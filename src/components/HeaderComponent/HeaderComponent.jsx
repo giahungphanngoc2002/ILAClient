@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Button, Col, Popover } from "antd";
 import { WrapperContentPopup, WrapperHeader } from "./style";
 import Search from "antd/es/input/Search";
@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import * as UserService from '../../services/UserService'
 import { resetUser } from "../../redux/slices/userSlide";
+import {UploadOutlined} from '@ant-design/icons'
 export default function HeaderComponent() {
   const suffix = (
     <AudioOutlined
@@ -19,14 +20,36 @@ export default function HeaderComponent() {
   const navigate =useNavigate()
   const user =useSelector((state)=> state.user)
   const dispatch = useDispatch();
+  const[userName ,setUserName] =useState('')
+  // const[userAvatar ,setUserAvatar] =useState('')
+  
   const handleLogout = async() =>{
     await UserService.logoutUser()
     dispatch(resetUser())
+    navigate( '/')
   }
+  const handleNavigateProfile =() =>{
+    navigate( '/profile')
+    
+  }
+  const handleNavigateHomePageTeacher =() =>{
+    navigate( '/teacher')
+    
+  }
+  useEffect(()=>{
+    setUserName(user?.name)
+    // setUserAvatar(user?.avatar)
+  },[user?.name ])
   const content =( 
  <div>
-  <WrapperContentPopup onClick={handleLogout} >đăng xuất</WrapperContentPopup>
-  <WrapperContentPopup>Profile</WrapperContentPopup>
+  <WrapperContentPopup onClick={handleLogout} >Đăng Xuất</WrapperContentPopup>
+  <WrapperContentPopup onClick={handleNavigateProfile}>Profile</WrapperContentPopup>
+  {user?.isTeacher && (
+ <WrapperContentPopup onClick={handleNavigateHomePageTeacher}>HomePageTeacher</WrapperContentPopup>
+  )
+   
+  }
+  
  </div>
   )
   const handleNavigateLogin =() =>{
@@ -35,6 +58,7 @@ export default function HeaderComponent() {
   const handleNavigateSignup =() =>{
     navigate( '/signup')
   }
+  
   const onSearch = (value, _e, info) => console.log(info?.source, value);
   return (
     <div>
@@ -49,12 +73,21 @@ export default function HeaderComponent() {
             onSearch={onSearch}
           />
         </Col>
-        
-        {user?.name ? (
+            {/* { userAvatar ? (
+              <img src={userAvatar} alt="avatar" 
+              style={{height:'30px',
+              width:'30px',
+              borderRadius:'50%',
+              objectFit:'cover'}}/>
+            ) : (
+              <UploadOutlined style ={{fontSize:'30px'}}/>
+             
+            )} */}
+        {user?.access_token ? (
           <>
           
           <Popover content={content} trigger="click">
-          <div style={{cursor :'pointer' ,padding: '10px 10px 0px 100px'}}>{user.name}</div>
+          <div style={{cursor :'pointer' ,padding: '10px 10px 0px 100px'}}>{userName?.length? userName : user?.email}</div>
           </Popover>
           </>
           

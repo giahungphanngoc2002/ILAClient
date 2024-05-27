@@ -33,10 +33,10 @@ export default function SignInPage() {
     if(isSuccess && data?.status !== 'ERR'){
       message.success()
       navigate( '/')          
-      localStorage.setItem('access_token',data?.access_token)
+      localStorage.setItem('access_token',JSON.stringify(data?.access_token))
       if(data?.access_token){
         const decoded =jwt_decode(data?.access_token)
-        console.log('decoded',decoded)
+        // console.log('decoded',decoded)
         if(decoded?.id){
           handleGetDetailsUSer(decoded?.id,data?.access_token)
         }

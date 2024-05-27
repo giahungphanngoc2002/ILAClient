@@ -104,7 +104,7 @@ const handleSignup =() =>{
               borderRadius: "4px",
               margin: "26px 0 10px",
             }}
-            textButton={"Đăng nhập"}
+            textButton={"Đăng Ký"}
             styleTextButton={{
               color: "#fff",
               fontSize: "15px",
