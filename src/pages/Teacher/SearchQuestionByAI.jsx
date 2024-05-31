@@ -3,6 +3,7 @@ import React, { Suspense, useState } from "react";
 
 import { Container, Col, Row } from "react-bootstrap";
 
+<<<<<<< HEAD
 const Loading = () => {
   return (
     <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
@@ -13,16 +14,25 @@ const Loading = () => {
   );
 };
 
+=======
+>>>>>>> origin/main
 export default function SearchQuestionByAI() {
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
   const [questions, setQuestions] = useState([]);
+<<<<<<< HEAD
   const [loading, setLoading] = useState(false);
+=======
+>>>>>>> origin/main
 
   
 
   async function generateAnswer() {
+<<<<<<< HEAD
     setLoading(true);
+=======
+    setAnswer("loading...");
+>>>>>>> origin/main
     const addText = `
     xin 10 câu hỏi trắc nghiệm về đoạn văn này theo format dưới đây
     [
@@ -95,7 +105,10 @@ export default function SearchQuestionByAI() {
 
     setQuestions(parsedAnswer);
     console.log(parsedAnswer);
+<<<<<<< HEAD
     setLoading(false);
+=======
+>>>>>>> origin/main
   }
 
   function handleDeleteQuestion(index) {
@@ -105,6 +118,7 @@ export default function SearchQuestionByAI() {
   }
 
   return (
+<<<<<<< HEAD
     <div className="home-page-teacher p-6 text-center">
       <h1 className="text-xl font-bold mb-4">Chat AI</h1>
       <textarea
@@ -180,3 +194,75 @@ export default function SearchQuestionByAI() {
     </div>
   );
 }
+=======
+    <div className="home-page-teacher p-6 text-center text-4xl">
+      <h1 className="text-2xl font-bold mb-4">Chat AI</h1>
+      <textarea
+      className="question-input w-full h-40 p-2 mb-4 border rounded w-full"
+      value={question}
+      onChange={(e) => setQuestion(e.target.value)}
+      placeholder="Nhập đoạn văn bạn muốn tạo ra câu hỏi"
+    ></textarea>
+    <button
+      className="generate-button bg-green-500 text-white font-bold py-2 px-4 rounded mb-4"
+      onClick={generateAnswer}
+    >
+      Generate answer
+    </button>
+    <Container>
+      {questions.map((question, key) => (
+        <div>
+          <Row>
+            <Col xs={10}>
+              <div className="mt-10">
+                <Row>
+                  <Col xs={12}>
+                    <h2 className="text-left mb-4">Question: {question.text}</h2>
+                  </Col>
+                </Row>
+                <Row className="">
+                  {question.options.map((answer, index) => (
+                    <Col key={index} xs={6}>
+                      <li
+                        className="p-3 rounded-3 border border-info"
+                        style={{
+                          listStyleType: "none",
+                          backgroundColor: "#c9dfff",
+                        }}
+                      >
+                        <label>
+                          <input
+                            type="radio"
+                            name="answer"
+                            value={answer}
+                          />
+                          {answer}
+                        </label>
+                      </li>
+                      <br />
+                    </Col>
+                  ))}
+                </Row>
+                <Row>
+                  <Col xs={12}>
+                    <p className="border-2 rounded-3 bg-green-200 p-2 text-left border-green-500">Correct answer: {question.correctAnswer}</p>
+                  </Col>
+                </Row>
+              </div>
+            </Col>
+            <Col
+              xs={1}
+              className="d-flex align-items-center justify-content-center"
+              onClick={() => handleDeleteQuestion(key)}
+            >
+              <button className="btn btn-danger">X</button>
+            </Col>
+          </Row>
+        </div>
+      ))}
+    </Container>
+    <button>Add vào lớp học</button>
+  </div>
+);
+}
+>>>>>>> origin/main

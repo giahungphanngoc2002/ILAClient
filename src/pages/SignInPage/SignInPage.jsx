@@ -24,6 +24,7 @@ export default function SignInPage() {
 
   const mutation = useMutationHooks((data) => UserService.loginUser(data));
 
+<<<<<<< HEAD
   const { data, isSuccess, isError } = mutation;
   useEffect(() => {
     if (isSuccess && data?.status !== "ERR") {
@@ -35,6 +36,19 @@ export default function SignInPage() {
         // console.log('decoded',decoded)
         if (decoded?.id) {
           handleGetDetailsUSer(decoded?.id, data?.access_token);
+=======
+  const {data,  isSuccess ,isError} = mutation
+  useEffect(()=>{
+    if(isSuccess && data?.status !== 'ERR'){
+      message.success()
+      navigate( '/')          
+      localStorage.setItem('access_token',JSON.stringify(data?.access_token))
+      if(data?.access_token){
+        const decoded =jwt_decode(data?.access_token)
+        // console.log('decoded',decoded)
+        if(decoded?.id){
+          handleGetDetailsUSer(decoded?.id,data?.access_token)
+>>>>>>> origin/main
         }
       }
     } else if (isError) {

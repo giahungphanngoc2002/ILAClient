@@ -5,8 +5,11 @@ import SignUp from "../pages/SignUpPage/SignUp";
 import Profile from "../pages/ProfilePage/ProfilePage";
 import HomePageTeacher from "../pages/HomePage/HomePageTeacher";
 import QuestionAI from "../pages/Teacher/SearchQuestionByAI";
+<<<<<<< HEAD
 import Quizz from "../pages/Quizz/Quizz";
 import MyClass from "../pages/Teacher/MyClass";
+=======
+>>>>>>> origin/main
 
 export const routes = [
   {
@@ -40,6 +43,7 @@ export const routes = [
     page: Profile,
     isShowHeader: true
   },
+<<<<<<< HEAD
   {
     path: "/quiz",
     page: Quizz,
@@ -50,6 +54,8 @@ export const routes = [
     page: MyClass,
     isShowHeader: true
   },
+=======
+>>>>>>> origin/main
   {
     path: "*",
     page: NotFoundPage,

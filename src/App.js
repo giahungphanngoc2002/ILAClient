@@ -12,12 +12,21 @@ import { updateUser } from "./redux/slices/userSlide";
 
 export default function App() {
   const dispatch=useDispatch();
+<<<<<<< HEAD
   useEffect(() =>{
     const{storageData,decoded}  = handleDecoded()        
     if( decoded?.id ) {
       handleGetDetailsUSer(decoded?.id,storageData)
     }
   },[])
+=======
+  // useEffect(() =>{
+  //   const{storageData,decoded}  = handleDecoded()        
+  //   if( decoded?.id ) {
+  //     handleGetDetailsUSer(decoded?.id,storageData)
+  //   }
+  // },[])
+>>>>>>> origin/main
 
   const handleDecoded =() => {
     let storageData = localStorage.getItem('access_token')
@@ -44,6 +53,7 @@ export default function App() {
     }
     return config
   })
+<<<<<<< HEAD
 
   const handleGetDetailsUSer =async(id ,token)=>{
     try {
@@ -55,6 +65,19 @@ export default function App() {
     }
   }
 
+=======
+
+  // const handleGetDetailsUSer =async(id ,token)=>{
+  //   try {
+  //     const res = await UserService.getDetailUser(id,token)
+  //     dispatch(updateUser({...res?.data , access_token:token}))
+  //   } catch (error) {
+  //     console.error('Error getting user details:', error)
+  //     // Handle the error, e.g., log it, show an error message to the user, etc.
+  //   }
+  // }
+
+>>>>>>> origin/main
   return (
     <div>
       <Router>

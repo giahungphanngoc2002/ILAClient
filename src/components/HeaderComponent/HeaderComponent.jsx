@@ -21,7 +21,11 @@ export default function HeaderComponent() {
   const user =useSelector((state)=> state.user)
   const dispatch = useDispatch();
   const[userName ,setUserName] =useState('')
+<<<<<<< HEAD
   const[userAvatar ,setUserAvatar] =useState('')
+=======
+  // const[userAvatar ,setUserAvatar] =useState('')
+>>>>>>> origin/main
   
   const handleLogout = async() =>{
     await UserService.logoutUser()
@@ -32,6 +36,13 @@ export default function HeaderComponent() {
     navigate( '/profile')
     
   }
+<<<<<<< HEAD
+=======
+  const handleNavigateHomePageTeacher =() =>{
+    navigate( '/teacher')
+    
+  }
+>>>>>>> origin/main
   useEffect(()=>{
     setUserName(user?.name)
     // setUserAvatar(user?.avatar)
@@ -40,6 +51,15 @@ export default function HeaderComponent() {
  <div>
   <WrapperContentPopup onClick={handleLogout} >Đăng Xuất</WrapperContentPopup>
   <WrapperContentPopup onClick={handleNavigateProfile}>Profile</WrapperContentPopup>
+<<<<<<< HEAD
+=======
+  {user?.isTeacher && (
+ <WrapperContentPopup onClick={handleNavigateHomePageTeacher}>HomePageTeacher</WrapperContentPopup>
+  )
+   
+  }
+  
+>>>>>>> origin/main
  </div>
   )
   const handleNavigateLogin =() =>{
@@ -78,7 +98,10 @@ export default function HeaderComponent() {
           
           <Popover content={content} trigger="click">
           <div style={{cursor :'pointer' ,padding: '10px 10px 0px 100px'}}>{userName?.length? userName : user?.email}</div>
+<<<<<<< HEAD
           {console.log(user.isAdmin)}
+=======
+>>>>>>> origin/main
           </Popover>
           </>
           
