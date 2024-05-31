@@ -16,6 +16,7 @@ export default function ButtonComponent({
       ...styleButton,
       background : disabled ? '#ccc' : styleButton.background
     }}
+    disabled={disabled}
     size={size} 
      {...rest}
      >
