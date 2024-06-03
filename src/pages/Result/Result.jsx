@@ -1,4 +1,3 @@
-import Navigation from "./Navigation";
 import React, { createContext, useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
@@ -8,7 +7,7 @@ import {
   setShowResult,
   setData,
   setError,
-} from "./Redux/store";
+} from "../../redux/slices/quizSlice";
 import { useLocation } from "react-router-dom";
 
 export default function Result() {
@@ -36,22 +35,22 @@ export default function Result() {
   
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    const apiUrl = "http://localhost:3001/quizs/";
-    fetch(apiUrl)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        return response.json();
-      })
-      .then((data) => {
-        dispatch(setData(data));
-      })
-      .catch((error) => {
-        dispatch(setError(error.message));
-      });
-  }, [dispatch]);
+  // useEffect(() => {
+  //   const apiUrl = "http://localhost:3001/quizs/";
+  //   fetch(apiUrl)
+  //     .then((response) => {
+  //       if (!response.ok) {
+  //         throw new Error("Network response was not ok");
+  //       }
+  //       return response.json();
+  //     })
+  //     .then((data) => {
+  //       dispatch(setData(data));
+  //     })
+  //     .catch((error) => {
+  //       dispatch(setError(error.message));
+  //     });
+  // }, [dispatch]);
 
   const finalData = [];
 
@@ -69,7 +68,6 @@ export default function Result() {
   if (error) return <div>Error: {error}</div>;
   return (
     <div>
-      <Navigation />
       <h1 style={{backgroundColor:"black", color:"white", textAlign:"center",padding:"30px"}}>Quiz Review</h1>
       {finalData.map((questionData, questionIndex) => {
         const saveSelectedQuestion = saveSelected

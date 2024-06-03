@@ -1,4 +1,3 @@
-import Navigation from "./Navigation";
 import React, { createContext, useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
@@ -8,7 +7,7 @@ import {
   setShowResult,
   setData,
   setError,
-} from "./Redux/store";
+} from "../../redux/slices/quizSlice";
 import { useLocation } from "react-router-dom";
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
@@ -30,25 +29,26 @@ export default function Review() {
   });
 
   console.log(saveSelected);
+  console.log(data)
 
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    const apiUrl = "http://localhost:3001/quizs/";
-    fetch(apiUrl)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        return response.json();
-      })
-      .then((data) => {
-        dispatch(setData(data));
-      })
-      .catch((error) => {
-        dispatch(setError(error.message));
-      });
-  }, [dispatch]);
+  // useEffect(() => {
+  //   const apiUrl = "http://localhost:3001/quizs/";
+  //   fetch(apiUrl)
+  //     .then((response) => {
+  //       if (!response.ok) {
+  //         throw new Error("Network response was not ok");
+  //       }
+  //       return response.json();
+  //     })
+  //     .then((data) => {
+  //       dispatch(setData(data));
+  //     })
+  //     .catch((error) => {
+  //       dispatch(setError(error.message));
+  //     });
+  // }, [dispatch]);
 
   const finalData = [];
 
@@ -61,12 +61,12 @@ export default function Review() {
     }
   }
   console.log(finalData);
+  console.log("score" , score)
 
   if (!data) return null;
   if (error) return <div>Error: {error}</div>;
   return (
     <div>
-      <Navigation />
       <h1
         style={{
           backgroundColor: "black",

@@ -23,7 +23,9 @@ export default function SignUp() {
 const navigate =useNavigate()
 const mutation = useMutationHooks (
   data => UserService.signupUser(data)
+  
 )
+
 const handleNavigateSignin =() =>{
   navigate( '/signin')
 }
@@ -35,6 +37,7 @@ useEffect(()=>{
   }else if (isSuccess && data?.status !== 'ERR'){
     
     message.success()
+    console.log(data)
     handleNavigateSignin()
   }
 },[isSuccess,isError]
@@ -51,6 +54,7 @@ const handleSignup =() =>{
     email,
     password,
     confirmPassword
+    
   })
 }
   

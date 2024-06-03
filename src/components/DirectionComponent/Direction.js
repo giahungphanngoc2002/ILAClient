@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 import { Container, Col, Row } from "react-bootstrap";
-import { QuizzContext } from "../../pages/Quizz/Quizz";
+import { QuizzContext } from "../../pages/Quiz/Quiz";
 import ButtonComponent from "../ButtonComponent/ButtonComponent";
 export default function Directional() {
   const {

@@ -5,11 +5,10 @@ import SignUp from "../pages/SignUpPage/SignUp";
 import Profile from "../pages/ProfilePage/ProfilePage";
 import HomePageTeacher from "../pages/HomePage/HomePageTeacher";
 import QuestionAI from "../pages/Teacher/SearchQuestionByAI";
-<<<<<<< HEAD
-import Quizz from "../pages/Quizz/Quizz";
 import MyClass from "../pages/Teacher/MyClass";
-=======
->>>>>>> origin/main
+import Quiz from "../pages/Quiz/Quiz";
+import Review from "../pages/Review/Review";
+import Result from "../pages/Result/Result";
 
 export const routes = [
   {
@@ -23,7 +22,7 @@ export const routes = [
     isShowHeader: true
   },
   {
-    path: "/questionAI",
+    path: "/questionAI/:id",
     page: QuestionAI,
     isShowHeader: true
   },
@@ -43,19 +42,26 @@ export const routes = [
     page: Profile,
     isShowHeader: true
   },
-<<<<<<< HEAD
   {
-    path: "/quiz",
-    page: Quizz,
-    isShowHeader: true
-  },
-  {
-    path: "/myClass",
+    path: "/myclass",
     page: MyClass,
     isShowHeader: true
   },
-=======
->>>>>>> origin/main
+  {
+    path: "/quiz/:id",
+    page: Quiz,
+    isShowHeader: true
+  },
+  {
+    path: "/result",
+    page: Result,
+    isShowHeader: true
+  },
+  {
+    path: "/review/:id",
+    page: Review,
+    isShowHeader: true
+  },
   {
     path: "*",
     page: NotFoundPage,

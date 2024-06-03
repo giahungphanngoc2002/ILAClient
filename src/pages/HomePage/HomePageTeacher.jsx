@@ -4,9 +4,10 @@ import ButtonComponent from "../../components/ButtonComponent/ButtonComponent";
 import { useState } from "react";
 import { useMutationHooks } from "../../hooks/useMutationHook";
 import * as message from  '../../components/MessageComponent/Message'
-import * as UserService from '../../services/UserService'
+import * as ClassService from '../../services/ClassService'
 import { useNavigate } from "react-router-dom";
-
+// import { getAllQuestion } from "../../services/QuestionService";
+import {  useSelector } from "react-redux";
 export default function HomePageTeacher() {
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -17,11 +18,13 @@ export default function HomePageTeacher() {
   
   const navigate =useNavigate()
   const handleNavigateQuestionAI =() =>{
-    navigate( '/questionAI')
+    navigate( '/myclass')
   }
   const mutation = useMutationHooks (
-    data => UserService.createClass(data)
+    data => ClassService.createClass(data)
   )
+  // const { data: questions } = getAllQuestion();
+  const user =useSelector((state)=> state.user)
 
   const handleCloseCreateModal = () => setShowCreateModal(false);
   const handleOpenCreateModal = () => setShowCreateModal(true);
@@ -31,9 +34,7 @@ export default function HomePageTeacher() {
 useEffect(()=>{
   if(isError){
     message.error()
-    
-  }else if (isSuccess && data?.status !== 'ERR'){
-    
+  }else if (isSuccess && data?.status !== 'ERR'){  
     message.success()
     handleNavigateQuestionAI()
   }
@@ -42,7 +43,7 @@ useEffect(()=>{
 const [nameClass, setNameClass] = useState('');
 const [classID, setClassID] = useState('');
 const [description, setDescription] = useState('');
-  
+const[teacherID ,setTeacherID] =useState('')
   const handleOnchangeClassName = (e) => {
     setNameClass(e.target.value);
   }
@@ -57,15 +58,20 @@ const [description, setDescription] = useState('');
     // Thực hiện các xử lý khi người dùng nhập mã lớp và bấm "Join Class"
     // ...
   };
-
+  useEffect(()=>{
+    setTeacherID(user?.id)
+    // setUserAvatar(user?.avatar)
+  },[user?.id ])
   const handleCreateClass = () => {
     mutation.mutate({
         nameClass,
         classID,
-        description
+        description,
+        teacherID:user?.id
        
       })
   }
+  console.log(data)
 
   return (
     <div>
@@ -113,6 +119,12 @@ const [description, setDescription] = useState('');
             onClick={handleOpenJoinModal}
           ></ButtonComponent>
 
+                {/* {questions?.map((c) => (
+                    <option key={c._id} value={c._id}>
+                      {c.name}
+                    </option>
+                  ))} */}
+
           <Modal show={showJoinModal} onHide={handleCloseJoinModal}>
             <Modal.Header closeButton>
               <Modal.Title>Enter Class Code</Modal.Title>
@@ -131,26 +143,32 @@ const [description, setDescription] = useState('');
           </Modal>
 
           <Modal show={showCreateModal} onHide={handleCloseCreateModal}>
-            <Modal.Header closeButton>
-              <Modal.Title>Create New Class</Modal.Title>
-            </Modal.Header>
-<Modal.Body>
-                <input type="text" placeholder="Class Code" onChange={handleOnchangeClassName} value={nameClass} />
-                <input type="text" placeholder="classID" onChange={handleOnchangeClassID} value={classID} />
-                <input type="text" placeholder="description" onChange={handleOnchangeDescription} value={description} />
-              
-            </Modal.Body>
-            <Modal.Footer>
-              <Button variant="secondary" onClick={handleCloseCreateModal}>
-                Cancel
-              </Button>
-              <Button 
-              disabled ={!nameClass.length || !classID.length ||!description.length}
-              variant="primary" onClick={handleCreateClass}>
-                Create Class
-              </Button>
-            </Modal.Footer>
-          </Modal>
+  <Modal.Header closeButton>
+    <Modal.Title>Create New Class</Modal.Title>
+  </Modal.Header>
+  <Modal.Body>
+    <div class="mb-4">
+      <span class="block text-gray-700 font-bold mb-2">Class Code:</span>
+      <input type="text" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="" onChange={handleOnchangeClassName} value={nameClass} />
+    </div>
+    <div class="mb-4">
+      <span class="block text-gray-700 font-bold mb-2">Class ID:</span>
+      <input type="text" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="" onChange={handleOnchangeClassID} value={classID} />
+    </div>
+    <div class="mb-4">
+      <span class="block text-gray-700 font-bold mb-2">Class Name:</span>
+      <input type="text" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="" onChange={handleOnchangeDescription} value={description} />
+    </div>
+  </Modal.Body>
+  <Modal.Footer>
+    <Button variant="secondary" onClick={handleCloseCreateModal} class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+      Cancel
+    </Button>
+    <Button disabled={!nameClass.length || !classID.length || !description.length} variant="primary" onClick={handleCreateClass} class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+      Create Class
+    </Button>
+  </Modal.Footer>
+</Modal>
         </Col>
       </Row>
     </div>

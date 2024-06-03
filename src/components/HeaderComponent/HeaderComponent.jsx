@@ -19,13 +19,10 @@ export default function HeaderComponent() {
   );
   const navigate =useNavigate()
   const user =useSelector((state)=> state.user)
+  const classTeacher =useSelector((state)=> state.class)
   const dispatch = useDispatch();
   const[userName ,setUserName] =useState('')
-<<<<<<< HEAD
-  const[userAvatar ,setUserAvatar] =useState('')
-=======
   // const[userAvatar ,setUserAvatar] =useState('')
->>>>>>> origin/main
   
   const handleLogout = async() =>{
     await UserService.logoutUser()
@@ -36,13 +33,14 @@ export default function HeaderComponent() {
     navigate( '/profile')
     
   }
-<<<<<<< HEAD
-=======
   const handleNavigateHomePageTeacher =() =>{
     navigate( '/teacher')
     
   }
->>>>>>> origin/main
+  const handleNavigateMyClass =() =>{
+    navigate( '/myclass')
+    
+  }
   useEffect(()=>{
     setUserName(user?.name)
     // setUserAvatar(user?.avatar)
@@ -51,15 +49,16 @@ export default function HeaderComponent() {
  <div>
   <WrapperContentPopup onClick={handleLogout} >Đăng Xuất</WrapperContentPopup>
   <WrapperContentPopup onClick={handleNavigateProfile}>Profile</WrapperContentPopup>
-<<<<<<< HEAD
-=======
   {user?.isTeacher && (
- <WrapperContentPopup onClick={handleNavigateHomePageTeacher}>HomePageTeacher</WrapperContentPopup>
+    <>
+    <WrapperContentPopup onClick={handleNavigateHomePageTeacher}>HomePageTeacher</WrapperContentPopup>
+    <WrapperContentPopup onClick={handleNavigateMyClass}>MyClass</WrapperContentPopup>
+    </>
+ 
   )
    
   }
   
->>>>>>> origin/main
  </div>
   )
   const handleNavigateLogin =() =>{
@@ -68,12 +67,18 @@ export default function HeaderComponent() {
   const handleNavigateSignup =() =>{
     navigate( '/signup')
   }
+
+  const handleClickLogo = () => {
+    navigate('/')
+  }
   
   const onSearch = (value, _e, info) => console.log(info?.source, value);
   return (
     <div>
       <WrapperHeader>
-        <Col span={6} style={{color:'rgb(26,119,255)'}} className="d-flex align-items-center text-xl fw-bold">LOGO</Col>
+        <Col span={6} style={{color:'rgb(26,119,255)'}} className="d-flex align-items-center text-xl fw-bold">
+          <button onClick={handleClickLogo}>LOGO</button>
+        </Col>
         <Col span={12}>
           <Search
             placeholder="Hỏi bất cứ điều gì bạn muốn"
@@ -98,10 +103,6 @@ export default function HeaderComponent() {
           
           <Popover content={content} trigger="click">
           <div style={{cursor :'pointer' ,padding: '10px 10px 0px 100px'}}>{userName?.length? userName : user?.email}</div>
-<<<<<<< HEAD
-          {console.log(user.isAdmin)}
-=======
->>>>>>> origin/main
           </Popover>
           </>
           

@@ -8,19 +8,39 @@ import {
   setSaveSelected,
   setData,
   setError,
-} from "../../redux/slices/quizzSlice";
-import { useNavigate, useLocation } from "react-router-dom";
+} from "../../redux/slices/quizSlice";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
 import Directional from "../../components/DirectionComponent/Direction";
 import { Container, Col, Row } from "react-bootstrap";
-import { useSaveSelected } from "../../redux/QuizzState";
+import { useSaveSelected } from "../../redux/QuizState";
+import { useQuery } from "@tanstack/react-query";
+import * as ClassService from "../../services/ClassService";
 
 export const QuizzContext = createContext();
 export const quizData = [];
 
-const Quizz = () => {
+const Quiz = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [saveSelected, setSaveSelected] = useSaveSelected();
+  const { id } = useParams();
+
+  const GetDetailsClass = (id) => async () => {
+    const res = await ClassService.getDetailClass(id);
+    return res;
+  };
+
+  const {
+    data: detailClassByID,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["detailClassByID", id],
+    queryFn: GetDetailsClass(id),
+  });
+
+
+  console.log(detailClassByID?.data)
 
   console.log(saveSelected);
 
@@ -37,6 +57,10 @@ const Quizz = () => {
     }
   }, [location.state, setSaveSelected]);
 
+  useEffect(() => {
+    dispatch(setData(detailClassByID?.data.questions))
+  })
+
   if (error) return <div>Error: {error}</div>;
 
   const handleAnswerSelect = (answer) => {
@@ -46,6 +70,7 @@ const Quizz = () => {
   const checkResult = () => {
     if (selectedAnswer === currentQuizQuestion.correctAnswer) {
       setScore(score + 1);
+      console.log("score",score)
       return true;
     } else {
       return false;
@@ -287,7 +312,7 @@ const Quizz = () => {
 
   const handleSubmit = () => {
     const data = saveSelected;
-    navigate("/review", { state: { data } });
+    navigate(`/review/${id}`, { state: { data } });
   };
 
   const handleReview = () => {
@@ -325,7 +350,7 @@ const Quizz = () => {
             padding: "30px",
           }}
         >
-          Javascrip Quizz
+          {detailClassByID?.data.nameClass}
         </h1>
         <Row>
           <h5 className="text-xl py-4">
@@ -368,10 +393,9 @@ const Quizz = () => {
             saveSelected,
           }}
         >
-            <div style={{marginTop:"20px"}}>
-          <Directional />
-
-            </div>
+          <div style={{ marginTop: "20px" }}>
+            <Directional />
+          </div>
         </QuizzContext.Provider>
         <Row>
           <Col xs={4} className="d-flex justify-content-center pt-4 pb-4">
@@ -399,4 +423,4 @@ const Quizz = () => {
   );
 };
 
-export default Quizz;
+export default Quiz;
