@@ -48,7 +48,7 @@ export default function SignUp() {
     if (isError) {
       message.error();
     } else if (isSuccess && data?.status !== "ERR") {
-      toast.success("Sign up successfully");
+      toast.success("Da gui ve mail");
       handleNavigateSignin();
     }
   }, [isSuccess, isError]);
