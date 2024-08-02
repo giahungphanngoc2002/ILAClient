@@ -7,60 +7,132 @@ import HomePageTeacher from "../pages/HomePage/HomePageTeacher";
 import QuestionAI from "../pages/Teacher/SearchQuestionByAI";
 import MyClass from "../pages/Teacher/MyClass";
 import Quiz from "../pages/Quiz/Quiz";
+import QuizTest from "../pages/Quiz/QuizTest";
 import Review from "../pages/Review/Review";
 import Result from "../pages/Result/Result";
+import ViewClass from "../pages/Teacher/ViewClass";
+import HistoryStudent from "../pages/Student/HistoryStudent";
+import Result2 from "../pages/Result/Result2";
+import ResultAssigment from "../pages/Result/ResultAssigment";
+import ActivationPage from "../pages/ActivationPage/ActivationPage";
+import RequestPasswordReset from "../pages/forgotpassword/RequestPasswordReset";
+import ResetPassword from "../pages/forgotpassword/ResetPassword";
+import ChangePassword from "../pages/ChangePassWord/ChangePassWord";
+import ViewQuestionTest from "../pages/ViewTest/ViewQuestionTest";
+import TeacherInboxPage from "../pages/Teacher/TeacherInboxPage";
 
 export const routes = [
   {
     path: "/",
     page: HomePage,
-    isShowHeader: true
+    isShowHeader: true,
   },
   {
     path: "/teacher",
     page: HomePageTeacher,
-    isShowHeader: true
+    isShowHeader: true,
+  },
+  {
+    path: "/changePassword",
+    page: ChangePassword,
+    isShowHeader: true,
   },
   {
     path: "/questionAI/:id",
     page: QuestionAI,
-    isShowHeader: true
+    isShowHeader: true,
   },
   {
     path: "/signin",
     page: SignInPage,
-    isShowHeader: false
+    isShowHeader: false,
   },
   {
     path: "/signup",
     page: SignUp,
-    isShowHeader: false
+    isShowHeader: false,
+  },
+  //message teacher
+  {
+    path: "/all-messages",
+    page: TeacherInboxPage,
+    isShowHeader: true,
   },
 
   {
+    path: "/requestPasswordReset",
+    page: RequestPasswordReset,
+    isShowHeader: false,
+  },
+  {
+    path: "/passwordReset/:resetToken",
+    page: ResetPassword,
+    isShowHeader: false,
+  },
+  {
+    path: "/activation/:activation_token",
+    page: ActivationPage,
+    isShowHeader: false,
+  },
+  {
+    path: "/quizTest/:id",
+    page: QuizTest,
+    isShowHeader: true,
+  },
+  {
     path: "/profile",
     page: Profile,
-    isShowHeader: true
+    isShowHeader: true,
   },
   {
     path: "/myclass",
     page: MyClass,
-    isShowHeader: true
+    isShowHeader: true,
   },
   {
     path: "/quiz/:id",
     page: Quiz,
-    isShowHeader: true
+    isShowHeader: true,
   },
   {
     path: "/result",
     page: Result,
-    isShowHeader: true
+    isShowHeader: true,
   },
   {
-    path: "/review/:id",
+    path: "/review/:assignment/:id",
     page: Review,
-    isShowHeader: true
+    isShowHeader: true,
+  },
+  {
+    path: "/review/:learning/:id",
+    page: Review,
+    isShowHeader: true,
+  },
+  {
+    path: "/viewClass/:id",
+    page: ViewClass,
+    isShowHeader: true,
+  },
+  {
+    path: "/historyStudent/:id",
+    page: HistoryStudent,
+    isShowHeader: true,
+  },
+  {
+    path: "/detailHistory/:id",
+    page: Result2,
+    isShowHeader: true,
+  },
+  {
+    path: "/detailAssigment/:id",
+    page: ResultAssigment,
+    isShowHeader: true,
+  },
+  {
+    path: "/detailTest/:id",
+    page: ViewQuestionTest,
+    isShowHeader: true,
   },
   {
     path: "*",

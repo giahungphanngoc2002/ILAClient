@@ -35,23 +35,6 @@ export default function Result() {
   
   const dispatch = useDispatch();
 
-  // useEffect(() => {
-  //   const apiUrl = "http://localhost:3001/quizs/";
-  //   fetch(apiUrl)
-  //     .then((response) => {
-  //       if (!response.ok) {
-  //         throw new Error("Network response was not ok");
-  //       }
-  //       return response.json();
-  //     })
-  //     .then((data) => {
-  //       dispatch(setData(data));
-  //     })
-  //     .catch((error) => {
-  //       dispatch(setError(error.message));
-  //     });
-  // }, [dispatch]);
-
   const finalData = [];
 
   if (saveSelected) {

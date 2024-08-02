@@ -1,261 +1,288 @@
 import React, { useEffect, useState } from "react";
-import {  WrapperContentProfile, WrapperHeader, WrapperInput, WrapperLabel, WrapperUploadFile } from "./style";
-import InputForm from "../../components/InputForm/InputForm";
-import ButtonComponent from "../../components/ButtonComponent/ButtonComponent";
-import { useSelector } from "react-redux";
-import * as UserService from '../../services/UserService'
+import { useSelector, useDispatch } from "react-redux";
+import * as UserService from "../../services/UserService";
 import { useMutationHooks } from "../../hooks/useMutationHook";
-import * as message from  '../../components/MessageComponent/Message'
-import {useDispatch} from 'react-redux'
+import * as message from "../../components/MessageComponent/Message";
 import { updateUser } from "../../redux/slices/userSlide";
-import { Button, Upload } from "antd";
-import {UploadOutlined} from '@ant-design/icons'
-// import { getBase64 } from "../../utils";
+import bcrypt from "bcryptjs";
+import { toast } from "react-toastify";
+import { MdOutlineRemoveRedEye } from "react-icons/md";
+import { TbPhotoEdit, TbArrowsExchange } from "react-icons/tb";
+import { BiUpload, BiTrash } from "react-icons/bi";
+import ProfileOverview from "./ProfileOverview";
+import ProfileEdit from "./ProfileEdit";
+import ChangePassword from "../ChangePassWord/ChangePassWord";
 
+const ProfilePage = () => {
+  const user = useSelector((state) => state.user);
+  const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
+  const [age, setAge] = useState("");
+  const [avatar, setAvatar] = useState("");
+  const [oldPassword, setOldPassword] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState("");
+  const [activeTab, setActiveTab] = useState("edit-profile");
 
-const ProfilePage =() =>{
-    const user =useSelector((state)=> state.user)
-    const[email ,setEmail]= useState(user?.email)
-    const[name ,setName]= useState( user?.name)
-    const[phone ,setPhone]= useState(user?.phone)
-    const[address ,setAddress]= useState(user?.address)
-    const[age ,setAge]= useState(user?.age)
-    // const[avatar ,setAvatar]= useState(user?.avatar)
-    const dispatch =useDispatch()
-    const mutation = useMutationHooks (
-        (data) => {
-            const{id,access_token, ...rests}=data
-            UserService.updateUser(id,rests,access_token)
-        }
-     )
-     
-     const {data,  isSuccess ,isError} = mutation
-     useEffect(()=>{
-        if(isSuccess && data?.status !== 'ERR'){
-          message.success()
-          handleGetDetailsUSer(user?.id, user?.access_token)      
-        }else if (isError){
-          message.error()
-        }
-      },[isSuccess ,isError]
-      )
-     
-       const handleGetDetailsUSer =async(id ,token)=>{
-        const res = await UserService.getDetailUser(id,token)
-        dispatch(updateUser({...res?.data , access_token:token}))
-       }
-    useEffect(()=>{
-        setEmail(user?.email) 
-        setName( user?.name) 
-        setPhone (user?.phone)
-        setAddress (user?.address)
-        setAge(user?.age)
-        // setAvatar(user?.avatar)
-    },[user])
+  const dispatch = useDispatch();
+  const mutation = useMutationHooks((data) => {
+    const { id, access_token, ...rests } = data;
+    return UserService.updateUser(id, rests, access_token);
+  });
 
+  const passwordMutation = useMutationHooks((data) => {
+    const { id, access_token, currentPassword, newPassword } = data;
+    return UserService.updatePassword(
+      id,
+      { currentPassword, newPassword },
+      access_token
+    );
+  });
 
-    const handleOnchangeEmail =(value) =>{
-        setEmail(value)
-    }
-    const handleOnchangeName =(value) =>{
-        setName(value)
-    }
-    const handleOnchangePhone =(value) =>{
-        setPhone(value)
-    }
-    const handleOnchangeAdress =(value) =>{
-        setAddress(value)
-    }
-    const handleOnchangeAge =(value) =>{
-        setAge(value)
-    }
-    // const handleOnchangeAvatar = async(fileList) =>{
-    //    const file =fileList[0]
-    //    if(!file.url && !file.preview){
-    //     file.preview =await getBase64(file.originFileObj);
-    //    }
-    //    setAvatar(file.url)
-    // }
+  const { data, isSuccess, isError } = mutation;
+  const {
+    data: passwordData,
+    isSuccess: isPasswordSuccess,
+    isError: isPasswordError,
+  } = passwordMutation;
 
-    const handleUpdate =() =>{
-        mutation.mutate({id: user?.id,email,name,phone,address,age ,access_token:user?.access_token})
-
+  useEffect(() => {
+    if (isSuccess && data?.status !== "ERROR") {
+      toast.success("User information updated successfully!");
+      handleGetDetailsUser(user?.id, user?.access_token);
+      setIsLoading(false);
+    } else if (isError || data?.status === "ERROR") {
+      toast.error("Failed to update user information");
+      setIsLoading(false);
     }
-    return(
-        <div style={{width:'1270px' ,margin:'0 auto', height:'500px'}}>
-          <WrapperHeader>Thông Tin Người Dùng</WrapperHeader>  
-          <WrapperContentProfile>          
-                <WrapperInput>
-             <WrapperLabel>Name</WrapperLabel>  
-             <InputForm
-            style={{ width:'300px' }} id="name"
-             value ={name} Onchange= {handleOnchangeName}
-          /> 
-          <ButtonComponent
-          
-          onClick={handleUpdate}  
-            size={40}
-            styleButton={{
-              
-              height: "30px",
-              width: "fit-content",
-              border: "1px solid #ccc",
-              borderRadius: "4px",
-              padding: "2px 6px 6px",
-            }}
-            textButton={"cập nhập"}
-            styleTextButton={{
-              color: "rgb(26, 148, 255",
-              fontSize: "15px",
-              fontWeight: "700",
-            }}
-          ></ButtonComponent>
-          </WrapperInput>
-          <WrapperInput>
-             <WrapperLabel>Email</WrapperLabel>  
-             <InputForm
-            style={{ width:'300px' }} id="email"
-             value ={email} Onchange= {handleOnchangeEmail}
-          /> 
-          <ButtonComponent
-          
-          onClick={handleUpdate}  
-            size={40}
-            styleButton={{
-              
-              height: "30px",
-              width: "fit-content",
-              border: "1px solid #ccc",
-              borderRadius: "4px",
-              padding: "2px 6px 6px",
-            }}
-            textButton={"cập nhập"}
-            styleTextButton={{
-              color: "rgb(26, 148, 255",
-              fontSize: "15px",
-              fontWeight: "700",
-            }}
-          ></ButtonComponent>
-          </WrapperInput>
-          <WrapperInput>
-             <WrapperLabel>Phone</WrapperLabel>  
-             <InputForm
-            style={{ width:'300px' }} id="phone"
-             value ={phone} Onchange= {handleOnchangePhone}
-          /> 
-          <ButtonComponent
-          
-          onClick={handleUpdate}  
-            size={40}
-            styleButton={{
-              
-              height: "30px",
-              width: "fit-content",
-              border: "1px solid #ccc",
-              borderRadius: "4px",
-              padding: "2px 6px 6px",
-            }}
-            textButton={"cập nhập"}
-            styleTextButton={{
-              color: "rgb(26, 148, 255",
-              fontSize: "15px",
-              fontWeight: "700",
-            }}
-          ></ButtonComponent>
-          </WrapperInput>
-          <WrapperInput>
-             <WrapperLabel>Address</WrapperLabel>  
-             <InputForm
-            style={{ width:'300px' }} id="address"
-             value ={address} Onchange= {handleOnchangeAdress}
-          /> 
-          <ButtonComponent
-          
-          onClick={handleUpdate}  
-            size={40}
-            styleButton={{
-              
-              height: "30px",
-              width: "fit-content",
-              border: "1px solid #ccc",
-              borderRadius: "4px",
-              padding: "2px 6px 6px",
-            }}
-            textButton={"cập nhập"}
-            styleTextButton={{
-              color: "rgb(26, 148, 255",
-              fontSize: "15px",
-              fontWeight: "700",
-            }}
-          ></ButtonComponent>
-          </WrapperInput>
-          <WrapperInput>
-             <WrapperLabel>Age</WrapperLabel>  
-             <InputForm
-            style={{ width:'300px' }} id="age"
-             value ={age} Onchange= {handleOnchangeAge}
-          /> 
-          <ButtonComponent
-          
-          onClick={handleUpdate}  
-            size={40}
-            styleButton={{
-              
-              height: "30px",
-              width: "fit-content",
-              border: "1px solid #ccc",
-              borderRadius: "4px",
-              padding: "2px 6px 6px",
-            }}
-            textButton={"cập nhập"}
-            styleTextButton={{
-              color: "rgb(26, 148, 255",
-              fontSize: "15px",
-              fontWeight: "700",
-            }}
-          ></ButtonComponent>
-          </WrapperInput>
-          {/* <WrapperInput>
-             <WrapperLabel>Avatar</WrapperLabel>  
-             <WrapperUploadFile Onchange={handleOnchangeAvatar} maxCount={1}>
-                <Button icon={<UploadOutlined/>}>Select File</Button>
-             </WrapperUploadFile>
-             {avatar && (
-                <img src ={avatar} style={{
-                    height:'60px',
-                    width:'60px',
-                    borderRadius:'50%',
-                    objectFit:'cover'
-                }} alt ="avatar"/>
-             )} */}
-             {/* <InputForm
-            style={{ width:'300px' }} id="avatar"
-             value ={avatar} Onchange= {handleOnchangeAvatar}
-          />  */}
-          {/* <ButtonComponent
-          
-          onClick={handleUpdate}  
-            size={40}
-            styleButton={{
-              
-              height: "30px",
-              width: "fit-content",
-              border: "1px solid #ccc",
-              borderRadius: "4px",
-              padding: "2px 6px 6px",
-            }}
-            textButton={"cập nhập"}
-            styleTextButton={{
-              color: "rgb(26, 148, 255",
-              fontSize: "15px",
-              fontWeight: "700",
-            }}
-          ></ButtonComponent>
-          </WrapperInput> */}
-            
-          </WrapperContentProfile>
+
+    if (isPasswordSuccess && passwordData?.status !== "ERROR") {
+      toast.success("Password updated successfully!");
+      setIsUpdatingPassword(false);
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmNewPassword("");
+    } else if (
+      isPasswordError ||
+      (isPasswordSuccess && passwordData?.status === "ERROR")
+    ) {
+      toast.error("Failed to update password");
+      setIsUpdatingPassword(false);
+    }
+}, [isSuccess, isError, isPasswordSuccess, isPasswordError]);
+
+  const handleGetDetailsUser = async (id, token) => {
+    const res = await UserService.getDetailUser(id, token);
+    dispatch(updateUser({ ...res.data, access_token: token }));
+  };
+
+  useEffect(() => {
+    if (user) {
+      setEmail(user.email || "");
+      setName(user.name || "");
+      setPhone(user.phone || "");
+      setAddress(user.address || "");
+      setAge(user.age || "");
+      setAvatar(user.avatar || "");
+      setOldPassword(user.password || "");
+    }
+  }, [user]);
+
+  const handleOnchangeEmail = (e) => setEmail(e.target.value);
+  const handleOnchangeName = (e) => setName(e.target.value);
+  const handleOnchangePhone = (e) => setPhone(e.target.value);
+  const handleOnchangeAddress = (e) => setAddress(e.target.value);
+  const handleOnchangeAge = (e) => setAge(e.target.value);
+
+  const handleOnchangeAvatar = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAvatar(reader.result);
+        handleUpdateAvatar(reader.result); // Save avatar immediately after selection
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleUpdateAvatar = (avatar) => {
+    setIsLoading(true);
+    mutation.mutate({
+      id: user?.id,
+      email,
+      name,
+      phone,
+      address,
+      age,
+      avatar,
+      access_token: user?.access_token,
+    });
+  };
+
+  const handleUpdate = () => {
+    setIsLoading(true);
+    mutation.mutate({
+      id: user?.id,
+      email,
+      name,
+      phone,
+      address,
+      age,
+      avatar,
+      access_token: user?.access_token,
+    });
+  };
+
+  const handleUpdatePassword = async (currentPassword, newPassword) => {
+    if (!currentPassword) {
+      message.error("Current password is required");
+      return;
+    }
+
+    if (newPassword !== confirmNewPassword) {
+      message.error("New password and confirm password do not match");
+      return;
+    }
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      message.error("Current password is incorrect");
+      return;
+    }
+
+    setIsUpdatingPassword(true);
+    passwordMutation.mutate({
+      id: user?.id,
+      currentPassword,
+      newPassword,
+      access_token: user?.access_token,
+    });
+  };
+
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case "overview":
+        return <ProfileOverview user={user} />;
+      case "edit-profile":
+        return (
+          <ProfileEdit
+            user={user}
+            onSave={handleUpdate}
+            name={name}
+            setName={setName}
+            email={email}
+            setEmail={setEmail}
+            phone={phone}
+            setPhone={setPhone}
+            address={address}
+            setAddress={setAddress}
+            age={age}
+            setAge={setAge}
+            isLoading={isLoading}
+          />
+        );
+      case "change-password":
+        return (
+<ChangePassword
+            onChangePassword={handleUpdatePassword}
+            isUpdatingPassword={isUpdatingPassword}
+            currentPassword={currentPassword}
+            setCurrentPassword={setCurrentPassword}
+            newPassword={newPassword}
+            setNewPassword={setNewPassword}
+            confirmNewPassword={confirmNewPassword}
+            setConfirmNewPassword={setConfirmNewPassword}
+          />
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="max-w-7xl mx-auto p-6">
+      <div className="bg-gradient-to-r from-blue-100 to-rose-100 shadow-lg rounded-lg overflow-hidden p-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="flex flex-col items-center">
+            <div className="relative">
+              <img
+                src={avatar}
+                alt="avatar"
+                className="w-32 h-32 rounded-full object-cover mb-4"
+              />
+              <input
+                type="file"
+                className="hidden"
+                id="avatar-upload"
+                onChange={handleOnchangeAvatar}
+              />
+              <label
+                htmlFor="avatar-upload"
+                className="absolute bottom-0 right-0 cursor-pointer bg-blue-500 text-white p-2 rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+              >
+                <BiUpload size={24} />
+              </label>
+            </div>
+            <div className="flex items-center space-x-2 mt-2">
+              <h2 className=" font-semibold mb-2 font-mono text-xl">{name}</h2>
+            </div>
+            <p className="text-gray-600">{user.job}</p>
+          </div>
+          <div className="col-span-2">
+            <ul className="flex justify-start space-x-8 pb-4 border-b">
+              <li>
+                <button
+                  className={`flex items-center space-x-2 ${
+                    activeTab === "overview"
+                      ? "border-b-2 border-blue-500 text-blue-500"
+                      : "text-gray-500 hover:text-blue-500"
+                  } py-2 px-4 focus:outline-none transition-colors duration-300`}
+                  onClick={() => setActiveTab("overview")}
+                >
+                  <MdOutlineRemoveRedEye size={20} />
+                  <span>Overview</span>
+                </button>
+              </li>
+              <li>
+                <button
+                  className={`flex items-center space-x-2 ${
+                    activeTab === "edit-profile"
+                      ? "border-b-2 border-blue-500 text-blue-500"
+                      : "text-gray-500 hover:text-blue-500"
+                  } py-2 px-4 focus:outline-none transition-colors duration-300`}
+                  onClick={() => setActiveTab("edit-profile")}
+                >
+                  <TbPhotoEdit size={20} />
+                  <span>Edit Profile</span>
+                </button>
+</li>
+              <li>
+                <button
+                  className={`flex items-center space-x-2 ${
+                    activeTab === "change-password"
+                      ? "border-b-2 border-blue-500 text-blue-500"
+                      : "text-gray-500 hover:text-blue-500"
+                  } py-2 px-4 focus:outline-none transition-colors duration-300`}
+                  onClick={() => setActiveTab("change-password")}
+                >
+                  <TbArrowsExchange size={20} />
+                  <span>Change Password</span>
+                </button>
+              </li>
+            </ul>
+            <div className="p-6">{renderTabContent()}</div>
+          </div>
         </div>
-    )
-}
+      </div>
+    </div>
+  );
+};
 
-export default ProfilePage
+export default ProfilePage;

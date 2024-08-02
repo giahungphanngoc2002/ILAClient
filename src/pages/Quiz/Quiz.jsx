@@ -23,6 +23,9 @@ const Quiz = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [saveSelected, setSaveSelected] = useSaveSelected();
+  const [progress, setProgress] = useState("0%");
+  const [learning, setLearning] = useState("learning");
+  const [checkedQuestions, setCheckedQuestions] = useState(0);
   const { id } = useParams();
 
   const GetDetailsClass = (id) => async () => {
@@ -39,16 +42,9 @@ const Quiz = () => {
     queryFn: GetDetailsClass(id),
   });
 
-
-  console.log(detailClassByID?.data)
-
-  console.log(saveSelected);
-
   const dispatch = useDispatch();
   const { currentQuestion, selectedAnswer, score, showResult, data, error } =
     useSelector((state) => state.quiz);
-
-  console.log("selected answer :" + selectedAnswer);
 
   useEffect(() => {
     const savedData = location.state?.saveSelected;
@@ -58,67 +54,80 @@ const Quiz = () => {
   }, [location.state, setSaveSelected]);
 
   useEffect(() => {
-    dispatch(setData(detailClassByID?.data.questions))
-  })
+    if (detailClassByID && detailClassByID.data) {
+      dispatch(setData(detailClassByID.data.questions));
+    }
+  }, [detailClassByID, dispatch]);
 
-  if (error) return <div>Error: {error}</div>;
+  useEffect(() => {
+    if (data) {
+      const initialSaveSelected = data.map((_, index) => ({
+        [`Question${index + 1}`]: null,
+        result: false,
+      }));
+      setSaveSelected(initialSaveSelected);
+    }
+  }, [data]);
+
+  useEffect(() => {
+    let selectedCount = 0;
+
+    saveSelected.forEach((question) => {
+      const questionKey = Object.keys(question)[0];
+      const questionValue = question[questionKey];
+
+      if (questionValue !== null) {
+        selectedCount++;
+      }
+    });
+    setCheckedQuestions(selectedCount);
+    console.log("saveSelected: ", selectedCount);
+    console.log("saveSelected: ", saveSelected)
+    const countProgress = (selectedCount / data?.length) * 100 + "%";
+    setProgress(countProgress);
+  }, [saveSelected]);
+
+  if (isError) return <div>Error: {error}</div>;
 
   const handleAnswerSelect = (answer) => {
     dispatch(setSelectedAnswer(answer));
-  };
 
-  const checkResult = () => {
-    if (selectedAnswer === currentQuizQuestion.correctAnswer) {
-      setScore(score + 1);
-      console.log("score",score)
-      return true;
-    } else {
-      return false;
-    }
-  };
-
-  const handleNextQuestion = () => {
+    const questionKey = `Question${currentQuestion + 1}`;
     const questionExists = saveSelected.some(
-      (answer) => Object.keys(answer)[0] === `Question${currentQuestion + 1}`
+      (selected) => Object.keys(selected)[0] === questionKey
     );
 
     if (questionExists) {
-      console.log(
-        `Question${currentQuestion + 1} already exists in saveSelected`
-      );
-      console.log(
-        "Selected answer: " +
-          selectedAnswer +
-          " current: " +
-          (currentQuestion + 1)
-      );
+console.log(`${questionKey} already exists in saveSelected`);
       const updatedSaveSelected = saveSelected.filter(
-        (answer) =>
-          Object.keys(answer)[0] !== `Question${currentQuestion + 1}` &&
-          Object.keys(answer)[0] !== "result"
+        (selected) =>
+          Object.keys(selected)[0] !== questionKey &&
+          Object.keys(selected)[0] !== "result"
       );
 
       setSaveSelected([
         ...updatedSaveSelected,
         {
-          [`Question${currentQuestion + 1}`]: selectedAnswer,
-          result: checkResult(),
+          [questionKey]: answer,
+          result: checkResult(answer),
         },
       ]);
     } else {
-      if (selectedAnswer === currentQuizQuestion.correctAnswer) {
+      if (answer === currentQuizQuestion.correctAnswer) {
         dispatch(setScore(score + 1));
       }
       setSaveSelected((prevSelected) => [
         ...prevSelected,
         {
-          [`Question${currentQuestion + 1}`]: selectedAnswer,
-          result: checkResult(),
+          [questionKey]: answer,
+          result: checkResult(answer),
         },
       ]);
     }
+  };
 
-    const previousSelectedAnswer = selectedAnswer; // Lưu trữ giá trị selectedAnswer trước khi gọi setSelectedAnswer(null)
+  const handleNextQuestion = () => {
+    const previousSelectedAnswer = selectedAnswer;
 
     dispatch(setCurrentQuestion(currentQuestion + 1));
 
@@ -132,11 +141,83 @@ const Quiz = () => {
         dispatch(setSelectedAnswer(nextAnswer));
       }
     } else {
-      dispatch(setSelectedAnswer(previousSelectedAnswer)); // Gán lại giá trị selectedAnswer nếu là câu hỏi cuối cùng
+      dispatch(setSelectedAnswer(previousSelectedAnswer));
+    }
+
+    // const countProgress = ((currentQuestion + 1) / data.length) * 100 + "%";
+    // setProgress(countProgress);
+  };
+
+  const checkResult = (answer) => {
+    if (answer === currentQuizQuestion.correctAnswer) {
+      dispatch(setScore(score + 1));
+      return true;
+    } else {
+      return false;
     }
   };
 
   const handlePrevQuestion = () => {
+    const previousSelectedAnswer = selectedAnswer;
+
+    dispatch(setCurrentQuestion(currentQuestion - 1));
+
+    if (currentQuestion > 0) {
+      dispatch(setSelectedAnswer(null));
+      const prevQuestion = saveSelected.find(
+        (item) => Object.keys(item)[0] === `Question${currentQuestion}`
+      );
+      if (prevQuestion) {
+        const prevAnswer = prevQuestion[`Question${currentQuestion}`];
+        dispatch(setSelectedAnswer(prevAnswer));
+      }
+    } else {
+      dispatch(setSelectedAnswer(previousSelectedAnswer));
+    }
+
+    // var countProgress = ((currentQuestion - 1) / data.length) * 100 + "%";
+    // setProgress(countProgress);
+  };
+
+  const handleFirstQuestion = () => {
+    const previousSelectedAnswer = selectedAnswer;
+
+    dispatch(setCurrentQuestion(0));
+    dispatch(setSelectedAnswer(null));
+    const firstQuestion = saveSelected.find(
+      (item) => Object.keys(item)[0] === `Question1`
+    );
+    if (firstQuestion) {
+      const firstAnswer = firstQuestion[`Question1`];
+      dispatch(setSelectedAnswer(firstAnswer));
+    } else {
+      dispatch(setSelectedAnswer(previousSelectedAnswer));
+    }
+
+    // var countProgress = (1 / data.length) * 100 + "%";
+    // setProgress(countProgress);
+  };
+
+  const handleLastQuestion = () => {
+const previousSelectedAnswer = selectedAnswer;
+
+    dispatch(setCurrentQuestion(data.length - 1));
+    dispatch(setSelectedAnswer(null));
+    const lastQuestion = saveSelected.find(
+      (item) => Object.keys(item)[0] === `Question${data.length}`
+    );
+    if (lastQuestion) {
+      const lastAnswer = lastQuestion[`Question${data.length}`];
+      dispatch(setSelectedAnswer(lastAnswer));
+    } else {
+      dispatch(setSelectedAnswer(previousSelectedAnswer));
+    }
+
+    // var countProgress = (data.length / data.length) * 100 + "%";
+    // setProgress(countProgress);
+  };
+
+  const handleSubmit = () => {
     const questionExists = saveSelected.some(
       (answer) => Object.keys(answer)[0] === `Question${currentQuestion + 1}`
     );
@@ -174,151 +255,12 @@ const Quiz = () => {
       ]);
     }
 
-    const previousSelectedAnswer = selectedAnswer;
-
-    dispatch(setCurrentQuestion(currentQuestion - 1));
-
-    if (currentQuestion) {
-      dispatch(setSelectedAnswer(null));
-      const prevQuestion = saveSelected.find(
-        (item) => Object.keys(item)[0] === `Question${currentQuestion}`
-      );
-      if (prevQuestion) {
-        const prevAnswer = prevQuestion[`Question${currentQuestion}`];
-        dispatch(setSelectedAnswer(prevAnswer));
-      }
-    } else {
-      dispatch(setSelectedAnswer(previousSelectedAnswer));
-    }
-  };
-
-  const handleFirstQuestion = () => {
-    const questionExists = saveSelected.some(
-      (answer) => Object.keys(answer)[0] === `Question${currentQuestion + 1}`
-    );
-
-    if (questionExists) {
-      console.log(
-        `Question${currentQuestion + 1} already exists in saveSelected`
-      );
-      console.log(
-        "Selected answer: " +
-          selectedAnswer +
-          " current: " +
-          (currentQuestion + 1)
-      );
-      const updatedSaveSelected = saveSelected.filter(
-        (answer) =>
-          Object.keys(answer)[0] !== `Question${currentQuestion + 1}` &&
-          Object.keys(answer)[0] !== "result"
-      );
-
-      setSaveSelected([
-        ...updatedSaveSelected,
-        {
-          [`Question${currentQuestion + 1}`]: selectedAnswer,
-          result: checkResult(),
-        },
-      ]);
-    } else {
-      if (selectedAnswer === currentQuizQuestion.correctAnswer) {
-        dispatch(setScore(score + 1));
-      }
-      setSaveSelected((prevSelected) => [
-        ...prevSelected,
-        {
-          [`Question${currentQuestion + 1}`]: selectedAnswer,
-          result: checkResult(),
-        },
-      ]);
-    }
-
-    const previousSelectedAnswer = selectedAnswer;
-
-    dispatch(setCurrentQuestion(0));
-
-    if (currentQuestion !== currentQuizQuestion.length - 1) {
-      dispatch(setSelectedAnswer(null));
-      const nextQuestion = saveSelected.find(
-        (item) => Object.keys(item)[0] === `Question${currentQuestion + 2}`
-      );
-      if (nextQuestion) {
-        const nextAnswer = nextQuestion[`Question${currentQuestion + 2}`];
-        dispatch(setSelectedAnswer(nextAnswer));
-      }
-    } else {
-      dispatch(setSelectedAnswer(previousSelectedAnswer));
-    }
-  };
-
-  const handleLastQuestion = () => {
-    const questionExists = saveSelected.some(
-      (answer) => Object.keys(answer)[0] === `Question${currentQuestion + 1}`
-    );
-
-    if (questionExists) {
-      console.log(
-        `Question${currentQuestion + 1} already exists in saveSelected`
-      );
-      console.log(
-        "Selected answer: " +
-          selectedAnswer +
-          " current: " +
-          (currentQuestion + 1)
-      );
-      const updatedSaveSelected = saveSelected.filter(
-        (answer) =>
-          Object.keys(answer)[0] !== `Question${currentQuestion + 1}` &&
-          Object.keys(answer)[0] !== "result"
-      );
-
-      setSaveSelected([
-        ...updatedSaveSelected,
-        {
-          [`Question${currentQuestion + 1}`]: selectedAnswer,
-          result: checkResult(),
-        },
-      ]);
-    } else {
-      if (selectedAnswer === currentQuizQuestion.correctAnswer) {
-        dispatch(setScore(score + 1));
-      }
-      setSaveSelected((prevSelected) => [
-        ...prevSelected,
-        {
-          [`Question${currentQuestion + 1}`]: selectedAnswer,
-          result: checkResult(),
-        },
-      ]);
-    }
-
-    const previousSelectedAnswer = selectedAnswer;
-
-    dispatch(setCurrentQuestion(data.length - 1));
-
-    if (currentQuestion !== currentQuizQuestion.length - 1) {
-      dispatch(setSelectedAnswer(null));
-      const nextQuestion = saveSelected.find(
-        (item) => Object.keys(item)[0] === `Question${currentQuestion + 2}`
-      );
-      if (nextQuestion) {
-        const nextAnswer = nextQuestion[`Question${currentQuestion + 2}`];
-        dispatch(setSelectedAnswer(nextAnswer));
-      }
-    } else {
-      dispatch(setSelectedAnswer(previousSelectedAnswer));
-    }
-  };
-
-  const handleSubmit = () => {
+    // Điều hướng đến trang review với dữ liệu đã cập nhật
     const data = saveSelected;
-    navigate(`/review/${id}`, { state: { data } });
+    navigate(`/review/${learning}/${id}`, { state: { data } });
   };
 
-  const handleReview = () => {
-    const data = saveSelected;
-    navigate("/result", { state: { data } });
-  };
+  // console.log("saveSelected: ", selectedCount);
 
   if (!data) return null;
 
@@ -339,32 +281,23 @@ const Quiz = () => {
     ? selectedAnswerForQuestion[`Question${currentQuestion + 1}`]
     : selectedAnswer;
 
+  // console.log(saveSelected)
   return (
     <div>
-      <Container>
-        <h1
-          style={{
-            backgroundColor: "black",
-            color: "white",
-            textAlign: "center",
-            padding: "30px",
-          }}
-        >
+      <div className="container mx-auto p-4">
+        <h1 className="bg-yellow-400 text-blue-800 text-center py-8 text-3xl font-bold rounded-lg">
           {detailClassByID?.data.nameClass}
         </h1>
-        <Row>
-          <h5 className="text-xl py-4">
+        <div className="mt-8">
+          <h5 className="text-2xl py-4 text-green-700">
             Q.{currentQuestion + 1} {currentQuizQuestion.question}
           </h5>
-        </Row>
-        <Row className="">
+        </div>
+        <div className="flex flex-wrap -mx-2">
           {currentQuizQuestion.answers.map((answer, index) => (
-            <Col key={index} xs={6}>
-              <li
-                className="p-3 rounded-3 border border-info text-xl"
-                style={{ listStyleType: "none", backgroundColor: "#c9dfff" }}
-              >
-                <label>
+<div key={index} className="w-full sm:w-1/2 px-2 mb-4">
+              <li className="p-3 bg-pink-100 rounded-lg border border-pink-300 list-none text-xl">
+                <label className="flex items-center text-purple-800">
                   <input
                     type="radio"
                     name="answer"
@@ -374,14 +307,24 @@ const Quiz = () => {
                       selectedAnswer === answer
                     }
                     onChange={() => handleAnswerSelect(answer)}
+                    className="mr-2"
                   />
                   {answer}
                 </label>
               </li>
-              <br />
-            </Col>
+            </div>
           ))}
-        </Row>
+        </div>
+        <div class="progress">
+          <div
+            class="progress-bar"
+            role="progressbar"
+            style={{ width: progress }}
+            aria-valuenow="75"
+            aria-valuemin="0"
+            aria-valuemax="100"
+          ></div>
+        </div>
         <QuizzContext.Provider
           value={{
             handleFirstQuestion,
@@ -393,32 +336,19 @@ const Quiz = () => {
             saveSelected,
           }}
         >
-          <div style={{ marginTop: "20px" }}>
+          <div className="mt-8">
             <Directional />
           </div>
         </QuizzContext.Provider>
-        <Row>
-          <Col xs={4} className="d-flex justify-content-center pt-4 pb-4">
-            <button
-              className="btn btn-primary m-2"
-              onClick={handleFirstQuestion}
-              disabled={currentQuestion === 0}
-            >
-              Quiz
-            </button>
-            <button
-              className="btn btn-primary m-2"
-              onClick={handleReview}
-              disabled={currentQuestion === 0}
-            >
-              Quiz Review
-            </button>
-            <button className="btn btn-primary m-2" onClick={handleSubmit}>
-              Submit
-            </button>
-          </Col>
-        </Row>
-      </Container>
+        <div className="flex justify-center py-8">
+          <button
+            className="btn btn-primary m-2 bg-green-400 text-white py-2 px-4 rounded-full shadow-md hover:bg-green-500 transition duration-200"
+            onClick={handleSubmit}
+          >
+            Submit
+          </button>
+        </div>
+      </div>
     </div>
   );
 };
