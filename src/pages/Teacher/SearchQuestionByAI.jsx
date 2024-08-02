@@ -35,7 +35,7 @@ export default function SearchQuestionByAI() {
   const [error, setError] = useState("");
   const [buttonColor, setButtonColor] = useState("gray");
   const [showWarning, setShowWarning] = useState(false);
-  const [status, setStatus] = useState("")
+  const [status, setStatus] = useState("");
   const navigate = useNavigate();
 
   const countWords = (text) => {
@@ -64,7 +64,7 @@ export default function SearchQuestionByAI() {
     queryFn: () => handleGetDetailsClass(id),
   });
 
-  console.log("123444", detailClass?.data.subject)
+  console.log("123444", detailClass?.data.subject);
 
   const handleUpdate = async () => {
     try {
@@ -133,7 +133,7 @@ export default function SearchQuestionByAI() {
       ]
       `;
 
-      const addTextTuNhien = `
+    const addTextTuNhien = `
       xin 10 câu hỏi trắc nghiệm các dạng tương tự bài này theo format dưới đây
       [
       {
@@ -178,7 +178,19 @@ export default function SearchQuestionByAI() {
         url: "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=AIzaSyAmhcR2Olj1sd4BzsgEfy28_d67sKTz-kI",
         method: "POST",
         data: {
-          contents: [{ parts: [{ text: question + (detailClass?.data.subject.includes("tuNhien") ? addTextTuNhien : addTextXaHoi) }] }],
+          contents: [
+            {
+              parts: [
+                {
+                  text:
+                    question +
+                    (detailClass?.data.subject.includes("tuNhien")
+                      ? addTextTuNhien
+                      : addTextXaHoi),
+                },
+              ],
+            },
+          ],
         },
       });
 
@@ -262,7 +274,7 @@ export default function SearchQuestionByAI() {
     }
   }
 
-  console.log("questionssss", questions)
+  console.log("questionssss", questions);
   return (
     <div className="home-page-teacher p-6 text-center">
       <h1 className="text-3xl font-bold mb-6 text-gray-800">Chat AI</h1>
@@ -274,7 +286,9 @@ export default function SearchQuestionByAI() {
         placeholder="Nhập đoạn văn bạn muốn tạo ra câu hỏi"
       ></textarea>
       {showWarning && (
-        <p className="text-red-500">Đoạn văn cần có ít nhất 150 từ để tạo câu hỏi.</p>
+        <p className="text-red-500">
+          Đoạn văn cần có ít nhất 150 từ để tạo câu hỏi.
+        </p>
       )}
       <div className="mb-4">
         <input
@@ -300,48 +314,63 @@ export default function SearchQuestionByAI() {
       {loading ? (
         <Loading />
       ) : (
-        <div className="container mx-auto mt-6">
-          {questions.map((questionn, key) => (
-            <div key={key} className="bg-white shadow-lg rounded-lg p-6 mb-6">
-              <div className="mb-4">
-                <h2 className="text-xl font-semibold text-left text-gray-800 mb-2">
-                  Question: {questionn.question}
-                </h2>
-                <h2 className="text-xl font-semibold text-left text-gray-800 mb-2">
-                  Level: {questionn.level}
-                </h2>
-                <div className="flex flex-wrap -mx-2">
-                  {questionn.answers.map((answer, index) => (
-                    <div key={index} className="w-full sm:w-1/2 px-2 mb-4">
-                      <li className="p-3 bg-blue-100 rounded-lg border border-blue-300 list-none">
-                        <label className="flex items-center">
-                          <input
-                            type="radio"
-                            name="answer"
-                            value={answer}
-                            className="mr-2"
-                          />
-                          {answer}
-                        </label>
-                      </li>
-                    </div>
-                  ))}
-                </div>
-                <p className="border-2 rounded-lg bg-green-200 p-3 text-left border-green-500">
-                  Correct answer: {questionn.correctAnswer}
-                </p>
-              </div>
-              <div className="text-right">
-                <button
-                  className="btn btn-danger bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition duration-200"
-                  onClick={() => handleDeleteQuestion(key)}
-                >
-                  X
-                </button>
-              </div>
+        <div className="container mx-auto mt-6 px-4 sm:px-6 lg:px-8">
+  {questions.map((questionn, key) => (
+    <div key={key} className="bg-white shadow-lg rounded-lg p-6 mb-8">
+      <div className="mb-4">
+        <h2 className="text-2xl font-bold text-left text-gray-900 mb-3">
+          Question: {questionn.question}
+        </h2>
+        <div className="flex items-center mb-6">
+          <span
+            className={`py-1 px-4 rounded-full text-base font-semibold ${
+              questionn.level === 1
+                ? "bg-green-100 text-green-600"
+                : questionn.level === 2
+                ? "bg-yellow-100 text-yellow-600"
+                : "bg-red-100 text-red-600"
+            }`}
+          >
+            {questionn.level === 1
+              ? "Easy"
+              : questionn.level === 2
+              ? "Medium"
+              : "Hard"}
+          </span>
+        </div>
+        <div className="flex flex-wrap -mx-2">
+          {questionn.answers.map((answer, index) => (
+            <div key={index} className="w-full sm:w-1/2 px-2 mb-4">
+              <li className="p-4 bg-blue-50 rounded-lg border border-blue-300 list-none hover:bg-blue-100 transition duration-200">
+                <label className="flex items-center cursor-pointer">
+                  <input
+                    type="radio"
+                    name={`answer-${key}`}
+                    value={answer}
+                    className="mr-2"
+                  />
+                  {answer}
+                </label>
+              </li>
             </div>
           ))}
         </div>
+        <p className="border-2 rounded-lg bg-green-100 p-4 text-left border-green-300 text-green-800 font-medium mt-4">
+          Correct answer: {questionn.correctAnswer}
+        </p>
+      </div>
+      <div className="text-right">
+        <button
+          className="bg-red-500 text-white py-2 px-5 rounded-full shadow-md hover:bg-red-600 hover:shadow-lg transition duration-200"
+          onClick={() => handleDeleteQuestion(key)}
+        >
+          Delete
+        </button>
+      </div>
+    </div>
+  ))}
+</div>
+
       )}
 
       <ButtonComponent
