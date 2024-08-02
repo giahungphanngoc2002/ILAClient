@@ -25,10 +25,10 @@ const ManageQuestion = ({
               Question
             </th>
             <th className="px-5 py-3 bg-gray-100 text-gray-600 border-b border-gray-200 text-left text-sm uppercase font-normal">
-              Level
+              Correct Answer
             </th>
             <th className="px-5 py-3 bg-gray-100 text-gray-600 border-b border-gray-200 text-left text-sm uppercase font-normal">
-              Correct Answer
+              Level
             </th>
             <th className="px-5 py-3 bg-gray-100 text-gray-600 border-b border-gray-200 text-left text-sm uppercase font-normal">
               Actions
@@ -49,10 +49,24 @@ const ManageQuestion = ({
                 {question.question}
               </td>
               <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                {question.level}
+                {question.correctAnswer}
               </td>
               <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                {question.correctAnswer}
+                <span
+                  className={`px-2 py-1 rounded-full font-semibold ${
+                    question.level === 1
+                      ? "bg-green-100 text-green-800"
+                      : question.level === 2
+                      ? "bg-yellow-100 text-yellow-800"
+                      : "bg-red-100 text-red-800"
+                  }`}
+                >
+                  {question.level === 1
+                    ? "Easy"
+                    : question.level === 2
+                    ? "Medium"
+                    : "Hard"}
+                </span>
               </td>
               <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                 <div className="flex space-x-2">
