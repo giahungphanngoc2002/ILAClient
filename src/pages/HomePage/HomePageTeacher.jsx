@@ -41,7 +41,7 @@ export default function HomePageTeacher() {
   const [status, setStatus] = useState("");
 
   const [teacherID, setTeacherID] = useState("");
-  const [subject, setSubject] = useState("")
+  const [subject, setSubject] = useState("");
 
   const handleOnchangeClassName = (e) => {
     setNameClass(e.target.value);
@@ -59,8 +59,8 @@ export default function HomePageTeacher() {
     setSubject(e.target.value);
   };
 
-  const handleOnchangeStatus = (e) => {
-    setStatus(e.target.value);
+  const handleOnchangeStatus = (isChecked) => {
+    setStatus(isChecked ? "true" : "false");
   };
 
   const handleJoinClass = () => {
@@ -96,7 +96,8 @@ export default function HomePageTeacher() {
             Welcome, Teacher
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600 ">
-          Classes you like will appear here. You can use this space to collect great content created by other teachers.
+            Classes you like will appear here. You can use this space to collect
+            great content created by other teachers.
           </p>
         </div>
         <div className="mt-8 flex justify-center gap-5">
@@ -141,72 +142,76 @@ export default function HomePageTeacher() {
           <Modal.Title>Create New Class</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <div className="mb-4">
-            <label className="block text-gray-700 font-bold mb-2">
-              Class Code:
-            </label>
-            <input
-              type="text"
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              placeholder="Class Code"
-              onChange={handleOnchangeClassName}
-              value={nameClass}
-            />
+          <div class="grid grid-cols-2 gap-4 mb-4">
+            
+            <div>
+              <label class="block font-semibold text-gray-700 mb-2">
+                Class ID
+              </label>
+              <input
+                type="text"
+                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                placeholder="Enter Class ID"
+                onChange={handleOnchangeClassID}
+                value={classID}
+              />
+            </div>
+            <div>
+              <label class="block font-semibold text-gray-700 mb-2">
+                Class Name
+              </label>
+              <input
+                type="text"
+                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                placeholder="Enter Class Name"
+                onChange={handleOnchangeClassName}
+                value={nameClass}
+              />
+            </div>
           </div>
-          <div className="mb-4">
-            <label className="block text-gray-700 font-bold mb-2">
-              Class ID:
+
+          <div class="mb-4">
+            <label class="block font-semibold text-gray-700 mb-2">
+              Class Description
             </label>
             <input
               type="text"
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              placeholder="Class ID"
-              onChange={handleOnchangeClassID}
-              value={classID}
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block text-gray-700 font-bold mb-2">
-              Class Name:
-            </label>
-            <input
-              type="text"
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              placeholder="Class Name"
+              class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              placeholder="Enter Class Name"
               onChange={handleOnchangeDescription}
               value={description}
             />
           </div>
-          <div className="mb-4">
-            <label className="block text-gray-700 font-bold mb-2">
-              Subject:
-            </label>
 
-            <select
-  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-  onChange={handleOnchangeSubject}
-  value={subject}
->
-  <option value="">Select Subject Name</option>
-  <option value="tuNhien">Tự nhiên</option>
-  <option value="xaHoi">Xã hội</option>
-</select>
-          </div>
-          <div className="mb-4">
-            <label className="block text-gray-700 font-bold mb-2">
-              Status:
+          <div class="mb-4">
+            <label class="block font-semibold text-gray-700 mb-2">
+              Subject
             </label>
             <select
-  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-  onChange={handleOnchangeStatus}
-  value={status}
->
-  <option value="">Select Status</option>
-  <option value="true">Public</option>
-  <option value="false">Private</option>
-</select>
+              class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              onChange={handleOnchangeSubject}
+              value={subject}
+            >
+              <option value="">Select Subject</option>
+              <option value="tuNhien">Tự nhiên</option>
+              <option value="xaHoi">Xã hội</option>
+            </select>
+          </div>
+
+          <div class="mb-4 flex items-center">
+            <label class="block font-semibold text-gray-700 mr-4">Public</label>
+            <label class="inline-flex relative items-center cursor-pointer">
+              <input
+                type="checkbox"
+                class="sr-only peer"
+                onChange={(e) => handleOnchangeStatus(e.target.checked)}
+                checked={status === "true"}
+              />
+              <div class="w-11 h-6 bg-gray-200 rounded-full peer-checked:bg-blue-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+            </label>
           </div>
         </Modal.Body>
+
         <Modal.Footer>
           <Button
             variant="secondary"
