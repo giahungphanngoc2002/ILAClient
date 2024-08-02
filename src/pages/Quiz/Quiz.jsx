@@ -1,5 +1,5 @@
 import React, { createContext, useEffect, useState } from "react";
-import { useSelector, useDispatch, Provider } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import {
   setCurrentQuestion,
   setSelectedAnswer,
@@ -11,13 +11,11 @@ import {
 } from "../../redux/slices/quizSlice";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
 import Directional from "../../components/DirectionComponent/Direction";
-import { Container, Col, Row } from "react-bootstrap";
 import { useSaveSelected } from "../../redux/QuizState";
 import { useQuery } from "@tanstack/react-query";
 import * as ClassService from "../../services/ClassService";
 
 export const QuizzContext = createContext();
-export const quizData = [];
 
 const Quiz = () => {
   const navigate = useNavigate();
@@ -59,15 +57,15 @@ const Quiz = () => {
     }
   }, [detailClassByID, dispatch]);
 
-  useEffect(() => {
-    if (data) {
-      const initialSaveSelected = data.map((_, index) => ({
-        [`Question${index + 1}`]: null,
-        result: false,
-      }));
-      setSaveSelected(initialSaveSelected);
-    }
-  }, [data]);
+  // useEffect(() => {
+  //   if (data) {
+  //     const initialSaveSelected = data.map((_, index) => ({
+  //       [`Question${index + 1}`]: null,
+  //       result: false,
+  //     }));
+  //     setSaveSelected(initialSaveSelected);
+  //   }
+  // }, [data]);
 
   useEffect(() => {
     let selectedCount = 0;
@@ -81,46 +79,40 @@ const Quiz = () => {
       }
     });
     setCheckedQuestions(selectedCount);
-    console.log("saveSelected: ", selectedCount);
-    console.log("saveSelected: ", saveSelected)
     const countProgress = (selectedCount / data?.length) * 100 + "%";
     setProgress(countProgress);
   }, [saveSelected]);
 
-  if (isError) return <div>Error: {error}</div>;
-
+  if (isError) return <div className="text-red-500">Error: {error}</div>;
+  // console.log("save Selected", saveSelected);
   const handleAnswerSelect = (answer) => {
     dispatch(setSelectedAnswer(answer));
-
     const questionKey = `Question${currentQuestion + 1}`;
     const questionExists = saveSelected.some(
       (selected) => Object.keys(selected)[0] === questionKey
     );
 
+    const isCorrect = checkResult(answer);
     if (questionExists) {
-console.log(`${questionKey} already exists in saveSelected`);
       const updatedSaveSelected = saveSelected.filter(
         (selected) =>
           Object.keys(selected)[0] !== questionKey &&
           Object.keys(selected)[0] !== "result"
       );
-
+      // console.log("saveSelected: " + saveSelected);
       setSaveSelected([
         ...updatedSaveSelected,
         {
           [questionKey]: answer,
-          result: checkResult(answer),
+          result: isCorrect,
         },
       ]);
     } else {
-      if (answer === currentQuizQuestion.correctAnswer) {
-        dispatch(setScore(score + 1));
-      }
       setSaveSelected((prevSelected) => [
         ...prevSelected,
         {
           [questionKey]: answer,
-          result: checkResult(answer),
+          result: isCorrect,
         },
       ]);
     }
@@ -143,9 +135,6 @@ console.log(`${questionKey} already exists in saveSelected`);
     } else {
       dispatch(setSelectedAnswer(previousSelectedAnswer));
     }
-
-    // const countProgress = ((currentQuestion + 1) / data.length) * 100 + "%";
-    // setProgress(countProgress);
   };
 
   const checkResult = (answer) => {
@@ -174,9 +163,6 @@ console.log(`${questionKey} already exists in saveSelected`);
     } else {
       dispatch(setSelectedAnswer(previousSelectedAnswer));
     }
-
-    // var countProgress = ((currentQuestion - 1) / data.length) * 100 + "%";
-    // setProgress(countProgress);
   };
 
   const handleFirstQuestion = () => {
@@ -193,13 +179,10 @@ console.log(`${questionKey} already exists in saveSelected`);
     } else {
       dispatch(setSelectedAnswer(previousSelectedAnswer));
     }
-
-    // var countProgress = (1 / data.length) * 100 + "%";
-    // setProgress(countProgress);
   };
 
   const handleLastQuestion = () => {
-const previousSelectedAnswer = selectedAnswer;
+    const previousSelectedAnswer = selectedAnswer;
 
     dispatch(setCurrentQuestion(data.length - 1));
     dispatch(setSelectedAnswer(null));
@@ -212,9 +195,6 @@ const previousSelectedAnswer = selectedAnswer;
     } else {
       dispatch(setSelectedAnswer(previousSelectedAnswer));
     }
-
-    // var countProgress = (data.length / data.length) * 100 + "%";
-    // setProgress(countProgress);
   };
 
   const handleSubmit = () => {
@@ -223,12 +203,6 @@ const previousSelectedAnswer = selectedAnswer;
     );
 
     if (questionExists) {
-      console.log(
-        `Question${currentQuestion + 1} already exists in saveSelected`
-      );
-      console.log(
-        "Selected answer: " + selectedAnswer + " current: " + currentQuestion
-      );
       const updatedSaveSelected = saveSelected.filter(
         (answer) =>
           Object.keys(answer)[0] !== `Question${currentQuestion + 1}` &&
@@ -243,9 +217,6 @@ const previousSelectedAnswer = selectedAnswer;
         },
       ]);
     } else {
-      if (selectedAnswer === currentQuizQuestion.correctAnswer) {
-        dispatch(setScore(score + 1));
-      }
       setSaveSelected((prevSelected) => [
         ...prevSelected,
         {
@@ -255,20 +226,20 @@ const previousSelectedAnswer = selectedAnswer;
       ]);
     }
 
-    // Điều hướng đến trang review với dữ liệu đã cập nhật
+    // Navigate to review page
     const data = saveSelected;
     navigate(`/review/${learning}/${id}`, { state: { data } });
   };
-
-  // console.log("saveSelected: ", selectedCount);
 
   if (!data) return null;
 
   if (showResult) {
     return (
-      <div>
-        <h1>Quiz Completed!</h1>
-        <p>Your score: {score}</p>
+      <div className="text-center py-8">
+        <h1 className="text-3xl font-bold text-green-500">Quiz Completed!</h1>
+        <p className="text-xl mt-4">
+          Your score: <span className="font-bold text-blue-500">{score}</span>
+        </p>
       </div>
     );
   }
@@ -281,73 +252,92 @@ const previousSelectedAnswer = selectedAnswer;
     ? selectedAnswerForQuestion[`Question${currentQuestion + 1}`]
     : selectedAnswer;
 
-  // console.log(saveSelected)
   return (
-    <div>
-      <div className="container mx-auto p-4">
-        <h1 className="bg-yellow-400 text-blue-800 text-center py-8 text-3xl font-bold rounded-lg">
-          {detailClassByID?.data.nameClass}
-        </h1>
-        <div className="mt-8">
-          <h5 className="text-2xl py-4 text-green-700">
-            Q.{currentQuestion + 1} {currentQuizQuestion.question}
-          </h5>
-        </div>
-        <div className="flex flex-wrap -mx-2">
-          {currentQuizQuestion.answers.map((answer, index) => (
-<div key={index} className="w-full sm:w-1/2 px-2 mb-4">
-              <li className="p-3 bg-pink-100 rounded-lg border border-pink-300 list-none text-xl">
-                <label className="flex items-center text-purple-800">
-                  <input
-                    type="radio"
-                    name="answer"
-                    value={answer}
-                    checked={
-                      selectedAnswerValue === answer ||
-                      selectedAnswer === answer
-                    }
-                    onChange={() => handleAnswerSelect(answer)}
-                    className="mr-2"
-                  />
-                  {answer}
-                </label>
+    <div className="container mx-auto p-4 bg-gray-100 rounded-lg shadow-lg">
+      <h1 className="bg-yellow-400 text-blue-800 text-center py-4 text-2xl font-bold rounded-t-lg">
+        {detailClassByID?.data.nameClass}
+      </h1>
+      <div className="mt-6">
+        <h5 className="text-xl py-4 text-green-700">
+          Q.{currentQuestion + 1} {currentQuizQuestion.question}
+        </h5>
+      </div>
+      <div className="flex flex-wrap -mx-2 mb-6">
+        {currentQuizQuestion.answers.map((answer, index) => {
+          const isCorrectAnswer =
+            saveSelected.some(
+              (selected) =>
+                selected[`Question${currentQuestion + 1}`] ===
+                data[currentQuestion].correctAnswer
+            ) && selectedAnswer === answer;
+          const isSelected = selectedAnswer === answer;
+          return (
+            <div key={index} className="w-full sm:w-1/2 px-2 mb-4">
+              <li
+                className={`p-4 rounded-lg border list-none text-lg cursor-pointer flex items-center ${
+                  isCorrectAnswer
+                    ? "bg-green-100 border-green-300"
+                    : isSelected
+                    ? "bg-red-100 border-red-300"
+                    : "bg-gray-200 border-gray-300"
+                }`}
+                onClick={() => handleAnswerSelect(answer)}
+              >
+                <input
+                  type="radio"
+                  name="answer"
+                  value={answer}
+                  checked={isSelected}
+                  onChange={() => handleAnswerSelect(answer)}
+                  className="mr-2"
+                />
+                <span className="flex-1">{answer}</span>
+                {isCorrectAnswer && (
+                  <span className="text-green-500 text-xl ml-2">&#10004;</span> // Check mark
+                )}
+                {isSelected && !isCorrectAnswer && (
+                  <span className="text-red-500 text-xl ml-2">&#10006;</span> // Cross mark
+                )}
               </li>
             </div>
-          ))}
-        </div>
-        <div class="progress">
-          <div
-            class="progress-bar"
-            role="progressbar"
-            style={{ width: progress }}
-            aria-valuenow="75"
-            aria-valuemin="0"
-            aria-valuemax="100"
-          ></div>
-        </div>
-        <QuizzContext.Provider
-          value={{
-            handleFirstQuestion,
-            handlePrevQuestion,
-            handleNextQuestion,
-            handleLastQuestion,
-            data,
-            currentQuestion,
-            saveSelected,
-          }}
-        >
-          <div className="mt-8">
-            <Directional />
+          );
+        })}
+      </div>
+      <div className="relative mb-6">
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="w-full h-2 bg-blue-200 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-blue-500 rounded-full"
+              style={{ width: progress }}
+            ></div>
           </div>
-        </QuizzContext.Provider>
-        <div className="flex justify-center py-8">
-          <button
-            className="btn btn-primary m-2 bg-green-400 text-white py-2 px-4 rounded-full shadow-md hover:bg-green-500 transition duration-200"
-            onClick={handleSubmit}
-          >
-            Submit
-          </button>
         </div>
+        {/* <div className="text-center text-sm text-gray-600">
+          Progress: {progress}
+        </div> */}
+      </div>
+      <QuizzContext.Provider
+        value={{
+          handleFirstQuestion,
+          handlePrevQuestion,
+          handleNextQuestion,
+          handleLastQuestion,
+          data,
+          currentQuestion,
+          saveSelected,
+        }}
+      >
+        <div className="mt-6">
+          <Directional />
+        </div>
+      </QuizzContext.Provider>
+      <div className="flex justify-center py-6">
+        <button
+          className="bg-green-500 text-white py-2 px-4 rounded-full shadow-md hover:bg-green-600 transition duration-200"
+          onClick={handleSubmit}
+        >
+          Submit
+        </button>
       </div>
     </div>
   );
