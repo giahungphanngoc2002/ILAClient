@@ -57,15 +57,15 @@ const Quiz = () => {
     }
   }, [detailClassByID, dispatch]);
 
-  // useEffect(() => {
-  //   if (data) {
-  //     const initialSaveSelected = data.map((_, index) => ({
-  //       [`Question${index + 1}`]: null,
-  //       result: false,
-  //     }));
-  //     setSaveSelected(initialSaveSelected);
-  //   }
-  // }, [data]);
+  useEffect(() => {
+    if (data) {
+      const initialSaveSelected = data.map((_, index) => ({
+        [`Question${index + 1}`]: null,
+        result: false,
+      }));
+      setSaveSelected(initialSaveSelected);
+    }
+  }, [data]);
 
   useEffect(() => {
     let selectedCount = 0;
@@ -84,7 +84,7 @@ const Quiz = () => {
   }, [saveSelected]);
 
   if (isError) return <div className="text-red-500">Error: {error}</div>;
-  // console.log("save Selected", saveSelected);
+
   const handleAnswerSelect = (answer) => {
     dispatch(setSelectedAnswer(answer));
     const questionKey = `Question${currentQuestion + 1}`;
@@ -99,7 +99,7 @@ const Quiz = () => {
           Object.keys(selected)[0] !== questionKey &&
           Object.keys(selected)[0] !== "result"
       );
-      // console.log("saveSelected: " + saveSelected);
+
       setSaveSelected([
         ...updatedSaveSelected,
         {
