@@ -18,7 +18,7 @@ import ActivationPage from "../pages/ActivationPage/ActivationPage";
 import RequestPasswordReset from "../pages/forgotpassword/RequestPasswordReset";
 import ResetPassword from "../pages/forgotpassword/ResetPassword";
 import ChangePassword from "../pages/ChangePassWord/ChangePassWord";
-import ViewQuestionTest from "../pages/ViewTest/ViewQuestionTest";
+import ViewQuestionTest from "../pages/ViewInfoTest/ViewInfoTest";
 import TeacherInboxPage from "../pages/Teacher/TeacherInboxPage";
 import PricingCount from "../pages/PricingCount/PricingCount";
 
