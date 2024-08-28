@@ -29,7 +29,7 @@ export default function HomePageTeacher() {
       navigate(`/pricingCount/`);
     }
   };
-
+  
   const { data, isSuccess, isError } = mutation;
 
   useEffect(() => {
