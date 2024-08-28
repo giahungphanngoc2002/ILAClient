@@ -431,6 +431,8 @@ const ViewClass = () => {
     const testData = {
       iDTest: testID,
       passwordTest: password,
+      timeStart:timeStart,
+      timeEnd:timeEnd,
     };
     createTestMutation.mutate({ classId: id, testData });
   };
