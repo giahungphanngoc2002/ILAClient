@@ -20,6 +20,7 @@ import ResetPassword from "../pages/forgotpassword/ResetPassword";
 import ChangePassword from "../pages/ChangePassWord/ChangePassWord";
 import ViewQuestionTest from "../pages/ViewTest/ViewQuestionTest";
 import TeacherInboxPage from "../pages/Teacher/TeacherInboxPage";
+import PricingCount from "../pages/PricingCount/PricingCount";
 
 export const routes = [
   {
@@ -132,6 +133,11 @@ export const routes = [
   {
     path: "/detailTest/:id",
     page: ViewQuestionTest,
+    isShowHeader: true,
+  },
+  {
+    path: "/pricingCount/",
+    page: PricingCount,
     isShowHeader: true,
   },
   {

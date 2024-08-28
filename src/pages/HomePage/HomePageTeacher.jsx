@@ -5,14 +5,13 @@ import * as message from "../../components/MessageComponent/Message";
 import * as ClassService from "../../services/ClassService";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { toast } from "react-toastify";
 
 export default function HomePageTeacher() {
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
-
   const handleCloseJoinModal = () => setShowJoinModal(false);
   const handleOpenJoinModal = () => setShowJoinModal(true);
-
   const navigate = useNavigate();
   const handleNavigateQuestionAI = () => {
     navigate("/myclass");
@@ -22,7 +21,14 @@ export default function HomePageTeacher() {
   const user = useSelector((state) => state.user);
 
   const handleCloseCreateModal = () => setShowCreateModal(false);
-  const handleOpenCreateModal = () => setShowCreateModal(true);
+  const handleOpenCreateModal = (count) => {
+    if (count > 0) {
+      setShowCreateModal(true);
+    } else {
+      toast.error("Mua nick");
+      navigate(`/pricingCount/`);
+    }
+  };
 
   const { data, isSuccess, isError } = mutation;
 
@@ -83,6 +89,16 @@ export default function HomePageTeacher() {
     });
   };
 
+  console.log("user", user.id);
+
+  console.log("count", user.count);
+
+  // const checkCountUser = (id, count) => {
+  //   if(count > 0){
+  //     console.log("123")
+  //   }
+  // }
+
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
@@ -102,7 +118,7 @@ export default function HomePageTeacher() {
         </div>
         <div className="mt-8 flex justify-center gap-5">
           <button
-            onClick={handleOpenCreateModal}
+            onClick={() => handleOpenCreateModal(user.count)}
             className=" flex justify-center py-2 px-4 border font-sans border-transparent  rounded-md font-semibold text-sm  text-white bg-purple-500 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
           >
             Create Class
@@ -143,7 +159,6 @@ export default function HomePageTeacher() {
         </Modal.Header>
         <Modal.Body>
           <div class="grid grid-cols-2 gap-4 mb-4">
-            
             <div>
               <label class="block font-semibold text-gray-700 mb-2">
                 Class ID

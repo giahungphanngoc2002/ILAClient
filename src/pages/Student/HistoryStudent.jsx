@@ -46,8 +46,8 @@ function HistoryStudent() {
   useEffect(() => {
     setIDStudent(user?.id);
   }, [user?.id]);
-  
-  console.log("12312",iDStudent)
+
+  console.log("12312", iDStudent);
 
   const getAllClass = async () => {
     const res = await ClassService.getAllClass();
@@ -215,7 +215,7 @@ function HistoryStudent() {
         { x: new Date(2024, 6, 10), y: 4.45 },
         { x: new Date(2024, 6, 11), y: 13.37 },
         { x: new Date(2024, 6, 12), y: 28.97 },
-{ x: new Date(2024, 6, 13), y: 40.11 },
+        { x: new Date(2024, 6, 13), y: 40.11 },
       ],
     },
   ];
@@ -336,10 +336,10 @@ function HistoryStudent() {
         tension: 0.5, // Điều chỉnh độ cong của đường nét
       },
     },
-spanGaps: true, // Bỏ qua các khoảng trống trong dữ liệu
+    spanGaps: true, // Bỏ qua các khoảng trống trong dữ liệu
   };
 
-  console.log(filteredHistory)
+  console.log(filteredHistory);
 
   return (
     <div className="bg-white shadow-md rounded-lg p-6">
@@ -421,7 +421,7 @@ spanGaps: true, // Bỏ qua các khoảng trống trong dữ liệu
           </select>
         </div>
         <div className="flex justify-between items-center mb-4">
-<input
+          <input
             type="text"
             className="p-2 border border-gray-300 rounded"
             placeholder="Search..."
@@ -442,7 +442,6 @@ spanGaps: true, // Bỏ qua các khoảng trống trong dữ liệu
         <table className="min-w-full  border border-gray-300">
           <thead>
             <tr className="bg-blue-300">
-              
               <th className="py-2 px-4 border-b">Name</th>
               <th className="py-2 px-4 border-b">Class Name</th>
               <th className="py-2 px-4 border-b">Class ID</th>
@@ -455,11 +454,16 @@ spanGaps: true, // Bỏ qua các khoảng trống trong dữ liệu
             </tr>
           </thead>
           <tbody>
-            {filteredHistory.filter(
-  (history) =>
-   
-    (history.classID?.nameClass?.toLowerCase().includes(searchTerm.toLowerCase()) || history.iDTest?.toLowerCase().includes(searchTerm.toLowerCase()))
-)
+            {filteredHistory
+              .filter(
+                (history) =>
+                  history.classID?.nameClass
+                    ?.toLowerCase()
+                    .includes(searchTerm.toLowerCase()) ||
+                  history.iDTest
+                    ?.toLowerCase()
+                    .includes(searchTerm.toLowerCase())
+              )
               .slice(0, entriesPerPage)
               .map((history, index) => {
                 const dateComplete = new Date(
@@ -471,14 +475,13 @@ spanGaps: true, // Bỏ qua các khoảng trống trong dữ liệu
                 );
                 return (
                   <tr key={history._id}>
-                    
                     <td className="px-6 py-4 whitespace-no-wrap border-b border-gray-300">
                       <div className="flex items-center">
                         <div>
                           <div className="text-sm leading-5 font-medium text-gray-900">
                             {history.studentID.name}
                           </div>
-                      <div className="text-sm leading-5 text-gray-500">
+                          <div className="text-sm leading-5 text-gray-500">
                             {history.studentID.email}
                           </div>
                         </div>
@@ -491,7 +494,7 @@ spanGaps: true, // Bỏ qua các khoảng trống trong dữ liệu
                       {history.classID?.classID || history.iDClass}
                     </td>
                     <td className="py-2 px-4 border-b">{dateComplete}</td>
-                    
+
                     <td className="px-6 py-4 whitespace-no-wrap border-b border-gray-300 text-sm leading-5">
                       <div className="flex items-center">
                         <span className="inline-block w-2 h-2 bg-green-500 rounded-full mr-2"></span>
@@ -509,12 +512,16 @@ spanGaps: true, // Bỏ qua các khoảng trống trong dữ liệu
                       </div>
                     </td>
                     <td className="py-2 px-4 border-b">
-  {!history.isAssignment ? (
-    <span className="bg-red-500 border border-red-500 px-2 py-1 rounded text-white">Learning</span>
-  ) : (
-    <span className="bg-green-500 border border-green-500 px-2 py-1 rounded text-white">Assignment</span>
-  )}
-</td>
+                      {!history.isAssignment ? (
+                        <span className="bg-red-500 border border-red-500 px-2 py-1 rounded text-white">
+                          Learning
+                        </span>
+                      ) : (
+                        <span className="bg-green-500 border border-green-500 px-2 py-1 rounded text-white">
+                          Assignment
+                        </span>
+                      )}
+                    </td>
 
                     <td className="py-2 px-4 border-b">{history.point}</td>
                     <td
@@ -541,8 +548,7 @@ spanGaps: true, // Bỏ qua các khoảng trống trong dữ liệu
                           onClick={() => handleReviewAssigment(history._id)}
                           className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
                         >
-                           <GrFormView />
-                          
+                          <GrFormView />
                         </button>
                       ) : (
                         <button

@@ -252,6 +252,8 @@ const Quiz = () => {
     ? selectedAnswerForQuestion[`Question${currentQuestion + 1}`]
     : selectedAnswer;
 
+
+    console.log("save selected", saveSelected)
   return (
     <div className="container mx-auto p-4 bg-gray-100 rounded-lg shadow-lg">
       <h1 className="bg-yellow-400 text-blue-800 text-center py-4 text-2xl font-bold rounded-t-lg">

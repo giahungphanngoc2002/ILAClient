@@ -33,11 +33,9 @@ export default function Review() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-
   useEffect(() => {
     setUserName(user?.id);
   }, [user?.id]);
-
 
   const newArray = saveSelected
     ? saveSelected.map((item) => ({ ...item }))
@@ -74,14 +72,13 @@ export default function Review() {
   }
   // console.log("123123123",finalData)
 
-  console.log("data",finalData)
+  console.log("data", finalData);
   const mutation = useMutationHooks(async (data) => {
     const { score, id, userName, finalData } = data;
-    const finalScore = (score / finalData?.length * 10).toFixed(2);
+    const finalScore = ((score / finalData?.length) * 10).toFixed(2);
     const historyData = {
       classID: id,
       studentID: userName, // Ensure consistency in parameter names
-      point: finalScore,
       historyAssignment: finalData,
     };
     try {
@@ -92,10 +89,10 @@ export default function Review() {
     }
   });
   const { mutate, isSuccess } = mutation;
-  
+
   const mutation2 = useMutationHooks(async (data) => {
     const { score, id, userName, finalData } = data;
-    const finalScore1 = (score / finalData?.length * 10).toFixed(2);
+    const finalScore1 = ((score / finalData?.length) * 10).toFixed(2);
     const historyTestData = {
       testID: id,
       studentID: userName,
@@ -109,7 +106,7 @@ export default function Review() {
       console.error("Error creating history", error);
     }
   });
-        // console.log("soccee",finalScore)
+  // console.log("soccee",finalScore)
   const { mutate: mutateAssignment, isSuccess: isSuccessAssignment } =
     mutation2;
 
@@ -118,26 +115,15 @@ export default function Review() {
       ClassService.addStudentIDToClass(classId, studentId)
   );
 
-
   const handleConfirmSubmit = () => {
-    // console.log("Submitting final data:", { score, id, userName, finalData });
     mutate({ score, id, userName, finalData });
     dispatch(setCurrentQuestion(0));
     dispatch(setScore(0));
     addStudentToClass({ classId: id, studentId: user.id });
-    // navigate(`/historyStudent/${user.id}`);
-
   };
 
   const handleConfirmSubmitAssigment = () => {
-    console.log("Submitting final data for assignment:", {
-      score,
-      id,
-      userName,
-      finalData,
-    });
     mutateAssignment({ score, id, userName, finalData });
-    // navigate("/");
     dispatch(setCurrentQuestion(0));
     dispatch(setScore(0));
   };
@@ -167,20 +153,25 @@ export default function Review() {
         Quiz Review
       </h1>
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mt-8 w-full max-w-4xl">
-        {finalData.map((questionData, questionIndex) => (
-          <div
-            key={questionIndex}
-            className="bg-blue-300 rounded-lg border-4 border-blue-400 p-4 flex flex-col items-center justify-center shadow-md"
-          >
-            <p className="text-2xl font-bold">Q{questionIndex + 1}</p>
-            {questionData.userAnswer === null ? (
-              <FaTimesCircle className="text-red-500 text-3xl mt-2" />
-            ) : (
-              <FaCheckCircle className="text-green-500 text-3xl mt-2" />
-            )}
-            <p className="text-lg mt-2">Answered</p>
-          </div>
-        ))}
+        {finalData.map((questionData, questionIndex) => {
+          if (questionData.userAnswer === null) {
+            return null; // Skip rendering this item
+          }
+          return (
+            <div
+              key={questionIndex}
+              className="bg-blue-300 rounded-lg border-4 border-blue-400 p-4 flex flex-col items-center justify-center shadow-md"
+            >
+              <p className="text-2xl font-bold">Q{questionIndex + 1}</p>
+              {questionData.userAnswer === null ? (
+                <FaTimesCircle className="text-red-500 text-3xl mt-2" />
+              ) : (
+                <FaCheckCircle className="text-green-500 text-3xl mt-2" />
+              )}
+              <p className="text-lg mt-2">Answered</p>
+            </div>
+          );
+        })}
       </div>
       {assignment === "learning" && (
         <button

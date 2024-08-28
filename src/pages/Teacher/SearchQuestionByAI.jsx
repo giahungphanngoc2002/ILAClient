@@ -315,62 +315,61 @@ export default function SearchQuestionByAI() {
         <Loading />
       ) : (
         <div className="container mx-auto mt-6 px-4 sm:px-6 lg:px-8">
-  {questions.map((questionn, key) => (
-    <div key={key} className="bg-white shadow-lg rounded-lg p-6 mb-8">
-      <div className="mb-4">
-        <h2 className="text-2xl font-bold text-left text-gray-900 mb-3">
-          Question: {questionn.question}
-        </h2>
-        <div className="flex items-center mb-6">
-          <span
-            className={`py-1 px-4 rounded-full text-base font-semibold ${
-              questionn.level === 1
-                ? "bg-green-100 text-green-600"
-                : questionn.level === 2
-                ? "bg-yellow-100 text-yellow-600"
-                : "bg-red-100 text-red-600"
-            }`}
-          >
-            {questionn.level === 1
-              ? "Easy"
-              : questionn.level === 2
-              ? "Medium"
-              : "Hard"}
-          </span>
-        </div>
-        <div className="flex flex-wrap -mx-2">
-          {questionn.answers.map((answer, index) => (
-            <div key={index} className="w-full sm:w-1/2 px-2 mb-4">
-              <li className="p-4 bg-blue-50 rounded-lg border border-blue-300 list-none hover:bg-blue-100 transition duration-200">
-                <label className="flex items-center cursor-pointer">
-                  <input
-                    type="radio"
-                    name={`answer-${key}`}
-                    value={answer}
-                    className="mr-2"
-                  />
-                  {answer}
-                </label>
-              </li>
+          {questions.map((questionn, key) => (
+            <div key={key} className="bg-white shadow-lg rounded-lg p-6 mb-8">
+              <div className="mb-4">
+                <h2 className="text-2xl font-bold text-left text-gray-900 mb-3">
+                  Question: {questionn.question}
+                </h2>
+                <div className="flex items-center mb-6">
+                  <span
+                    className={`py-1 px-4 rounded-full text-base font-semibold ${
+                      questionn.level === 1
+                        ? "bg-green-100 text-green-600"
+                        : questionn.level === 2
+                        ? "bg-yellow-100 text-yellow-600"
+                        : "bg-red-100 text-red-600"
+                    }`}
+                  >
+                    {questionn.level === 1
+                      ? "Easy"
+                      : questionn.level === 2
+                      ? "Medium"
+                      : "Hard"}
+                  </span>
+                </div>
+                <div className="flex flex-wrap -mx-2">
+                  {questionn.answers.map((answer, index) => (
+                    <div key={index} className="w-full sm:w-1/2 px-2 mb-4">
+                      <li className="p-4 bg-blue-50 rounded-lg border border-blue-300 list-none hover:bg-blue-100 transition duration-200">
+                        <label className="flex items-center cursor-pointer">
+                          <input
+                            type="radio"
+                            name={`answer-${key}`}
+                            value={answer}
+                            className="mr-2"
+                          />
+                          {answer}
+                        </label>
+                      </li>
+                    </div>
+                  ))}
+                </div>
+                <p className="border-2 rounded-lg bg-green-100 p-4 text-left border-green-300 text-green-800 font-medium mt-4">
+                  Correct answer: {questionn.correctAnswer}
+                </p>
+              </div>
+              <div className="text-right">
+                <button
+                  className="bg-red-500 text-white py-2 px-5 rounded-full shadow-md hover:bg-red-600 hover:shadow-lg transition duration-200"
+                  onClick={() => handleDeleteQuestion(key)}
+                >
+                  Delete
+                </button>
+              </div>
             </div>
           ))}
         </div>
-        <p className="border-2 rounded-lg bg-green-100 p-4 text-left border-green-300 text-green-800 font-medium mt-4">
-          Correct answer: {questionn.correctAnswer}
-        </p>
-      </div>
-      <div className="text-right">
-        <button
-          className="bg-red-500 text-white py-2 px-5 rounded-full shadow-md hover:bg-red-600 hover:shadow-lg transition duration-200"
-          onClick={() => handleDeleteQuestion(key)}
-        >
-          Delete
-        </button>
-      </div>
-    </div>
-  ))}
-</div>
-
       )}
 
       <ButtonComponent
