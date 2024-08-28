@@ -45,8 +45,6 @@ export default function MyClass() {
     queryFn: getAllClass,
   });
 
-  console.log("allclass1", allclass1);
-
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -75,8 +73,6 @@ export default function MyClass() {
     });
 
   const classList = Array.isArray(filteredClass1) ? filteredClass1 : [];
-
-  console.log("filtered: ", filteredClass1);
 
   const handleAddQuestion = (id) => {
     navigate(`/questionAI/${id}`);

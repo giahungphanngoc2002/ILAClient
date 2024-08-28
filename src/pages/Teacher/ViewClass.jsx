@@ -61,9 +61,9 @@ const ViewClass = () => {
   const [searchData, setSearchData] = useState([]);
   const [listUser, setListUser] = useState([]);
   const [textSearch, setTextSearch] = useState("");
-  const [inputQuestion, setInputQuestion] = useState("");
-  const [timeTest, setTimeTest] = useState("");
   const [selectedTestId, setSelectedTestId] = useState("");
+  const [timeStart, setTimeStart] = useState("");
+  const [timeEnd, setTimeEnd] = useState("");
 
   const [selectedValue, setSelectedValue] = useState(null);
   const [inputValue, setInputValue] = useState("");
@@ -409,6 +409,14 @@ const ViewClass = () => {
     setPassword(e.target.value);
   };
 
+  const handleOnchangeTimeStart = (e) => {
+    setTimeStart(e.target.value);
+  }
+
+  const handleOnchangeTimeEnd = (e) => {
+    setTimeEnd(e.target.value);
+  }
+
   const handleOnchangeTime = (e) => {
     setTime(e.target.value);
   };
@@ -418,7 +426,6 @@ const ViewClass = () => {
   };
 
   const result = filteredQuestionToAdd(questions, selectedQuestions);
-  console.log("result", result);
 
   const handleCreateTest = () => {
     const testData = {
@@ -484,8 +491,6 @@ const ViewClass = () => {
   const handleOpenAllQuestion = (id) => {
     navigate(`/detailTest/${id}`);
   };
-
-  console.log("all user", allUser);
 
   const filteredTestttt = allclass1.data.tests
     .filter((test) => test.historyTest && test.historyTest.length > 0)
@@ -557,19 +562,13 @@ const ViewClass = () => {
       ),
     })) || [];
 
-  console.log(options);
   const handleTextSearchChange = (e) => {
     setTextSearch(e.target.value);
   };
 
-  console.log(textSearch);
-
-  console.log(questions);
   const filteredQuestionBySearch = questions.filter((question) =>
     question.question.toLowerCase().includes(textSearch.toLowerCase())
   );
-
-  console.log("Da search", filteredQuestionBySearch);
 
   const handleSelectChangeeee = (e) => {
     const selectedId = e.target.value;
@@ -586,6 +585,8 @@ const ViewClass = () => {
   const handleOnchangeTimeeee = (e) => {
     setTime(e.target.value);
   };
+
+  console.log(timeEnd, timeStart)
 
   return (
     <div className="main-content p-6 bg-gray-100 min-h-screen">
@@ -790,6 +791,10 @@ const ViewClass = () => {
           handleOnchangePassword={handleOnchangePassword}
           password={password}
           handleCreateTest={handleCreateTest}
+          timeEnd={timeEnd}
+          timeStart={timeStart}
+          handleOnchangeTimeEnd={handleOnchangeTimeEnd}
+          handleOnchangeTimeStart={handleOnchangeTimeStart}
         />
       )}
       {showAddQuestionToTestModal && (
