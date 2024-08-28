@@ -73,25 +73,6 @@ const ManageHistory = ({ currentHistories, viewReview,indexOfFirstItem,totalPage
           ))}
         </tbody>
       </table>
-      <div className="flex justify-between mt-4">
-        <button
-          onClick={() => handlePageChange(currentPage - 1)}
-          disabled={currentPage === 1}
-          className="bg-gray-300 text-gray-700 px-3 py-2 rounded hover:bg-gray-400"
-        >
-          Previous
-        </button>
-        <div>
-          Page {currentPage} of {totalPages}
-        </div>
-        <button
-          onClick={() => handlePageChange(currentPage + 1)}
-          disabled={currentPage === totalPages}
-          className="bg-gray-300 text-gray-700 px-3 py-2 rounded hover:bg-gray-400"
-        >
-          Next
-        </button>
-      </div>
     </div>
   );
 };
