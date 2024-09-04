@@ -44,7 +44,7 @@ export default function HomePageTeacher() {
   const [nameClass, setNameClass] = useState("");
   const [classID, setClassID] = useState("");
   const [description, setDescription] = useState("");
-  const [status, setStatus] = useState("");
+  const [status, setStatus] = useState("false"); 
 
   const [teacherID, setTeacherID] = useState("");
   const [subject, setSubject] = useState("");
@@ -64,6 +64,10 @@ export default function HomePageTeacher() {
   const handleOnchangeSubject = (e) => {
     setSubject(e.target.value);
   };
+
+  // const handleOnchangeStatus = (isChecked) => {
+  //   setStatus(isChecked ? "true" : "false");
+  // };
 
   const handleOnchangeStatus = (isChecked) => {
     setStatus(isChecked ? "true" : "false");
@@ -101,7 +105,7 @@ export default function HomePageTeacher() {
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+<div className="max-w-md w-full space-y-8">
         <div className="text-center">
           <img
             src="https://cf.quizizz.com/image/emptystate-likeanactivity.png"
@@ -174,7 +178,7 @@ export default function HomePageTeacher() {
             <div>
               <label class="block font-semibold text-gray-700 mb-2">
                 Class Name
-              </label>
+</label>
               <input
                 type="text"
                 class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
@@ -219,8 +223,8 @@ export default function HomePageTeacher() {
               <input
                 type="checkbox"
                 class="sr-only peer"
-                onChange={(e) => handleOnchangeStatus(e.target.checked)}
-                checked={status === "true"}
+                onChange={(e) => handleOnchangeStatus(e.target.checked ? "true" : "false")}
+                  checked={status === "true"}
               />
               <div class="w-11 h-6 bg-gray-200 rounded-full peer-checked:bg-blue-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
             </label>
@@ -243,7 +247,7 @@ export default function HomePageTeacher() {
             onClick={handleCreateClass}
             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
           >
-            Create Class
+Create Class
           </Button>
         </Modal.Footer>
       </Modal>
