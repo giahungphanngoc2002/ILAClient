@@ -355,7 +355,7 @@ Certified Educators
                     />
                     <div className="text-lg font-medium">
                       {userName?.length ? userName : user?.email}
-</div>
+                </div>
                   </div>
                 </Popover>
               ) : (
@@ -384,7 +384,7 @@ Certified Educators
         {/* Adjust the padding-top based on your navbar height */}
         {/* Nội dung chính của trang */}
       </div>
-      <ChatboxButton data={data} /> {/* Add the chatbox button component */}
+     
     </>
   );
 }

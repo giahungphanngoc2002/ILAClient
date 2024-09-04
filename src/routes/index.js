@@ -76,7 +76,7 @@ export const routes = [
     isShowHeader: false,
   },
   {
-    path: "/quizTest/:id",
+    path: "/quizTest/:idClass/:idTest",
     page: QuizTest,
     isShowHeader: true,
   },

@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import React, { useEffect, useState } from "react";
 import * as TestService from "../../services/TestService";
-import * as ClassService from "../../services/ClassService";
 import { useParams } from "react-router-dom";
+import { toast } from "react-toastify";
 
 export default function ViewQuestionTest() {
   const [idTest, setIdTest] = useState("");
@@ -23,14 +23,31 @@ export default function ViewQuestionTest() {
     queryFn: () => getDetailTest(id),
   });
 
-  const handleSave = () => {
-    console.log({
-      idTest: detailTest?.data.iDTest,
-      password: detailTest?.data.passwordTest,
-      timeStart: detailTest?.data.timeStart,
-      timeEnd: detailTest?.data.timeEnd,
-      question: question,
-    });
+  useEffect(() => {
+    if (detailTest) {
+      setIdTest(detailTest.data.iDTest);
+      setPassword(detailTest.data.passwordTest);
+      setTimeStart(detailTest.data.timeStart);
+      setTimeEnd(detailTest.data.timeEnd);
+    }
+  }, [detailTest]);
+
+  const handleSave = async () => {
+    const data = {
+      iDTest: idTest,
+      password: password,
+      timeStart: timeStart,
+      timeEnd: timeEnd,
+      quantityQuestion: question,
+    };
+
+    try {
+      const result = await TestService.updateTest(id, data);
+      toast.success("Cập nhật thành công");
+    } catch (error) {
+      console.error('Lỗi khi cập nhật:', error);
+      toast.error("Cập nhật thất bại ");
+    }
   };
 
   return (
@@ -45,7 +62,7 @@ export default function ViewQuestionTest() {
           </label>
           <input
             type="text"
-            value={detailTest?.data.iDTest}
+            value={idTest}
             onChange={(e) => setIdTest(e.target.value)}
             className="border border-gray-300 rounded p-3 w-full text-lg"
           />
@@ -56,7 +73,7 @@ export default function ViewQuestionTest() {
           </label>
           <input
             type="password"
-            value={detailTest?.data.passwordTest}
+            value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="border border-gray-300 rounded p-3 w-full text-lg"
           />
@@ -67,7 +84,7 @@ export default function ViewQuestionTest() {
           </label>
           <input
             type="datetime-local"
-            value={detailTest?.data.timeStart}
+            value={timeStart}
             onChange={(e) => setTimeStart(e.target.value)}
             className="border border-gray-300 rounded p-3 w-full text-lg"
           />
@@ -78,7 +95,7 @@ export default function ViewQuestionTest() {
           </label>
           <input
             type="datetime-local"
-            value={detailTest?.data.timeEnd}
+            value={timeEnd}
             onChange={(e) => setTimeEnd(e.target.value)}
             className="border border-gray-300 rounded p-3 w-full text-lg"
           />

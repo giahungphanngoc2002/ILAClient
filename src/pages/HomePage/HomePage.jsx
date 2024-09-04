@@ -111,14 +111,8 @@ export default function HomePage() {
       (student) => student._id === user.id
     );
 
-    if (!studentCheck) {
-      toast.error("Không nằm trong lớp");
-      console.log("123");
-      return; // Exit the function immediately
-    }
-
     if (test) {
-      navigate(`/quizTest/${test._id}`);
+      navigate(`/quizTest/${idClass}/${test._id}`);
       toast.success("Join Test Successfully!");
     } else {
       toast.error("Wrong ID or Password!");

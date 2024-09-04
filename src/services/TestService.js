@@ -51,3 +51,7 @@ export const deleteTestByID = async (id) => {
   );
   return res.data;
 };
+export const updateTest = async(id ,data) =>{
+  const res =await axios.put (`http://localhost:3001/api/test/updateTest/${id}`,data)
+  return res.data;
+}

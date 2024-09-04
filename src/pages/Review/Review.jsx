@@ -70,15 +70,21 @@ export default function Review() {
       finalData.push(newData);
     }
   }
-  // console.log("123123123",finalData)
 
-  console.log("data", finalData);
+  console.log("Final data", finalData);
+  const scoreFinal = finalData.reduce((total, answer) => {
+    return answer.result === true ? total + 1 : total;
+  }, 0);
+
+  
+  
+  console.log("score final",scoreFinal)
+
   const mutation = useMutationHooks(async (data) => {
-    const { score, id, userName, finalData } = data;
-    const finalScore = ((score / finalData?.length) * 10).toFixed(2);
+    const { id, userName, finalData } = data
     const historyData = {
       classID: id,
-      studentID: userName, // Ensure consistency in parameter names
+      studentID: userName,
       historyAssignment: finalData,
     };
     try {
@@ -90,13 +96,13 @@ export default function Review() {
   });
   const { mutate, isSuccess } = mutation;
 
-  const mutation2 = useMutationHooks(async (data) => {
-    const { score, id, userName, finalData } = data;
-    const finalScore1 = ((score / finalData?.length) * 10).toFixed(2);
+  const mutationTest = useMutationHooks(async (data) => {
+    const { id, userName, finalData } = data;
+    const finalScore = ((scoreFinal / finalData?.length) * 10).toFixed(2);
     const historyTestData = {
       testID: id,
       studentID: userName,
-      point: finalScore1,
+      point: finalScore,
       historyAssignment: finalData,
     };
     try {
@@ -108,7 +114,7 @@ export default function Review() {
   });
   // console.log("soccee",finalScore)
   const { mutate: mutateAssignment, isSuccess: isSuccessAssignment } =
-    mutation2;
+    mutationTest;
 
   const { mutate: addStudentToClass } = useMutationHooks(
     ({ classId, studentId }) =>
@@ -118,14 +124,12 @@ export default function Review() {
   const handleConfirmSubmit = () => {
     mutate({ score, id, userName, finalData });
     dispatch(setCurrentQuestion(0));
-    dispatch(setScore(0));
     addStudentToClass({ classId: id, studentId: user.id });
   };
 
   const handleConfirmSubmitAssigment = () => {
     mutateAssignment({ score, id, userName, finalData });
     dispatch(setCurrentQuestion(0));
-    dispatch(setScore(0));
   };
 
   useEffect(() => {
@@ -145,7 +149,7 @@ export default function Review() {
   if (!data) return null;
   if (error) return <div>Error: {error}</div>;
 
-  console.log(saveSelected);
+  // console.log(saveSelected);
 
   return (
     <div className="bg-gradient-to-r from-yellow-200 to-pink-200 min-h-screen p-6 flex flex-col items-center">
@@ -155,7 +159,7 @@ export default function Review() {
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mt-8 w-full max-w-4xl">
         {finalData.map((questionData, questionIndex) => {
           if (questionData.userAnswer === null) {
-            return null; // Skip rendering this item
+            return null;
           }
           return (
             <div

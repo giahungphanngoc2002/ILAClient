@@ -14,6 +14,7 @@ import Directional from "../../components/DirectionComponent/Direction";
 import { useSaveSelected } from "../../redux/QuizState";
 import { useQuery } from "@tanstack/react-query";
 import * as ClassService from "../../services/ClassService";
+import DirectionComponent from "../../components/DirectionComponent/DirectionComponent";
 
 export const QuizzContext = createContext();
 
@@ -318,7 +319,7 @@ const Quiz = () => {
           Progress: {progress}
         </div> */}
       </div>
-      <QuizzContext.Provider
+      {/* <QuizzContext.Provider
         value={{
           handleFirstQuestion,
           handlePrevQuestion,
@@ -332,7 +333,17 @@ const Quiz = () => {
         <div className="mt-6">
           <Directional />
         </div>
-      </QuizzContext.Provider>
+      </QuizzContext.Provider> */}
+      <div className="mt-6">
+          <DirectionComponent
+            handleFirstQuestion={handleFirstQuestion}
+            handlePrevQuestion={handlePrevQuestion}
+            handleLastQuestion={handleLastQuestion}
+            handleNextQuestion={handleNextQuestion}
+            data={data}
+            currentQuestion={currentQuestion}
+          />
+        </div>
       <div className="flex justify-center py-6">
         <button
           className="bg-green-500 text-white py-2 px-4 rounded-full shadow-md hover:bg-green-600 transition duration-200"
