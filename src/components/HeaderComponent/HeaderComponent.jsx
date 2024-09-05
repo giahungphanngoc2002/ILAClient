@@ -24,6 +24,7 @@ export default function HeaderComponent() {
 
   const handleLogout = async () => {
     await UserService.logoutUser();
+    localStorage.removeItem("access_token");
     dispatch(resetUser());
     navigate("/");
   };
