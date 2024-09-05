@@ -88,15 +88,25 @@ export default function HomePage() {
   const handleOnchangePassword = (e) => {
     setPassword(e.target.value);
   };
+
+  console.log(detailClass?.data)
+
   const handleGoToLearning = () => {
     const classDetails = detailClass?.data;
-
+    const checkStatus = !!classDetails?.status;
+    const studentCheck = classDetails?.studentID.find(
+      (student) => student._id === user.id
+    );
+  
     if (!classDetails?.questions || classDetails.questions.length === 0) {
-      toast.error("join error");
+      toast.error("Join error");
+    } else if (!checkStatus && !studentCheck) {
+      toast.error("Class is not active and you're not a member");
     } else {
       navigate(`/quiz/${idClass}`);
     }
   };
+  
 
   const handleCheckAssignment = () => {
     setAssignment(true);
@@ -107,9 +117,9 @@ export default function HomePage() {
       (testt) => testt.iDTest === testID && testt.passwordTest === password
     );
 
-    const studentCheck = detailClass?.data.studentID.find(
-      (student) => student._id === user.id
-    );
+    // const studentCheck = detailClass?.data.studentID.find(
+    //   (student) => student._id === user.id
+    // );
 
     if (test) {
       navigate(`/quizTest/${idClass}/${test._id}`);
