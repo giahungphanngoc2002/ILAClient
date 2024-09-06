@@ -39,6 +39,19 @@ export default function MyClass() {
     }
   }, [deleteMutation.isSuccess]);
 
+  const updateClassMutation = useMutation({
+    mutationFn: ({ selectedClassId ,data}) => ClassService.updateClass(selectedClassId,data),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["detailClassByID",selectedClassId]);
+    },
+  });
+
+  useEffect(() => {
+    if (updateClassMutation.isSuccess) {
+      toast.success("Class update successfully");
+    }
+  }, [updateClassMutation.isSuccess]);
+
   const getAllClass = async () => {
     const res = await ClassService.getAllClass();
     return res;
@@ -152,21 +165,15 @@ export default function MyClass() {
   };
 
   const handleSaveClass = () => {
-    // Implement save logic here
-    // For example, call an API to update the class details
-    // ClassService.updateClassByID(selectedClassId, {
-    //   classID,
-    //   nameClass,
-    //   description,
-    //   subject,
-    //   status
-    // }).then(() => {
-    //   toast.success("Class updated successfully");
-    //   queryClient.invalidateQueries(["allclass1"]);
-    //   handleCloseSettingModal();
-    // }).catch(() => {
-    //   toast.error("Error updating class");
-    // });
+    const data = {
+      classID :classID,
+      nameClass:nameClass,
+      description:description,
+      subject:subject,
+      status:status,
+    }; 
+    updateClassMutation.mutate(
+      {  selectedClassId, data })
   };
 
   return (

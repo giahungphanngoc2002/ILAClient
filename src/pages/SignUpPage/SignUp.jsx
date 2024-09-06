@@ -7,12 +7,15 @@ import * as message from "../../components/MessageComponent/Message";
 import styles from "./style";
 import { toast } from "react-toastify";
 
+const defaultAvatar = "https://inkythuatso.com/uploads/thumbnails/800/2023/03/6-anh-dai-dien-trang-inkythuatso-03-15-26-36.jpg";
+
 export default function SignUp() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [count, setCount] = useState(0)
   const [visible, setVisible] = useState(false);
+  const [avatar, setAvatar] = useState(defaultAvatar)
   const navigate = useNavigate();
 
   const mutation = useMutationHooks((data) => UserService.signupUser(data));
@@ -36,7 +39,8 @@ export default function SignUp() {
       email,
       password,
       confirmPassword,
-      count
+      count,
+      avatar,
     });
   };
 
@@ -84,7 +88,7 @@ export default function SignUp() {
                       <input
                         type="email"
                         name="email"
-autoComplete="email"
+                        autoComplete="email"
                         required
                         value={email}
                         onChange={(e) => handleOnchangeEmail(e)}
@@ -144,7 +148,7 @@ autoComplete="email"
                       {visible ? (
                         <AiOutlineEye
                           className="absolute right-2 top-2 cursor-pointer"
-size={25}
+                          size={25}
                           onClick={() => setVisible(false)}
                         />
                       ) : (

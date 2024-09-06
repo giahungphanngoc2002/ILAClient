@@ -261,7 +261,7 @@ Certified Educators
                     className="w-10 h-10 rounded-full object-cover"
                   />
                   <div className="text-lg font-medium">
-                    {userName?.length ? userName : user?.name}
+                  {userName?.length ? userName : user?.name ? user?.name : user?.email}
                   </div>
                 </div>
               </Popover>
