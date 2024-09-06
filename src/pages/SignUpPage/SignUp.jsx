@@ -13,28 +13,53 @@ export default function SignUp() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [count, setCount] = useState(0)
+  const [count, setCount] = useState(0);
   const [visible, setVisible] = useState(false);
-  const [avatar, setAvatar] = useState(defaultAvatar)
+  const [avatar, setAvatar] = useState(defaultAvatar);
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [confirmPasswordError, setConfirmPasswordError] = useState("");
   const navigate = useNavigate();
 
   const mutation = useMutationHooks((data) => UserService.signupUser(data));
   const { data, isSuccess, isError } = mutation;
 
+  const validateEmail = (email) => {
+    const regex = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return regex.test(email);
+  };
+
+  const validatePassword = (password) => {
+    return password.length >= 6; // Minimum length of 6 characters
+  };
+
   const handleOnchangeEmail = (e) => {
-    setEmail(e.target.value);
+    const value = e.target.value;
+    setEmail(value);
+    setEmailError(validateEmail(value) ? "" : "Invalid email address");
   };
 
   const handleOnchangePassword = (e) => {
-    setPassword(e.target.value);
+    const value = e.target.value;
+    setPassword(value);
+    setPasswordError(validatePassword(value) ? "" : "Password must be at least 6 characters");
   };
 
   const handleOnchangeConfirmPassword = (e) => {
-    setConfirmPassword(e.target.value);
+    const value = e.target.value;
+    setConfirmPassword(value);
+    setConfirmPasswordError(value === password ? "" : "Passwords do not match");
   };
 
   const handleSignup = (e) => {
     e.preventDefault();
+    if (!validateEmail(email) || !validatePassword(password) || password !== confirmPassword) {
+      // Prevent form submission if validation fails
+      if (!validateEmail(email)) setEmailError("Invalid email address");
+      if (!validatePassword(password)) setPasswordError("Password must be at least 6 characters");
+      if (password !== confirmPassword) setConfirmPasswordError("Passwords do not match");
+      return;
+    }
     mutation.mutate({
       email,
       password,
@@ -52,7 +77,7 @@ export default function SignUp() {
     if (isError) {
       message.error();
     } else if (isSuccess && data?.status !== "ERR") {
-      toast.success("Da gui ve mail!!!!");
+      toast.success("Registration successful! Please check your email.");
       handleNavigateSignin();
     }
   }, [isSuccess, isError]);
@@ -94,6 +119,7 @@ export default function SignUp() {
                         onChange={(e) => handleOnchangeEmail(e)}
                         className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                       />
+                      {emailError && <p className="text-red-500 text-sm mt-1">{emailError}</p>}
                     </div>
                   </div>
                   <div>
@@ -127,6 +153,7 @@ export default function SignUp() {
                         />
                       )}
                     </div>
+                    {passwordError && <p className="text-red-500 text-sm mt-1">{passwordError}</p>}
                   </div>
                   <div>
                     <label
@@ -159,6 +186,7 @@ export default function SignUp() {
                         />
                       )}
                     </div>
+                    {confirmPasswordError && <p className="text-red-500 text-sm mt-1">{confirmPasswordError}</p>}
                   </div>
 
                   <div>
@@ -166,7 +194,10 @@ export default function SignUp() {
                       disabled={
                         !email.length ||
                         !password.length ||
-                        !confirmPassword.length
+                        !confirmPassword.length ||
+                        emailError ||
+                        passwordError ||
+                        confirmPasswordError
                       }
                       onClick={handleSignup}
                       type="submit"
