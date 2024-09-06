@@ -13,8 +13,6 @@ import ProfileOverview from "./ProfileOverview";
 import ProfileEdit from "./ProfileEdit";
 import ChangePassword from "../ChangePassWord/ChangePassWord";
 
-const defaultAvatar = "https://inkythuatso.com/uploads/thumbnails/800/2023/03/6-anh-dai-dien-trang-inkythuatso-03-15-26-36.jpg";
-
 const ProfilePage = () => {
   const user = useSelector((state) => state.user);
   const [email, setEmail] = useState("");
@@ -91,7 +89,7 @@ const ProfilePage = () => {
       setPhone(user.phone || "");
       setAddress(user.address || "");
       setAge(user.age || "");
-      setAvatar(user.avatar || defaultAvatar);
+      setAvatar(user.avatar || "");
       setOldPassword(user.password || "");
     }
   }, [user]);
