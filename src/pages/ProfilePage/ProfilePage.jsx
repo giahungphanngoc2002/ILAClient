@@ -20,7 +20,7 @@ const ProfilePage = () => {
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [age, setAge] = useState("");
-  const [avatar, setAvatar] = useState("");
+  const [avatar, setAvatar] = useState("123456");
   const [oldPassword, setOldPassword] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -75,7 +75,7 @@ const ProfilePage = () => {
       toast.error("Failed to update password");
       setIsUpdatingPassword(false);
     }
-}, [isSuccess, isError, isPasswordSuccess, isPasswordError]);
+  }, [isSuccess, isError, isPasswordSuccess, isPasswordError]);
 
   const handleGetDetailsUser = async (id, token) => {
     const res = await UserService.getDetailUser(id, token);
@@ -94,6 +94,8 @@ const ProfilePage = () => {
     }
   }, [user]);
 
+  console.log(avatar)
+
   const handleOnchangeEmail = (e) => setEmail(e.target.value);
   const handleOnchangeName = (e) => setName(e.target.value);
   const handleOnchangePhone = (e) => setPhone(e.target.value);
@@ -106,7 +108,7 @@ const ProfilePage = () => {
       const reader = new FileReader();
       reader.onloadend = () => {
         setAvatar(reader.result);
-        handleUpdateAvatar(reader.result); // Save avatar immediately after selection
+        handleUpdateAvatar(reader.result);
       };
       reader.readAsDataURL(file);
     }
@@ -190,7 +192,7 @@ const ProfilePage = () => {
         );
       case "change-password":
         return (
-<ChangePassword
+          <ChangePassword
             onChangePassword={handleUpdatePassword}
             isUpdatingPassword={isUpdatingPassword}
             currentPassword={currentPassword}
@@ -239,11 +241,10 @@ const ProfilePage = () => {
             <ul className="flex justify-start space-x-8 pb-4 border-b">
               <li>
                 <button
-                  className={`flex items-center space-x-2 ${
-                    activeTab === "overview"
-                      ? "border-b-2 border-blue-500 text-blue-500"
-                      : "text-gray-500 hover:text-blue-500"
-                  } py-2 px-4 focus:outline-none transition-colors duration-300`}
+                  className={`flex items-center space-x-2 ${activeTab === "overview"
+                    ? "border-b-2 border-blue-500 text-blue-500"
+                    : "text-gray-500 hover:text-blue-500"
+                    } py-2 px-4 focus:outline-none transition-colors duration-300`}
                   onClick={() => setActiveTab("overview")}
                 >
                   <MdOutlineRemoveRedEye size={20} />
@@ -252,24 +253,22 @@ const ProfilePage = () => {
               </li>
               <li>
                 <button
-                  className={`flex items-center space-x-2 ${
-                    activeTab === "edit-profile"
-                      ? "border-b-2 border-blue-500 text-blue-500"
-                      : "text-gray-500 hover:text-blue-500"
-                  } py-2 px-4 focus:outline-none transition-colors duration-300`}
+                  className={`flex items-center space-x-2 ${activeTab === "edit-profile"
+                    ? "border-b-2 border-blue-500 text-blue-500"
+                    : "text-gray-500 hover:text-blue-500"
+                    } py-2 px-4 focus:outline-none transition-colors duration-300`}
                   onClick={() => setActiveTab("edit-profile")}
                 >
                   <TbPhotoEdit size={20} />
                   <span>Edit Profile</span>
                 </button>
-</li>
+              </li>
               <li>
                 <button
-                  className={`flex items-center space-x-2 ${
-                    activeTab === "change-password"
-                      ? "border-b-2 border-blue-500 text-blue-500"
-                      : "text-gray-500 hover:text-blue-500"
-                  } py-2 px-4 focus:outline-none transition-colors duration-300`}
+                  className={`flex items-center space-x-2 ${activeTab === "change-password"
+                    ? "border-b-2 border-blue-500 text-blue-500"
+                    : "text-gray-500 hover:text-blue-500"
+                    } py-2 px-4 focus:outline-none transition-colors duration-300`}
                   onClick={() => setActiveTab("change-password")}
                 >
                   <TbArrowsExchange size={20} />
