@@ -3,15 +3,23 @@ import { useSelector } from "react-redux";
 import * as ClassService from "../../services/ClassService";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { message } from "antd";
 import { toast } from "react-toastify";
+import { FaPencilAlt } from "react-icons/fa";
+import { Modal } from "react-bootstrap";
+import ModalSettingClass from "../Modal/ModalSettingClass";
 
 export default function MyClass() {
   const { data } = useSelector((state) => state.class);
   const user = useSelector((state) => state.user);
   const [userName, setUserName] = useState("");
+  const [selectedClassId, setSelectedClassId] = useState(null);
+  const [showSettingModal, setShowSettingModal] = useState(false);
+  const [classID, setClassID] = useState("");
+  const [nameClass, setNameClass] = useState("");
+  const [description, setDescription] = useState("");
+  const [subject, setSubject] = useState("");
+  const [status, setStatus] = useState("");
   const queryClient = useQueryClient();
-
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -45,6 +53,26 @@ export default function MyClass() {
     queryFn: getAllClass,
   });
 
+  const {
+    data: detailClassByID,
+    isLoading: isDetailLoading,
+    isError: isDetailError,
+  } = useQuery({
+    queryKey: ["detailClassByID", selectedClassId],
+    queryFn: () => ClassService.getDetailClass(selectedClassId),
+    enabled: !!selectedClassId,
+  });
+
+  useEffect(() => {
+    if (detailClassByID?.data) {
+      setClassID(detailClassByID.data.classID);
+      setNameClass(detailClassByID.data.nameClass);
+      setDescription(detailClassByID.data.description);
+      setSubject(detailClassByID.data.subject);
+      setStatus(detailClassByID.data.status);
+    }
+  }, [detailClassByID?.data]);
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -67,10 +95,10 @@ export default function MyClass() {
       return { ...item, key: item._id };
     });
 
-    const filteredClass1 = allclass1.data?.filter((item) => {
-      return item.teacherID?.name === userName && 
-             item.teacherID?.classes.some((classRole) => classRole.isTeacher === true);
-    });
+  const filteredClass1 = allclass1.data?.filter((item) => {
+    return item.teacherID?.name === userName &&
+      item.teacherID?.classes.some((classRole) => classRole.isTeacher === true);
+  });
 
   const classList = Array.isArray(filteredClass1) ? filteredClass1 : [];
 
@@ -90,6 +118,57 @@ export default function MyClass() {
     deleteMutation.mutate({ classId: id });
   };
 
+  const handleSettingClass = (id) => {
+    setSelectedClassId(id);
+    setShowSettingModal(true);
+  };
+
+  console.log(classID, status)
+
+
+  const handleCloseSettingModal = () => {
+    setShowSettingModal(false);
+    setSelectedClassId(null);
+  };
+
+  const handleOnchangeClassID = (e) => {
+    setClassID(e.target.value);
+  };
+
+  const handleOnchangeClassName = (e) => {
+    setNameClass(e.target.value);
+  };
+
+  const handleOnchangeDescription = (e) => {
+    setDescription(e.target.value);
+  };
+
+  const handleOnchangeSubject = (e) => {
+    setSubject(e.target.value);
+  };
+
+  const handleOnchangeStatus = (e) => {
+    setStatus(e.target.checked);
+  };
+
+  const handleSaveClass = () => {
+    // Implement save logic here
+    // For example, call an API to update the class details
+    // ClassService.updateClassByID(selectedClassId, {
+    //   classID,
+    //   nameClass,
+    //   description,
+    //   subject,
+    //   status
+    // }).then(() => {
+    //   toast.success("Class updated successfully");
+    //   queryClient.invalidateQueries(["allclass1"]);
+    //   handleCloseSettingModal();
+    // }).catch(() => {
+    //   toast.error("Error updating class");
+    // });
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 py-10">
       <div className="max-w-6xl mx-auto px-4">
@@ -100,6 +179,7 @@ export default function MyClass() {
           <table className="table-auto w-full text-left">
             <thead>
               <tr className="bg-indigo-600 text-white uppercase text-sm leading-normal text-center">
+                <th className="py-4 px-6"></th>
                 <th className="py-4 px-6">Class ID</th>
                 <th className="py-4 px-6">Class Name</th>
                 <th className="py-4 px-6">Description</th>
@@ -112,6 +192,14 @@ export default function MyClass() {
                   key={index}
                   className="border-b border-gray-200 hover:bg-gray-100 transition duration-300"
                 >
+                  <td className="py-4 px-6 text-center">
+                    <button
+                      className="flex items-center justify-center bg-green-500 text-white p-2 rounded-full shadow-lg hover:bg-green-600 transition duration-300 focus:outline-none"
+                      onClick={() => handleSettingClass(item._id)}
+                    >
+                      <FaPencilAlt className="w-5 h-5" />
+                    </button>
+                  </td>
                   <td className="py-4 px-6">{item?.classID}</td>
                   <td className="py-4 px-6">{item?.nameClass}</td>
                   <td className="py-4 px-6">{item?.description}</td>
@@ -149,8 +237,25 @@ export default function MyClass() {
           </table>
         </div>
       </div>
+      {showSettingModal && (
+        <ModalSettingClass
+          showSettingModal={showSettingModal}
+          handleCloseSettingModal={handleCloseSettingModal}
+          isLoading={isDetailLoading}
+          isError={isDetailError}
+          handleOnchangeClassID={handleOnchangeClassID}
+          handleOnchangeClassName={handleOnchangeClassName}
+          handleOnchangeDescription={handleOnchangeDescription}
+          handleOnchangeSubject={handleOnchangeSubject}
+          handleOnchangeStatus={handleOnchangeStatus}
+          classID={classID}
+          nameClass={nameClass}
+          subject={subject}
+          description={description}
+          status={status}
+          handleSaveClass={handleSaveClass}
+        />
+      )}
     </div>
   );
-  
-  
 }

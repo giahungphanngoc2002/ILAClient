@@ -39,12 +39,6 @@ const ManageStudent = ({ uniqueStudents , handleOpenUpdateModal , deleteStudentB
                 
                 <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                   <div className="flex space-x-2">
-                    {/* <button
-                      className="bg-blue-500 text-white p-3 rounded hover:bg-blue-700 w-10 h-10 flex items-center justify-center"
-                      onClick={() => handleOpenUpdateModal(student._id)}
-                    >
-                      <FontAwesomeIcon icon="pen" />
-                    </button> */}
                     <button
                       className="bg-red-500 text-white p-3 rounded hover:bg-red-700 w-10 h-10 flex items-center justify-center"
                       onClick={() => deleteStudentByID(student._id)}
