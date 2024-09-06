@@ -27,6 +27,7 @@ library.add(fas);
 const ViewClass = () => {
   const { id, studentId } = useParams();
   const [questions, setQuestions] = useState([]);
+  const [studentID, setStudentID] = useState([]);
   const [histories, setHistories] = useState([]);
   const [selectedQuestions, setSelectedQuestions] = useState([]);
   const [filteredQuestion, setFilteredQuestion] = useState(null); // Use a single object for the filtered question
@@ -78,21 +79,9 @@ const ViewClass = () => {
     onSearch(value); // Perform search when input changes
   };
 
-  const { mutate: addStudentToClass } = useMutationHooks(
-    ({ classId, studentId }) =>
-      ClassService.addStudentIDToClass(classId, studentId)
-  );
 
-  const handleAddStudentToClass = async () => {
-    try {
-      await addStudentToClass({ classId: id, studentId: selectedValue });
-      toast.success("Student added successfully");
-    } catch (error) {
-      console.error("Error adding student:", error);
-      toast.error("Failed to add student");
-    }
-    handleCloseAddNewStudentModal();
-  };
+
+
   const deleteStudentIdMutation = useMutation({
     mutationFn: ({ classId: id, studentId: selectedValue }) =>
       ClassService.deleteStudentIDToClass(id, selectedValue),
@@ -175,6 +164,12 @@ const ViewClass = () => {
     }
   }, [allclass1]);
 
+  useEffect(() => {
+    if (allclass1 && allclass1.data.studentID) {
+      setStudentID(allclass1.data.studentID);
+    }
+  }, [allclass1]);
+
   const createTestMutation = useMutation({
     mutationFn: ({ classId, testData }) =>
       ClassService.addTest(classId, testData),
@@ -187,6 +182,22 @@ const ViewClass = () => {
       toast.error("Failed to create test");
     },
   });
+
+  const addStudentToClassMutation = useMutation({
+    mutationFn: ({ classId, email }) =>
+      ClassService.addStudentIDToClass(classId, email),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["allclass1", id]);
+      toast.success("Test created successfully");
+
+      handleCloseAddNewStudentModal();
+    },
+    onError: () => {
+      toast.error("Failed to create student");
+    },
+  });
+
+
 
   const addQuestionToTestMutation = useMutation({
     mutationFn: async ({ testId, questionData, timeTest }) => {
@@ -258,6 +269,8 @@ const ViewClass = () => {
       toast.error("Failed to update question");
     },
   });
+
+
 
   const handleSelect = (e, id) => {
     if (e.target.checked) {
@@ -381,7 +394,7 @@ const ViewClass = () => {
       question: textQuestion,
       correctAnswer: filteredQuestion.correctAnswer,
       answers: filteredQuestion.answers,
-      level:filteredQuestion.level,
+      level: filteredQuestion.level,
     };
     updateMutation.mutate({
       classId: id,
@@ -389,7 +402,6 @@ const ViewClass = () => {
       updatedQuestion,
     });
   };
-
   const viewReview = (id) => {
     navigate(`/detailHistory/${id}`);
   };
@@ -431,10 +443,17 @@ const ViewClass = () => {
     const testData = {
       iDTest: testID,
       passwordTest: password,
-      timeStart:timeStart,
-      timeEnd:timeEnd,
+      timeStart: timeStart,
+      timeEnd: timeEnd,
     };
     createTestMutation.mutate({ classId: id, testData });
+  };
+
+  const handleAddStudentToClass = () => {
+    addStudentToClassMutation.mutate({
+      classId: id,
+      email: selectedValue,
+    });
   };
 
   const handleCreateQuestionByTestId = () => {
@@ -515,10 +534,10 @@ const ViewClass = () => {
     filter === "All"
       ? combinedHistories
       : combinedHistories.filter((history) => {
-          return filter === "Learning"
-            ? !history.isAssignment
-            : history.isAssignment;
-        });
+        return filter === "Learning"
+          ? !history.isAssignment
+          : history.isAssignment;
+      });
 
   const sortedHistories = filteredHistories.sort((a, b) => {
     return new Date(b.createdAt) - new Date(a.createdAt);
@@ -553,7 +572,7 @@ const ViewClass = () => {
 
   const options =
     searchData?.map((item) => ({
-      value: item._id,
+      value: item.email,
       label: (
         <div className="w-full flex items-center py-2 px-4 bg-gray shadow-md hover:bg-gray-100 rounded-lg transition duration-200 ease-in-out">
           <h1 className="text-sm font-semibold text-gray-900 flex-grow">
@@ -601,8 +620,8 @@ const ViewClass = () => {
                   {activeTab === "questions"
                     ? "Manage Questions"
                     : activeTab === "history"
-                    ? "Manage History"
-                    : "Manage Test"}
+                      ? "Manage History"
+                      : "Manage Test"}
                 </h2>
                 <div className="flex space-x-2">
                   {activeTab === "questions" && (
@@ -650,41 +669,37 @@ const ViewClass = () => {
               </div>
               <div className="flex space-x-4 mt-4">
                 <button
-                  className={`px-4 py-2 rounded-lg focus:outline-none ${
-                    activeTab === "questions"
+                  className={`px-4 py-2 rounded-lg focus:outline-none ${activeTab === "questions"
                       ? "bg-blue-500 text-white"
                       : "bg-gray-200 text-gray-600"
-                  }`}
+                    }`}
                   onClick={() => setActiveTab("questions")}
                 >
                   Manage Questions
                 </button>
                 <button
-                  className={`px-4 py-2 rounded-lg focus:outline-none ${
-                    activeTab === "history"
+                  className={`px-4 py-2 rounded-lg focus:outline-none ${activeTab === "history"
                       ? "bg-blue-500 text-white"
                       : "bg-gray-200 text-gray-600"
-                  }`}
+                    }`}
                   onClick={() => setActiveTab("history")}
                 >
                   Manage History
                 </button>
                 <button
-                  className={`px-4 py-2 rounded-lg focus:outline-none ${
-                    activeTab === "test"
+                  className={`px-4 py-2 rounded-lg focus:outline-none ${activeTab === "test"
                       ? "bg-blue-500 text-white"
                       : "bg-gray-200 text-gray-600"
-                  }`}
+                    }`}
                   onClick={() => setActiveTab("test")}
                 >
                   Manage Test
                 </button>
                 <button
-                  className={`px-4 py-2 rounded-lg focus:outline-none ${
-                    activeTab === "student"
+                  className={`px-4 py-2 rounded-lg focus:outline-none ${activeTab === "student"
                       ? "bg-blue-500 text-white"
                       : "bg-gray-200 text-gray-600"
-                  }`}
+                    }`}
                   onClick={() => setActiveTab("student")}
                 >
                   Manage Student
@@ -748,7 +763,8 @@ const ViewClass = () => {
               />
             ) : activeTab === "student" ? (
               <ManageStudent
-                uniqueStudents={allclass1?.data.studentID}
+
+                allclass1={allclass1}
                 handleOpenUpdateModal={handleOpenUpdateModal}
                 deleteStudentByID={deleteStudentByID}
               />
@@ -771,7 +787,7 @@ const ViewClass = () => {
           textCA={textCA}
           textLevel={textLevel}
           handleCorrectAnswerChange={handleCorrectAnswerChange}
-          handleLevelChange= {handleLevelChange}
+          handleLevelChange={handleLevelChange}
           saveCorrectQuestion={saveCorrectQuestion}
           handleEditCA={handleEditCA}
           editingAnswerIndex={editingAnswerIndex}
@@ -823,6 +839,7 @@ const ViewClass = () => {
           inputValue={inputValue}
           handleInputChange={handleInputChange}
           handleAddStudentToClass={handleAddStudentToClass}
+
         />
       )}
     </div>

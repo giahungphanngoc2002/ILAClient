@@ -60,8 +60,8 @@ export const addTest = async(classId, testData) => {
     const res = await axios.post(`http://localhost:3001/api/class/class/${classId}/test`, testData);
     return res.data;
 }
-export const addStudentIDToClass = async (classId, studentId) => {
-    const res = await axios.post(`http://localhost:3001/api/class/class/${classId}/studentID`, { studentId });
+export const addStudentIDToClass = async (classId, email) => {
+    const res = await axios.post(`http://localhost:3001/api/class/class/${classId}/studentID`, { email });
     return res.data;
   };
 
