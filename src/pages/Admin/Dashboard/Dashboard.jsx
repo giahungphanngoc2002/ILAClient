@@ -23,7 +23,7 @@ const Dashboard = () => {
                     icon={<FaMoneyBill />}
                     title="Doanh thu"
                     value="1.000.000 đ"
-                    color="purple"
+                    color="green"
                 />
                 <Card
                     icon={<FaCommentDots />}

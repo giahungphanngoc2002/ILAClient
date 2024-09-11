@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import * as ClassService from "../../../services/UserService";
 
 const columns = [
     { id: 'name', label: 'Name', minWidth: 170 },
