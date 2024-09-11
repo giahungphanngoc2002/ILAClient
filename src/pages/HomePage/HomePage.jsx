@@ -38,10 +38,14 @@ export default function HomePage() {
     const res = await ClassService.getAllTopClass();
     return res;
   };
+
+  
   const GetDetailsClass = async (id) => {
     const res = await ClassService.getDetailClass(id);
     return res;
   };
+
+  
 
   const {
     data: Sclass,
@@ -55,6 +59,8 @@ export default function HomePage() {
   const { data: detailClass } = useQuery({
     queryKey: ["detailClass", idClass],
     queryFn: () => GetDetailsClass(idClass),
+    enabled: !!idClass, // quan trong ne ko dung thi dong lai
+    
   });
 
   const onSearch = (value) => {

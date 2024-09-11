@@ -69,27 +69,53 @@ function HistoryStudent() {
     }
   }, [allclass]);
 
+  // const filteredHistory = allclass?.data
+  //   .flatMap((item) => {
+  //     const historyIDs =
+  //       item.historyID && item.historyID.length > 0 ? item.historyID : [];
+  //     const historyTests = item.tests
+  //       ? item.tests.flatMap((test) =>
+  //           test.historyTest
+  //             ? test.historyTest.map((ht) => ({
+  //                 ...ht,
+  //                 isAssignment: true,
+  //                 iDTest: test.iDTest,
+  //                 iDClass: item.classID,
+  //               }))
+  //             : []
+  //         )
+  //       : [];
+  //     return [...historyIDs, ...historyTests];
+  //   })
+  //   .filter(
+  //     (history, index, self) =>
+  //       history?.studentID?._id === iDStudent &&
+  //       self.findIndex((h) => h._id === history._id) === index
+  //   )
+  //   .sort((a, b) => b.createdAt - a.createdAt); // Sắp xếp theo điểm từ cao đến thấp
+
   const filteredHistory = allclass?.data
     .flatMap((item) => {
       const historyIDs =
         item.historyID && item.historyID.length > 0 ? item.historyID : [];
       const historyTests = item.tests
         ? item.tests.flatMap((test) =>
-            test.historyTest
-              ? test.historyTest.map((ht) => ({
-                  ...ht,
-                  isAssignment: true,
-                  iDTest: test.iDTest,
-                  iDClass: item.classID,
-                }))
-              : []
-          )
+          test.historyTest
+            ? test.historyTest.map((ht) => ({
+              ...ht,
+              isAssignment: true,
+              iDTest: test.iDTest,
+              iDClass: item.classID,
+            }))
+            : []
+        )
         : [];
       return [...historyIDs, ...historyTests];
     })
     .filter(
       (history, index, self) =>
         history?.studentID?._id === iDStudent &&
+        history.isAssignment &&  // Chỉ lọc các bản ghi có isAssignment = true
         self.findIndex((h) => h._id === history._id) === index
     )
     .sort((a, b) => b.createdAt - a.createdAt); // Sắp xếp theo điểm từ cao đến thấp

@@ -71,12 +71,24 @@ const Quiz = () => {
     }
   }, [detailTestByID]);
 
+  // useEffect(() => {
+  //   if (dataQuestion.length > 0) {
+  //     const randomQuestions = getRandomQuestions(dataQuestion, dataQuantityQuestion);
+  //     dispatch(setData(randomQuestions));
+  //   }
+  // }, [dataQuestion, dispatch]);
   useEffect(() => {
-    if (dataQuestion.length > 0) {
+    if (dataQuestion.length > 0 && dataQuantityQuestion > 0) {
       const randomQuestions = getRandomQuestions(dataQuestion, dataQuantityQuestion);
       dispatch(setData(randomQuestions));
     }
-  }, [dataQuestion, dispatch]);
+  }, [dataQuestion, dataQuantityQuestion, dispatch]);
+
+  // Check if currentQuestion is valid
+  // const currentQuizQuestionn = data && data[currentQuestion];
+  // if (!currentQuizQuestionn) {
+  //   return <p>Question not available</p>;
+  // }
 
   const getRandomQuestions = (questions, num) => {
     if (!questions || questions.length === 0 || num <= 0) {
