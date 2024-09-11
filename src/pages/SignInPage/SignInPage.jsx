@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import * as UserService from "../../services/UserService";
 import { useMutationHooks } from "../../hooks/useMutationHook";
@@ -10,32 +10,50 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import styles from "./style";
 
+
 export default function SignInPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
+  const user = useSelector((state) => state.user);
   const mutation = useMutationHooks((data) => UserService.loginUser(data));
   const { data, isSuccess, isError } = mutation;
-
+  const [userName, setUserName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [visible, setVisible] = useState(false);
 
+
+  useEffect(() => {
+    setUserName(user?.isAdmin);
+  }, [user?.isAdmin]);
+
+  
+
   useEffect(() => {
     if (isSuccess && data?.status !== "ERR") {
       toast.success("Login successful"); // Toast for successful login
-      navigate("/");
+
+      // Lưu token vào localStorage
       localStorage.setItem("access_token", JSON.stringify(data?.access_token));
+      
       if (data?.access_token) {
         const decoded = jwt_decode(data?.access_token);
         if (decoded?.id) {
           handleGetDetailsUser(decoded?.id, data?.access_token);
         }
       }
+
+      // Kiểm tra isAdmin để điều hướng
+      if (data?.isAdmin) {
+        navigate("/admin/dashboard"); // Điều hướng tới trang admin
+      } else {
+        navigate("/"); // Điều hướng tới trang người dùng bình thường
+      }
+
     } else if (isError) {
       toast.error("Login failed"); // Toast for login failure
     }
-  }, [isSuccess, isError]);
+  }, [isSuccess, isError, data]);
 
   const handleGetDetailsUser = async (id, token) => {
     const res = await UserService.getDetailUser(id, token);
@@ -52,6 +70,9 @@ export default function SignInPage() {
 
   const handleNavigateSignup = () => {
     navigate("/signup");
+  };
+  const handleNavigateAdmin = () => {
+    navigate("/admin/dashboard");
   };
 
   const handleSignin = (e) => {

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import * as ClassService from "../../../services/UserService";
+import * as UserService from "../../../services/UserService";
+import { useQuery } from '@tanstack/react-query';
 
 const columns = [
     { id: 'name', label: 'Name', minWidth: 170 },
@@ -99,6 +100,24 @@ export const AccountManage = () => {
         setRowsPerPage(parseInt(event.target.value, 10));
         setPage(0);
     };
+
+    const getAllUser = async () => {
+        const res = await UserService.getAllUser();
+        return res;
+    };
+
+    const { data: alluser, isLoading, isError } = useQuery({
+        queryKey: ["alluser"],
+        queryFn: getAllUser,
+    });
+
+    if (isLoading) {
+        return <div>Loading...</div>;
+    }
+
+    if (isError) {
+        return <div>Error loading users.</div>;
+    }
 
     const paginatedRows = rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
