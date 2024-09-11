@@ -27,9 +27,6 @@ export default function HomePage() {
     setUserName(user?.id);
   }, [user?.id]);
 
-  // console.log(learning == 'learning')
-  console.log(userName);
-
   const handleNavigateSignup = () => {
     navigate("/signin");
   };
@@ -39,13 +36,13 @@ export default function HomePage() {
     return res;
   };
 
-  
+
   const GetDetailsClass = async (id) => {
     const res = await ClassService.getDetailClass(id);
     return res;
   };
 
-  
+
 
   const {
     data: Sclass,
@@ -60,7 +57,7 @@ export default function HomePage() {
     queryKey: ["detailClass", idClass],
     queryFn: () => GetDetailsClass(idClass),
     enabled: !!idClass, // quan trong ne ko dung thi dong lai
-    
+
   });
 
   const onSearch = (value) => {
@@ -95,15 +92,13 @@ export default function HomePage() {
     setPassword(e.target.value);
   };
 
-  console.log(detailClass?.data)
-
   const handleGoToLearning = () => {
     const classDetails = detailClass?.data;
     const checkStatus = !!classDetails?.status;
     const studentCheck = classDetails?.studentID.find(
       (student) => student._id === user.id
     );
-  
+
     if (!classDetails?.questions || classDetails.questions.length === 0) {
       toast.error("Join error");
     } else if (!checkStatus && !studentCheck) {
@@ -112,7 +107,7 @@ export default function HomePage() {
       navigate(`/quiz/${idClass}`);
     }
   };
-  
+
 
   const handleCheckAssignment = () => {
     setAssignment(true);
@@ -146,8 +141,6 @@ export default function HomePage() {
   if (isError) {
     return <div>Error loading classes.</div>;
   }
-
-  // console.log(Sclass);
 
   const options =
     searchData?.map((item) => ({
@@ -308,7 +301,7 @@ export default function HomePage() {
                                 className="text-gray-500 mr-2"
                               />
                             </button>
-                            <Modal.Title>{!assignment ? "Choose Option" : "Enter ID and Password" }</Modal.Title>
+                            <Modal.Title>{!assignment ? "Choose Option" : "Enter ID and Password"}</Modal.Title>
                           </Modal.Header>
                           <Modal.Body className="px-6 py-4 bg-white">
                             {assignment ? (
