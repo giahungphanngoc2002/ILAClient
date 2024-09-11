@@ -33,12 +33,26 @@ export default function App() {
   };
 
   const handleGetDetailsUser = async (id, token) => {
+    if (!token) {
+      console.error("User is not logged in.");
+      return;
+    }
+  
+    if (!id) {
+      console.error("User ID is not provided.");
+      return;
+    }
+  
     try {
+      console.log("Fetching details for user ID:", id); // Kiểm tra id
       const res = await UserService.getDetailUser(id, token);
       dispatch(updateUser({ ...res?.data, access_token: token }));
     } catch (error) {
-      console.error("Error getting user details:", error);
-      // Handle the error, e.g., log it, show an error message to the user, etc.
+      if (error.response && error.response.status === 404) {
+        console.error("User not found. Please check the user ID and URL.");
+      } else {
+        console.error("Error getting user details:", error);
+      }
     }
   };
 
