@@ -101,7 +101,7 @@ export default function HeaderComponent() {
             onClick={handleNavigateHistory}
             className="p-2 hover:bg-gray-200 rounded cursor-pointer flex items-center space-x-2"
           >
-<img
+            <img
               src="https://cdn.prod.website-files.com/61fd8e9c8085651f81824642/63a0c2228f6be943d26d2167_poll-people%201.svg"
               alt=""
               className="w-6 h-6"
@@ -170,9 +170,8 @@ export default function HeaderComponent() {
   return (
     <>
       <div
-        className={`fixed w-full z-50 transition-all duration-300 ${
-          scrolled ? "bg-white shadow-md py-2" : "bg-transparent pt-2"
-        }`}
+        className={`fixed w-full z-50 transition-all duration-300 ${scrolled ? "bg-white shadow-md py-2" : "bg-transparent pt-2"
+          }`}
       >
         <div className="flex justify-between items-center px-8 font-poppins">
           <Link
@@ -206,7 +205,7 @@ export default function HeaderComponent() {
                 alt=""
                 className="h-6 mr-2"
               />
-Certified Educators
+              Certified Educators
             </a>
             <a
               href="#"
@@ -261,7 +260,7 @@ Certified Educators
                     className="w-10 h-10 rounded-full object-cover"
                   />
                   <div className="text-lg font-medium">
-                  {userName?.length ? userName : user?.name ? user?.name : user?.email}
+                    {userName?.length ? userName : user?.name ? user?.name : user?.email}
                   </div>
                 </div>
               </Popover>
@@ -277,7 +276,7 @@ Certified Educators
                     className="h-6 mr-2"
                   />
                   Log in
-</Button>
+                </Button>
                 <Button
                   onClick={handleNavigateSignup}
                   type="primary"
@@ -356,7 +355,7 @@ Certified Educators
                     />
                     <div className="text-lg font-medium">
                       {userName?.length ? userName : user?.email}
-                </div>
+                    </div>
                   </div>
                 </Popover>
               ) : (
@@ -385,7 +384,7 @@ Certified Educators
         {/* Adjust the padding-top based on your navbar height */}
         {/* Nội dung chính của trang */}
       </div>
-     
+
     </>
   );
 }

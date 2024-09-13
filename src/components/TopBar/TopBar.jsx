@@ -1,6 +1,10 @@
 import { FaBell, FaFlag, FaSearch } from 'react-icons/fa';
+import { useSelector } from 'react-redux';
 
 export const TopBar = () => {
+  const user = useSelector((state) => state.user);
+
+  console.log(user)
   return (
     <div className="flex items-center justify-between bg-white p-4 shadow-lg">
       {/* Search bar */}
@@ -20,9 +24,9 @@ export const TopBar = () => {
         <FaFlag className="text-gray-500 hover:text-blue-500 transition-colors duration-200 cursor-pointer" />
         <FaBell className="text-gray-500 hover:text-blue-500 transition-colors duration-200 cursor-pointer" />
         <img
-          src="https://via.placeholder.com/40" // Replace with actual image URL
+          src={user.avatar} // Replace with actual image URL
           alt="User Avatar"
-          className="w-10 h-10 rounded-full object-cover border-2 border-indigo-500"
+          className="w-10 h-10 rounded-full object-cover"
         />
       </div>
     </div>
