@@ -21,6 +21,8 @@ import ChangePassword from "../pages/ChangePassWord/ChangePassWord";
 import ViewQuestionTest from "../pages/ViewInfoTest/ViewInfoTest";
 import TeacherInboxPage from "../pages/Teacher/TeacherInboxPage";
 import PricingCount from "../pages/PricingCount/PricingCount";
+import Admin from "../pages/Admin/Admin";
+
 
 export const routes = [
   {
@@ -139,6 +141,11 @@ export const routes = [
     path: "/pricingCount/",
     page: PricingCount,
     isShowHeader: true,
+  },
+  {
+    path: "/admin/*",
+    page: Admin,
+    isShowHeader: false,
   },
   {
     path: "*",

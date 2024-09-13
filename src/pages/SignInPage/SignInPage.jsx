@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFacebookF, faGoogle, faGithub } from "@fortawesome/free-brands-svg-icons";
@@ -14,7 +14,8 @@ import "react-toastify/dist/ReactToastify.css";
 export default function SignInPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const location = useLocation(); // Hook to access current route path
+  const location = useLocation();
+  const user = useSelector((state) => state.user);
 
   const mutation = useMutationHooks((data) => UserService.loginUser(data));
   const { data, isSuccess, isError, error } = mutation;
@@ -22,19 +23,27 @@ export default function SignInPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [visible, setVisible] = useState(false);
-  const [activeLink, setActiveLink] = useState(location.pathname); // State to manage active link
+  const [activeLink, setActiveLink] = useState(location.pathname);
 
   useEffect(() => {
     if (isSuccess && data?.status !== "ERR") {
       toast.success("Đăng nhập thành công");
-      navigate("/");
       localStorage.setItem("access_token", JSON.stringify(data?.access_token));
+
       if (data?.access_token) {
         const decoded = jwt_decode(data?.access_token);
         if (decoded?.id) {
           handleGetDetailsUser(decoded?.id, data?.access_token);
         }
       }
+
+      // Check if user is admin and navigate accordingly
+      if (data?.isAdmin) {
+        navigate("/admin/dashboard");
+      } else {
+        navigate("/");
+      }
+
     } else if (isError) {
       toast.error(error?.response?.data?.message || "Đăng nhập thất bại");
     }
@@ -72,7 +81,7 @@ export default function SignInPage() {
 
   const handleLinkClick = (path) => {
     setActiveLink(path);
-    navigate(path); // Navigate to the clicked link path
+    navigate(path);
   };
 
   return (
@@ -101,17 +110,13 @@ export default function SignInPage() {
           <div className="flex space-x-4 mb-6">
             <span
               onClick={() => handleLinkClick("/signin")}
-              className={`cursor-pointer font-bold ${
-                activeLink === "/signin" ? "text-blue-600" : "text-gray-600"
-              } hover:text-blue-800 transition-colors duration-200`}
+              className={`cursor-pointer font-bold ${activeLink === "/signin" ? "text-blue-600" : "text-gray-600"} hover:text-blue-800 transition-colors duration-200`}
             >
               Đăng nhập
             </span>
             <span
               onClick={() => handleLinkClick("/signup")}
-              className={`cursor-pointer ${
-                activeLink === "/signup" ? "text-blue-600" : "text-gray-600"
-              } hover:text-blue-800 transition-colors duration-200`}
+              className={`cursor-pointer ${activeLink === "/signup" ? "text-blue-600" : "text-gray-600"} hover:text-blue-800 transition-colors duration-200`}
             >
               Đăng ký
             </span>
