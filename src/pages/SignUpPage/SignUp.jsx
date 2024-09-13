@@ -3,218 +3,198 @@ import { useNavigate, Link } from "react-router-dom";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { useMutationHooks } from "../../hooks/useMutationHook";
 import * as UserService from "../../services/UserService";
-import * as message from "../../components/MessageComponent/Message";
-import styles from "./style";
 import { toast } from "react-toastify";
-
-const defaultAvatar = "https://inkythuatso.com/uploads/thumbnails/800/2023/03/6-anh-dai-dien-trang-inkythuatso-03-15-26-36.jpg";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faFacebookF, faGoogle, faGithub } from "@fortawesome/free-brands-svg-icons";
 
 export default function SignUp() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [count, setCount] = useState(0);
   const [visible, setVisible] = useState(false);
-  const [avatar, setAvatar] = useState(defaultAvatar);
-  const [emailError, setEmailError] = useState("");
-  const [passwordError, setPasswordError] = useState("");
-  const [confirmPasswordError, setConfirmPasswordError] = useState("");
   const navigate = useNavigate();
 
+  // Mutation hook to handle sign-up requests
   const mutation = useMutationHooks((data) => UserService.signupUser(data));
-  const { data, isSuccess, isError } = mutation;
+  const { data, isSuccess, isError, error } = mutation;
 
-  const validateEmail = (email) => {
-    const regex = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    return regex.test(email);
+  // Handle input changes
+  const handleOnChangeEmail = (e) => {
+    setEmail(e.target.value);
   };
 
-  const validatePassword = (password) => {
-    return password.length >= 6; // Minimum length of 6 characters
+  const handleOnChangePassword = (e) => {
+    setPassword(e.target.value);
   };
 
-  const handleOnchangeEmail = (e) => {
-    const value = e.target.value;
-    setEmail(value);
-    setEmailError(validateEmail(value) ? "" : "Invalid email address");
+  const handleOnChangeConfirmPassword = (e) => {
+    setConfirmPassword(e.target.value);
   };
 
-  const handleOnchangePassword = (e) => {
-    const value = e.target.value;
-    setPassword(value);
-    setPasswordError(validatePassword(value) ? "" : "Password must be at least 6 characters");
-  };
-
-  const handleOnchangeConfirmPassword = (e) => {
-    const value = e.target.value;
-    setConfirmPassword(value);
-    setConfirmPasswordError(value === password ? "" : "Passwords do not match");
-  };
-
+  // Handle sign-up form submission
   const handleSignup = (e) => {
     e.preventDefault();
-    if (!validateEmail(email) || !validatePassword(password) || password !== confirmPassword) {
-      // Prevent form submission if validation fails
-      if (!validateEmail(email)) setEmailError("Invalid email address");
-      if (!validatePassword(password)) setPasswordError("Password must be at least 6 characters");
-      if (password !== confirmPassword) setConfirmPasswordError("Passwords do not match");
+
+    // Ensure password and confirm password match
+    if (password !== confirmPassword) {
+      toast.error("Mật khẩu và mật khẩu xác nhận không khớp.");
       return;
     }
+
+    // Ensure all fields are filled
+    if (!email.trim() || !password.trim() || !confirmPassword.trim()) {
+      toast.error("Vui lòng điền đầy đủ thông tin");
+      return;
+    }
+
+    // Call the mutation to sign up the user
     mutation.mutate({
-      email,
-      password,
-      confirmPassword,
-      count,
-      avatar,
+      email: email.trim(),
+      password: password.trim(),
+      confirmPassword: confirmPassword.trim(),
     });
   };
 
+  // Handle navigation to sign-in page
   const handleNavigateSignin = () => {
     navigate("/signin");
   };
 
+  // Effect to handle sign-up success or failure
   useEffect(() => {
     if (isError) {
-      message.error();
+      toast.error("Đăng ký thất bại, vui lòng thử lại.");
+      console.error("Lỗi đăng ký:", error);
     } else if (isSuccess && data?.status !== "ERR") {
-      toast.success("Registration successful! Please check your email.");
+      toast.success("Đăng ký thành công! Vui lòng kiểm tra email để xác nhận.");
       handleNavigateSignin();
     }
-  }, [isSuccess, isError]);
+  }, [isSuccess, isError, data, error]);
+
+  // Toggle password visibility
+  const togglePasswordVisibility = () => {
+    setVisible(!visible);
+  };
 
   return (
-    <section className="h-screen">
-      <div className="px-6 h-full text-gray-800">
-        <div className="flex xl:justify-center lg:justify-between justify-center items-center flex-wrap h-full g-6">
-          <div className="grow-0 shrink-1 md:shrink-0 basis-auto xl:w-6/12 lg:w-6/12 md:w-9/12 mb-12 md:mb-0">
-            <img
-              src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/draw2.webp"
-              alt="Reset Password"
-              className="w-full h-auto"
-            />
+    <section className="w-full h-screen flex items-center justify-center bg-white relative">
+      <div className="flex w-full h-full max-w-8xl bg-white shadow-lg rounded-lg overflow-hidden">
+        <div className="hidden md:block bg-black relative">
+          <img
+            src="/images/ảnhlogin.jpg"
+            alt="Nền"
+            className="w-full h-full object-cover opacity-90"
+          />
+          <div
+            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-5xl font-extrabold text-gray-600 italic drop-shadow-lg"
+            style={{ transform: "rotate(-25deg) skew(-15deg)" }}
+          >
+            Educare
           </div>
-          <div className="w-full lg:w-1/3 mt-8 lg:mt-0 p-4">
-            <div className="sm:mx-auto sm:w-full sm:max-w-md">
-              <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                Register as a new user
-              </h2>
-            </div>
-            <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-              <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-                <form className="space-y-6">
-                  <div>
-                    <label
-                      htmlFor="email"
-                      className="block text-sm font-medium text-gray-700"
-                    >
-                      Email address
-                    </label>
-                    <div className="mt-1">
-                      <input
-                        type="email"
-                        name="email"
-                        autoComplete="email"
-                        required
-                        value={email}
-                        onChange={(e) => handleOnchangeEmail(e)}
-                        className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                      />
-                      {emailError && <p className="text-red-500 text-sm mt-1">{emailError}</p>}
-                    </div>
-                  </div>
-                  <div>
-                    <label
-                      htmlFor="password"
-                      className="block text-sm font-medium text-gray-700"
-                    >
-                      Password
-                    </label>
-                    <div className="mt-1 relative">
-                      <input
-                        type={visible ? "text" : "password"}
-                        name="password"
-                        autoComplete="new-password"
-                        required
-                        value={password}
-                        onChange={(e) => handleOnchangePassword(e)}
-                        className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                      />
-                      {visible ? (
-                        <AiOutlineEye
-                          className="absolute right-2 top-2 cursor-pointer"
-                          size={25}
-                          onClick={() => setVisible(false)}
-                        />
-                      ) : (
-                        <AiOutlineEyeInvisible
-                          className="absolute right-2 top-2 cursor-pointer"
-                          size={25}
-                          onClick={() => setVisible(true)}
-                        />
-                      )}
-                    </div>
-                    {passwordError && <p className="text-red-500 text-sm mt-1">{passwordError}</p>}
-                  </div>
-                  <div>
-                    <label
-                      htmlFor="confirmPassword"
-                      className="block text-sm font-medium text-gray-700"
-                    >
-                      Confirm Password
-                    </label>
-                    <div className="mt-1 relative">
-                      <input
-                        type={visible ? "text" : "password"}
-                        name="confirmPassword"
-                        autoComplete="new-password"
-                        required
-                        value={confirmPassword}
-                        onChange={(e) => handleOnchangeConfirmPassword(e)}
-                        className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                      />
-                      {visible ? (
-                        <AiOutlineEye
-                          className="absolute right-2 top-2 cursor-pointer"
-                          size={25}
-                          onClick={() => setVisible(false)}
-                        />
-                      ) : (
-                        <AiOutlineEyeInvisible
-                          className="absolute right-2 top-2 cursor-pointer"
-                          size={25}
-                          onClick={() => setVisible(true)}
-                        />
-                      )}
-                    </div>
-                    {confirmPasswordError && <p className="text-red-500 text-sm mt-1">{confirmPasswordError}</p>}
-                  </div>
-
-                  <div>
-                    <button
-                      disabled={
-                        !email.length ||
-                        !password.length ||
-                        !confirmPassword.length ||
-                        emailError ||
-                        passwordError ||
-                        confirmPasswordError
-                      }
-                      onClick={handleSignup}
-                      type="submit"
-                      className="group relative w-full h-[40px] flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-                    >
-                      Submit
-                    </button>
-                  </div>
-                  <div className={`${styles.noramlFlex} w-full`}>
-                    <span>Already have an account?</span>
-                    <Link to="/signin" className="text-blue-600 ml-2">
-                      Sign In
-                    </Link>
-                  </div>
-                </form>
+        </div>
+        <div className="w-full ml-[250px] md:w-1/3 p-10 flex flex-col justify-center">
+          <h3 className="text-3xl font-extrabold text-gray-600 mb-10 border-b-4 border-blue-500 pb-2">
+            Chào mừng bạn đến với nền tảng <span className="text-blue-600">Educare</span> của chúng tôi.
+          </h3>
+          <p className="text-sm text-black mb-6">
+            Khám phá nền tảng học tập trực tuyến hiện đại, giúp bạn chinh phục tri thức và mở ra tương lai tươi sáng.
+          </p>
+          <div className="flex space-x-4 mb-6">
+            <Link 
+              to="/signin" 
+              className="text-blue-600 font-bold hover:text-blue-800 transition-colors duration-200"
+              style={{ textDecoration: 'none' }}
+            >
+              Đăng nhập
+            </Link>
+            <Link 
+              to="/signup" 
+              className="text-gray-600 hover:text-gray-800 transition-colors duration-200"
+              style={{ textDecoration: 'none' }}
+            >
+              Đăng ký
+            </Link>
+          </div>
+          <form onSubmit={handleSignup} className="space-y-4">
+            <input
+              className="w-full px-4 py-2 border rounded bg-gray-100 focus:outline-none"
+              type="email"
+              name="email"
+              value={email}
+              onChange={handleOnChangeEmail}
+              placeholder="Địa chỉ Email"
+              required
+            />
+            <div className="relative">
+              <input
+                className="w-full px-4 py-2 border rounded bg-gray-100 focus:outline-none"
+                type={visible ? "text" : "password"}
+                name="password"
+                value={password}
+                onChange={handleOnChangePassword}
+                placeholder="Mật khẩu"
+                required
+              />
+              <div
+                className="absolute top-2 right-3 text-gray-600 cursor-pointer"
+                onClick={togglePasswordVisibility}
+              >
+                {visible ? <AiOutlineEyeInvisible /> : <AiOutlineEye />}
               </div>
             </div>
+            <div className="relative">
+              <input
+                className="w-full px-4 py-2 border rounded bg-gray-100 focus:outline-none"
+                type={visible ? "text" : "password"}
+                name="confirmPassword"
+                value={confirmPassword}
+                onChange={handleOnChangeConfirmPassword}
+                placeholder="Xác nhận Mật khẩu"
+                required
+              />
+              <div
+                className="absolute top-2 right-3 text-gray-600 cursor-pointer"
+                onClick={togglePasswordVisibility}
+              >
+                {visible ? <AiOutlineEyeInvisible /> : <AiOutlineEye />}
+              </div>
+            </div>
+            <div className="flex justify-between items-center">
+              <button
+                type="submit"
+                className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 focus:bg-blue-700 transition duration-200"
+              >
+                Đăng ký
+              </button>
+              <Link 
+                to="/requestPasswordReset" 
+                className="text-sm text-blue-500 hover:underline"
+                style={{ textDecoration: 'none' }}
+              >
+                Quên mật khẩu?
+              </Link>
+            </div>
+          </form>
+          <div className="flex items-center justify-center space-x-4 mt-14">
+            <span className="text-gray-500">Hoặc đăng ký bằng</span>
+            <a 
+              href="#" 
+              className="rounded-full bg-blue-600 p-3 text-white hover:bg-blue-700 active:bg-blue-800 transition duration-200 flex items-center justify-center w-12 h-12"
+            >
+              <FontAwesomeIcon icon={faFacebookF} className="text-lg" />
+            </a>
+            <a 
+              href="#" 
+              className="rounded-full bg-red-500 p-3 text-white hover:bg-red-600 active:bg-red-700 transition duration-200 flex items-center justify-center w-12 h-12"
+            >
+              <FontAwesomeIcon icon={faGoogle} className="text-lg" />
+            </a>
+            <a 
+              href="#" 
+              className="rounded-full bg-gray-800 p-3 text-white hover:bg-gray-700 active:bg-gray-900 transition duration-200 flex items-center justify-center w-12 h-12"
+            >
+              <FontAwesomeIcon icon={faGithub} className="text-lg" />
+            </a>
           </div>
         </div>
       </div>

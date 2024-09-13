@@ -1,29 +1,32 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faFacebookF, faGoogle, faGithub } from "@fortawesome/free-brands-svg-icons";
 import * as UserService from "../../services/UserService";
 import { useMutationHooks } from "../../hooks/useMutationHook";
 import { jwtDecode as jwt_decode } from "jwt-decode";
 import { updateUser } from "../../redux/slices/userSlide";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import styles from "./style";
 
 export default function SignInPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation(); // Hook to access current route path
 
   const mutation = useMutationHooks((data) => UserService.loginUser(data));
-  const { data, isSuccess, isError } = mutation;
+  const { data, isSuccess, isError, error } = mutation;
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [visible, setVisible] = useState(false);
+  const [activeLink, setActiveLink] = useState(location.pathname); // State to manage active link
 
   useEffect(() => {
     if (isSuccess && data?.status !== "ERR") {
-      toast.success("Login successful"); // Toast for successful login
+      toast.success("Đăng nhập thành công");
       navigate("/");
       localStorage.setItem("access_token", JSON.stringify(data?.access_token));
       if (data?.access_token) {
@@ -33,25 +36,30 @@ export default function SignInPage() {
         }
       }
     } else if (isError) {
-      toast.error("Login failed"); // Toast for login failure
+      toast.error(error?.response?.data?.message || "Đăng nhập thất bại");
     }
-  }, [isSuccess, isError]);
+  }, [isSuccess, isError, data, error, navigate]);
 
   const handleGetDetailsUser = async (id, token) => {
-    const res = await UserService.getDetailUser(id, token);
-    dispatch(updateUser({ ...res?.data, access_token: token }));
+    try {
+      const res = await UserService.getDetailUser(id, token);
+      dispatch(updateUser({ ...res?.data, access_token: token }));
+    } catch (err) {
+      console.error("Lỗi khi lấy thông tin người dùng:", err);
+      toast.error("Không thể lấy thông tin người dùng");
+    }
   };
 
-  const handleOnchangeEmail = (e) => {
+  const handleOnChangeEmail = (e) => {
     setEmail(e.target.value);
   };
 
-  const handleOnchangePassword = (e) => {
+  const handleOnChangePassword = (e) => {
     setPassword(e.target.value);
   };
 
-  const handleNavigateSignup = () => {
-    navigate("/signup");
+  const togglePasswordVisibility = () => {
+    setVisible(!visible);
   };
 
   const handleSignin = (e) => {
@@ -62,123 +70,115 @@ export default function SignInPage() {
     });
   };
 
+  const handleLinkClick = (path) => {
+    setActiveLink(path);
+    navigate(path); // Navigate to the clicked link path
+  };
+
   return (
-    <section className="h-screen">
-      <div className="px-6 h-full text-gray-800">
-        <div className="flex xl:justify-center lg:justify-between justify-center items-center flex-wrap h-full g-6">
-          <div className="grow-0 shrink-1 md:shrink-0 basis-auto xl:w-6/12 lg:w-6/12 md:w-9/12 mb-12 md:mb-0">
-            <img
-              src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/draw2.webp"
-              alt="Reset Password"
-              className="w-full h-auto"
-            />
+    <section className="w-full h-screen flex items-center justify-center bg-white relative">
+      <div className="flex w-full h-full max-w-8xl bg-white shadow-lg rounded-lg overflow-hidden">
+        <div className="hidden md:block bg-black relative">
+          <img
+            src="/images/ảnhlogin.jpg"
+            alt="Nền"
+            className="w-full h-full object-cover opacity-90"
+          />
+          <div
+            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-5xl font-extrabold text-gray-600 italic drop-shadow-lg"
+            style={{ transform: "rotate(-25deg) skew(-15deg)" }}
+          >
+            Educare
           </div>
-          <div className="w-full lg:w-1/3 mt-8 lg:mt-0 p-4">
-            <div className="sm:mx-auto sm:w-full sm:max-w-md">
-              <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                Login to your account
-              </h2>
-            </div>
-            <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-<div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-                <form className="space-y-6" onSubmit={handleSignin}>
-                  <div>
-                    <label
-                      htmlFor="email"
-                      className="block text-sm font-medium text-gray-700"
-                    >
-                      Email address
-                    </label>
-                    <div className="mt-1">
-                      <input
-                        type="email"
-                        name="email"
-                        autoComplete="email"
-                        required
-                        value={email}
-                        onChange={handleOnchangeEmail}
-                        className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label
-                      htmlFor="password"
-                      className="block text-sm font-medium text-gray-700"
-                    >
-                      Password
-                    </label>
-                    <div className="mt-1 relative">
-                      <input
-                        type={visible ? "text" : "password"}
-                        name="password"
-                        autoComplete="current-password"
-                        required
-                        value={password}
-                        onChange={handleOnchangePassword}
-                        className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                      />
-                      {visible ? (
-                        <AiOutlineEye
-                          className="absolute right-2 top-2 cursor-pointer"
-                          size={25}
-                          onClick={() => setVisible(false)}
-                        />
-                      ) : (
-                        <AiOutlineEyeInvisible
-                          className="absolute right-2 top-2 cursor-pointer"
-                          size={25}
-                          onClick={() => setVisible(true)}
-                        />
-                      )}
-                    </div>
-                  </div>
-                  <div className={`${styles.noramlFlex} justify-between`}>
-                    <div className={`${styles.noramlFlex}`}>
-                      <input
-                        type="checkbox"
-                        name="remember-me"
-                        id="remember-me"
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                      />
-                      <label
-                        htmlFor="remember-me"
-className="ml-2 block text-sm text-gray-900"
-                      >
-                        Remember me
-                      </label>
-                    </div>
-                    <Link
-                      to="/requestPasswordReset"
-                      className="text-sm font-medium text-blue-600 hover:text-blue-500"
-                    >
-                      Forgot your password?
-                    </Link>
-                  </div>
-                  <div>
-                    <button
-                      disabled={!email.length || !password.length}
-                      type="submit"
-                      className="group relative w-full h-[40px] flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-                    >
-                      Submit
-                    </button>
-                  </div>
-                  <div
-                    className={`${styles.noramlFlex} w-full justify-center mt-4`}
-                  >
-                    <span>Not have any account?</span>
-                    <Link
-                      to="/signup"
-                      className="text-blue-600 ml-2"
-                      onClick={handleNavigateSignup}
-                    >
-                      Sign Up
-                    </Link>
-                  </div>
-                </form>
+        </div>
+        <div className="w-full ml-[250px] md:w-1/3 p-10 flex flex-col justify-center">
+          <h3 className="text-3xl font-extrabold text-gray-600 mb-10 border-b-4 border-blue-500 pb-2">
+            Chào mừng bạn đến với nền tảng <span className="text-blue-600">Educare</span> của chúng tôi.
+          </h3>
+          <p className="text-sm text-black mb-6">
+            Khám phá nền tảng học tập trực tuyến hiện đại, giúp bạn chinh phục tri thức và mở ra tương lai tươi sáng.
+          </p>
+          <div className="flex space-x-4 mb-6">
+            <span
+              onClick={() => handleLinkClick("/signin")}
+              className={`cursor-pointer font-bold ${
+                activeLink === "/signin" ? "text-blue-600" : "text-gray-600"
+              } hover:text-blue-800 transition-colors duration-200`}
+            >
+              Đăng nhập
+            </span>
+            <span
+              onClick={() => handleLinkClick("/signup")}
+              className={`cursor-pointer ${
+                activeLink === "/signup" ? "text-blue-600" : "text-gray-600"
+              } hover:text-blue-800 transition-colors duration-200`}
+            >
+              Đăng ký
+            </span>
+          </div>
+          <form onSubmit={handleSignin} className="space-y-4">
+            <input
+              className="w-full px-4 py-2 border rounded bg-gray-100 focus:outline-none"
+              type="email"
+              name="email"
+              value={email}
+              onChange={handleOnChangeEmail}
+              placeholder="Địa chỉ Email"
+              required
+            />
+            <div className="relative">
+              <input
+                className="w-full px-4 py-2 border rounded bg-gray-100 focus:outline-none"
+                type={visible ? "text" : "password"}
+                name="password"
+                value={password}
+                onChange={handleOnChangePassword}
+                placeholder="Mật khẩu"
+                required
+              />
+              <div
+                className="absolute top-2 right-3 text-gray-600 cursor-pointer"
+                onClick={togglePasswordVisibility}
+              >
+                {visible ? <AiOutlineEyeInvisible /> : <AiOutlineEye />}
               </div>
             </div>
+            <div className="flex justify-between items-center">
+              <button
+                type="submit"
+                className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
+              >
+                Đăng nhập
+              </button>
+              <Link
+                to="/requestPasswordReset"
+                className="text-sm text-blue-500 hover:underline"
+                style={{ textDecoration: "none" }}
+              >
+                Quên mật khẩu?
+              </Link>
+            </div>
+          </form>
+          <div className="flex items-center justify-center space-x-4 mt-14">
+            <span className="text-gray-500">Hoặc đăng nhập bằng</span>
+            <a
+              href="#"
+              className="rounded-full bg-blue-600 p-3 text-white hover:bg-blue-700 transition duration-200 flex items-center justify-center w-12 h-12"
+            >
+              <FontAwesomeIcon icon={faFacebookF} className="text-lg" />
+            </a>
+            <a
+              href="#"
+              className="rounded-full bg-red-500 p-3 text-white hover:bg-red-600 transition duration-200 flex items-center justify-center w-12 h-12"
+            >
+              <FontAwesomeIcon icon={faGoogle} className="text-lg" />
+            </a>
+            <a
+              href="#"
+              className="rounded-full bg-gray-800 p-3 text-white hover:bg-gray-700 transition duration-200 flex items-center justify-center w-12 h-12"
+            >
+              <FontAwesomeIcon icon={faGithub} className="text-lg" />
+            </a>
           </div>
         </div>
       </div>
