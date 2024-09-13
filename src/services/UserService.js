@@ -85,3 +85,8 @@ export const getAllTopUser = async() =>{
   const res =await axios.get (`http://localhost:3001/api/user/top`)
   return res.data
 }
+
+export const getcountUsers = async() =>{
+  const res =await axios.get (`http://localhost:3001/api/user/count`)
+  return res.data
+}

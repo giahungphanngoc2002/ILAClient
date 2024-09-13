@@ -37,6 +37,11 @@ export const getAllTopClass = async() =>{
     return res.data
 }
 
+export const getCountClass = async() =>{
+    const res =await axios.get (`http://localhost:3001/api/class/countClass`)
+    return res.data
+}
+
 export const deleteQuestionById = async (classId, questionId) => {
     const res = await axios.delete(`http://localhost:3001/api/class/class/${classId}/questions/${questionId}`);
     return res.data;
