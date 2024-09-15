@@ -69,6 +69,8 @@ function HistoryStudent() {
     }
   }, [allclass]);
 
+  console.log(allclass?.data);
+
   // const filteredHistory = allclass?.data
   //   .flatMap((item) => {
   //     const historyIDs =
@@ -194,8 +196,8 @@ function HistoryStudent() {
   };
 
   allclass.data.forEach((history) => {
-    history.historyID.forEach((historii) => {
-      if (historii.studentID._id === iDStudent) {
+    history?.historyID.forEach((historii) => {
+      if (historii?.studentID?._id === iDStudent) {
         totalScore += Number(historii.point);
         totalCompleted++;
         studentHistories.push(historii);
@@ -364,8 +366,6 @@ function HistoryStudent() {
     },
     spanGaps: true, // Bỏ qua các khoảng trống trong dữ liệu
   };
-
-  console.log(filteredHistory);
 
   return (
     <div className="bg-white shadow-md rounded-lg p-6">

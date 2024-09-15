@@ -22,6 +22,7 @@ import ViewQuestionTest from "../pages/ViewInfoTest/ViewInfoTest";
 import TeacherInboxPage from "../pages/Teacher/TeacherInboxPage";
 import PricingCount from "../pages/PricingCount/PricingCount";
 import Admin from "../pages/Admin/Admin";
+import PaymentSuccess from "../pages/PricingCount/PaymentSuccess";
 
 
 export const routes = [
@@ -146,6 +147,11 @@ export const routes = [
     path: "/admin/*",
     page: Admin,
     isShowHeader: false,
+  },
+  {
+    path: "/paymentSuccess/",
+    page: PaymentSuccess,
+    isShowHeader: true,
   },
   {
     path: "*",
