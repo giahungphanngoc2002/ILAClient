@@ -90,3 +90,15 @@ export const getcountUsers = async() =>{
   const res =await axios.get (`http://localhost:3001/api/user/count`)
   return res.data
 }
+
+export const updateUserCount = async (userId, newCount) => {
+  try {
+    const res = await axios.put(`http://localhost:3001/api/user/updateCount/${userId}`, {
+      count: newCount,
+    });
+    return res.data;
+  } catch (error) {
+    
+    throw error.response ? error.response.data : new Error(error.message);
+  }
+};

@@ -32,7 +32,7 @@ export default function PricingCount() {
                     <h1 className="text-lg font-medium uppercase p-3 pb-0 text-center tracking-wide">
                       Gói Cơ Bản
                     </h1>
-                    <h2 className="text-sm text-gray-500 text-center pb-6">99,999 VND</h2>
+                    <h2 className="text-sm text-gray-500 text-center pb-6">10,000 VND</h2>
                     Nhận 2 lượt sử dụng. Thanh toán đơn giản và nhanh chóng.
                   </div>
 
@@ -99,7 +99,7 @@ export default function PricingCount() {
                   </div>
                   <div className="block flex items-center p-8 uppercase">
                     <button
-                      onClick={() => goToPayOs(99999, 21)}
+                      onClick={() => goToPayOs(10000, 21)}
                       className="mt-3 text-lg font-semibold 
                       bg-black w-full text-white rounded-lg 
                       px-6 py-3 block shadow-xl hover:bg-gray-700"
@@ -204,9 +204,9 @@ export default function PricingCount() {
                       Gói Doanh Nghiệp
                     </h1>
                     <h2 className="text-sm text-gray-500 text-center pb-6">
-                      100,000 VND
+                      10,000,000 VND
                     </h2>
-                    Nhận 30 lượt sử dụng. Giải pháp tối ưu cho doanh nghiệp.
+                    Doanh nghiệp bảo hành trọn đời
                   </div>
                   <div className="flex flex-wrap mt-3 px-6">
                     <ul>
@@ -272,7 +272,7 @@ export default function PricingCount() {
 
                   <div className="block flex items-center p-8 uppercase">
                     <button
-                      onClick={() => goToPayOs(100000, 20)}
+                      onClick={() => goToPayOs(10000000, 999)}
                       className="mt-3 text-lg font-semibold 
                       bg-black w-full text-white rounded-lg 
                       px-6 py-3 block shadow-xl hover:bg-gray-700"

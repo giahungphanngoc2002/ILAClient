@@ -5,6 +5,7 @@ import Dashboard from './Dashboard/Dashboard';
 import { Route, Routes } from 'react-router-dom';
 import UserManage from './UserManage/UserManage';
 import { ClassManage } from './ClassManage/ClassManage';
+import { PayOsHistoryManage } from './PayOsHistory/PayOsHistoryManage';
 
 const Admin = () => {
     return (
@@ -17,6 +18,7 @@ const Admin = () => {
                         <Route path="dashboard" element={<Dashboard />} />
                         <Route path="user" element={<UserManage />} />
                         <Route path="class" element={<ClassManage />} />
+                        <Route path="revenue" element={<PayOsHistoryManage />} />
                     </Routes>
                 </div>
             </div>

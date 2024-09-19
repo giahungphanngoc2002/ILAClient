@@ -11,6 +11,8 @@ const initialState = {
   access_token: "",
   password: "",
   count: "",
+  updatedAt:" ",
+  createdAt:" ",
   isAdmin: false,
   isTeacher: false,
   isAuthenticated: false,
@@ -32,6 +34,8 @@ export const userSlice = createSlice({
         access_token = "",
         password = "",
         count = "",
+        createdAt="",
+        updatedAt="",
         isTeacher = false,
         isAdmin = false,
       } = action.payload;
@@ -46,6 +50,8 @@ export const userSlice = createSlice({
       state.avatar = avatar;
       state.password = password;
       state.count = count;
+      state.updatedAt = updatedAt;
+      state.createdAt = createdAt;
       state.access_token = access_token;
       state.isAuthenticated = !!access_token; // Ensure authentication
     },
