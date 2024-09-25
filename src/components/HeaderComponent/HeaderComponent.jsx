@@ -175,7 +175,7 @@ export default function HeaderComponent() {
     <>
       <div className="absolute bg-black top-0 w-full z-50">
         {/* Top Links */}
-        <div className="container mx-auto py-3 text-sm text-gray-400 flex justify-between">
+        <div className="container mx-auto pt-3 pb-1 text-sm text-gray-400 flex justify-between">
           <div className="hidden md:block">Call: +1 123 456 7890</div>
           <div className="flex space-x-4">
             {user?.access_token ? (
@@ -211,10 +211,11 @@ export default function HeaderComponent() {
 
         {/* Main Navigation */}
         <div className="bg-transparent">
-          <div className="container mx-auto flex justify-between items-center py-3">
+          <div className="container mx-auto flex justify-between items-center py-1">
             <div className="logo">
-              <Link to="/">
-                <img src="images/logo.png" alt="Logo" className="h-16" />
+              <Link to="/" className="flex items-center justify-center no-underline">
+                <p className="text-4xl m-0 text-white tracking-widest font-bold">ILA</p>
+                <img src="images/logoILA.png" alt="Logo" className="h-16 scale-150" />
               </Link>
             </div>
             <nav className="hidden md:flex space-x-6">
@@ -237,7 +238,7 @@ export default function HeaderComponent() {
       </div>
 
       {/* Add padding to push the content down */}
-      <div className="pt-[148px]">
+      <div className="pt-[112px]">
         {/* Main content here */}
 
       </div>

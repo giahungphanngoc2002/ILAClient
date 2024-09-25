@@ -4,7 +4,7 @@ import { FaBook } from "react-icons/fa";
 
 const Counter = () => {
     return (
-        <div className="bg-gray-100 py-16">
+        <div className="py-16">
             <div className="container mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
                 <div className="flex flex-col items-center">
                     <CiUser className="text-3xl" />

@@ -136,7 +136,7 @@ const SearchClass = () => {
         <div className="bg-gradient-to-b from-blue-200 to-blue-500 flex flex-col items-center min-h-screen">
             <form
                 id="proceed-game-action-wrapper"
-                className={`bg-white box-border flex flex-col sm:flex-row w-full sm:w-auto sm:justify-center sm:items-center gap-2 border-ds-dark-500-20 p-2 border-2 bg-ds-light-500 rounded-xl transition-all duration-300 ${isSearching ? 'mt-10' : 'mt-40' // Move form to top when searching
+                className={`bg-white box-border flex flex-col sm:flex-row w-full sm:w-auto sm:justify-center sm:items-center gap-2 border-ds-dark-500-20 p-2 border-2 bg-ds-light-500 rounded-xl transition-all duration-300 ${isSearching ? 'mt-10' : 'mt-60' // Move form to top when searching
                     }`}
                 onSubmit={handleSubmit}
                 style={{ boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2), 0 1px 3px rgba(0, 0, 0, 0.1)" }}

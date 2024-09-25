@@ -3,7 +3,7 @@ import { FaLightbulb, FaUsers, FaPuzzlePiece } from "react-icons/fa"; // Import 
 
 const InfoSection = () => {
     return (
-        <div className=" py-16 bg-gray-100">
+        <div className="py-16">
             <div className="container flex flex-col md:flex-row items-center">
                 {/* Cột bên trái: Hình ảnh */}
                 <div className="w-full md:w-1/2">
@@ -15,34 +15,34 @@ const InfoSection = () => {
                 </div>
 
                 {/* Cột bên phải: Nội dung */}
-                <div className="w-full md:w-1/2 pl-0 md:pl-12 mt-8 md:mt-0">
-                    <div className="mb-8">
-                        <div className="flex items-center mb-4">
-                            <FaLightbulb className="text-yellow-500 text-2xl mr-3" />
-                            <h3 className="text-xl font-semibold">Learn Anything Online</h3>
+                <div className="w-full md:w-1/2 pl-0 md:pl-16 mt-8 md:mt-0"> {/* Increased padding */}
+                    <div className="mb-12"> {/* Increased margin-bottom */}
+                        <div className="flex items-center mb-3">
+                            <FaLightbulb className="text-yellow-500 text-2xl mr-4" /> {/* Increased margin-right */}
+                            <h3 className="text-xl font-semibold m-0">Học Mọi Thứ Trực Tuyến</h3>
                         </div>
                         <p className="text-gray-600">
-                            Suspendisse ante mi iaculis ac eleifend id venenatis non eros. Sed rhoncus gravida eli.
+                            Nền tảng cung cấp bài học cho mọi môn học từ tiểu học đến THPT, giúp bạn học dễ dàng và hiệu quả.
                         </p>
                     </div>
 
-                    <div className="mb-8">
-                        <div className="flex items-center mb-4">
-                            <FaUsers className="text-yellow-500 text-2xl mr-3" />
-                            <h3 className="text-xl font-semibold">Communicate People</h3>
+                    <div className="mb-12"> {/* Increased margin-bottom */}
+                        <div className="flex items-center mb-3">
+                            <FaUsers className="text-yellow-500 text-2xl mr-4" /> {/* Increased margin-right */}
+                            <h3 className="text-xl font-semibold m-0">Kết Nối Học Tập</h3>
                         </div>
                         <p className="text-gray-600">
-                            Suspendisse ante mi iaculis ac eleifend id venenatis non eros. Sed rhoncus gravida eli eu sollicitudin sem iaculis.
+                            Tương tác với giáo viên và bạn bè, đặt câu hỏi và trao đổi kiến thức để cùng nhau tiến bộ.
                         </p>
                     </div>
 
-                    <div className="mb-8">
-                        <div className="flex items-center mb-4">
-                            <FaPuzzlePiece className="text-yellow-500 text-2xl mr-3" />
-                            <h3 className="text-xl font-semibold">Share Your Knowledge</h3>
+                    <div className="mb-12"> {/* Increased margin-bottom */}
+                        <div className="flex items-center mb-3">
+                            <FaPuzzlePiece className="text-yellow-500 text-2xl mr-4" /> {/* Increased margin-right */}
+                            <h3 className="text-xl font-semibold m-0">Chia Sẻ Kiến Thức Của Bạn</h3>
                         </div>
                         <p className="text-gray-600">
-                            Suspendisse ante mi iaculis ac eleifend id venenatis non eros. Sed rhoncus gravida.
+                            Học sinh có thể chia sẻ kinh nghiệm và bài học với bạn bè, cùng nhau nâng cao kết quả học tập.
                         </p>
                     </div>
                 </div>

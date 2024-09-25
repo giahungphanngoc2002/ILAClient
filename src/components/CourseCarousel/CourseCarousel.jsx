@@ -23,7 +23,7 @@ const CourseCarousel = () => {
     ];
 
     return (
-        <div className="py-16">
+        <div className="py-16 bg-gray-100 ">
             <div className="container mx-auto">
                 <h2 className="text-4xl font-bold mb-8 text-center">Môn học</h2>
                 <p className="text-gray-600 mb-12 text-center">Suspendisse ante mi iaculis ac eleifend id venenatis non eros.</p>
