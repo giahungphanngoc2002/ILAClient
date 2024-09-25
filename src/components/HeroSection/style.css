@@ -1,0 +1,19 @@
+.custom-input {
+    width: 100%; /* Tăng chiều rộng cho trải nghiệm nhập liệu tốt hơn */
+    padding: 12px 20px; /* Thêm khoảng đệm để người dùng cảm thấy thoải mái */
+    font-size: 16px; /* Tăng kích thước chữ */
+    border-radius: 50px; /* Bo tròn góc cạnh cho cảm giác hiện đại */
+    border: 2px solid #ccc; /* Thêm đường viền nhẹ */
+    background-color: #f9f9f9; /* Màu nền nhẹ để tạo độ tương phản */
+    box-shadow: 0 2px 5px #13418c; /* Thêm bóng để nổi bật */
+    margin-top: 20px; /* Tạo khoảng cách giữa các phần tử */
+    transition: all 0.3s ease-in-out; /* Thêm hiệu ứng chuyển động */
+    border: 1px solid #3B82F6;
+}
+
+/* Thêm hiệu ứng khi người dùng tương tác */
+.custom-input:focus {
+    outline: none;
+    border-color: #007bff; /* Đổi màu viền khi người dùng nhấp vào */
+    box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2); /* Tăng độ bóng khi được chọn */
+}

@@ -254,16 +254,16 @@ const Quiz = () => {
     : selectedAnswer;
 
 
-    console.log("save selected", saveSelected)
+  console.log("so cau hoi", checkedQuestions)
   return (
-    <div className="container mx-auto p-4 bg-gray-100 rounded-lg shadow-lg">
-      <h1 className="bg-yellow-400 text-blue-800 text-center py-4 text-2xl font-bold rounded-t-lg">
-        {detailClassByID?.data.nameClass}
-      </h1>
-      <div className="mt-6">
-        <h5 className="text-xl py-4 text-green-700">
+    <div className="container mx-auto p-4 bg-gray-50 rounded-lg shadow-lg mt-10">
+      <div className="mt-2">
+        <h5 className="text-2xl text-gray-900 font-bold mb-12">
           Q.{currentQuestion + 1} {currentQuizQuestion.question}
         </h5>
+        <div className="text-gray-700 text-lg mb-4">
+          Hãy chọn một đáp án đúng nhất:
+        </div>
       </div>
       <div className="flex flex-wrap -mx-2 mb-6">
         {currentQuizQuestion.answers.map((answer, index) => {
@@ -274,16 +274,16 @@ const Quiz = () => {
                 data[currentQuestion].correctAnswer
             ) && selectedAnswer === answer;
           const isSelected = selectedAnswer === answer;
+
           return (
             <div key={index} className="w-full sm:w-1/2 px-2 mb-4">
               <li
-                className={`p-4 rounded-lg border list-none text-lg cursor-pointer flex items-center ${
-                  isCorrectAnswer
-                    ? "bg-green-100 border-green-300"
+                className={`p-4 rounded-lg border list-none text-xl cursor-pointer flex items-center transition-colors duration-200 ${isCorrectAnswer
+                    ? "bg-green-100 border-green-500"
                     : isSelected
-                    ? "bg-red-100 border-red-300"
-                    : "bg-gray-200 border-gray-300"
-                }`}
+                      ? "bg-red-100 border-red-500"
+                      : "bg-blue-100 border-gray-300 hover:bg-blue-50"
+                  }`}
                 onClick={() => handleAnswerSelect(answer)}
               >
                 <input
@@ -296,64 +296,59 @@ const Quiz = () => {
                 />
                 <span className="flex-1">{answer}</span>
                 {isCorrectAnswer && (
-                  <span className="text-green-500 text-xl ml-2">&#10004;</span> // Check mark
+                  <span className="text-green-500 text-xl ml-2">&#10004;</span>
                 )}
                 {isSelected && !isCorrectAnswer && (
-                  <span className="text-red-500 text-xl ml-2">&#10006;</span> // Cross mark
+                  <span className="text-red-500 text-xl ml-2">&#10006;</span>
                 )}
               </li>
             </div>
           );
         })}
       </div>
-      <div className="relative mb-6">
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-full h-2 bg-blue-200 rounded-full overflow-hidden">
+      <div className="relative mb-6 flex items-center justify-between">
+        {/* Nút trái hiển thị số 0 */}
+        <div className="flex items-center justify-center w-10 h-10 border border-blue-400 rounded-full">
+          <span className="text-black">{checkedQuestions}</span>
+        </div>
+
+        {/* Thanh progress */}
+        <div className="flex-1 mx-4">
+          <div className="relative w-full h-2 bg-blue-100 rounded-full overflow-hidden">
             <div
-              className="h-full bg-blue-500 rounded-full"
+              className="absolute top-0 left-0 h-full bg-gradient-to-r from-blue-400 to-blue-600 rounded-full"
               style={{ width: progress }}
             ></div>
           </div>
         </div>
-        {/* <div className="text-center text-sm text-gray-600">
-          Progress: {progress}
-        </div> */}
+
+        <div className="flex items-center justify-center w-10 h-10 border border-blue-400 rounded-full">
+          <span className="text-black">{data?.length}</span>
+        </div>
       </div>
-      {/* <QuizzContext.Provider
-        value={{
-          handleFirstQuestion,
-          handlePrevQuestion,
-          handleNextQuestion,
-          handleLastQuestion,
-          data,
-          currentQuestion,
-          saveSelected,
-        }}
-      >
-        <div className="mt-6">
-          <Directional />
-        </div>
-      </QuizzContext.Provider> */}
+
       <div className="mt-6">
-          <DirectionComponent
-            handleFirstQuestion={handleFirstQuestion}
-            handlePrevQuestion={handlePrevQuestion}
-            handleLastQuestion={handleLastQuestion}
-            handleNextQuestion={handleNextQuestion}
-            data={data}
-            currentQuestion={currentQuestion}
-          />
-        </div>
-      <div className="flex justify-center py-6">
+        <DirectionComponent
+          handleFirstQuestion={handleFirstQuestion}
+          handlePrevQuestion={handlePrevQuestion}
+          handleLastQuestion={handleLastQuestion}
+          handleNextQuestion={handleNextQuestion}
+          data={data}
+          currentQuestion={currentQuestion}
+        />
+      </div>
+      {/* <div className="flex justify-center py-6 mt-4">
         <button
-          className="bg-green-500 text-white py-2 px-4 rounded-full shadow-md hover:bg-green-600 transition duration-200"
+          className="bg-green-600 text-lg text-white py-2 px-6 rounded-full shadow-md hover:bg-green-700 transition duration-200"
           onClick={handleSubmit}
         >
-          Submit
+          Nộp bài
         </button>
-      </div>
+      </div> */}
     </div>
   );
+
+
 };
 
 export default Quiz;

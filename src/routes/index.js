@@ -23,6 +23,7 @@ import TeacherInboxPage from "../pages/Teacher/TeacherInboxPage";
 import PricingCount from "../pages/PricingCount/PricingCount";
 import Admin from "../pages/Admin/Admin";
 import PaymentSuccess from "../pages/PricingCount/PaymentSuccess";
+import SearchClass from "../pages/SearchClass/SearchClass";
 
 
 export const routes = [
@@ -151,6 +152,11 @@ export const routes = [
   {
     path: "/paymentSuccess/",
     page: PaymentSuccess,
+    isShowHeader: true,
+  },
+  {
+    path: "/searchClass/",
+    page: SearchClass,
     isShowHeader: true,
   },
   {

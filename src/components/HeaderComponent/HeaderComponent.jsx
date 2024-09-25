@@ -5,6 +5,9 @@ import { useDispatch, useSelector } from "react-redux";
 import * as UserService from "../../services/UserService";
 import { resetUser } from "../../redux/slices/userSlide";
 import ChatboxButton from "./ChatboxButton"; // Adjust the path as necessary
+import { CiLogin } from "react-icons/ci";
+import { PiCashRegisterBold } from "react-icons/pi";
+import { FaFacebookF, FaInstagram, FaGoogle, FaLinkedinIn } from "react-icons/fa";
 
 export default function HeaderComponent() {
   const navigate = useNavigate();
@@ -156,6 +159,7 @@ export default function HeaderComponent() {
       </div>
     </div>
   );
+
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 50);
@@ -169,222 +173,75 @@ export default function HeaderComponent() {
 
   return (
     <>
-      <div
-        className={`fixed w-full z-50 transition-all duration-300 ${scrolled ? "bg-white shadow-md py-2" : "bg-transparent pt-2"
-          }`}
-      >
-        <div className="flex justify-between items-center px-8 font-poppins">
-          <Link
-            to="/"
-            className="flex items-center text-purple-700 text-2xl font-bold no-underline"
-          >
-            <img
-              src="https://cdn.prod.website-files.com/60aca2b71ab9a5e4ececf1cf/62fa6419161d3a641f681ceb_Logo.svg"
-              alt="Logo"
-              className="h-10 mr-3"
-            />
-          </Link>
-          <nav className="hidden md:flex space-x-8">
-            <a
-              href=""
-              className="flex items-center text-lg text-gray-700 hover:text-purple-700 no-underline transition duration-300 hover:border-b-2 hover:border-blue-300"
-            >
-              <img
-                src="https://cdn.prod.website-files.com/60aca2b71ab9a5e4ececf1cf/632b579034dcb77743b131fb_School.svg"
-                alt=""
-                className="h-6 mr-2"
-              />
-              Overview
-            </a>
-            <a
-              href="#"
-              className="flex items-center text-lg text-gray-700 hover:text-purple-700 no-underline transition duration-300 hover:border-b-2 hover:border-blue-300"
-            >
-              <img
-                src="https://cdn.prod.website-files.com/60aca2b71ab9a5e4ececf1cf/6332064ac11c2a5449906881_file-certificate%201.svg"
-                alt=""
-                className="h-6 mr-2"
-              />
-              Certified Educators
-            </a>
-            <a
-              href="#"
-              className="flex items-center text-lg text-gray-700 hover:text-purple-700 no-underline transition duration-300 hover:border-b-2 hover:border-blue-300"
-            >
-              <img
-                src="https://cdn.prod.website-files.com/60aca2b71ab9a5e4ececf1cf/6332067bc211b1ca44d7d167_newspaper%201.svg"
-                alt=""
-                className="h-6 mr-2"
-              />
-              Blog
-            </a>
-            <a
-              href="#"
-              className="flex items-center text-lg text-gray-700 hover:text-purple-700 no-underline transition duration-300 hover:border-b-2 hover:border-blue-300"
-            >
-              <img
-                src="https://cdn.prod.website-files.com/61fd8e9c8085651f81824642/63a0c1a3d731a36274c4ef89_school%203.svg"
-                alt=""
-                className="h-6 mr-2"
-              />
-              Resources
-            </a>
-            <a
-              onClick={handlequizai}
-              className="flex items-center text-lg text-gray-700 hover:text-purple-700 no-underline transition duration-300 hover:border-b-2 hover:border-blue-300"
-            >
-              <img
-                src="https://cdn.prod.website-files.com/60aca2b71ab9a5e4ececf1cf/64da76ec93a656777d37aa74_Quizizz%20AI%20Sparkle.png"
-                alt=""
-                className="h-6 mr-2"
-              />
-              Quizizz AI
-            </a>
-          </nav>
-
-          <div className="hidden md:flex space-x-6 items-center">
-            <Button className="border border-blue-700 text-black text-lg flex items-center px-3 py-2">
-              <img
-                src="https://cdn.prod.website-files.com/60aca2b71ab9a5e4ececf1cf/6332067bba88a96b771afce0_user-headset%201.svg"
-                alt=""
-                className="h-6 mr-2"
-              />
-              Help Center
-            </Button>
+      <div className="absolute bg-black top-0 w-full z-50">
+        {/* Top Links */}
+        <div className="container mx-auto py-3 text-sm text-gray-400 flex justify-between">
+          <div className="hidden md:block">Call: +1 123 456 7890</div>
+          <div className="flex space-x-4">
             {user?.access_token ? (
               <Popover content={content} trigger="click">
                 <div className="flex items-center cursor-pointer space-x-2">
                   <img
                     src={user?.avatar}
                     alt="User"
-                    className="w-10 h-10 rounded-full object-cover"
+                    className="w-5 h-5 rounded-full object-cover"
                   />
-                  <div className="text-lg font-medium">
+                  <div className="text-sm">
                     {userName?.length ? userName : user?.name ? user?.name : user?.email}
                   </div>
                 </div>
               </Popover>
             ) : (
               <>
-                <Button
-                  onClick={handleNavigateLogin}
-                  className="border border-blue-700 text-black text-lg flex items-center px-3 py-2"
-                >
-                  <img
-                    src="https://cdn.prod.website-files.com/61fd8e9c8085651f81824642/63a0c259ae3f133ca53c3e86_user-plus%201.svg"
-                    alt=""
-                    className="h-6 mr-2"
-                  />
-                  Log in
-                </Button>
-                <Button
-                  onClick={handleNavigateSignup}
-                  type="primary"
-                  className="bg-white text-black border-blue-200 text-lg flex items-center px-3 py-2"
-                >
-                  <img
-                    src="https://cdn.prod.website-files.com/60aca2b71ab9a5e4ececf1cf/632b57e283d43912e086909f_chalkboard-user%2010.svg"
-                    alt=""
-                    className="h-6 mr-2"
-                  />
-                  Sign up
-                </Button>
+                <button className="text-sm text-gray-300 inline-flex items-center" onClick={handleNavigateLogin}>
+                  <CiLogin className="mr-2" /> Login
+                </button>
+                <button className="text-sm text-gray-300 inline-flex items-center ml-4" onClick={handleNavigateSignup}>
+                  <PiCashRegisterBold className="mr-2" /> Register
+                </button>
               </>
             )}
+            <span>|</span>
+            <button className="hover:text-gray-400 text-sm text-gray-300"><FaFacebookF /></button>
+            <button className="hover:text-gray-400 text-sm text-gray-300"><FaInstagram /></button>
+            <button className="hover:text-gray-400 text-sm text-gray-300"><FaGoogle /></button>
+            <button className="hover:text-gray-400 text-sm text-gray-300"><FaLinkedinIn /></button>
           </div>
         </div>
-        {isOpen && (
-          <div className="md:hidden bg-white shadow-md">
-            <nav className="flex flex-col items-center space-y-4 py-4">
-              <a
-                href="#"
-                className="text-lg text-gray-700 hover:text-purple-700 no-underline"
-              >
-                For Schools
-              </a>
-              <a
-                href="#"
-                className="text-lg text-gray-700 hover:text-purple-700 no-underline"
-              >
-                Plans
-              </a>
-              <a
-                href="#"
-                className="text-lg text-gray-700 hover:text-purple-700 no-underline"
-              >
-                Solutions
-              </a>
-              <a
-                href="#"
-                className="text-lg text-gray-700 hover:text-purple-700 no-underline"
-              >
-                Resources
-              </a>
-              <a
-                href="#"
-                className="text-lg text-gray-700 hover:text-purple-700 no-underline"
-              >
-                For Business
-              </a>
-              {user?.access_token && user?.isTeacher && (
-                <Button
-                  onClick={handleClick}
-                  className="border border-purple-700 text-purple-700 text-lg flex items-center px-3 py-2"
-                >
-                  All Messages
-                </Button>
-              )}
-              {user?.access_token && !user?.isTeacher && (
-                <Button
-                  onClick={handleClick}
-                  className="border border-purple-700 text-purple-700 text-lg flex items-center px-3 py-2"
-                >
-                  Messages
-                </Button>
-              )}
-              <Button className="border border-purple-700 text-purple-700 text-lg flex items-center px-3 py-2">
-                Enter code
-              </Button>
-              {user?.access_token ? (
-                <Popover content={content} trigger="click">
-                  <div className="flex items-center cursor-pointer space-x-2">
-                    <img
-                      src={user?.avatar}
-                      alt="User"
-                      className="w-10 h-10 rounded-full object-cover"
-                    />
-                    <div className="text-lg font-medium">
-                      {userName?.length ? userName : user?.email}
-                    </div>
-                  </div>
-                </Popover>
-              ) : (
-                <>
-                  <Button
-                    onClick={handleNavigateLogin}
-                    className="border border-purple-700 text-purple-700 text-lg flex items-center px-3 py-2"
-                  >
-                    Log in
-                  </Button>
-                  <Button
-                    onClick={handleNavigateSignup}
-                    type="primary"
-                    className="bg-purple-700 text-white text-lg flex items-center px-3 py-2"
-                  >
-                    Sign up
-                  </Button>
-                </>
-              )}
+
+        {/* Main Navigation */}
+        <div className="bg-transparent">
+          <div className="container mx-auto flex justify-between items-center py-3">
+            <div className="logo">
+              <Link to="/">
+                <img src="images/logo.png" alt="Logo" className="h-16" />
+              </Link>
+            </div>
+            <nav className="hidden md:flex space-x-6">
+              <button className="text-gray-200 hover:text-gray-200" onClick={() => window.location.href = 'index-2.html'}>Home</button>
+              <button className="text-gray-400 hover:text-gray-200" onClick={() => window.location.href = 'about-us.html'}>About Us</button>
+              <div className="relative group">
+                <button className="text-gray-400 hover:text-gray-200">Courses</button>
+                <div className="absolute left-0 hidden group-hover:block bg-white shadow-md mt-2">
+                  <button className="block px-4 py-2 text-sm text-gray-400" onClick={() => window.location.href = 'courses.html'}>Grid View</button>
+                  <button className="block px-4 py-2 text-sm text-gray-400" onClick={() => window.location.href = 'courses1.html'}>List View</button>
+                  <button className="block px-4 py-2 text-sm text-gray-400" onClick={() => window.location.href = 'courses2.html'}>Single Course</button>
+                </div>
+              </div>
+              <button className="text-gray-400 hover:text-gray-200" onClick={() => window.location.href = 'our-team.html'}>Our Team</button>
+              <button className="text-gray-400 hover:text-gray-200" onClick={() => window.location.href = 'blog.html'}>Blog</button>
+              <button className="text-gray-400 hover:text-gray-200" onClick={() => window.location.href = 'contact.html'}>Contact Us</button>
             </nav>
           </div>
-        )}
-      </div>
-      <div className="pt-16">
-        {" "}
-        {/* Adjust the padding-top based on your navbar height */}
-        {/* Nội dung chính của trang */}
+        </div>
       </div>
 
+      {/* Add padding to push the content down */}
+      <div className="pt-[148px]">
+        {/* Main content here */}
+
+      </div>
     </>
   );
+
 }

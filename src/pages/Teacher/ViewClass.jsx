@@ -500,8 +500,8 @@ const ViewClass = () => {
 
   const uniqueStudents = [];
 
-  allclass1.data.historyID.forEach((history) => {
-    const studentId = history.studentID._id;
+  allclass1?.data.historyID.forEach((history) => {
+    const studentId = history?.studentID?._id;
 
     if (!uniqueIds.has(studentId)) {
       uniqueIds.add(studentId);

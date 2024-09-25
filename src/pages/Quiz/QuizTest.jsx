@@ -28,6 +28,7 @@ const Quiz = () => {
   const { idClass, idTest } = useParams();
   const [dataQuestion, setDataQuestion] = useState([]);
   const [dataQuantityQuestion, setDataQuantityQuestion] = useState(0);
+  const [visitedQuestions, setVisitedQuestions] = useState([]);
 
   const dispatch = useDispatch(); // Move dispatch here
 
@@ -108,32 +109,32 @@ const Quiz = () => {
     const numLevel2 = Math.ceil(num * 0.6); // 60%
     const numLevel3 = num - numLevel1 - numLevel2; // 20% or remaining
 
-    console.log("so luong",numLevel1,numLevel2,numLevel3)
+    console.log("so luong", numLevel1, numLevel2, numLevel3)
 
     const getRandomSubset = (array, count) => {
-        const shuffled = [...array];
-        for (let i = shuffled.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-        }
-        return shuffled.slice(0, count);
+      const shuffled = [...array];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+      return shuffled.slice(0, count);
     };
 
     // Randomly select questions from each level
     const selectedLevel1 = getRandomSubset(level1Questions, numLevel1);
     const selectedLevel2 = getRandomSubset(level2Questions, numLevel2);
     const selectedLevel3 = getRandomSubset(level3Questions, numLevel3);
-  
+
     // Combine all selected questions
     const combinedQuestions = [
-        ...selectedLevel1,  
-        ...selectedLevel2,
-        ...selectedLevel3
+      ...selectedLevel1,
+      ...selectedLevel2,
+      ...selectedLevel3
     ];
 
     // Shuffle the final set of questions
     return getRandomSubset(combinedQuestions, num);
-};
+  };
 
   const { currentQuestion, selectedAnswer, score, showResult, data } = useSelector((state) => state.quiz);
 
@@ -293,15 +294,21 @@ const Quiz = () => {
     ? selectedAnswerForQuestion[`Question${currentQuestion + 1}`]
     : selectedAnswer;
 
-    return (
-      <div className="container mx-auto p-4 bg-gray-100 rounded-lg shadow-lg">
-        <h1 className="bg-yellow-400 text-blue-800 text-center py-4 text-2xl font-bold rounded-t-lg">
-          {detailClassByID?.data.nameClass}
-        </h1>
-        <div className="mt-6">
-          <h5 className="text-xl py-4 text-green-700">
+  const handleQuestionClick = (index) => {
+    dispatch(setCurrentQuestion(index));
+  };
+
+  return (
+    <div className="w-screen h-screen p-4 bg-gray-50 flex">
+      {/* Nội dung chính của câu hỏi */}
+      <div className="w-3/4 pr-4">
+        <div className="mt-2">
+          <h5 className="text-xl mb-12 text-gray-900 font-bold">
             Q.{currentQuestion + 1} {currentQuizQuestion.question}
           </h5>
+          <div className="text-gray-700 text-sm mb-4">
+            Hãy chọn một đáp án đúng nhất:
+          </div>
         </div>
         <div className="flex flex-wrap -mx-2 mb-6">
           {currentQuizQuestion.answers.map((answer, index) => {
@@ -315,11 +322,10 @@ const Quiz = () => {
             return (
               <div key={index} className="w-full sm:w-1/2 px-2 mb-4">
                 <li
-                  className={`p-4 rounded-lg border list-none text-lg cursor-pointer flex items-center ${
-                     isSelected
-                      ? "bg-red-100 border-red-300"
-                      : "bg-gray-200 border-gray-300"
-                  }`}
+                  className={`p-4 rounded-lg border list-none text-lg cursor-pointer flex items-center ${isSelected
+                    ? "bg-red-100 border-red-300"
+                    : "bg-gray-200 border-gray-300"
+                    }`}
                   onClick={() => handleAnswerSelect(answer)}
                 >
                   <input
@@ -331,65 +337,86 @@ const Quiz = () => {
                     className="mr-2"
                   />
                   <span className="flex-1">{answer}</span>
-                  {/* {isCorrectAnswer && (
-                    <span className="text-green-500 text-xl ml-2">&#10004;</span> // Check mark
-                  )}
-                  {isSelected && !isCorrectAnswer && (
-                    <span className="text-red-500 text-xl ml-2">&#10006;</span> // Cross mark
-                  )} */}
                 </li>
               </div>
             );
           })}
         </div>
-        <div className="relative mb-6">
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-full h-2 bg-blue-200 rounded-full overflow-hidden">
+        <div className="relative mb-6 flex items-center justify-between">
+          {/* Nút trái hiển thị số 0 */}
+          <div className="flex items-center justify-center w-10 h-10 border border-blue-400 rounded-full">
+            <span className="text-black">{checkedQuestions}</span>
+          </div>
+
+          {/* Thanh progress */}
+          <div className="flex-1 mx-4">
+            <div className="relative w-full h-2 bg-blue-100 rounded-full overflow-hidden">
               <div
-                className="h-full bg-blue-500 rounded-full"
+                className="absolute top-0 left-0 h-full bg-gradient-to-r from-blue-400 to-blue-600 rounded-full"
                 style={{ width: progress }}
               ></div>
             </div>
           </div>
-          {/* <div className="text-center text-sm text-gray-600">
-            Progress: {progress}
-          </div> */}
+
+          <div className="flex items-center justify-center w-10 h-10 border border-blue-400 rounded-full">
+            <span className="text-black">{data?.length}</span>
+          </div>
         </div>
-        {/* <QuizzContext.Provider
-          value={{
-            handleFirstQuestion,
-            handlePrevQuestion,
-            handleNextQuestion,
-            handleLastQuestion,
-            data,
-            currentQuestion,
-            saveSelected,
-          }}
-        >
-          <div className="mt-6">
-            <Directional />
-          </div>
-        </QuizzContext.Provider> */}
         <div className="mt-6">
-            <DirectionComponent
-              handleFirstQuestion={handleFirstQuestion}
-              handlePrevQuestion={handlePrevQuestion}
-              handleLastQuestion={handleLastQuestion}
-              handleNextQuestion={handleNextQuestion}
-              data={data}
-              currentQuestion={currentQuestion}
-            />
-          </div>
+          <DirectionComponent
+            handleFirstQuestion={handleFirstQuestion}
+            handlePrevQuestion={handlePrevQuestion}
+            handleLastQuestion={handleLastQuestion}
+            handleNextQuestion={handleNextQuestion}
+            data={data}
+            currentQuestion={currentQuestion}
+          />
+        </div>
         <div className="flex justify-center py-6">
           <button
             className="bg-green-500 text-white py-2 px-4 rounded-full shadow-md hover:bg-green-600 transition duration-200"
             onClick={handleSubmit}
           >
-            Submit
+            Nộp bài
           </button>
         </div>
       </div>
-    );
+
+      {/* Bảng điều khiển câu hỏi */}
+      <div className="w-1/4 pl-4 bg-white rounded-xl shadow-lg p-0">
+        <h2 className="text-2xl font-semibold text-center bg-gray-200 py-3 rounded-t-xl">
+          Danh sách câu hỏi
+        </h2>
+        <div className="grid grid-cols-4 gap-2 p-4">
+          {data.map((question, index) => {
+            const isAnswered = saveSelected.some(
+              (selected) => selected[`Question${index + 1}`]
+            );
+            return (
+              <div
+                key={index}
+                className={`w-12 h-12 cursor-pointer text-center rounded-lg border flex flex-col justify-center items-center ${currentQuestion === index
+                    ? "bg-blue-100 border-blue-500"
+                    : "bg-gray-100 border-gray-300 hover:bg-gray-200"
+                  }`}
+                onClick={() => handleQuestionClick(index)}
+              >
+                <span className="text-xs font-medium">Câu {index + 1}</span>
+                {isAnswered ? (
+                  <span className="text-green-500 text-lg font-bold mt-1">✓</span>
+                ) : (
+                  <span className="text-gray-500 text-lg font-bold mt-1"> </span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+    </div>
+  );
+
+
 };
 
 export default Quiz;
