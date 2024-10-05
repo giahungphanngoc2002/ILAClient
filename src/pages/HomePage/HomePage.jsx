@@ -12,9 +12,9 @@ import Banner from "../../components/Banner/Banner";
 import Counters from "../../components/Counter/Counter";
 import CourseCarousel from "../../components/CourseCarousel/CourseCarousel";
 import FeaturesSection from "../../components/FeaturesSection/FeaturesSection";
-import ProjectsSection from "../../components/ProjectsSection/ProjectsSection";
 import TrainersSection from "../../components/TrainersSection/TrainersSection";
 import Footer from "../../components/Footer/Footer";
+import Contact from "../../components/Contact/Contact";
 
 
 export default function HomePage() {
@@ -177,23 +177,13 @@ export default function HomePage() {
 
   return (
     <div>
-      {/* <div className="top_container">
-        <HeroSection
-          user={user}
-          options={options}
-          onSearch={onSearch}
-          handleNavigateSignup={handleNavigateSignup}
-        />
-      </div> */}
-      {/* <Header /> */}
       <Banner />
-      <Counters />
-      <CourseCarousel />
       <FeaturesSection />
-      <ProjectsSection />
+      <CourseCarousel />
+      <Counters />
       <TrainersSection />
+      <Contact />
       <Footer />
-
       {showLinkModal && (
         <Modal
           show={showLinkModal}

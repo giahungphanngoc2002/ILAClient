@@ -15,16 +15,15 @@ const Banner = () => {
             <div className="container mx-auto h-full flex items-center justify-center">
                 <div className="text-center text-white z-10">
                     <h1 className="text-5xl font-light mb-4">
-                        The Best Professional e-Learning Courses <br />
-                        For Better World!
+                        Nền tảng Quản lý Giáo dục
                     </h1>
-                    <h2 className="text-xl font-normal mb-6">1500+ Centers Across the World</h2>
-                    <button
+                    <h2 className="text-xl font-normal mb-6">Hỗ trợ quản lý đào tạo, dạy - học và đánh giá, kiểm tra trực tuyến <br /> dành cho các đơn vị giáo dục</h2>
+                    {/* <button
                         className="bg-blue-600 text-xl text-white px-8 py-3 rounded-full inline-flex items-center"
-                        onClick={ handleToSearchClass }
+                        onClick={handleToSearchClass}
                     >
                         Bắt đầu
-                    </button>
+                    </button> */}
                 </div>
             </div>
         </div>

@@ -1,58 +1,48 @@
 import React from "react";
 
 const CourseCarousel = () => {
-    const courses = [
-        {
-            title: "Toán học",
-            price: "15",
-            img: "images/hoc-toan.jpg",
-            content: "Khóa học giúp học sinh phát triển tư duy logic, rèn luyện kỹ năng giải toán từ cơ bản đến nâng cao, phù hợp với mọi lứa tuổi. Chuẩn bị tốt cho các kỳ thi."
-        },
-        {
-            title: "Văn học",
-            price: "25",
-            img: "images/van-hoc.png",
-            content: "Khóa học Văn học giúp học sinh hiểu sâu về các tác phẩm, rèn luyện kỹ năng phân tích và đọc hiểu, hỗ trợ trong học tập và thi cử."
-        },
-        {
-            title: "Anh văn",
-            price: "80",
-            img: "images/tieng-anh.jpg",
-            content: "Khóa học tiếng Anh cung cấp kiến thức ngữ pháp, từ vựng và kỹ năng giao tiếp, giúp học sinh tự tin trong học tập và các kỳ thi quốc tế."
-        }
-    ];
-
     return (
-        <div className="py-16 bg-gray-100 ">
+        <div className="py-16 bg-white">
             <div className="container mx-auto">
                 <h2 className="text-4xl font-bold mb-8 text-center">Môn học</h2>
                 <p className="text-gray-600 mb-12 text-center">Suspendisse ante mi iaculis ac eleifend id venenatis non eros.</p>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {courses.map((course, index) => (
-                        <div key={index} className="bg-white shadow-lg rounded-lg overflow-hidden flex flex-col h-full">
-                            <img src={course.img} alt={course.title} className="w-full h-48 object-cover border-b-2" />
-                            <div className="pt-3 px-4 flex-grow">
-                                <div className="flex justify-between">
-                                    <h3 className="text-lg font-bold mb-2">{course.title}</h3>
-                                    <span className="text-yellow-500 text-xl font-semibold">{course.price} người</span>
-                                </div>
-                                <p className="text-gray-500 mt-2 mb-4 line-clamp-3">
-                                    {course.content}
-                                </p>
-                            </div>
-                            <div className="pt-2 px-4 pb-4">
-                                <button className="inline-block bg-blue-500 text-white px-4 py-2 rounded-full hover:bg-blue-600">
-                                    Tham gia
-                                </button>
-                            </div>
-                        </div>
-                    ))}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-0">
+                    <div className="bg-orange-400 overflow-hidden flex flex-col h-full py-10 px-12 justify-center items-center">
+                        <img src="images/toan-hoc.png" alt="Toán học" className="w-[157px] h-[150px] object-cover" />
+                        <div className="text-white text-center mt-4 text-xl font-bold">Toán học</div>
+                    </div>
+                    <div className="bg-neutral-100 overflow-hidden flex flex-col h-full py-10 px-12 justify-center items-center">
+                        <img src="images/vat-ly.png" alt="Vật lý" className="w-[157px] h-[150px] object-cover" />
+                        <div className="text-black text-center mt-4 text-xl font-bold">Vật lý</div>
+                    </div>
+                    <div className="bg-yellow-300 overflow-hidden flex flex-col h-full py-10 px-12 justify-center items-center">
+                        <img src="images/tieng-anh.png" alt="Tiếng anh" className="w-[157px] h-[150px] object-cover" />
+                        <div className="text-white text-center mt-4 text-xl font-bold">Tiếng anh</div>
+                    </div>
+                    <div className="bg-neutral-100 overflow-hidden flex flex-col h-full py-10 px-12 justify-center items-center">
+                        <img src="images/hoa-hoc.png" alt="Hoá học" className="w-[157px] h-[150px] object-cover" />
+                        <div className="text-black text-center mt-4 text-xl font-bold">Hoá học</div>
+                    </div>
+                    <div className="bg-neutral-100 overflow-hidden flex flex-col h-full py-10 px-12 justify-center items-center">
+                        <img src="images/lich-su.png" alt="Lịch sử" className="w-[157px] h-[150px] object-cover" />
+                        <div className="text-black text-center mt-4 text-xl font-bold">Lịch sử</div>
+                    </div>
+                    <div className="bg-sky-400 overflow-hidden flex flex-col h-full py-10 px-12 justify-center items-center">
+                        <img src="images/dia-ly.png" alt="Địa lý" className="w-[157px] h-[150px] object-cover" />
+                        <div className="text-white text-center mt-4 text-xl font-bold">Địa lý</div>
+                    </div>
+                    <div className="bg-neutral-100 overflow-hidden flex flex-col h-full py-10 px-12 justify-center items-center">
+                        <img src="images/sinh-hoc.png" alt="Sinh học" className="w-[157px] h-[150px] object-cover" />
+                        <div className="text-black text-center mt-4 text-xl font-bold">Sinh học</div>
+                    </div>
+                    <div className="bg-blue-500 overflow-hidden flex flex-col h-full py-10 px-12 justify-center items-center">
+                        <img src="images/ngu-van.png" alt="Ngữ văn" className="w-[157px] h-[150px] object-cover" />
+                        <div className="text-white text-center mt-4 text-xl font-bold">Ngữ văn</div>
+                    </div>
                 </div>
             </div>
         </div>
     );
-
-
 };
 
 export default CourseCarousel;

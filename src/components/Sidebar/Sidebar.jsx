@@ -1,96 +1,54 @@
-import { NavLink } from 'react-router-dom';
-import { FaHome, FaCar, FaUserShield, FaShoppingCart, FaCalendarAlt, FaSignOutAlt } from 'react-icons/fa';
+import { MoreVertical, ChevronLast, ChevronFirst } from "lucide-react";
+import { useContext, createContext, useState } from "react";
+import { Link } from "react-router-dom";
 
-export const Sidebar = () => {
+// Create and export SidebarContext
+export const SidebarContext = createContext();
+
+export default function Sidebar({ children }) {
+  const [expanded, setExpanded] = useState(true);
+
   return (
-    <div className="h-screen w-64 bg-gradient-to-b from-blue-600 to-blue-800 text-white shadow-lg">
-      {/* Logo Section */}
-      <div className="flex items-center justify-center py-6 border-b border-blue-500">
-        <NavLink to="/" className="text-3xl font-bold tracking-wider no-underline text-white">ILA</NavLink>
-      </div>
+    <aside className="h-screen">
+      <nav className="h-full flex flex-col bg-white border-r shadow-sm">
+        <div className="p-4 pb-2 flex justify-between items-center">
+          {/* <img
+            src="/images/logo.png"
+            className={`overflow-hidden transition-all ${expanded ? "w-32" : "w-0 flex items-center justify-center no-underline "}`}
+            alt=""
+          /> */}
 
-      {/* Menu Items */}
-      <nav className="mt-10">
-        <ul className="space-y-2 p-0">
-          <li>
-            <NavLink
-              to="/admin/dashboard"
-              className={({ isActive }) =>
-                `flex items-center p-4 mx-3 rounded-lg no-underline transition-colors duration-300 text-lg font-medium ${isActive ? 'bg-blue-500 text-white shadow-md' : 'text-blue-200 hover:bg-blue-700 hover:shadow-lg'
-                }`
-              }
-            >
-              <FaHome className="mr-3 text-xl" />
-              <span>Tổng quát</span>
-            </NavLink>
-          </li>
+          <Link to="/" className={`flex items-center justify-center no-underline overflow-hidden transition-all ${expanded ? "w-32" : "w-0 "}`}>
+            <img src="/images/logoILA.png" alt="Logo" className="h-16 scale-150" />
+            <p className="text-4xl m-0 text-blue-600 tracking-widest font-bold">ILA</p>
+          </Link>
+          <button
+            onClick={() => setExpanded((curr) => !curr)}
+            className="p-1.5 rounded-lg bg-gray-50 hover:bg-gray-100"
+          >
+            {expanded ? <ChevronFirst /> : <ChevronLast />}
+          </button>
+        </div>
 
-          <li>
-            <NavLink
-              to="/admin/user"
-              className={({ isActive }) =>
-                `flex items-center p-4 mx-3 rounded-lg no-underline transition-colors duration-300 text-lg font-medium ${isActive ? 'bg-blue-500 text-white shadow-md' : 'text-blue-200 hover:bg-blue-700 hover:shadow-lg'
-                }`
-              }
-            >
-              <FaUserShield className="mr-3 text-xl" />
-              <span>Tài khoản</span>
-            </NavLink>
-          </li>
+        <SidebarContext.Provider value={{ expanded }}>
+          <ul className="flex-1 px-3">{children}</ul>
+        </SidebarContext.Provider>
 
-          <li>
-            <NavLink
-              to="/admin/class"
-              className={({ isActive }) =>
-                `flex items-center p-4 mx-3 rounded-lg no-underline transition-colors duration-300 text-lg font-medium ${isActive ? 'bg-blue-500 text-white shadow-md' : 'text-blue-200 hover:bg-blue-700 hover:shadow-lg'
-                }`
-              }
-            >
-              <FaCar className="mr-3 text-xl" />
-              <span>Lớp học</span>
-            </NavLink>
-          </li>
-
-          <li>
-            <NavLink
-              to="/admin/revenue"
-              className={({ isActive }) =>
-                `flex items-center p-4 mx-3 rounded-lg no-underline transition-colors duration-300 text-lg font-medium ${isActive ? 'bg-blue-500 text-white shadow-md' : 'text-blue-200 hover:bg-blue-700 hover:shadow-lg'
-                }`
-              }
-            >
-              <FaShoppingCart className="mr-3 text-xl" />
-              <span>Doanh thu</span>
-            </NavLink>
-          </li>
-
-          <li>
-            <NavLink
-              to="/admin/reviews"
-              className={({ isActive }) =>
-                `flex items-center p-4 mx-3 rounded-lg no-underline transition-colors duration-300 text-lg font-medium ${isActive ? 'bg-blue-500 text-white shadow-md' : 'text-blue-200 hover:bg-blue-700 hover:shadow-lg'
-                }`
-              }
-            >
-              <FaCalendarAlt className="mr-3 text-xl" />
-              <span>Đánh giá</span>
-            </NavLink>
-          </li>
-
-          <li>
-            <NavLink
-              to="/admin/logout"
-              className={({ isActive }) =>
-                `flex items-center p-4 mx-3 rounded-lg no-underline transition-colors duration-300 text-lg font-medium ${isActive ? 'bg-red-500 text-white shadow-md' : 'text-red-200 hover:bg-red-700 hover:shadow-lg'
-                }`
-              }
-            >
-              <FaSignOutAlt className="mr-3 text-xl" />
-              <span>Đăng xuất</span>
-            </NavLink>
-          </li>
-        </ul>
+        <div className="border-t flex p-3">
+          <img
+            src="https://ui-avatars.com/api/?background=c7d2fe&color=3730a3&bold=true"
+            alt=""
+            className="w-10 h-10 rounded-md"
+          />
+          <div className={`flex justify-between items-center overflow-hidden transition-all ${expanded ? "w-52 ml-3" : "w-0"}`}>
+            <div className="leading-4">
+              <h4 className="font-semibold">John Doe</h4>
+              <span className="text-xs text-gray-600">johndoe@gmail.com</span>
+            </div>
+            <MoreVertical size={20} />
+          </div>
+        </div>
       </nav>
-    </div>
+    </aside>
   );
-};
+}

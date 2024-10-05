@@ -1,10 +1,10 @@
 import React from "react";
-import HeaderComponent from "../HeaderComponent/HeaderComponent";
+import Header from "../HeaderComponent/Header";
 
 export default function  DefaultComponent({ children }) {
   return (
     <div>
-      <HeaderComponent />
+      <Header />
       {children}
     </div>
   );
