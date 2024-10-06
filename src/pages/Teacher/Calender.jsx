@@ -3,7 +3,7 @@ import { GrNext, GrPrevious } from "react-icons/gr";
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-const Calendar = () => {
+const Calendar = ({ onClassClick }) => {
   const [currentWeekOffset, setCurrentWeekOffset] = useState(0); // Track week offset
   const [scheduleData, setScheduleData] = useState([]); // State to store fetched schedule data
   const [isLoading, setIsLoading] = useState(true); // Loading state
@@ -92,20 +92,16 @@ const Calendar = () => {
     if (classData) {
       const slotData = classData.slots.find(slot => slot.slotNumber === slotIndex + 1);
 
-      // Ensure that 'status' is treated as a boolean
       const isCompleted = Boolean(classData && classData.status);
 
-      // If status is true (Hoàn thành)
       if (slotData && isCompleted) {
         return { ...slotData, isCompleted: true };
       }
 
-      // If status is false and the time has passed, it's missed (Bỏ lỡ)
       if (slotData && slotDate < currentDateTime && !isCompleted) {
         return { ...slotData, isMissed: true };
       }
 
-      // If status is false but the time hasn't passed yet, it's upcoming (Sắp đến)
       if (slotData && slotDate >= currentDateTime && !isCompleted) {
         return { ...slotData, isMissed: false };
       }
@@ -117,8 +113,9 @@ const Calendar = () => {
   }
 
   const goToClass = (idClass) => {
-    navigate(`/teacher/class/${idClass}`)
+    onClassClick(idClass); // Call the passed function with classId
   }
+
 
   return (
     <div className="container mx-auto p-4">
@@ -164,7 +161,7 @@ const Calendar = () => {
                       (classData.isCompleted ? 'bg-green-100' : (classData.isMissed ? 'bg-red-100' : 'bg-yellow-100'))
                       : 'bg-white'} rounded-lg shadow-sm my-1 h-16 flex items-center justify-center`}
                   >
-                    <button onClick={() => goToClass(classData._id)}>
+                    <button onClick={() => goToClass(classData.classId._id)}>
 
                       {classData ? (
                         <div className="text-xs text-gray-700 w-full h-full flex flex-col items-center justify-center">

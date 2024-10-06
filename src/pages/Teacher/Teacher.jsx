@@ -7,17 +7,21 @@ import Calendar from "./Calender";
 import MyClass from "./StudentTable";
 import Dashboard from "../Dashboard/Dashboard";
 import MyClasses from "../MyClasses/MyClasses";
+import StudentTable from "./StudentTable";
 
 const Admin = () => {
   const [activeContent, setActiveContent] = useState("Home");
   const [expanded, setExpanded] = useState(true);
+  const [idClass, setIdClass] = useState(null);
 
   const renderContent = () => {
     switch (activeContent) {
       case "schedule":
-        return <Calendar />;
+        return <Calendar onClassClick={(classId) => handleClassClick(classId)} />;
       case "my-class":
         return <MyClasses />;
+      case "tableStudent":
+        return <StudentTable idClass={idClass} handleBackSchedule={handleBackSchedule} />;
       case "Settings":
         return <h1 className="text-2xl font-bold">Settings</h1>;
       case "Notifications":
@@ -26,6 +30,15 @@ const Admin = () => {
         return <Dashboard />;
     }
   };
+
+  const handleClassClick = (classId) => {
+    setIdClass(classId);
+    setActiveContent("tableStudent"); 
+  };
+
+  const handleBackSchedule = () => {
+    setActiveContent("schedule")
+  }
 
   return (
     <div className="flex">
