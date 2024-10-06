@@ -1,24 +1,16 @@
 import { MoreVertical, ChevronLast, ChevronFirst } from "lucide-react";
-import { useContext, createContext, useState } from "react";
+import { createContext, useState } from "react";
 import { Link } from "react-router-dom";
 
 // Create and export SidebarContext
 export const SidebarContext = createContext();
 
-export default function Sidebar({ children }) {
-  const [expanded, setExpanded] = useState(true);
-
+export default function Sidebar({ children, expanded, setExpanded }) {
   return (
-    <aside className="h-screen">
-      <nav className="h-full flex flex-col bg-white border-r shadow-sm">
+    <aside className={`h-screen ${expanded ? "w-64" : "w-20"} transition-width duration-300`}>
+      <nav className="fixed h-full flex flex-col bg-white border-r shadow-sm">
         <div className="p-4 pb-2 flex justify-between items-center">
-          {/* <img
-            src="/images/logo.png"
-            className={`overflow-hidden transition-all ${expanded ? "w-32" : "w-0 flex items-center justify-center no-underline "}`}
-            alt=""
-          /> */}
-
-          <Link to="/" className={`flex items-center justify-center no-underline overflow-hidden transition-all ${expanded ? "w-32" : "w-0 "}`}>
+          <Link to="/" className={`flex items-center justify-center no-underline overflow-hidden transition-all ${expanded ? "w-32" : "w-0"}`}>
             <img src="/images/logoILA.png" alt="Logo" className="h-16 scale-150" />
             <p className="text-4xl m-0 text-blue-600 tracking-widest font-bold">ILA</p>
           </Link>
@@ -31,7 +23,7 @@ export default function Sidebar({ children }) {
         </div>
 
         <SidebarContext.Provider value={{ expanded }}>
-          <ul className="flex-1 px-3">{children}</ul>
+          <ul className="flex-1 px-3 overflow-y-auto">{children}</ul>
         </SidebarContext.Provider>
 
         <div className="border-t flex p-3">

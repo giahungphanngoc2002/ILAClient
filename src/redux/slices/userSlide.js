@@ -10,12 +10,12 @@ const initialState = {
   id: "",
   access_token: "",
   password: "",
-  count: "",
+  
   updatedAt:" ",
   createdAt:" ",
-  isAdmin: false,
-  isTeacher: false,
+  
   isAuthenticated: false,
+  role:" ",
 };
 
 export const userSlice = createSlice({
@@ -33,11 +33,11 @@ export const userSlice = createSlice({
         avatar = "",
         access_token = "",
         password = "",
-        count = "",
+        
         createdAt="",
         updatedAt="",
-        isTeacher = false,
-        isAdmin = false,
+        role=" ",
+        
       } = action.payload;
       state.name = name;
       state.email = email;
@@ -45,11 +45,10 @@ export const userSlice = createSlice({
       state.address = address;
       state.age = age;
       state.id = _id;
-      state.isAdmin = isAdmin;
-      state.isTeacher = isTeacher;
+      state.role=role;
       state.avatar = avatar;
       state.password = password;
-      state.count = count;
+      
       state.updatedAt = updatedAt;
       state.createdAt = createdAt;
       state.access_token = access_token;
@@ -64,8 +63,8 @@ export const userSlice = createSlice({
       state.id = "";
       state.avatar = "";
       state.access_token = "";
-      state.isAdmin = false;
-      state.isTeacher = false;
+      state.role="";
+      
       state.isAuthenticated = false; // Reset authentication
     },
   },

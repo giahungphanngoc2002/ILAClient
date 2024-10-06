@@ -6,7 +6,10 @@ import Profile from "../pages/ProfilePage/ProfilePage";
 import RequestPasswordReset from "../pages/forgotpassword/RequestPasswordReset";
 import ResetPassword from "../pages/forgotpassword/ResetPassword";
 import ChangePassword from "../pages/ChangePassWord/ChangePassWord";
-import Admin from "../pages/Admin/Admin";
+import Teacher from "../pages/Teacher/Teacher";
+import GradeTable from "../pages/GradeTable/GradeTable";
+import TeachingMaterials from "../pages/TeachingMaterial/TeachingMaterial";
+import StudentTable from "../pages/Teacher/StudentTable";
 
 
 export const routes = [
@@ -51,8 +54,23 @@ export const routes = [
     isShowHeader: true,
   },
   {
-    path: "/admin/*",
-    page: Admin,
+    path: "teacher/gradeTable",
+    page: GradeTable,
+    isShowHeader: false,
+  },
+  {
+    path: "teacher/teachingMaterial",
+    page: TeachingMaterials,
+    isShowHeader: false,
+  },
+  {
+    path: `teacher/class/:id`,
+    page: StudentTable,
+    isShowHeader: false,
+  },
+  {
+    path: "/teacher/*",
+    page: Teacher,
     isShowHeader: false,
   },
   {

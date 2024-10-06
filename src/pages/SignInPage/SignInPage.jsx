@@ -28,26 +28,35 @@ export default function SignInPage() {
   useEffect(() => {
     if (isSuccess && data?.status !== "ERR") {
       toast.success("Đăng nhập thành công");
-      localStorage.setItem("access_token", JSON.stringify(data?.access_token));
 
-      if (data?.access_token) {
-        const decoded = jwt_decode(data?.access_token);
-        if (decoded?.id) {
-          handleGetDetailsUser(decoded?.id, data?.access_token);
+      const accessToken = data?.access_token;
+      if (accessToken && typeof accessToken === "string") {
+        localStorage.setItem("access_token", JSON.stringify(accessToken));
+
+        try {
+          const decoded = jwt_decode(accessToken);
+          if (decoded?.id) {
+            handleGetDetailsUser(decoded?.id, accessToken);
+          }
+        } catch (error) {
+          console.error("Error decoding JWT:", error.message);
         }
+      } else {
+        console.error("Invalid access token:", accessToken);
       }
 
-      // Check if user is admin and navigate accordingly
-      if (data?.isAdmin) {
+      if (data?.role === "Admin") {
         navigate("/admin/dashboard");
+      } else if (data?.role === "Teacher") {
+        navigate("/teacher");
       } else {
         navigate("/");
       }
-
     } else if (isError) {
       toast.error(error?.response?.data?.message || "Đăng nhập thất bại");
     }
   }, [isSuccess, isError, data, error, navigate]);
+
 
   const handleGetDetailsUser = async (id, token) => {
     try {
@@ -89,7 +98,7 @@ export default function SignInPage() {
       <div className="flex w-full h-full max-w-8xl bg-white shadow-lg rounded-lg overflow-hidden">
         <div className="hidden md:block bg-black relative">
           <img
-            src="/images/ảnhlogin.jpg"
+            src="/images/anhlogin.jpg"
             alt="Nền"
             className="w-full h-full object-cover opacity-90"
           />

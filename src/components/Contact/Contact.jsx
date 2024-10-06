@@ -8,15 +8,49 @@ const Contact = () => {
         message: '',
     });
 
+    const [isSubmitting, setIsSubmitting] = useState(false); // Trạng thái gửi
+    const [responseMessage, setResponseMessage] = useState(""); // Thông báo sau khi gửi
+
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log(formData);
-        // Handle form submission logic here
+
+        // Kiểm tra xem có thiếu thông tin không
+        if (!formData.name || !formData.email || !formData.phone || !formData.message) {
+            setResponseMessage("Vui lòng điền đầy đủ thông tin.");
+            return;
+        }
+
+        setIsSubmitting(true); // Bắt đầu trạng thái gửi
+
+        // Gửi dữ liệu lên backend
+        try {
+            const response = await fetch("http://localhost:3001/api/contact/contact", { // Đảm bảo đúng URL backend
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(formData),
+            });
+
+            if (!response.ok) {
+                // Nếu phản hồi không OK, đưa ra lỗi chi tiết hơn
+                const errorData = await response.json();
+                throw new Error(errorData.message || "Lỗi khi gửi yêu cầu.");
+            }
+
+            const result = await response.json();
+            setResponseMessage(result.message || "Gửi thông tin thành công! Chúng tôi sẽ liên hệ với bạn sớm nhất.");
+
+        } catch (error) {
+            setResponseMessage(`Lỗi: ${error.message}`);
+        }
+
+        setIsSubmitting(false); // Kết thúc trạng thái gửi
     };
 
     return (
@@ -92,21 +126,28 @@ const Contact = () => {
                                 </div>
                                 <div className="w-full flex justify-end xl:w-[560px]">
                                     <button
-                                    style={{backgroundColor:"#F47E1F"}}
+                                        style={{ backgroundColor: "#F47E1F" }}
                                         type="submit"
                                         className="rounded-[5px] w-[100%] md:w-[177px] h-[55px] flex items-center font-bold justify-center text-white text-[15px]"
+                                        disabled={isSubmitting}
                                     >
-                                        Gửi Đăng Ký
+                                        {isSubmitting ? "Đang gửi..." : "Gửi Đăng Ký"}
                                     </button>
                                 </div>
                             </form>
+
+                            {/* Thông báo sau khi gửi */}
+                            {responseMessage && (
+                                <div className="mt-4 text-white font-bold">
+                                    {responseMessage}
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     );
-
 };
 
 export default Contact;
