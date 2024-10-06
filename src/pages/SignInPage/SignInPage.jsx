@@ -89,7 +89,7 @@ export default function SignInPage() {
       <div className="flex w-full h-full max-w-8xl bg-white shadow-lg rounded-lg overflow-hidden">
         <div className="hidden md:block bg-black relative">
           <img
-            src="/images/ảnhlogin.jpg"
+            src="/images/anhlogin.jpg"
             alt="Nền"
             className="w-full h-full object-cover opacity-90"
           />

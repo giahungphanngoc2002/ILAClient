@@ -81,7 +81,7 @@ export default function SignUp() {
       <div className="flex w-full h-full max-w-8xl bg-white shadow-lg rounded-lg overflow-hidden">
         <div className="hidden md:block bg-black relative">
           <img
-            src="/images/ảnhlogin.jpg"
+            src="/images/anhlogin.jpg"
             alt="Nền"
             className="w-full h-full object-cover opacity-90"
           />
@@ -100,15 +100,15 @@ export default function SignUp() {
             Khám phá nền tảng học tập trực tuyến hiện đại, giúp bạn chinh phục tri thức và mở ra tương lai tươi sáng.
           </p>
           <div className="flex space-x-4 mb-6">
-            <Link 
-              to="/signin" 
+            <Link
+              to="/signin"
               className="text-blue-600 font-bold hover:text-blue-800 transition-colors duration-200"
               style={{ textDecoration: 'none' }}
             >
               Đăng nhập
             </Link>
-            <Link 
-              to="/signup" 
+            <Link
+              to="/signup"
               className="text-gray-600 hover:text-gray-800 transition-colors duration-200"
               style={{ textDecoration: 'none' }}
             >
@@ -166,8 +166,8 @@ export default function SignUp() {
               >
                 Đăng ký
               </button>
-              <Link 
-                to="/requestPasswordReset" 
+              <Link
+                to="/requestPasswordReset"
                 className="text-sm text-blue-500 hover:underline"
                 style={{ textDecoration: 'none' }}
               >
@@ -177,20 +177,20 @@ export default function SignUp() {
           </form>
           <div className="flex items-center justify-center space-x-4 mt-14">
             <span className="text-gray-500">Hoặc đăng ký bằng</span>
-            <a 
-              href="#" 
+            <a
+              href="#"
               className="rounded-full bg-blue-600 p-3 text-white hover:bg-blue-700 active:bg-blue-800 transition duration-200 flex items-center justify-center w-12 h-12"
             >
               <FontAwesomeIcon icon={faFacebookF} className="text-lg" />
             </a>
-            <a 
-              href="#" 
+            <a
+              href="#"
               className="rounded-full bg-red-500 p-3 text-white hover:bg-red-600 active:bg-red-700 transition duration-200 flex items-center justify-center w-12 h-12"
             >
               <FontAwesomeIcon icon={faGoogle} className="text-lg" />
             </a>
-            <a 
-              href="#" 
+            <a
+              href="#"
               className="rounded-full bg-gray-800 p-3 text-white hover:bg-gray-700 active:bg-gray-900 transition duration-200 flex items-center justify-center w-12 h-12"
             >
               <FontAwesomeIcon icon={faGithub} className="text-lg" />
