@@ -9,6 +9,7 @@ import ChangePassword from "../pages/ChangePassWord/ChangePassWord";
 import Teacher from "../pages/Teacher/Teacher";
 import GradeTable from "../pages/GradeTable/GradeTable";
 import TeachingMaterials from "../pages/TeachingMaterial/TeachingMaterial";
+import StudentTable from "../pages/Teacher/StudentTable";
 
 
 export const routes = [
@@ -60,6 +61,11 @@ export const routes = [
   {
     path: "teacher/teachingMaterial",
     page: TeachingMaterials,
+    isShowHeader: false,
+  },
+  {
+    path: `teacher/class/:id`,
+    page: StudentTable,
     isShowHeader: false,
   },
   {

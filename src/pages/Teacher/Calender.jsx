@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { GrNext, GrPrevious } from "react-icons/gr";
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const Calendar = () => {
   const [currentWeekOffset, setCurrentWeekOffset] = useState(0); // Track week offset
   const [scheduleData, setScheduleData] = useState([]); // State to store fetched schedule data
   const [isLoading, setIsLoading] = useState(true); // Loading state
   const [isError, setIsError] = useState(false); // Error state
+  const navigate = useNavigate();
+
 
   // Fetch schedule data from the API
   const getAllSchedule = async () => {
@@ -83,34 +86,38 @@ const Calendar = () => {
 
     const classData = scheduleData.find(
       (cls) => new Date(cls.dayOfWeek).toLocaleDateString('en-GB') === formattedDate &&
-               cls.slots.some(slot => slot.slotNumber === slotIndex + 1)
+        cls.slots.some(slot => slot.slotNumber === slotIndex + 1)
     );
-    
+
     if (classData) {
       const slotData = classData.slots.find(slot => slot.slotNumber === slotIndex + 1);
-    
+
       // Ensure that 'status' is treated as a boolean
       const isCompleted = Boolean(classData && classData.status);
-    
+
       // If status is true (Hoàn thành)
       if (slotData && isCompleted) {
         return { ...slotData, isCompleted: true };
       }
-    
+
       // If status is false and the time has passed, it's missed (Bỏ lỡ)
       if (slotData && slotDate < currentDateTime && !isCompleted) {
         return { ...slotData, isMissed: true };
       }
-    
+
       // If status is false but the time hasn't passed yet, it's upcoming (Sắp đến)
       if (slotData && slotDate >= currentDateTime && !isCompleted) {
         return { ...slotData, isMissed: false };
       }
-    
+
       return slotData;
     }
-    
+
     return null;
+  }
+
+  const goToClass = (idClass) => {
+    navigate(`/teacher/class/${idClass}`)
   }
 
   return (
@@ -149,31 +156,31 @@ const Calendar = () => {
                 <span className="text-xs">{weekDates[index]}</span> {/* Display corresponding date */}
               </div>
               {slotTimes.map((slot, i) => {
-  const classData = getScheduleForDay(day, i);
-  return (
-    <div
-      key={i}
-      className={`py-3 border-b border-gray-300 ${classData ? 
-        (classData.isCompleted ? 'bg-green-100' : (classData.isMissed ? 'bg-red-100' : 'bg-yellow-100')) 
-        : 'bg-white'} 
-        rounded-lg shadow-sm my-1 h-16 flex items-center justify-center`}
-    >
-      {classData ? (
-        <div className="text-xs text-gray-700 w-full h-full flex flex-col items-center justify-center">
-          <div className="font-bold text-blue-800">{classData.subjectId.nameSubject}</div>
-          <div>{classData.classId.nameClass}</div>
-          <div className={`text-${classData.isCompleted ? 'green' : (classData.isMissed ? 'red' : 'yellow')}-600`}>
-  {classData.isCompleted ? 'Hoàn thành' : (classData.isMissed ? 'Bỏ lỡ' : 'Sắp đến')}
-</div>
-        </div>
-      ) : (
-        <div className="text-center text-gray-400">Trống</div>
-      )}
-    </div>
-  );
-})}
-              
-              
+                const classData = getScheduleForDay(day, i);
+                return (
+                  <div
+                    key={i}
+                    className={`py-3 border-b border-gray-300 ${classData ?
+                      (classData.isCompleted ? 'bg-green-100' : (classData.isMissed ? 'bg-red-100' : 'bg-yellow-100'))
+                      : 'bg-white'} rounded-lg shadow-sm my-1 h-16 flex items-center justify-center`}
+                  >
+                    <button onClick={() => goToClass(classData._id)}>
+
+                      {classData ? (
+                        <div className="text-xs text-gray-700 w-full h-full flex flex-col items-center justify-center">
+                          <div className="font-bold text-blue-800">{classData.subjectId.nameSubject}</div>
+                          <div>{classData.classId.nameClass}</div>
+                          <div className={`text-${classData.isCompleted ? 'green' : (classData.isMissed ? 'red' : 'yellow')}-600`}>
+                            {classData.isCompleted ? 'Hoàn thành' : (classData.isMissed ? 'Bỏ lỡ' : 'Sắp đến')}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="text-center text-gray-400">Trống</div>
+                      )}
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           ))}
         </div>
