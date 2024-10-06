@@ -63,7 +63,7 @@ const Admin = () => {
       </Sidebar>
 
       {/* Main Content */}
-      <div className={`flex-1 p-10 transition-all duration-300 ${expanded ? "ml-20" : "ml-20"}`}>
+      <div className={`bg-gray-100 flex-1 p-10 transition-all duration-300 ${expanded ? "pl-20" : ""}`}>
         {renderContent()}
       </div>
     </div>

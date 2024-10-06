@@ -113,6 +113,10 @@ function MyClasses() {
         navigate(`/teacher/gradeTable/`);
     }
 
+    const handleTeachingMaterial = () => {
+        navigate(`/teacher/teachingMaterial`);
+    }
+
     return (
         <div className="container mx-auto p-6">
             <h1 className="text-2xl font-bold text-blue-600 mb-6">Lớp Học Của Tôi</h1>
@@ -143,22 +147,22 @@ function MyClasses() {
                         {/* Chấm điểm */}
                         <div className="bg-gray-100 p-4 rounded-lg shadow-md">
                             <h3 className="text-lg font-semibold text-gray-700 mb-2"><FaClipboardList className="inline-block mr-2" /> Chấm Điểm</h3>
-                            <p>Cập nhật điểm số của học sinh.</p>
+                            <p>Tổng hợp điểm số của học sinh.</p>
                             <Button onClick={handleGradeTable} variant="primary">Truy cập bảng điểm</Button>
                         </div>
 
                         {/* Chấm công */}
                         <div className="bg-gray-100 p-4 rounded-lg shadow-md">
-                            <h3 className="text-lg font-semibold text-gray-700 mb-2"><FaClipboardList className="inline-block mr-2" /> Chấm Công</h3>
-                            <p>Điểm danh học sinh theo buổi học.</p>
-                            <Button variant="success">Truy cập chấm công</Button>
+                            <h3 className="text-lg font-semibold text-gray-700 mb-2"><FaClipboardList className="inline-block mr-2" /> Điểm Danh</h3>
+                            <p>Tổng hợp điểm danh của học sinh.</p>
+                            <Button variant="success">Truy cập điểm danh</Button>
                         </div>
 
                         {/* Tài liệu học tập */}
                         <div className="bg-gray-100 p-4 rounded-lg shadow-md">
                             <h3 className="text-lg font-semibold text-gray-700 mb-2"><FaFileAlt className="inline-block mr-2" /> Tài Liệu Học Tập</h3>
                             <p>Quản lý tài liệu và bài giảng cho lớp.</p>
-                            <Button variant="warning">Quản lý tài liệu</Button>
+                            <Button onClick={handleTeachingMaterial} variant="warning">Quản lý tài liệu</Button>
                         </div>
 
                         {/* Bài tập */}
