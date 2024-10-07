@@ -1,11 +1,14 @@
 import { MoreVertical, ChevronLast, ChevronFirst } from "lucide-react";
 import { createContext, useState } from "react";
+import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 
 // Create and export SidebarContext
 export const SidebarContext = createContext();
 
 export default function Sidebar({ children, expanded, setExpanded }) {
+  const user = useSelector((state) => state.user);
+  console.log(user)
   return (
     <aside className={`h-screen ${expanded ? "w-64" : "w-20"} transition-width duration-300`}>
       <nav className="fixed h-full flex flex-col bg-white border-r shadow-sm">
