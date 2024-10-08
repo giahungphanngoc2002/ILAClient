@@ -210,7 +210,7 @@ const ProfilePage = () => {
 
   return (
     <div className="max-w-7xl mx-auto p-6">
-      <div className="bg-gradient-to-r from-blue-100 to-rose-100 shadow-lg rounded-lg overflow-hidden p-8">
+      <div className="bg-white shadow-lg rounded-lg overflow-hidden p-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="flex flex-col items-center">
             <div className="relative">

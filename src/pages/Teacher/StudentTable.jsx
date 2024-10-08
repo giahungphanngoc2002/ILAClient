@@ -123,9 +123,122 @@ const StudentTable = () => {
 
       {selectedStudent && (
         <Modal show={showModal} onHide={closeModal} size="xl">
-          <Modal.Body>
-            {/* Nội dung modal */}
-          </Modal.Body>
+          {/* <Modal.Body>
+            <div className="bg-gray-100 flex justify-center">
+              <div className="bg-white p-8 rounded-lg shadow-lg w-full">
+                <h2 className="text-2xl font-bold mb-4 text-center">Bảng Điểm Học Sinh</h2>
+                <table className="table-auto w-full border-collapse">
+                  <thead>
+                    <tr>
+                      <th className="border px-4 py-2">Tên học sinh</th>
+                      <th className="border px-4 py-2 cursor-pointer"
+                        onClick={() => {
+                          setSelectedUser({
+                            ...selectedUser,
+                            oralScore: [...selectedUser.oralScore, ''],
+                          });
+                        }}>
+                        Điểm miệng
+                      </th>
+                      <th className="border px-4 py-2 cursor-pointer"
+                        onClick={() => {
+                          setSelectedUser({
+                            ...selectedUser,
+                            quizScore: [...selectedUser.quizScore, ''],
+                          });
+                        }}>
+                        Điểm 15 phút
+                      </th>
+                      <th className="border px-4 py-2 cursor-pointer"
+                        onClick={() => {
+                          setSelectedUser({
+                            ...selectedUser,
+                            testScore: [...selectedUser.testScore, ''],
+                          });
+                        }}>
+                        Điểm 1 tiết
+                      </th>
+                      <th className="border px-4 py-2">Điểm cuối kì</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td className="border px-4 py-2">
+                        <input
+                          type="text"
+                          name="name"
+                          value={selectedUser.name}
+                          readOnly
+                          className="w-full border rounded px-2 py-1 bg-gray-100"
+                          style={{ width: '250px' }}
+                        />
+                      </td>
+                      <td className="border px-4 py-2">
+                        <div className="grid grid-cols-2 gap-2">
+                          {selectedUser.oralScore.map((score, index) => (
+                            <input
+                              key={index}
+                              type="text"
+                              value={score}
+                              onChange={(e) => {
+                                const newScores = [...selectedUser.oralScore];
+                                newScores[index] = e.target.value;
+                                setSelectedUser({ ...selectedUser, oralScore: newScores });
+                              }}
+                              className="w-full border rounded px-2 py-1"
+                            />
+                          ))}
+                        </div>
+                      </td>
+                      <td className="border px-4 py-2">
+                        <div className="grid grid-cols-2 gap-2">
+                          {selectedUser.quizScore.map((score, index) => (
+                            <input
+                              key={index}
+                              type="text"
+                              value={score}
+                              onChange={(e) => {
+                                const newScores = [...selectedUser.quizScore];
+                                newScores[index] = e.target.value;
+                                setSelectedUser({ ...selectedUser, quizScore: newScores });
+                              }}
+                              className="w-full border rounded px-2 py-1"
+                            />
+                          ))}
+                        </div>
+                      </td>
+                      <td className="border px-4 py-2">
+                        <div className="grid grid-cols-2 gap-2">
+                          {selectedUser.testScore.map((score, index) => (
+                            <input
+                              key={index}
+                              type="text"
+                              value={score}
+                              onChange={(e) => {
+                                const newScores = [...selectedUser.testScore];
+                                newScores[index] = e.target.value;
+                                setSelectedUser({ ...selectedUser, testScore: newScores });
+                              }}
+                              className="w-full border rounded px-2 py-1"
+                            />
+                          ))}
+                        </div>
+                      </td>
+                      <td className="border px-4 py-2">
+                        <input
+                          type="text"
+                          name="finalScore"
+                          value={selectedUser.finalScore}
+                          onChange={(e) => setSelectedUser({ ...selectedUser, finalScore: e.target.value })}
+                          className="w-full border rounded px-2 py-1"
+                        />
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </Modal.Body> */}
           <Modal.Footer>
             <Button variant="secondary" onClick={closeModal}>
               Tắt

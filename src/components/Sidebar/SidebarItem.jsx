@@ -7,7 +7,8 @@ export function SidebarItem({ icon, text, active, alert, onClick }) {
     return (
         <li
             onClick={onClick}
-            className={`relative flex items-center py-2 px-3 my-1 font-medium rounded-md cursor-pointer transition-colors group ${active ? "bg-gradient-to-tr from-blue-200 to-blue-100 text-blue-800" : "hover:bg-blue-50 text-gray-600"}`}
+            className={`relative flex items-center py-2 px-3 my-1 font-medium rounded-md cursor-pointer transition-colors group 
+            ${active ? "bg-gradient-to-tr from-blue-200 to-blue-100 text-blue-800" : "hover:bg-blue-50 text-gray-600"}`}
         >
             {icon}
             <span className={`overflow-hidden transition-all ${expanded ? "w-52 ml-3" : "w-0"}`}>

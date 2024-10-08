@@ -13,6 +13,7 @@ import StudentTable from "../pages/Teacher/StudentTable";
 import Calendar from "../pages/Teacher/Calender";
 import MyClasses from "../pages/MyClasses/MyClasses";
 import AttendanceTable from "../pages/AttendanceTable/AttendanceTable";
+import Notifications from "../pages/Notification/Notifications";
 
 
 export const routes = [
@@ -101,7 +102,18 @@ export const routes = [
     isShowHeader: false,
     isShowSideBar: true,
   },
-
+  {
+    path: "/teacher/profile",
+    page: Profile,
+    isShowHeader: false,
+    isShowSideBar: true,
+  },
+  {
+    path: "/teacher/notification",
+    page: Notifications,
+    isShowHeader: false,
+    isShowSideBar: true,
+  },
   {
     path: "*",
     page: NotFoundPage,
