@@ -1,10 +1,11 @@
 import { FaChalkboardTeacher, FaUserGraduate, FaCalendarAlt, FaBell, FaChartLine } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 
 function Dashboard() {
+    const navigate = useNavigate();
     return (
         <div className="container mx-auto p-6">
             <h1 className="text-2xl font-bold text-blue-600 mb-6">Bảng Điều Khiển Tổng Quan</h1>
-
             {/* Section: Quick Stats */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 {/* Số lượng lớp dạy */}

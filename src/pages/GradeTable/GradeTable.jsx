@@ -85,7 +85,7 @@ const GradeTable = () => {
     });
 
     return (
-        <div className="container mx-auto p-6">
+        <div className="container mx-auto p-6 min-h-screen">
             <h1 className="text-2xl font-bold mb-6 text-center">Bảng Điểm Môn Toán Lớp 10/1</h1>
 
             {/* Tìm kiếm và lọc */}
@@ -113,7 +113,7 @@ const GradeTable = () => {
 
                 <div className="flex items-center space-x-2">
                     <button
-                        className="px-4 py-2 bg-green-500 text-white rounded-lg shadow-lg flex items-center hover:bg-green-600 transition duration-300"
+                        className="px-4 py-2 bg-green-600 text-white rounded-lg shadow-lg flex items-center hover:bg-green-700 transition duration-300"
                         onClick={handleDownloadExcel}
                     >
                         <FaFileExcel className="mr-2" /> Tải xuống Excel

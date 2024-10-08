@@ -10,6 +10,9 @@ import Teacher from "../pages/Teacher/Teacher";
 import GradeTable from "../pages/GradeTable/GradeTable";
 import TeachingMaterials from "../pages/TeachingMaterial/TeachingMaterial";
 import StudentTable from "../pages/Teacher/StudentTable";
+import Calendar from "../pages/Teacher/Calender";
+import MyClasses from "../pages/MyClasses/MyClasses";
+import AttendanceTable from "../pages/AttendanceTable/AttendanceTable";
 
 
 export const routes = [
@@ -17,6 +20,7 @@ export const routes = [
     path: "/",
     page: HomePage,
     isShowHeader: true,
+    isShowSideBar: false,
   },
   {
     path: "/changePassword",
@@ -64,6 +68,11 @@ export const routes = [
     isShowHeader: false,
   },
   {
+    path: "teacher/attendanceTable",
+    page: AttendanceTable,
+    isShowHeader: false,
+  },
+  {
     path: `teacher/class/:id`,
     page: StudentTable,
     isShowHeader: false,
@@ -72,7 +81,27 @@ export const routes = [
     path: "/teacher/*",
     page: Teacher,
     isShowHeader: false,
+    isShowSideBar: true,
   },
+  {
+    path: "teacher/calender/",
+    page: Calendar,
+    isShowHeader: false,
+    isShowSideBar: true,
+  },
+  {
+    path: "teacher/calender/:idClass",
+    page: StudentTable,
+    isShowHeader: false,
+    isShowSideBar: true,
+  },
+  {
+    path: "/teacher/myClass",
+    page: MyClasses,
+    isShowHeader: false,
+    isShowSideBar: true,
+  },
+
   {
     path: "*",
     page: NotFoundPage,

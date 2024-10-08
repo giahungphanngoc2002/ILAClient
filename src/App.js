@@ -10,6 +10,7 @@ import { jwtDecode as jwt_decode } from "jwt-decode";
 import { useDispatch } from "react-redux";
 import * as UserService from "./services/UserService";
 import { updateUser } from "./redux/slices/userSlide";
+import DefaultSidebar from "./components/DefaultSidebar/DefaultSidebar";
 
 export default function App() {
   const dispatch = useDispatch();
@@ -17,7 +18,7 @@ export default function App() {
   useEffect(() => {
     const { storageData, decoded } = handleDecoded();
     if (decoded?.id) {
-      handleGetDetailsUser(decoded?.id, storageData);
+      handleGetDetailsUser(decoded.id, storageData);
     }
   }, []);
 
@@ -29,12 +30,12 @@ export default function App() {
       try {
         storageData = JSON.parse(storageData);
         if (typeof storageData === 'string') {
-          decoded = jwt_decode(storageData);  // Decode only if it's a string
+          decoded = jwt_decode(storageData);
         } else {
           console.error("Invalid token format. Expected a string.");
         }
       } catch (error) {
-        console.error("Error decoding token:", error.message); // Catch any decoding errors
+        console.error("Error decoding token:", error.message);
       }
     } else {
       console.error("Invalid or missing token in localStorage.");
@@ -66,9 +67,10 @@ export default function App() {
   };
 
   UserService.axiosJWT.interceptors.request.use(async (config) => {
-    const currentTime = new Date();
+    const currentTime = new Date().getTime() / 1000;
     const { decoded } = handleDecoded();
-    if (decoded?.exp && decoded.exp < currentTime.getTime() / 1000) {
+
+    if (decoded?.exp && decoded.exp < currentTime) {
       try {
         const data = await UserService.refreshToken();
         config.headers["Authorization"] = `Bearer ${data?.access_token}`;
@@ -80,27 +82,33 @@ export default function App() {
   });
 
   return (
-    <div>
+    <div className="flex h-screen">
       <Router>
-        <Routes>
-          {routes.map((route) => {
-            const Page = route.page;
-            const Layout = route.isShowHeader
-              ? DefaultComponent
-              : React.Fragment;
-            return (
-              <Route
-                key={route.path}
-                path={route.path}
-                element={
-                  <Layout>
-                    <Page />
-                  </Layout>
-                }
-              />
-            );
-          })}
-        </Routes>
+        <div className="flex flex-col flex-1">
+          <Routes>
+            {routes.map((route) => {
+              const Page = route.page;
+
+              return (
+                <Route
+                  key={route.path}
+                  path={route.path}
+                  element={
+                    <div className="flex bg-gray-100">
+                      {route.isShowSideBar && <DefaultSidebar />}
+                      <div className="flex-1">
+                        {route.isShowHeader && <DefaultComponent />}
+                        <Page />
+                      </div>
+                    </div>
+                  }
+                />
+              );
+            })}
+          </Routes>
+        </div>
+
+        {/* Toast Container for notifications */}
         <ToastContainer
           position="top-right"
           autoClose={1000}
@@ -113,7 +121,6 @@ export default function App() {
           pauseOnHover
           theme="light"
         />
-        <ToastContainer />
       </Router>
     </div>
   );

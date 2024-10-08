@@ -4,12 +4,15 @@ import { GrView } from "react-icons/gr";
 import { Modal, Button } from 'react-bootstrap';
 import { FaArrowLeft } from 'react-icons/fa';
 import * as ClassService from "../../services/ClassService";
+import { useNavigate, useParams } from 'react-router-dom';
 
-const StudentTable = ({ idClass, handleBackSchedule }) => {
+const StudentTable = () => {
 
   const [students, setStudents] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
+  const { idClass } = useParams();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -28,7 +31,7 @@ const StudentTable = ({ idClass, handleBackSchedule }) => {
       student._id === id ? { ...student, status: !student.status } : student
     );
     setStudents(updatedStudents);
-    console.log("student Id" ,id)
+    console.log("student Id", id)
   };
 
   const saveStudents = () => {
@@ -48,6 +51,10 @@ const StudentTable = ({ idClass, handleBackSchedule }) => {
     setShowModal(false);
     setSelectedStudent(null);
   };
+
+  const handleBackSchedule = () => {
+    navigate('/teacher/calender')
+  }
 
   return (
     <div className="container mx-auto p-4">

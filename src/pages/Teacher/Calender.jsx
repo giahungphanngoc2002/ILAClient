@@ -113,7 +113,7 @@ const Calendar = ({ onClassClick }) => {
   }
 
   const goToClass = (idClass) => {
-    onClassClick(idClass); // Call the passed function with classId
+    navigate(`/teacher/calender/${idClass}`)
   }
 
 
