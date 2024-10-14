@@ -14,6 +14,8 @@ import Calendar from "../pages/Teacher/Calender";
 import MyClasses from "../pages/MyClasses/MyClasses";
 import AttendanceTable from "../pages/AttendanceTable/AttendanceTable";
 import Notifications from "../pages/Notification/Notifications";
+import ClassDivision from "../pages/ClassDivision/ClassDivision";
+import ManageSchedule from "../pages/ManageSchedule/ManageSchedule";
 
 
 export const routes = [
@@ -111,6 +113,18 @@ export const routes = [
   {
     path: "/teacher/notification",
     page: Notifications,
+    isShowHeader: false,
+    isShowSideBar: true,
+  },
+  {
+    path: "/teacher/classDivision",
+    page: ClassDivision,
+    isShowHeader: false,
+    isShowSideBar: true,
+  },
+  {
+    path: "/teacher/manageSchedule",
+    page: ManageSchedule,
     isShowHeader: false,
     isShowSideBar: true,
   },
