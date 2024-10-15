@@ -1,54 +1,41 @@
 import React, { useState, useEffect } from 'react';
 import { GrNext, GrPrevious } from "react-icons/gr";
 import { useNavigate } from 'react-router-dom';
-import * as ClassService from "../../services/ClassService";
+import * as ScheduleService from "../../services/ScheduleService";
 import { useSelector } from 'react-redux';
-import { useQuery } from '@tanstack/react-query';
+
 const Calendar = ({ onClassClick }) => {
   const [currentWeekOffset, setCurrentWeekOffset] = useState(0);
   const [scheduleData, setScheduleData] = useState([]);
-  const [scheduleData1, setScheduleData1] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
   const user = useSelector((state) => state.user);
   const [teacherId, setTeacherId] = useState(user?.id); 
   const navigate = useNavigate();
- 
-  
+
   useEffect(() => {
-    setTeacherId(user?.id); // Update teacherId whenever user changes
-}, [user]);
+    setTeacherId(user?.id);
+  }, [user]);
 
-console.log("teacherID",teacherId)
-
-
-useEffect(() => {
-  const fetchSchedule = async () => {
-    setIsLoading(true);
-    try {
-      const data = await ClassService.getAllScheduleForTeacherId(teacherId);
-      setScheduleData(data); 
-      setIsError(false);
-
-     
-      if (data && data.length > 0) {
-        const scheduleIds = data.map(schedule => schedule._id); 
-        console.log('Schedule IDs:', scheduleIds);
-        setScheduleData1(scheduleIds) 
+  useEffect(() => {
+    const fetchSchedule = async () => {
+      setIsLoading(true);
+      try {
+        const data = await ScheduleService.getAllScheduleByTeacherId(teacherId);
+        setScheduleData(data?.data || []);
+        setIsError(false);
+      } catch (error) {
+        setIsError(true);
+        console.error('Error fetching schedule data:', error);
+      } finally {
+        setIsLoading(false);
       }
-
-    } catch (error) {
-      setIsError(true);
-      console.error('Error fetching schedule data:', error);
-    } finally {
-      setIsLoading(false);
+    };
+    
+    if (teacherId) {
+      fetchSchedule();
     }
-  };
-  
-  if (teacherId) {
-    fetchSchedule();
-  }
-}, [teacherId]);
+  }, [teacherId]);
 
   const days = ['Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy', 'Chủ nhật'];
   const slotTimes = [
@@ -71,21 +58,12 @@ useEffect(() => {
     for (let i = 0; i < 7; i++) {
       const date = new Date(firstDayOfWeek);
       date.setDate(firstDayOfWeek.getDate() + i);
-      const formattedDate = date.toLocaleDateString('en-GB');
-      currentWeekDates.push(formattedDate);
+      currentWeekDates.push(date.toLocaleDateString('en-GB'));
     }
     return currentWeekDates;
   };
 
   const weekDates = getWeekDates(currentWeekOffset);
-
-  const handlePreviousWeek = () => {
-    setCurrentWeekOffset(currentWeekOffset - 1);
-  };
-
-  const handleNextWeek = () => {
-    setCurrentWeekOffset(currentWeekOffset + 1);
-  };
 
   const getScheduleForDay = (day, slotIndex) => {
     const formattedDate = weekDates[days.indexOf(day)];
@@ -125,14 +103,12 @@ useEffect(() => {
     return null;
   };
 
-  
- 
+  const handlePreviousWeek = () => setCurrentWeekOffset(currentWeekOffset - 1);
+  const handleNextWeek = () => setCurrentWeekOffset(currentWeekOffset + 1);
 
-
-  const goToClass = (idClass, idSchedule, idSlot,idSubject,semester) => {
+  const goToClass = (idClass, idSchedule, idSlot, idSubject, semester) => {
     navigate(`/teacher/calender/${idClass}/${idSchedule}/${idSlot}/${idSubject}/${semester}`);
   };
-  
 
   return (
     <div className="container mx-auto p-4">
@@ -168,28 +144,27 @@ useEffect(() => {
               </div>
               {slotTimes.map((slot, i) => {
                 const classData = getScheduleForDay(day, i);
-                console.log('class',classData)
                 return (
                   <div
                     key={i}
-                    className={`py-3 border-b border-gray-300 ${classData ?
-                      (classData.isCompleted ? 'bg-green-100' : (classData.isMissed ? 'bg-red-100' : 'bg-yellow-100'))
-                      : 'bg-white'} rounded-lg shadow-sm my-1 h-16 flex items-center justify-center`}
+                    className={`py-3 border-b border-gray-300 ${classData ? 
+                      (classData.isCompleted ? 'bg-green-100' : 'bg-yellow-100') : 'bg-white'} rounded-lg shadow-sm my-1 h-16 flex items-center justify-center`}
                   >
-                   <button onClick={() => goToClass(classData.classId._id, classData.scheduleId, classData._id,classData.subjectId._id,classData.subjectId.semester)}>
-
-                      {classData ? (
+                    {classData ? (
+                      <button
+                        onClick={() => goToClass(classData.classId._id, classData.scheduleId, classData._id, classData.subjectId._id, classData.subjectId.semester)}
+                      >
                         <div className="text-xs text-gray-700 w-full h-full flex flex-col items-center justify-center">
                           <div className="font-bold text-blue-800">{classData.subjectId.nameSubject}</div>
                           <div>{classData.classId.nameClass}</div>
-                          <div className={`text-${classData.isCompleted ? 'green' : (classData.isMissed ? 'red' : 'yellow')}-600`}>
-                            {classData.isCompleted ? 'Hoàn thành' : (classData.isMissed ? 'Bỏ lỡ' : 'Sắp đến')}
+                          <div className={`text-${classData.isCompleted ? 'green' : 'yellow'}-600`}>
+                            {classData.isCompleted ? 'Hoàn thành' : 'Sắp đến'}
                           </div>
                         </div>
-                      ) : (
-                        <div className="text-center text-gray-400">Trống</div>
-                      )}
-                    </button>
+                      </button>
+                    ) : (
+                      <div className="text-center text-gray-400">Trống</div>
+                    )}
                   </div>
                 );
               })}
@@ -200,4 +175,5 @@ useEffect(() => {
     </div>
   );
 };
+
 export default Calendar;

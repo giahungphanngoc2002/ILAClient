@@ -5,13 +5,16 @@ import { FaArrowLeft } from 'react-icons/fa';
 import * as ClassService from "../../services/ClassService";
 import * as AbsentStudentService from "../../services/AbsentStudentService";
 import * as ScoreSbujectService from "../../services/ScoreSbujectService";
+import * as ScheduleService from "../../services/ScheduleService";
 import { useNavigate, useParams } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { GrView } from "react-icons/gr";
+import { toast } from "react-toastify";
 const StudentTable = () => {
   const [students, setStudents] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(true);
+  const [studentAbsent, setStudentAbsent] = useState([]);
   
   const [error, setError] = useState(''); // Thêm trạng thái lỗi
   const navigate = useNavigate();
@@ -35,6 +38,20 @@ const StudentTable = () => {
     fetchData();
   }, [idClass]);
 
+  const fetchAbsentStudents = async () => {
+    try {
+      const data = await ScheduleService.getAllAbsentStudentId(idClass,idSchedule,idSlot);
+      console.log("Absent Students Data:", data);
+      setStudentAbsent(data)
+    } catch (error) {
+      console.error("Failed to fetch absent students:", error.message);
+    }
+  };
+  
+  fetchAbsentStudents();
+
+  console.log("studentAbsent",studentAbsent)
+
   console.log("classid",idClass)
   console.log("classid1",idSchedule)
   console.log("classid2",idSlot)
@@ -57,9 +74,11 @@ const StudentTable = () => {
       }),
     onSuccess: (data) => {
       console.log('Absent students saved:', data);
+      toast.success("Đã lưu danh sách học sinh vắng mặt thành công!");
     },
     onError: (error) => {
       console.error('Error saving absent students:', error);
+      toast.error("Lưu danh sách học sinh vắng mặt thất bại.");
     },
   });
   
@@ -68,27 +87,27 @@ const StudentTable = () => {
     console.log("Slot ID:", idSlot);
     console.log("subject ID:", idSubject);
 
-  const saveStudents = () => {
+    const saveStudents = () => {
+      if (!idClass || !idSchedule || !idSlot) {
+        console.error('Error: Missing required parameters');
+        return;
+      }
     
-
-  
-    if (!idClass || !idSchedule || !idSlot) {
-      console.error('Error: Missing required parameters');
-      return;
-    }
-  
-    const absentStudentIds = students
-      .filter(student => !student.status && student._id)
-      .map(student => student._id);
-  
-    console.log('Absent Student IDs:', absentStudentIds);
-    if (absentStudentIds.length === 0) {
-      console.warn('No absent students selected');
-      return;
-    }
-  
-    mutation.mutate(absentStudentIds);
-  };
+      // Lọc ra học sinh có status = false và lấy ID của chúng
+      const absentStudentIds = students
+        .filter(student => student.status === false && student._id)
+        .map(student => student._id);
+    
+      console.log('Absent Student IDs:', absentStudentIds);
+    
+      if (absentStudentIds.length === 0) {
+        console.warn('No absent students selected');
+        return;
+      }
+    
+      // Gọi hàm mutation để lưu học sinh vắng mặt
+      mutation.mutate(absentStudentIds);
+    };
   
   const openModal = async (student) => {
     try {
