@@ -1,44 +1,56 @@
 import React, { useState, useEffect } from 'react';
 import { GrNext, GrPrevious } from "react-icons/gr";
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-
+import * as ClassService from "../../services/ClassService";
+import { useSelector } from 'react-redux';
+import { useQuery } from '@tanstack/react-query';
 const Calendar = ({ onClassClick }) => {
-  const [currentWeekOffset, setCurrentWeekOffset] = useState(0); // Track week offset
-  const [scheduleData, setScheduleData] = useState([]); // State to store fetched schedule data
-  const [isLoading, setIsLoading] = useState(true); // Loading state
-  const [isError, setIsError] = useState(false); // Error state
+  const [currentWeekOffset, setCurrentWeekOffset] = useState(0);
+  const [scheduleData, setScheduleData] = useState([]);
+  const [scheduleData1, setScheduleData1] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isError, setIsError] = useState(false);
+  const user = useSelector((state) => state.user);
+  const [teacherId, setTeacherId] = useState(user?.id); 
   const navigate = useNavigate();
+ 
+  
+  useEffect(() => {
+    setTeacherId(user?.id); // Update teacherId whenever user changes
+}, [user]);
+
+console.log("teacherID",teacherId)
 
 
-  // Fetch schedule data from the API
-  const getAllSchedule = async () => {
+useEffect(() => {
+  const fetchSchedule = async () => {
+    setIsLoading(true);
     try {
-      const res = await axios.get('http://localhost:3001/api/schedule/getAllSchedule');
-      return res.data;
+      const data = await ClassService.getAllScheduleForTeacherId(teacherId);
+      setScheduleData(data); 
+      setIsError(false);
+
+     
+      if (data && data.length > 0) {
+        const scheduleIds = data.map(schedule => schedule._id); 
+        console.log('Schedule IDs:', scheduleIds);
+        setScheduleData1(scheduleIds) 
+      }
+
     } catch (error) {
       setIsError(true);
       console.error('Error fetching schedule data:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
-
-  useEffect(() => {
-    // Fetch schedule data on component mount
-    const fetchSchedule = async () => {
-      setIsLoading(true);
-      const data = await getAllSchedule();
-      if (data) {
-        setScheduleData(data.data); // Assuming API returns data in `data.data`
-        setIsError(false);
-      }
-      setIsLoading(false);
-    };
-
+  
+  if (teacherId) {
     fetchSchedule();
-  }, []);
+  }
+}, [teacherId]);
 
   const days = ['Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy', 'Chủ nhật'];
-
   const slotTimes = [
     { start: '07:00', end: '08:00' },
     { start: '08:00', end: '09:00' },
@@ -54,8 +66,7 @@ const Calendar = ({ onClassClick }) => {
 
   const getWeekDates = (weekOffset) => {
     const today = new Date();
-    const firstDayOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + 1 + (weekOffset * 7))); // Get Monday
-
+    const firstDayOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + 1 + (weekOffset * 7)));
     const currentWeekDates = [];
     for (let i = 0; i < 7; i++) {
       const date = new Date(firstDayOfWeek);
@@ -81,51 +92,55 @@ const Calendar = ({ onClassClick }) => {
     const currentDateTime = new Date();
     const [startHour, startMinute] = slotTimes[slotIndex].start.split(':').map(Number);
     const slotDate = new Date(formattedDate.split('/').reverse().join('-'));
-
     slotDate.setHours(startHour, startMinute);
-
+  
     const classData = scheduleData.find(
       (cls) => new Date(cls.dayOfWeek).toLocaleDateString('en-GB') === formattedDate &&
-        cls.slots.some(slot => slot.slotNumber === slotIndex + 1)
+                cls.slots.some(slot => slot.slotNumber === slotIndex + 1)
     );
 
+    console.log('class',classData)
+  
     if (classData) {
       const slotData = classData.slots.find(slot => slot.slotNumber === slotIndex + 1);
-
-      const isCompleted = Boolean(classData && classData.status);
-
-      if (slotData && isCompleted) {
-        return { ...slotData, isCompleted: true };
+      
+      // Extract the `scheduleId`
+      const scheduleId = classData._id;  
+      
+      if (slotData) {
+        const isCompleted = classData.status;
+  
+        if (slotDate < currentDateTime && !isCompleted) {
+          return { ...slotData, scheduleId, isMissed: true };
+        }
+  
+        if (slotDate >= currentDateTime && !isCompleted) {
+          return { ...slotData, scheduleId, isMissed: false };
+        }
+  
+        return { ...slotData, scheduleId, isCompleted };
       }
-
-      if (slotData && slotDate < currentDateTime && !isCompleted) {
-        return { ...slotData, isMissed: true };
-      }
-
-      if (slotData && slotDate >= currentDateTime && !isCompleted) {
-        return { ...slotData, isMissed: false };
-      }
-
-      return slotData;
     }
-
+  
     return null;
-  }
+  };
 
-  const goToClass = (idClass) => {
-    navigate(`/teacher/calender/${idClass}`)
-  }
+  
+ 
 
+
+  const goToClass = (idClass, idSchedule, idSlot,idSubject,semester) => {
+    navigate(`/teacher/calender/${idClass}/${idSchedule}/${idSlot}/${idSubject}/${semester}`);
+  };
+  
 
   return (
     <div className="container mx-auto p-4">
-      {/* Loading and Error States */}
       {isLoading && <div>Loading schedule...</div>}
       {isError && <div>Error loading schedule. Please try again later.</div>}
 
       {!isLoading && !isError && (
         <div className="grid grid-cols-8 gap-2 bg-gray-100 shadow-lg p-4 rounded-lg overflow-hidden">
-          {/* Slot Column */}
           <div className="col-span-1">
             <div className="flex justify-between mb-4">
               <button onClick={handlePreviousWeek} className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-sm">
@@ -145,15 +160,15 @@ const Calendar = ({ onClassClick }) => {
             ))}
           </div>
 
-          {/* Days Columns */}
           {days.map((day, index) => (
             <div key={index} className="col-span-1">
               <div className="font-bold text-center text-white bg-blue-500 p-2 rounded-lg mb-2 shadow-sm text-xs">
                 {day} <br />
-                <span className="text-xs">{weekDates[index]}</span> {/* Display corresponding date */}
+                <span className="text-xs">{weekDates[index]}</span>
               </div>
               {slotTimes.map((slot, i) => {
                 const classData = getScheduleForDay(day, i);
+                console.log('class',classData)
                 return (
                   <div
                     key={i}
@@ -161,7 +176,7 @@ const Calendar = ({ onClassClick }) => {
                       (classData.isCompleted ? 'bg-green-100' : (classData.isMissed ? 'bg-red-100' : 'bg-yellow-100'))
                       : 'bg-white'} rounded-lg shadow-sm my-1 h-16 flex items-center justify-center`}
                   >
-                    <button onClick={() => goToClass(classData.classId._id)}>
+                   <button onClick={() => goToClass(classData.classId._id, classData.scheduleId, classData._id,classData.subjectId._id,classData.subjectId.semester)}>
 
                       {classData ? (
                         <div className="text-xs text-gray-700 w-full h-full flex flex-col items-center justify-center">
@@ -185,5 +200,4 @@ const Calendar = ({ onClassClick }) => {
     </div>
   );
 };
-
 export default Calendar;

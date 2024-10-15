@@ -93,7 +93,7 @@ export const routes = [
     isShowSideBar: true,
   },
   {
-    path: "teacher/calender/:idClass",
+    path: "teacher/calender/:idClass/:idSchedule/:idSlot/:idSubject/:semester",
     page: StudentTable,
     isShowHeader: false,
     isShowSideBar: true,
