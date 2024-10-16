@@ -16,6 +16,7 @@ import AttendanceTable from "../pages/AttendanceTable/AttendanceTable";
 import Notifications from "../pages/Notification/Notifications";
 import ClassDivision from "../pages/ClassDivision/ClassDivision";
 import ManageSchedule from "../pages/ManageSchedule/ManageSchedule";
+import QuestionManager from "../pages/QuestionManage/QuestionManage";
 
 
 export const routes = [
@@ -91,6 +92,12 @@ export const routes = [
     page: Calendar,
     isShowHeader: false,
     isShowSideBar: true,
+  },
+  {
+    path: "teacher/questionManage/",
+    page: QuestionManager,
+    isShowHeader: false,
+    isShowSideBar: false,
   },
   {
     path: "teacher/calender/:idClass/:idSchedule/:idSlot/:idSubject/:semester",

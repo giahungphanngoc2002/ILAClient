@@ -121,6 +121,10 @@ function MyClasses() {
         navigate(`/teacher/attendanceTable`);
     }
 
+    const handleGoToQuestionManage = () => {
+        navigate(`/teacher/questionManage`);
+    }
+
     return (
         <div className="container mx-auto p-6">
             <h1 className="text-2xl font-bold text-blue-600 mb-6">Lớp Học Của Tôi</h1>
@@ -171,9 +175,9 @@ function MyClasses() {
 
                         {/* Bài tập */}
                         <div className="bg-gray-100 p-4 rounded-lg shadow-md">
-                            <h3 className="text-lg font-semibold text-gray-700 mb-2"><FaClipboardList className="inline-block mr-2" /> Bài Tập</h3>
-                            <p>Quản lý bài tập và tình trạng nộp bài.</p>
-                            <Button variant="danger">Quản lý bài tập</Button>
+                            <h3 className="text-lg font-semibold text-gray-700 mb-2"><FaClipboardList className="inline-block mr-2" /> Tự học</h3>
+                            <p>Quản lý các câu hỏi cho học sinh tự học tại nhà.</p>
+                            <Button onClick={handleGoToQuestionManage} variant="danger">Quản lý câu hỏi</Button>
                         </div>
                     </div>
                 </Modal.Body>

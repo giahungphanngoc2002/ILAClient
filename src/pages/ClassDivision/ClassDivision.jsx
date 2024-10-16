@@ -41,6 +41,7 @@ const ClassDivision = () => {
                     id: row[0],
                     score: row[1],
                     preference: row[2], // Môn chuyên
+                    name: row[3], // Môn chuyên
                 }));
                 console.log(parsedStudents);
                 setStudents(parsedStudents);
@@ -92,7 +93,7 @@ const ClassDivision = () => {
 
     return (
         <div className="container mx-auto p-5">
-            <h2 className="text-3xl font-bold text-center mb-6 text-gray-800">Student Class Assigner</h2>
+            <h2 className="text-3xl font-bold text-center mb-6 text-gray-800">Phân chia lớp học</h2>
 
             <div className="flex items-center justify-center mb-6">
                 <label
@@ -121,7 +122,7 @@ const ClassDivision = () => {
                     onClick={assignClasses}
                     disabled={!students.length}
                 >
-                    Assign Classes
+                    Phân lớp
                 </button>
             </div>
 
@@ -132,7 +133,7 @@ const ClassDivision = () => {
                             <tr>
                                 <th className="px-6 py-3 border-b">Mã lớp</th>
                                 <th className="px-6 py-3 border-b">Miêu tả</th>
-                                <th className="px-6 py-3 border-b">Action</th>
+                                <th className="px-6 py-3 border-b">Thao tác</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -146,7 +147,7 @@ const ClassDivision = () => {
                                                 onClick={() => toggleView(index)}
                                                 className="text-blue-500 hover:text-blue-700"
                                             >
-                                                {openClass === index ? <FaEyeSlash /> : <FaEye />}
+                                                {openClass === index ? 'Ẩn chi tiết' : 'Xem chi tiết'}
                                             </button>
                                         </td>
                                     </tr>
@@ -154,16 +155,26 @@ const ClassDivision = () => {
                                     {openClass === index && (
                                         <tr>
                                             <td colSpan="3" className="px-6 py-4 bg-gray-50">
-                                                <ul>
-                                                    {classItem.students.map((student) => (
-                                                        <li
-                                                            key={student.id}
-                                                            className="py-2 border-b border-gray-200 text-gray-700"
-                                                        >
-                                                            <strong>ID:</strong> {student.id} | <strong>Score:</strong> {student.score} | <strong>Preference:</strong> {student.preference}
-                                                        </li>
-                                                    ))}
-                                                </ul>
+                                                <table className="table-auto w-full">
+                                                    <thead>
+                                                        <tr>
+                                                            <th className="px-4 py-2 border-b">Tên học sinh</th>
+                                                            <th className="px-4 py-2 border-b">Mã học sinh</th>
+                                                            <th className="px-4 py-2 border-b">Điểm</th>
+                                                            <th className="px-4 py-2 border-b">Nguyện vọng</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {classItem.students.map((student) => (
+                                                            <tr key={student.id} className="hover:bg-gray-100">
+                                                                <td className="px-4 py-2 border-b">{student.name}</td>
+                                                                <td className="px-4 py-2 border-b">{student.id}</td>
+                                                                <td className="px-4 py-2 border-b">{student.score}</td>
+                                                                <td className="px-4 py-2 border-b">{student.preference}</td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
                                             </td>
                                         </tr>
                                     )}
@@ -173,6 +184,7 @@ const ClassDivision = () => {
                     </table>
                 )}
             </div>
+
         </div>
     );
 };

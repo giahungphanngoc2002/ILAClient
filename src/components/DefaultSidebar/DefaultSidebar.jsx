@@ -71,23 +71,23 @@ const DefaultSidebar = () => {
                             active={activeItem === 'Thông báo'}
                             onClick={goToNotification}
                         />
+                        <SidebarItem
+                            icon={<CalendarClock size={20} />}
+                            text="Thời khoá biểu"
+                            active={activeItem === 'Thời khoá biểu'}
+                            onClick={goToManageSchedule}
+                        />
+                        <SidebarItem
+                            icon={<Bell size={20} />}
+                            text="Chia lớp"
+                            active={activeItem === 'Chia lớp'}
+                            onClick={goToClassDivision}
+                        />
                     </>
                 )
             }
             {user.role === "Admin" && (
                 <>
-                    <SidebarItem
-                        icon={<Bell size={20} />}
-                        text="Chia lớp"
-                        active={activeItem === 'Chia lớp'}
-                        onClick={goToClassDivision}
-                    />
-                    <SidebarItem
-                        icon={<Bell size={20} />}
-                        text="Thời khoá biểu"
-                        active={activeItem === 'Thời khoá biểu'}
-                        onClick={goToManageSchedule}
-                    />
                 </>
             )}
         </Sidebar>
