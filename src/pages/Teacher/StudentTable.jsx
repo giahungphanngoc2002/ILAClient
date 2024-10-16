@@ -15,6 +15,7 @@ const StudentTable = () => {
   const [students, setStudents] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [studentScores, setStudentScores] = useState(null);
+  const [existingAbsentId, setExistingAbsentId] = useState(null);
   const [studentAbsent, setStudentAbsent] = useState([]);
   const [error, setError] = useState('');
   const [isInitialLoadComplete, setIsInitialLoadComplete] = useState(false);
@@ -45,13 +46,13 @@ const StudentTable = () => {
         const data = await ScheduleService.getAllAbsentStudentId(idClass, idSchedule, idSlot);
         const absentStudents = data?.data?.absentStudents || [];
 
-        // Gộp thông tin học sinh và trạng thái vắng mặt vào nhau
+        
         const updatedStudents = students.map(student => {
           const isAbsent = absentStudents.some(absent => absent._id === student._id);
           return {
             ...student,
-            isAbsent,  // Dùng để biết trạng thái vắng mặt
-            status: !isAbsent // Nếu vắng mặt thì status = false, nếu có mặt thì status = true
+            isAbsent,  
+            status: !isAbsent 
           };
         });
 
@@ -64,9 +65,24 @@ const StudentTable = () => {
 
     if (!isInitialLoadComplete && students.length > 0) {
       fetchAbsentStudents();
-      setIsInitialLoadComplete(true); // Đảm bảo chỉ gọi fetchAbsentStudents một lần
+      setIsInitialLoadComplete(true); 
     }
   }, [idClass, idSchedule, idSlot, students.length, isInitialLoadComplete]);
+
+  useEffect(() => {
+    const fetchAbsentRecord = async () => {
+      try {
+        const data = await AbsentStudentService.getAbsentId(idClass, idSchedule, idSlot);
+        if (data && data.absentId) {
+          setExistingAbsentId(data.absentId); // Lưu absentId vào state
+        }
+      } catch (error) {
+        console.error("Error fetching absent ID:", error);
+      }
+    };
+  
+    fetchAbsentRecord();
+  }, [idClass, idSchedule, idSlot]);
 
 
 
@@ -79,38 +95,74 @@ const StudentTable = () => {
     setStudents(updatedStudents);
   };
   
-
-
+ console.log("existingAbsentId",existingAbsentId)
 
   const mutation = useMutation({
-    mutationFn: (absentStudentIds) =>
-      AbsentStudentService.createAbsentStudent({
-        classId: idClass,
-        scheduleId: idSchedule,
-        slotId: idSlot,
-        studentIds: absentStudentIds,
-      }),
-    onSuccess: () => {
-      toast.success("Đã lưu danh sách học sinh vắng mặt thành công!");
+    mutationFn: async ({ absentStudentIds, absentId }) => {
+      if (absentId) {
+        // Gọi hàm update nếu đã có absentId
+        await Promise.all(
+          absentStudentIds.map((studentId) => 
+            AbsentStudentService.updateAbsentStudent(absentId, studentId)
+          )
+        );
+      } else {
+        // Gọi hàm create nếu chưa có absentId và trả về phản hồi chứa absentId mới
+        const response = await AbsentStudentService.createAbsentStudent({
+          classId: idClass,
+          scheduleId: idSchedule,
+          slotId: idSlot,
+          studentIds: absentStudentIds,
+        });
+        return response; // Trả về để sử dụng trong onSuccess
+      }
+    },
+    onSuccess: (data) => {
+      if (data && data.data && data.data.absentId) {
+        const newAbsentId = data.data.absentId;
+        console.log("Newly created absentId:", newAbsentId); // Để kiểm tra absentId mới
+        toast.success("Đã khởi tạo danh sách học sinh vắng mặt thành công!");
+      } else {
+        toast.success("Cập nhật danh sách học sinh vắng mặt thành công!");
+      }
     },
     onError: () => {
       toast.error("Lưu danh sách học sinh vắng mặt thất bại.");
     },
   });
-
-  const saveStudents = () => {
+  
+  // Hàm saveStudents kiểm tra và gọi mutation với điều kiện
+  const saveStudents = async () => {
     if (!idClass || !idSchedule || !idSlot) {
       console.error('Error: Missing required parameters');
       return;
     }
+  
     const absentStudentIds = students
-      .filter(student => !student.status && student._id) // Lọc các học sinh có status === false
+      .filter(student => !student.status && student._id) // Chỉ các học sinh có status === false
       .map(student => student._id);
-
+  
+    const presentStudentIds = students
+      .filter(student => student.status && student._id && student.isAbsent) // Học sinh có status === true và hiện đang trong danh sách vắng mặt
+      .map(student => student._id);
+  
+    // Khởi tạo nếu có học sinh vắng mặt
     if (absentStudentIds.length > 0) {
-      mutation.mutate(absentStudentIds);
+      await mutation.mutateAsync({ absentStudentIds, absentId: null });
+    }
+  
+    // Sử dụng Promise.all để chờ đợi tất cả các cập nhật hoàn thành
+    if (presentStudentIds.length > 0 && existingAbsentId) {
+      await Promise.all(
+        presentStudentIds.map(studentId =>
+          mutation.mutateAsync({ absentStudentIds: [studentId], absentId: existingAbsentId })
+        )
+      );
+    } else if (presentStudentIds.length > 0 && !existingAbsentId) {
+      console.error('No valid absentId provided for updating existing record');
     }
   };
+  
 
 
   const openModal = async (student) => {
