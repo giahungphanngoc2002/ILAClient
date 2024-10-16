@@ -116,16 +116,22 @@ const StudentTable = () => {
   const openModal = async (student) => {
     try {
       const scoresData = await ScoreSbujectService.getAllScoresBySubject(idSubject, idClass, semester, student._id);
+  
+      // Xử lý dữ liệu điểm từ scoreDetailId
+      const allScores = scoresData?.scoreDetailId?.flatMap(item => item.scores) || [];
+      const scoreId = scoresData?.scoreDetailId[0]?._id || null; // Lấy scoreId nếu có
+  
       const categorizedScores = {
-        oralScore: scoresData?.scoreDetailId?.scores?.filter(score => score.type === 'mieng')?.map(score => score.score) || [],
-        quizScore: scoresData?.scoreDetailId?.scores?.filter(score => score.type === '15-minute')?.map(score => score.score) || [],
-        testScore: scoresData?.scoreDetailId?.scores?.filter(score => score.type === '1 tiet')?.map(score => score.score) || [],
-        finalScore: scoresData?.scoreDetailId?.scores?.find(score => score.type === 'final')?.score || '',
+        oralScore: allScores.filter(score => score.type === 'mieng').map(score => score.score),
+        quizScore: allScores.filter(score => score.type === '15-minute').map(score => score.score),
+        testScore: allScores.filter(score => score.type === '1 tiet').map(score => score.score),
+        finalScore: allScores.find(score => score.type === 'final')?.score || '',
       };
-
+  
       setStudentScores({
         name: student.name,
         id: student._id,
+        scoreId: scoreId, // Gán scoreId vào studentScores
         scores: categorizedScores,
       });
       setShowModal(true);
@@ -135,6 +141,7 @@ const StudentTable = () => {
       setStudentScores({
         name: student.name,
         id: student._id,
+        scoreId: null, // Không có scoreId nếu xảy ra lỗi
         scores: {
           oralScore: [],
           quizScore: [],
@@ -145,6 +152,8 @@ const StudentTable = () => {
       setShowModal(true);
     }
   };
+  
+  
 
   const closeModal = () => {
     setShowModal(false);
@@ -179,6 +188,7 @@ const StudentTable = () => {
     navigate('/teacher/calender');
   };
 
+  
   return (
     <div className="container mx-auto p-4">
       <div className="overflow-x-auto">
@@ -269,65 +279,65 @@ const StudentTable = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    <tr>
-                      <td className="border px-4 py-2">
+                <tr>
+                  <td className="border px-4 py-2">
+                    <input
+                      type="text"
+                      name="name"
+                      value={studentScores.name}
+                      readOnly
+                      className="w-full border rounded px-2 py-1 bg-gray-100"
+                    />
+                  </td>
+                  <td className="border px-4 py-2">
+                    <div className="grid grid-cols-2 gap-2">
+                      {studentScores.scores.oralScore?.map((score, index) => (
                         <input
-                          type="text"
-                          name="name"
-                          value={studentScores.name}
-                          readOnly
-                          className="w-full border rounded px-2 py-1 bg-gray-100"
-                        />
-                      </td>
-                      <td className="border px-4 py-2">
-                        <div className="grid grid-cols-2 gap-2">
-                          {studentScores.scores.oralScore.map((score, index) => (
-                            <input
-                              key={index}
-                              type="number"
-                              value={score}
-                              onChange={(e) => handleScoreChange('oralScore', index, e.target.value)}
-                              className="w-full border rounded px-2 py-1"
-                            />
-                          ))}
-                        </div>
-                      </td>
-                      <td className="border px-4 py-2">
-                        <div className="grid grid-cols-2 gap-2">
-                          {studentScores.scores.quizScore.map((score, index) => (
-                            <input
-                              key={index}
-                              type="number"
-                              value={score}
-                              onChange={(e) => handleScoreChange('quizScore', index, e.target.value)}
-                              className="w-full border rounded px-2 py-1"
-                            />
-                          ))}
-                        </div>
-                      </td>
-                      <td className="border px-4 py-2">
-                        <div className="grid grid-cols-2 gap-2">
-                          {studentScores.scores.testScore.map((score, index) => (
-                            <input
-                              key={index}
-                              type="number"
-                              value={score}
-                              onChange={(e) => handleScoreChange('testScore', index, e.target.value)}
-                              className="w-full border rounded px-2 py-1"
-                            />
-                          ))}
-                        </div>
-                      </td>
-                      <td className="border px-4 py-2">
-                        <input
+                          key={index}
                           type="number"
-                          value={studentScores.scores.finalScore || ''}
-                          onChange={(e) => handleScoreChange('finalScore', null, e.target.value)}
+                          value={score}
+                          onChange={(e) => handleScoreChange('oralScore', index, e.target.value)}
                           className="w-full border rounded px-2 py-1"
                         />
-                      </td>
-                    </tr>
-                  </tbody>
+                      ))}
+                    </div>
+                  </td>
+                  <td className="border px-4 py-2">
+                    <div className="grid grid-cols-2 gap-2">
+                      {studentScores.scores.quizScore?.map((score, index) => (
+                        <input
+                          key={index}
+                          type="number"
+                          value={score}
+                          onChange={(e) => handleScoreChange('quizScore', index, e.target.value)}
+                          className="w-full border rounded px-2 py-1"
+                        />
+                      ))}
+                    </div>
+                  </td>
+                  <td className="border px-4 py-2">
+                    <div className="grid grid-cols-2 gap-2">
+                      {studentScores.scores.testScore?.map((score, index) => (
+                        <input
+                          key={index}
+                          type="number"
+                          value={score}
+                          onChange={(e) => handleScoreChange('testScore', index, e.target.value)}
+                          className="w-full border rounded px-2 py-1"
+                        />
+                      ))}
+                    </div>
+                  </td>
+                  <td className="border px-4 py-2">
+                    <input
+                      type="number"
+                      value={studentScores.scores.finalScore || ''}
+                      onChange={(e) => handleScoreChange('finalScore', null, e.target.value)}
+                      className="w-full border rounded px-2 py-1"
+                    />
+                  </td>
+                </tr>
+              </tbody>
                 </table>
               </div>
             </div>
@@ -336,14 +346,48 @@ const StudentTable = () => {
             <Button variant="secondary" onClick={closeModal}>
               Tắt
             </Button>
+            
+
             <Button
               variant="primary"
-              onClick={() => {
-                const updatedStudents = students.map((user) =>
-                  user.id === studentScores.id ? studentScores : user
-                );
-                setStudents(updatedStudents);
-                closeModal();
+              onClick={async () => {
+                const scoreData = {
+                  scores: [
+                    ...studentScores.scores.oralScore.map(score => ({ type: 'mieng', score })),
+                    ...studentScores.scores.quizScore.map(score => ({ type: '15-minute', score })),
+                    ...studentScores.scores.testScore.map(score => ({ type: '1 tiet', score })),
+                    studentScores.scores.finalScore ? { type: 'final', score: studentScores.scores.finalScore } : null
+                  ].filter(scoreItem => scoreItem && scoreItem.score), // Lọc bỏ các điểm rỗng hoặc không có giá trị
+                  studentId: studentScores.id,
+                  subjectId: idSubject,
+                  classId: idClass
+                };
+                console.log("studentScores",studentScores.scoreId)
+
+                try {
+                  // Kiểm tra nếu đã có scoreId thì dùng updateScore, nếu chưa thì dùng createScore
+                  let response;
+                  if (studentScores.scoreId) {
+                    // Nếu scoreId tồn tại, gọi updateScore
+                    response = await ScoreSbujectService.updateScore(studentScores.scoreId, scoreData);
+                    toast.success("Đã cập nhật điểm thành công!");
+                    console.log('Score updated:', response);
+                  } else {
+                    // Nếu chưa có scoreId, gọi createScore
+                    response = await ScoreSbujectService.createScore(scoreData);
+                    toast.success("Đã khởi tạo điểm thành công!");
+                    console.log('Score created:', response);
+                  }
+
+                  // Cập nhật danh sách sinh viên với dữ liệu điểm mới
+                  const updatedStudents = students.map((user) =>
+                    user._id === studentScores.id ? { ...user, score: response } : user
+                  );
+                  setStudents(updatedStudents);
+                  closeModal();
+                } catch (error) {
+                  console.error("Error handling score:", error);
+                }
               }}
             >
               Lưu

@@ -9,3 +9,9 @@ export const getAllScoresBySubject = async(subjectId, classId, semester ,student
     const res = await axios.get(`http://localhost:3001/api/score/scores/${subjectId}/${classId}/${semester}/${studentId}`);
     return res.data; 
 }
+
+export const updateScore = async (scoreId, updatedData) => {
+      const res = await axios.put(`http://localhost:3001/api/score/updateScore/${scoreId}`, updatedData);
+      return res.data;
+    
+ };
