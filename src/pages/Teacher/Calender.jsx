@@ -146,8 +146,9 @@ const Calendar = ({ onClassClick }) => {
                 return (
                   <div
                     key={i}
-                    className={`py-3 border-b border-gray-300 ${classData ? 
-                      (classData.isCompleted ? 'bg-green-100' : 'bg-yellow-100') : 'bg-white'} rounded-lg shadow-sm my-1 h-16 flex items-center justify-center`}
+                    className={`py-3 border-b border-gray-300 ${classData ?
+                      (classData.isCompleted ? 'bg-green-100' : (classData.isMissed ? 'bg-red-100' : 'bg-yellow-100'))
+                      : 'bg-white'} rounded-lg shadow-sm my-1 h-16 flex items-center justify-center`}
                   >
                     {classData ? (
                       <button
@@ -156,8 +157,8 @@ const Calendar = ({ onClassClick }) => {
                         <div className="text-xs text-gray-700 w-full h-full flex flex-col items-center justify-center">
                           <div className="font-bold text-blue-800">{classData.subjectId.nameSubject}</div>
                           <div>{classData.classId.nameClass}</div>
-                          <div className={`text-${classData.isCompleted ? 'green' : 'yellow'}-600`}>
-                            {classData.isCompleted ? 'Hoàn thành' : 'Sắp đến'}
+                          <div className={`text-${classData.isCompleted ? 'green' : (classData.isMissed ? 'red' : 'yellow')}-600`}>
+                            {classData.isCompleted ? 'Hoàn thành' : (classData.isMissed ? 'Bỏ lỡ' : 'Sắp đến')}
                           </div>
                         </div>
                       </button>

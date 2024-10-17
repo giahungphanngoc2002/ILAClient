@@ -1,181 +1,139 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Modal, Button } from 'react-bootstrap';
 import { FaUserGraduate, FaCalendarAlt, FaClock, FaFileAlt, FaClipboardList } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import * as ClassService from "../../services/ClassService";
+import { useSelector } from 'react-redux';
 
 function MyClasses() {
-    const [classes, setClasses] = useState([
-        {
-            id: 1,
-            name: 'Toán - Lớp 12A',
-            students: 30,
-            days: 'Thứ 2, Thứ 4, Thứ 6',
-            time: '08:00 - 10:00',
-        },
-        {
-            id: 2,
-            name: 'Lý - Lớp 11B',
-            students: 25,
-            days: 'Thứ 3, Thứ 5',
-            time: '10:30 - 12:00',
-        },
-        {
-            id: 3,
-            name: 'Hóa - Lớp 12C',
-            students: 28,
-            days: 'Thứ 2, Thứ 4',
-            time: '01:00 - 02:30',
-        },
-        {
-            id: 4,
-            name: 'Tiếng Anh - Lớp 12C',
-            students: 28,
-            days: 'Thứ 2, Thứ 4',
-            time: '01:00 - 02:30',
-        },
-        {
-            id: 4,
-            name: 'Tiếng Anh - Lớp 12C',
-            students: 28,
-            days: 'Thứ 2, Thứ 4',
-            time: '01:00 - 02:30',
-        },
-        {
-            id: 4,
-            name: 'Tiếng Anh - Lớp 12C',
-            students: 28,
-            days: 'Thứ 2, Thứ 4',
-            time: '01:00 - 02:30',
-        },
-        {
-            id: 4,
-            name: 'Tiếng Anh - Lớp 12C',
-            students: 28,
-            days: 'Thứ 2, Thứ 4',
-            time: '01:00 - 02:30',
-        },
-        {
-            id: 4,
-            name: 'Tiếng Anh - Lớp 12C',
-            students: 28,
-            days: 'Thứ 2, Thứ 4',
-            time: '01:00 - 02:30',
-        },
-        {
-            id: 4,
-            name: 'Tiếng Anh - Lớp 12C',
-            students: 28,
-            days: 'Thứ 2, Thứ 4',
-            time: '01:00 - 02:30',
-        },
-        {
-            id: 4,
-            name: 'Tiếng Anh - Lớp 12C',
-            students: 28,
-            days: 'Thứ 2, Thứ 4',
-            time: '01:00 - 02:30',
-        },
-        {
-            id: 4,
-            name: 'Tiếng Anh - Lớp 12C',
-            students: 28,
-            days: 'Thứ 2, Thứ 4',
-            time: '01:00 - 02:30',
-        },
-        {
-            id: 4,
-            name: 'Tiếng Anh - Lớp 12C',
-            students: 28,
-            days: 'Thứ 2, Thứ 4',
-            time: '01:00 - 02:30',
-        },
-        {
-            id: 4,
-            name: 'Tiếng Anh - Lớp 12C',
-            students: 28,
-            days: 'Thứ 2, Thứ 4',
-            time: '01:00 - 02:30',
-        },
-    ]);
-
-    const [selectedClass, setSelectedClass] = useState(null);
+    const user = useSelector((state) => state.user);
+    const [teacherId, setTeacherId] = useState(user?.id);
+    const [classes, setClasses] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isError, setIsError] = useState(false);
+    const [selectedClass, setSelectedClass] = useState(null); // To store selected class details
     const [isModalOpen, setIsModalOpen] = useState(false);
+
     const navigate = useNavigate();
 
-    const handleSelectClass = (classItem) => {
-        setSelectedClass(classItem);
-        setIsModalOpen(true); // Mở Modal khi chọn lớp học
+    useEffect(() => {
+        setTeacherId(user?.id);
+    }, [user]);
+
+    useEffect(() => {
+        const fetchSubject = async () => {
+            setIsLoading(true);
+            try {
+                const data = await ClassService.getAllSubjectClassesByTeacherId(teacherId);
+                setClasses(data || []); // Use data directly
+                setIsError(false);
+            } catch (error) {
+                setIsError(true);
+                console.error('Error fetching schedule data:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        if (teacherId) {
+            fetchSubject();
+        }
+    }, [teacherId]);
+
+    const handleSelectClass = (classItem, subject) => {
+        setSelectedClass({ ...classItem, selectedSubject: subject });
+        setIsModalOpen(true);
     };
 
     const handleClose = () => setIsModalOpen(false);
 
-    const handleGoToGradeTable = () => {
-        navigate(`/manage/gradeTable/`);
-    }
+    const handleGoToGradeTable = (idSubject, idClass, semester) => {
+        navigate(`/manage/gradeTable/${idSubject}/${idClass}/${semester}`);
+    };
 
     const handleGoToTeachingMaterial = () => {
         navigate(`/manage/teachingMaterial`);
-    }
+    };
 
     const handleGoToAttendanceTable = () => {
         navigate(`/manage/attendanceTable`);
-    }
+    };
 
     const handleGoToQuestionManage = () => {
         navigate(`/manage/questionManage`);
-    }
+    };
 
     return (
         <div className="container mx-auto p-6">
             <h1 className="text-2xl font-bold text-blue-600 mb-6">Lớp Học Của Tôi</h1>
 
-            {/* Danh sách các lớp học */}
+            {/* Separate cards for each subject */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                {classes.map((classItem) => (
-                    <div
-                        key={classItem.id}
-                        className="bg-white p-6 rounded-lg shadow-md cursor-pointer hover:shadow-lg transition"
-                        onClick={() => handleSelectClass(classItem)}
-                    >
-                        <h3 className="text-lg font-bold text-gray-800">{classItem.name}</h3>
-                        <p className="text-gray-600"><FaUserGraduate className="inline-block mr-2" /> Số học sinh: {classItem.students}</p>
-                        <p className="text-gray-600"><FaCalendarAlt className="inline-block mr-2" /> Ngày học: {classItem.days}</p>
-                        <p className="text-gray-600"><FaClock className="inline-block mr-2" /> Giờ học: {classItem.time}</p>
-                    </div>
-                ))}
+                {classes.flatMap((classItem) =>
+                    classItem.subjects.map((subject, idx) => (
+                        <div
+                            key={`${classItem._id}-${subject._id}-${idx}`}
+                            className="bg-white p-6 rounded-lg shadow-md cursor-pointer hover:shadow-lg transition"
+                            onClick={() => handleSelectClass(classItem, subject)}
+                        >
+                            <h2 className="text-xl font-bold text-blue-600 mb-4">
+                                {classItem.nameClass} - {classItem.year}
+                            </h2>
+                            <h3 className="text-lg font-bold text-gray-800">Môn học: {subject.nameSubject}</h3>
+                            <p className="text-gray-600">
+                                <FaUserGraduate className="inline-block mr-2" /> Số học sinh: {classItem.studentID.length}
+                            </p>
+                        </div>
+                    ))
+                )}
             </div>
 
-            {/* Modal chi tiết lớp học */}
+            {/* Modal for selected class details */}
             <Modal show={isModalOpen} onHide={handleClose} size="xl">
                 <Modal.Header closeButton>
-                    <Modal.Title>Chi tiết lớp học: {selectedClass?.name}</Modal.Title>
+                    <Modal.Title>Chi tiết lớp học: {selectedClass?.nameClass}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {/* Chấm điểm */}
+                        {/* Grade Table */}
                         <div className="bg-gray-100 p-4 rounded-lg shadow-md">
-                            <h3 className="text-lg font-semibold text-gray-700 mb-2"><FaClipboardList className="inline-block mr-2" /> Chấm Điểm</h3>
+                            <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                                <FaClipboardList className="inline-block mr-2" /> Chấm Điểm
+                            </h3>
                             <p>Tổng hợp điểm số của học sinh.</p>
-                            <Button onClick={handleGoToGradeTable} variant="primary">Truy cập bảng điểm</Button>
+                            <Button
+                                onClick={() =>
+                                    handleGoToGradeTable(selectedClass.selectedSubject._id, selectedClass._id, selectedClass.selectedSubject.semester)
+                                }
+                                variant="primary"
+                            >
+                                Truy cập bảng điểm 
+                            </Button>
                         </div>
 
-                        {/* Chấm công */}
+                        {/* Attendance Table */}
                         <div className="bg-gray-100 p-4 rounded-lg shadow-md">
-                            <h3 className="text-lg font-semibold text-gray-700 mb-2"><FaClipboardList className="inline-block mr-2" /> Điểm Danh</h3>
+                            <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                                <FaClipboardList className="inline-block mr-2" /> Điểm Danh
+                            </h3>
                             <p>Tổng hợp điểm danh của học sinh.</p>
                             <Button variant="success" onClick={handleGoToAttendanceTable}>Truy cập điểm danh</Button>
                         </div>
 
-                        {/* Tài liệu học tập */}
+                        {/* Teaching Material */}
                         <div className="bg-gray-100 p-4 rounded-lg shadow-md">
-                            <h3 className="text-lg font-semibold text-gray-700 mb-2"><FaFileAlt className="inline-block mr-2" /> Tài Liệu Học Tập</h3>
+                            <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                                <FaFileAlt className="inline-block mr-2" /> Tài Liệu Học Tập
+                            </h3>
                             <p>Quản lý tài liệu và bài giảng cho lớp.</p>
                             <Button onClick={handleGoToTeachingMaterial} variant="warning">Quản lý tài liệu</Button>
                         </div>
 
-                        {/* Bài tập */}
+                        {/* Question Management */}
                         <div className="bg-gray-100 p-4 rounded-lg shadow-md">
-                            <h3 className="text-lg font-semibold text-gray-700 mb-2"><FaClipboardList className="inline-block mr-2" /> Tự học</h3>
+                            <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                                <FaClipboardList className="inline-block mr-2" /> Tự học
+                            </h3>
                             <p>Quản lý các câu hỏi cho học sinh tự học tại nhà.</p>
                             <Button onClick={handleGoToQuestionManage} variant="danger">Quản lý câu hỏi</Button>
                         </div>

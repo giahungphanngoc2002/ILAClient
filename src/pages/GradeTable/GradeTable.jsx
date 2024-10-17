@@ -1,43 +1,61 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import * as XLSX from "xlsx";
-import { FaFileExcel, FaSearch, FaArrowLeft } from 'react-icons/fa'; // Thêm biểu tượng
+import { FaFileExcel, FaSearch, FaArrowLeft } from 'react-icons/fa';
+import { useParams } from "react-router-dom";
+import * as ScoreSubjectService from "../../services/ScoreSbujectService";
 
 const GradeTable = () => {
-    const [students, setStudents] = useState([
-        { name: "Nguyen Van A", oral: [8, 10], test15: [7, 9], test45: [8], final: [9] },
-        { name: "Tran Thi B", oral: [7, 5], test15: [6, 8], test45: [9], final: [8] },
-        { name: "Le Van C", oral: [9, 6], test15: [8, 7], test45: [7], final: [6] },
-        { name: "Hoang Thi D", oral: [10, 9], test15: [9, 8], test45: [10], final: [9] },
-        { name: "Phan Van E", oral: [6, 5], test15: [5, 7], test45: [6], final: [7] },
-        { name: "Dang Thi F", oral: [8, 7], test15: [7, 9], test45: [8], final: [8] },
-        { name: "Vo Van G", oral: [7, 6], test15: [8, 6], test45: [7], final: [7] },
-        { name: "Nguyen Thi H", oral: [10, 9], test15: [9, 10], test45: [9], final: [10] },
-        { name: "Pham Van I", oral: [6, 5], test15: [7, 8], test45: [6], final: [7] },
-        { name: "Tran Thi J", oral: [9, 8], test15: [8, 9], test45: [9], final: [8] },
-        { name: "Le Thi K", oral: [8, 7], test15: [7, 9], test45: [8], final: [9] },
-        { name: "Nguyen Van L", oral: [6, 7], test15: [8, 9], test45: [7], final: [6] },
-        { name: "Hoang Van M", oral: [10, 10], test15: [9, 8], test45: [10], final: [10] },
-        { name: "Vo Thi N", oral: [9, 9], test15: [9, 10], test45: [9], final: [9] },
-        { name: "Pham Van O", oral: [7, 6], test15: [7, 8], test45: [7], final: [6] },
-        { name: "Nguyen Thi P", oral: [8, 8], test15: [8, 9], test45: [8], final: [9] },
-        { name: "Tran Van Q", oral: [10, 9], test15: [9, 8], test45: [10], final: [9] },
-        { name: "Le Van R", oral: [6, 7], test15: [7, 8], test45: [6], final: [7] },
-        { name: "Hoang Thi S", oral: [9, 10], test15: [10, 9], test45: [10], final: [10] },
-        { name: "Vo Van T", oral: [7, 8], test15: [7, 6], test45: [7], final: [7] },
-        { name: "Nguyen Van U", oral: [10, 10], test15: [9, 10], test45: [9], final: [10] },
-        { name: "Tran Thi V", oral: [8, 7], test15: [7, 8], test45: [8], final: [8] },
-        { name: "Le Van W", oral: [6, 5], test15: [5, 6], test45: [7], final: [6] },
-        { name: "Pham Thi X", oral: [9, 8], test15: [8, 9], test45: [9], final: [8] },
-        { name: "Nguyen Van Y", oral: [10, 10], test15: [9, 10], test45: [10], final: [10] },
-        { name: "Tran Van Z", oral: [8, 9], test15: [8, 7], test45: [9], final: [8] },
-        { name: "Le Thi A1", oral: [7, 6], test15: [6, 7], test45: [7], final: [7] },
-        { name: "Pham Van A2", oral: [9, 9], test15: [9, 8], test45: [9], final: [9] },
-        { name: "Nguyen Thi A3", oral: [8, 8], test15: [7, 9], test45: [8], final: [9] },
-        { name: "Tran Van A4", oral: [10, 9], test15: [9, 10], test45: [10], final: [9] }
-    ]);
-
+    const [students, setStudents] = useState([]);
+    const { idClass, idSubject, semester } = useParams();
     const [searchTerm, setSearchTerm] = useState("");
     const [filterScore, setFilterScore] = useState("");
+
+    useEffect(() => {
+        const fetchScores = async () => {
+            try {
+                const scoresData = await ScoreSubjectService.getAllScoresBySubjectSemester(idSubject, idClass, semester);
+
+                // Cấu trúc lại dữ liệu cho phù hợp với bảng
+                const formattedStudents = scoresData.scoreDetailId.map((detail) => {
+                    const scores = { oral: [], test15: [], test45: [], final: [] };
+                    
+                    detail.scores.forEach((score) => {
+                        switch (score.type) {
+                            case "mieng":
+                                scores.oral.push(score.score);
+                                break;
+                            case "15-minute":
+                                scores.test15.push(score.score);
+                                break;
+                            case "1 tiet":
+                                scores.test45.push(score.score);
+                                break;
+                            case "final":
+                                scores.final.push(score.score);
+                                break;
+                            default:
+                                break;
+                        }
+                    });
+
+                    return {
+                        name: detail.studentId.name,
+                        email: detail.studentId.email,
+                        nameClass: detail.classId.nameClass,
+                        nameSubject: scoresData.nameSubject,
+                        ...scores
+                    };
+                });
+
+                setStudents(formattedStudents);
+            } catch (error) {
+                console.error("Error fetching scores:", error);
+            }
+        };
+
+        fetchScores();
+    }, [idClass, idSubject, semester]);
+    console.log("formattedStudents",students)
 
     const calculateAverage = (grades) =>
         grades.length > 0
@@ -56,8 +74,7 @@ const GradeTable = () => {
                     (calculateAverage(student.oral) * 1 +
                         calculateAverage(student.test15) * 2 +
                         calculateAverage(student.test45) * 3 +
-                        calculateAverage(student.final) * 4) /
-                    10
+                        calculateAverage(student.final) * 4) / 10
                 ).toFixed(1),
             }))
         );
@@ -71,11 +88,10 @@ const GradeTable = () => {
             (calculateAverage(student.oral) * 1 +
                 calculateAverage(student.test15) * 2 +
                 calculateAverage(student.test45) * 3 +
-                calculateAverage(student.final) * 4) /
-            10
+                calculateAverage(student.final) * 4) / 10
         ).toFixed(1);
 
-        const matchName = student.name.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchName = student?.name?.toLowerCase().includes(searchTerm.toLowerCase());
         const matchScore =
             filterScore === "" ||
             (filterScore === "high" && averageScore >= 8) ||
@@ -83,10 +99,13 @@ const GradeTable = () => {
 
         return matchName && matchScore;
     });
+    const nameClass = students.length > 0 ? students[0].nameClass : "";
+    const nameSubject = students.length > 0 ? students[0].nameSubject : "";
+
 
     return (
         <div className="container mx-auto p-6 min-h-screen">
-            <h1 className="text-2xl font-bold mb-6 text-center">Bảng Điểm Môn Toán Lớp 10/1</h1>
+            <h1 className="text-2xl font-bold mb-6 text-center">Bảng Điểm Môn {nameSubject} Lớp {nameClass}</h1>
 
             {/* Tìm kiếm và lọc */}
             <div className="flex justify-between items-center mb-4">
@@ -153,8 +172,7 @@ const GradeTable = () => {
                                         (calculateAverage(student.oral) * 1 +
                                             calculateAverage(student.test15) * 2 +
                                             calculateAverage(student.test45) * 3 +
-                                            calculateAverage(student.final) * 4) /
-                                        10
+                                            calculateAverage(student.final) * 4) / 10
                                     ).toFixed(1)}
                                 </td>
                             </tr>

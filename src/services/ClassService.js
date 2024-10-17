@@ -86,3 +86,8 @@ export const getAllScheduleForTeacherId = async (teacherId) => {
     const res = await axios.get(`http://localhost:3001/api/class/teacher/${teacherId}/schedules`);
     return res.data;
 };
+
+export const getAllSubjectClassesByTeacherId = async (teacherId) => {
+    const res = await axios.get(`http://localhost:3001/api/class/teacher/${teacherId}/classes/subjects`);
+    return res.data;
+};

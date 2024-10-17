@@ -63,7 +63,7 @@ export const routes = [
     isShowHeader: true,
   },
   {
-    path: "manage/gradeTable",
+    path: "manage/gradeTable/:idSubject/:idClass/:semester",
     page: GradeTable,
     isShowHeader: false,
   },
