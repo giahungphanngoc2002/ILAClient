@@ -1,3 +1,7 @@
+
+
+// App.js
+
 import React, { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { routes } from "./routes";
@@ -5,12 +9,12 @@ import DefaultComponent from "./components/DefaultComponent/DefaultComponent";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { isJsonString } from "./utils";
 import { jwtDecode as jwt_decode } from "jwt-decode";
 import { useDispatch } from "react-redux";
 import * as UserService from "./services/UserService";
 import { updateUser } from "./redux/slices/userSlide";
 import DefaultSidebar from "./components/DefaultSidebar/DefaultSidebar";
+import ProtectedRoute from "./routes/ProtectedRoute";
 
 export default function App() {
   const dispatch = useDispatch();
@@ -26,43 +30,23 @@ export default function App() {
     let storageData = localStorage.getItem("access_token");
     let decoded = {};
 
-    if (storageData && isJsonString(storageData)) {
+    if (storageData) {
       try {
-        storageData = JSON.parse(storageData);
-        if (typeof storageData === 'string') {
-          decoded = jwt_decode(storageData);
-        } else {
-          console.error("Invalid token format. Expected a string.");
-        }
+        decoded = jwt_decode(storageData);
       } catch (error) {
         console.error("Error decoding token:", error.message);
       }
-    } else {
-      console.error("Invalid or missing token in localStorage.");
     }
     return { decoded, storageData };
   };
 
   const handleGetDetailsUser = async (id, token) => {
-    if (!token) {
-      console.error("User is not logged in.");
-      return;
-    }
-
-    if (!id) {
-      console.error("User ID is not provided.");
-      return;
-    }
-
+    if (!token) return;
     try {
       const res = await UserService.getDetailUser(id, token);
       dispatch(updateUser({ ...res?.data, access_token: token }));
     } catch (error) {
-      if (error.response && error.response.status === 404) {
-        console.error("User not found. Please check the user ID and URL.");
-      } else {
-        console.error("Error getting user details:", error);
-      }
+      console.error("Error getting user details:", error);
     }
   };
 
@@ -86,41 +70,30 @@ export default function App() {
       <Router>
         <div className="flex flex-col flex-1">
           <Routes>
-            {routes.map((route) => {
-              const Page = route.page;
-
-              return (
-                <Route
-                  key={route.path}
-                  path={route.path}
-                  element={
-                    <div className="flex bg-gray-100">
-                      {route.isShowSideBar && <DefaultSidebar />}
-                      <div className="flex-1">
-                        {route.isShowHeader && <DefaultComponent />}
+            {routes.map(({ path, page: Page, isShowSideBar, isShowHeader }, index) => (
+              <Route
+                key={index}
+                path={path}
+                element={
+                  <div className="flex bg-gray-100">
+                    {isShowSideBar && <DefaultSidebar />}
+                    <div className="flex-1">
+                      {isShowHeader && <DefaultComponent />}
+                      {path.includes("/teacher") ? (
+                        <ProtectedRoute>
+                          <Page />
+                        </ProtectedRoute>
+                      ) : (
                         <Page />
-                      </div>
+                      )}
                     </div>
-                  }
-                />
-              );
-            })}
+                  </div>
+                }
+              />
+            ))}
           </Routes>
         </div>
-
-        {/* Toast Container for notifications */}
-        <ToastContainer
-          position="top-right"
-          autoClose={1000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme="light"
-        />
+        <ToastContainer position="top-right" autoClose={1000} hideProgressBar={false} />
       </Router>
     </div>
   );

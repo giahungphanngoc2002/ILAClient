@@ -1,3 +1,5 @@
+
+
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
@@ -19,45 +21,26 @@ export default function SignUp() {
   const { data, isSuccess, isError, error } = mutation;
 
   // Handle input changes
-  const handleOnChangeEmail = (e) => {
-    setEmail(e.target.value);
-  };
-
-  const handleOnChangePassword = (e) => {
-    setPassword(e.target.value);
-  };
-
-  const handleOnChangeConfirmPassword = (e) => {
-    setConfirmPassword(e.target.value);
-  };
+  const handleOnChangeEmail = (e) => setEmail(e.target.value);
+  const handleOnChangePassword = (e) => setPassword(e.target.value);
+  const handleOnChangeConfirmPassword = (e) => setConfirmPassword(e.target.value);
 
   // Handle sign-up form submission
   const handleSignup = (e) => {
     e.preventDefault();
-
-    // Ensure password and confirm password match
     if (password !== confirmPassword) {
       toast.error("Mật khẩu và mật khẩu xác nhận không khớp.");
       return;
     }
-
-    // Ensure all fields are filled
     if (!email.trim() || !password.trim() || !confirmPassword.trim()) {
       toast.error("Vui lòng điền đầy đủ thông tin");
       return;
     }
-
-    // Call the mutation to sign up the user
     mutation.mutate({
       email: email.trim(),
       password: password.trim(),
       confirmPassword: confirmPassword.trim(),
     });
-  };
-
-  // Handle navigation to sign-in page
-  const handleNavigateSignin = () => {
-    navigate("/signin");
   };
 
   // Effect to handle sign-up success or failure
@@ -66,15 +49,13 @@ export default function SignUp() {
       toast.error("Đăng ký thất bại, vui lòng thử lại.");
       console.error("Lỗi đăng ký:", error);
     } else if (isSuccess && data?.status !== "ERR") {
-      toast.success("Đăng ký thành công! Vui lòng kiểm tra email để xác nhận.");
-      handleNavigateSignin();
+      toast.success("Đăng ký thành công!");
+      navigate("/signin");
     }
-  }, [isSuccess, isError, data, error]);
+  }, [isSuccess, isError, data, error, navigate]);
 
   // Toggle password visibility
-  const togglePasswordVisibility = () => {
-    setVisible(!visible);
-  };
+  const togglePasswordVisibility = () => setVisible(!visible);
 
   return (
     <section className="w-full h-screen flex items-center justify-center bg-white relative">
