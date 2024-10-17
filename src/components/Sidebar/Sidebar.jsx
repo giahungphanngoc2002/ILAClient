@@ -10,6 +10,10 @@ export default function Sidebar({ children, expanded, setExpanded }) {
   const user = useSelector((state) => state.user);
   const navigate = useNavigate();
   console.log(user)
+
+  const handleLogOut = () => {
+    console.log("dang xuat")
+  }
   return (
     <aside className={`h-screen ${expanded ? "w-64" : "w-20"} transition-width duration-300`}>
       <nav className="fixed h-full flex flex-col bg-white border-r shadow-sm">
@@ -45,7 +49,9 @@ export default function Sidebar({ children, expanded, setExpanded }) {
               <h4 className="font-semibold">{user.name}</h4>
               <span className="text-xs text-gray-600">{user.email}</span>
             </div>
-            <MoreVertical size={20} />
+            <button onClick={handleLogOut}>
+              <MoreVertical size={20} />
+            </button>
           </div>
         </div>
       </nav>

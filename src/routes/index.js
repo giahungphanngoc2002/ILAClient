@@ -17,6 +17,7 @@ import Notifications from "../pages/Notification/Notifications";
 import ClassDivision from "../pages/ClassDivision/ClassDivision";
 import ManageSchedule from "../pages/ManageSchedule/ManageSchedule";
 import QuestionManager from "../pages/QuestionManage/QuestionManage";
+import TimeTable from "../pages/TimeTable/TimeTable";
 
 
 export const routes = [
@@ -62,76 +63,88 @@ export const routes = [
     isShowHeader: true,
   },
   {
-    path: "teacher/gradeTable",
+    path: "manage/gradeTable",
     page: GradeTable,
     isShowHeader: false,
   },
   {
-    path: "teacher/teachingMaterial",
+    path: "manage/teachingMaterial",
     page: TeachingMaterials,
     isShowHeader: false,
   },
   {
-    path: "teacher/attendanceTable",
+    path: "manage/attendanceTable",
     page: AttendanceTable,
     isShowHeader: false,
   },
   {
-    path: `teacher/class/:id`,
+    path: `manage/class/:id`,
     page: StudentTable,
     isShowHeader: false,
   },
   {
-    path: "/teacher/*",
+    path: "/manage/*",
     page: Teacher,
     isShowHeader: false,
     isShowSideBar: true,
   },
   {
-    path: "teacher/calender/",
+    path: "/student/*",
+    page: Teacher,
+    isShowHeader: false,
+    isShowSideBar: true,
+  },
+  {
+    path: "manage/calender/",
     page: Calendar,
     isShowHeader: false,
     isShowSideBar: true,
   },
   {
-    path: "teacher/questionManage/",
+    path: "manage/questionManage/",
     page: QuestionManager,
     isShowHeader: false,
     isShowSideBar: false,
   },
   {
-    path: "teacher/calender/:idClass/:idSchedule/:idSlot/:idSubject/:semester",
+    path: "manage/calender/:idClass/:idSchedule/:idSlot/:idSubject/:semester",
     page: StudentTable,
     isShowHeader: false,
     isShowSideBar: true,
   },
   {
-    path: "/teacher/myClass",
+    path: "/manage/myClass",
     page: MyClasses,
     isShowHeader: false,
     isShowSideBar: true,
   },
   {
-    path: "/teacher/profile",
+    path: "/manage/profile",
     page: Profile,
     isShowHeader: false,
     isShowSideBar: true,
   },
   {
-    path: "/teacher/notification",
+    path: "/manage/notification",
     page: Notifications,
     isShowHeader: false,
     isShowSideBar: true,
   },
   {
-    path: "/teacher/classDivision",
+    path: "/manage/classDivision",
     page: ClassDivision,
     isShowHeader: false,
     isShowSideBar: true,
   },
   {
-    path: "/teacher/manageSchedule",
+    path: "/manage/manageSchedule",
     page: ManageSchedule,
+    isShowHeader: false,
+    isShowSideBar: true,
+  },
+  {
+    path: "/student/timeTable",
+    page: TimeTable,
     isShowHeader: false,
     isShowSideBar: true,
   },

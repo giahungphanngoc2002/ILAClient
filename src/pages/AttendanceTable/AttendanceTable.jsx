@@ -30,7 +30,7 @@ const AttendanceTable = () => {
   };
 
   const handleBackMyClass = () => {
-    navigate('/teacher/myClass');
+    navigate('/manage/myClass');
   };
 
   return (

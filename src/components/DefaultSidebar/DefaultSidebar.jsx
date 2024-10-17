@@ -14,32 +14,37 @@ const DefaultSidebar = () => {
 
     const goToScheduleTeacher = () => {
         setActiveItem('Lịch làm việc');
-        navigate('/teacher/calender');
+        navigate('/manage/calender');
     };
 
     const goToMyClass = () => {
         setActiveItem('Quản lý lớp');
-        navigate('/teacher/myClass');
+        navigate('/manage/myClass');
     };
 
     const goToProfile = () => {
         setActiveItem('Thông tin cá nhân');
-        navigate('/teacher/profile');
+        navigate('/manage/profile');
     };
 
     const goToNotification = () => {
         setActiveItem('Thông báo');
-        navigate('/teacher/notification');
+        navigate('/manage/notification');
     };
 
     const goToClassDivision = () => {
         setActiveItem('Chia lớp');
-        navigate('/teacher/classDivision');
+        navigate('/manage/classDivision');
     };
 
     const goToManageSchedule = () => {
         setActiveItem('Thời khoá biểu');
-        navigate('/teacher/manageSchedule');
+        navigate('/manage/manageSchedule');
+    };
+
+    const goToTimeTable = () => {
+        setActiveItem('Thời khoá biểu');
+        navigate('/student/timeTable');
     };
 
     return (
@@ -65,29 +70,45 @@ const DefaultSidebar = () => {
                             active={activeItem === 'Thông tin cá nhân'}
                             onClick={goToProfile}
                         />
-                        <SidebarItem
-                            icon={<Bell size={20} />}
-                            text="Thông báo"
-                            active={activeItem === 'Thông báo'}
-                            onClick={goToNotification}
-                        />
-                        <SidebarItem
-                            icon={<CalendarClock size={20} />}
-                            text="Thời khoá biểu"
-                            active={activeItem === 'Thời khoá biểu'}
-                            onClick={goToManageSchedule}
-                        />
-                        <SidebarItem
-                            icon={<Bell size={20} />}
-                            text="Chia lớp"
-                            active={activeItem === 'Chia lớp'}
-                            onClick={goToClassDivision}
-                        />
                     </>
                 )
             }
+            <SidebarItem
+                icon={<Bell size={20} />}
+                text="Thông báo"
+                active={activeItem === 'Thông báo'}
+                onClick={goToNotification}
+            />
             {user.role === "Admin" && (
                 <>
+                    <SidebarItem
+                        icon={<CalendarClock size={20} />}
+                        text="Thời khoá biểu"
+                        active={activeItem === 'Thời khoá biểu'}
+                        onClick={goToManageSchedule}
+                    />
+                    <SidebarItem
+                        icon={<Bell size={20} />}
+                        text="Chia lớp"
+                        active={activeItem === 'Chia lớp'}
+                        onClick={goToClassDivision}
+                    />
+                </>
+            )}
+            {user.role === "User" && (
+                <>
+                    <SidebarItem
+                        icon={<CalendarClock size={20} />}
+                        text="Thời khoá biểu"
+                        active={activeItem === 'Thời khoá biểu'}
+                        onClick={goToTimeTable}
+                    />
+                    <SidebarItem
+                        icon={<Bell size={20} />}
+                        text="Chia lớp"
+                        active={activeItem === 'Chia lớp'}
+                        onClick={goToClassDivision}
+                    />
                 </>
             )}
         </Sidebar>

@@ -82,7 +82,6 @@ const Calendar = ({ onClassClick }) => {
     if (classData) {
       const slotData = classData.slots.find(slot => slot.slotNumber === slotIndex + 1);
       
-      // Extract the `scheduleId`
       const scheduleId = classData._id;  
       
       if (slotData) {
@@ -107,7 +106,7 @@ const Calendar = ({ onClassClick }) => {
   const handleNextWeek = () => setCurrentWeekOffset(currentWeekOffset + 1);
 
   const goToClass = (idClass, idSchedule, idSlot, idSubject, semester) => {
-    navigate(`/teacher/calender/${idClass}/${idSchedule}/${idSlot}/${idSubject}/${semester}`);
+    navigate(`/manage/calender/${idClass}/${idSchedule}/${idSlot}/${idSubject}/${semester}`);
   };
 
   return (

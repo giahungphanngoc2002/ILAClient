@@ -93,7 +93,7 @@ const TeachingMaterial = () => {
       <h1 className="text-3xl font-bold mb-6 text-center text-gray-800">Tài liệu giảng dạy</h1>
       <div className="mb-4">
         <button
-          onClick={() => navigate('/teacher/myclass')}
+          onClick={() => navigate('/manage/myclass')}
           className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-all flex items-center space-x-2"
         >
           <FaArrowLeft className="mr-2" /> Trở về

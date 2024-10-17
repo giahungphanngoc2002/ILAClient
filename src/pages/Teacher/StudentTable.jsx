@@ -237,7 +237,7 @@ const StudentTable = () => {
   };
 
   const handleBackSchedule = () => {
-    navigate('/teacher/calender');
+    navigate('/manage/calender');
   };
 
   

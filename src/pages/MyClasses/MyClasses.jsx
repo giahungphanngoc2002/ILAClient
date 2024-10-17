@@ -110,19 +110,19 @@ function MyClasses() {
     const handleClose = () => setIsModalOpen(false);
 
     const handleGoToGradeTable = () => {
-        navigate(`/teacher/gradeTable/`);
+        navigate(`/manage/gradeTable/`);
     }
 
     const handleGoToTeachingMaterial = () => {
-        navigate(`/teacher/teachingMaterial`);
+        navigate(`/manage/teachingMaterial`);
     }
 
     const handleGoToAttendanceTable = () => {
-        navigate(`/teacher/attendanceTable`);
+        navigate(`/manage/attendanceTable`);
     }
 
     const handleGoToQuestionManage = () => {
-        navigate(`/teacher/questionManage`);
+        navigate(`/manage/questionManage`);
     }
 
     return (

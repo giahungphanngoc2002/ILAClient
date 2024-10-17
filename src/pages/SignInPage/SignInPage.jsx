@@ -48,9 +48,9 @@ export default function SignInPage() {
       if (data?.role === "Admin") {
         navigate("/admin/dashboard");
       } else if (data?.role === "Teacher") {
-        navigate("/teacher");
+        navigate("/manage");
       } else {
-        navigate("/");
+        navigate("/student");
       }
     } else if (isError) {
       toast.error(error?.response?.data?.message || "Đăng nhập thất bại");
