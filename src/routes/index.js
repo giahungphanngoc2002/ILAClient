@@ -18,6 +18,7 @@ import ClassDivision from "../pages/ClassDivision/ClassDivision";
 import ManageSchedule from "../pages/ManageSchedule/ManageSchedule";
 import QuestionManager from "../pages/QuestionManage/QuestionManage";
 import TimeTable from "../pages/TimeTable/TimeTable";
+import ProtectedRoute from "../routes/ProtectedRoute"; // Đảm bảo bạn đã import ProtectedRoute
 
 
 export const routes = [
@@ -26,11 +27,6 @@ export const routes = [
     page: HomePage,
     isShowHeader: true,
     isShowSideBar: false,
-  },
-  {
-    path: "/changePassword",
-    page: ChangePassword,
-    isShowHeader: true,
   },
   {
     path: "/signin",
@@ -52,99 +48,158 @@ export const routes = [
     page: ResetPassword,
     isShowHeader: false,
   },
-  // {
-  //   path: "/activation/:activation_token",
-  //   page: ActivationPage,
-  //   isShowHeader: false,
-  // },
   {
     path: "/profile",
-    page: Profile,
+    page: () => (
+      <ProtectedRoute>
+        <Profile />
+      </ProtectedRoute>
+    ),
     isShowHeader: true,
   },
   {
     path: "manage/gradeTable/:idSubject/:idClass/:semester",
-    page: GradeTable,
+    page: () => (
+      <ProtectedRoute>
+        <GradeTable />
+      </ProtectedRoute>
+    ),
     isShowHeader: false,
   },
   {
     path: "manage/teachingMaterial",
-    page: TeachingMaterials,
+    page: () => (
+      <ProtectedRoute>
+        <TeachingMaterials />
+      </ProtectedRoute>
+    ),
     isShowHeader: false,
   },
   {
     path: "manage/attendanceTable",
-    page: AttendanceTable,
+    page: () => (
+      <ProtectedRoute>
+        <AttendanceTable />
+      </ProtectedRoute>
+    ),
     isShowHeader: false,
   },
   {
     path: `manage/class/:id`,
-    page: StudentTable,
+    page: () => (
+      <ProtectedRoute>
+        <StudentTable />
+      </ProtectedRoute>
+    ),
     isShowHeader: false,
   },
   {
     path: "/manage/*",
-    page: Teacher,
+    page: () => (
+      <ProtectedRoute>
+        <Teacher />
+      </ProtectedRoute>
+    ),
     isShowHeader: false,
     isShowSideBar: true,
   },
   {
     path: "/student/*",
-    page: Teacher,
+    page: () => (
+      <ProtectedRoute>
+        <Teacher />
+      </ProtectedRoute>
+    ),
     isShowHeader: false,
     isShowSideBar: true,
   },
   {
     path: "manage/calender/",
-    page: Calendar,
+    page: () => (
+      <ProtectedRoute>
+        <Calendar />
+      </ProtectedRoute>
+    ),
     isShowHeader: false,
     isShowSideBar: true,
   },
   {
     path: "manage/questionManage/",
-    page: QuestionManager,
+    page: () => (
+      <ProtectedRoute>
+        <QuestionManager />
+      </ProtectedRoute>
+    ),
     isShowHeader: false,
     isShowSideBar: false,
   },
   {
     path: "manage/calender/:idClass/:idSchedule/:idSlot/:idSubject/:semester",
-    page: StudentTable,
+    page: () => (
+      <ProtectedRoute>
+        <StudentTable />
+      </ProtectedRoute>
+    ),
     isShowHeader: false,
     isShowSideBar: true,
   },
   {
     path: "/manage/myClass",
-    page: MyClasses,
+    page: () => (
+      <ProtectedRoute>
+        <MyClasses />
+      </ProtectedRoute>
+    ),
     isShowHeader: false,
     isShowSideBar: true,
   },
   {
     path: "/manage/profile",
-    page: Profile,
+    page: () => (
+      <ProtectedRoute>
+        <Profile />
+      </ProtectedRoute>
+    ),
     isShowHeader: false,
     isShowSideBar: true,
   },
   {
     path: "/manage/notification",
-    page: Notifications,
+    page: () => (
+      <ProtectedRoute>
+        <Notifications />
+      </ProtectedRoute>
+    ),
     isShowHeader: false,
     isShowSideBar: true,
   },
   {
     path: "/manage/classDivision",
-    page: ClassDivision,
+    page: () => (
+      <ProtectedRoute>
+        <ClassDivision />
+      </ProtectedRoute>
+    ),
     isShowHeader: false,
     isShowSideBar: true,
   },
   {
     path: "/manage/manageSchedule",
-    page: ManageSchedule,
+    page: () => (
+      <ProtectedRoute>
+        <ManageSchedule />
+      </ProtectedRoute>
+    ),
     isShowHeader: false,
     isShowSideBar: true,
   },
   {
     path: "/student/timeTable",
-    page: TimeTable,
+    page: () => (
+      <ProtectedRoute>
+        <TimeTable />
+      </ProtectedRoute>
+    ),
     isShowHeader: false,
     isShowSideBar: true,
   },
