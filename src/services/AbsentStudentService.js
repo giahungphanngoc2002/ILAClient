@@ -22,3 +22,6 @@ export const getAbsentId = async (classId, scheduleId, slotId) => {
   }
 };
 
+
+
+

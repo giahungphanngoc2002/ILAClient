@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, Button } from 'react-bootstrap';
-import { FaUserGraduate, FaCalendarAlt, FaClock, FaFileAlt, FaClipboardList } from 'react-icons/fa';
+import { FaUserGraduate, FaClipboardList, FaFileAlt } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import * as ClassService from "../../services/ClassService";
 import { useSelector } from 'react-redux';
@@ -24,8 +24,19 @@ function MyClasses() {
         const fetchSubject = async () => {
             setIsLoading(true);
             try {
-                const data = await ClassService.getAllSubjectClassesByTeacherId(teacherId);
-                setClasses(data || []); // Use data directly
+                const response = await ClassService.getAllSubjectClassesByTeacherId(teacherId);
+                
+                // Logging the full response to check the structure
+                console.log('Full API response data:', response); 
+                
+                // Now extract the data properly
+                if (response && response.data && response.data.classes) {
+                    setClasses(response.data.classes); // Properly extract classes
+                } else {
+                    console.error('Unexpected API response structure', response); 
+                    setClasses([]); // Set empty array if classes are missing
+                }
+
                 setIsError(false);
             } catch (error) {
                 setIsError(true);
@@ -39,6 +50,9 @@ function MyClasses() {
             fetchSubject();
         }
     }, [teacherId]);
+
+    // Debugging: Log classes to ensure data is correctly set
+    console.log("Classes data:", classes);
 
     const handleSelectClass = (classItem, subject) => {
         setSelectedClass({ ...classItem, selectedSubject: subject });
@@ -77,7 +91,7 @@ function MyClasses() {
                             onClick={() => handleSelectClass(classItem, subject)}
                         >
                             <h2 className="text-xl font-bold text-blue-600 mb-4">
-                                {classItem.nameClass} - {classItem.year}
+                                {classItem.nameClass.trim()} - {classItem.year}
                             </h2>
                             <h3 className="text-lg font-bold text-gray-800">Môn học: {subject.nameSubject}</h3>
                             <p className="text-gray-600">
@@ -103,11 +117,15 @@ function MyClasses() {
                             <p>Tổng hợp điểm số của học sinh.</p>
                             <Button
                                 onClick={() =>
-                                    handleGoToGradeTable(selectedClass.selectedSubject._id, selectedClass._id, selectedClass.selectedSubject.semester)
+                                    handleGoToGradeTable(
+                                        selectedClass.selectedSubject._id,
+                                        selectedClass._id,
+                                        selectedClass.selectedSubject.semester
+                                    )
                                 }
                                 variant="primary"
                             >
-                                Truy cập bảng điểm 
+                                Truy cập bảng điểm
                             </Button>
                         </div>
 
@@ -117,7 +135,9 @@ function MyClasses() {
                                 <FaClipboardList className="inline-block mr-2" /> Điểm Danh
                             </h3>
                             <p>Tổng hợp điểm danh của học sinh.</p>
-                            <Button variant="success" onClick={handleGoToAttendanceTable}>Truy cập điểm danh</Button>
+                            <Button variant="success" onClick={handleGoToAttendanceTable}>
+                                Truy cập điểm danh
+                            </Button>
                         </div>
 
                         {/* Teaching Material */}
@@ -126,7 +146,9 @@ function MyClasses() {
                                 <FaFileAlt className="inline-block mr-2" /> Tài Liệu Học Tập
                             </h3>
                             <p>Quản lý tài liệu và bài giảng cho lớp.</p>
-                            <Button onClick={handleGoToTeachingMaterial} variant="warning">Quản lý tài liệu</Button>
+                            <Button onClick={handleGoToTeachingMaterial} variant="warning">
+                                Quản lý tài liệu
+                            </Button>
                         </div>
 
                         {/* Question Management */}
@@ -135,12 +157,16 @@ function MyClasses() {
                                 <FaClipboardList className="inline-block mr-2" /> Tự học
                             </h3>
                             <p>Quản lý các câu hỏi cho học sinh tự học tại nhà.</p>
-                            <Button onClick={handleGoToQuestionManage} variant="danger">Quản lý câu hỏi</Button>
+                            <Button onClick={handleGoToQuestionManage} variant="danger">
+                                Quản lý câu hỏi
+                            </Button>
                         </div>
                     </div>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={handleClose}>Đóng</Button>
+                    <Button variant="secondary" onClick={handleClose}>
+                        Đóng
+                    </Button>
                 </Modal.Footer>
             </Modal>
         </div>

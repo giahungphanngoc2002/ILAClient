@@ -97,113 +97,119 @@ const StudentTable = () => {
   
  console.log("existingAbsentId",existingAbsentId)
 
-  const mutation = useMutation({
-    mutationFn: async ({ absentStudentIds, absentId }) => {
-      if (absentId) {
-        // Gọi hàm update nếu đã có absentId
-        await Promise.all(
-          absentStudentIds.map((studentId) => 
-            AbsentStudentService.updateAbsentStudent(absentId, studentId)
-          )
-        );
-      } else {
-        // Gọi hàm create nếu chưa có absentId và trả về phản hồi chứa absentId mới
-        const response = await AbsentStudentService.createAbsentStudent({
-          classId: idClass,
-          scheduleId: idSchedule,
-          slotId: idSlot,
-          studentIds: absentStudentIds,
-        });
-        return response; // Trả về để sử dụng trong onSuccess
+ const mutation = useMutation({
+  mutationFn: async ({ absentStudentIds, absentId }) => {
+    if (absentId) {
+      // Thực hiện tuần tự từng yêu cầu thay vì chạy đồng thời bằng Promise.all
+      for (const studentId of absentStudentIds) {
+        if (absentId && studentId) {
+          await AbsentStudentService.updateAbsentStudent(absentId, studentId);
+        } else {
+          console.error("Missing absentId or studentId", { absentId, studentId });
+        }
       }
-    },
-    onSuccess: (data) => {
-      if (data && data.data && data.data.absentId) {
-        const newAbsentId = data.data.absentId;
-        console.log("Newly created absentId:", newAbsentId); // Để kiểm tra absentId mới
-        toast.success("Đã khởi tạo danh sách học sinh vắng mặt thành công!");
-      } else {
-        toast.success("Cập nhật danh sách học sinh vắng mặt thành công!");
-      }
-    },
-    onError: () => {
-      toast.error("Lưu danh sách học sinh vắng mặt thất bại.");
-    },
-  });
-  
-  // Hàm saveStudents kiểm tra và gọi mutation với điều kiện
-  const saveStudents = async () => {
-    if (!idClass || !idSchedule || !idSlot) {
-      console.error('Error: Missing required parameters');
-      return;
-    }
-  
-    const absentStudentIds = students
-      .filter(student => !student.status && student._id) // Chỉ các học sinh có status === false
-      .map(student => student._id);
-  
-    const presentStudentIds = students
-      .filter(student => student.status && student._id && student.isAbsent) // Học sinh có status === true và hiện đang trong danh sách vắng mặt
-      .map(student => student._id);
-  
-    // Khởi tạo nếu có học sinh vắng mặt
-    if (absentStudentIds.length > 0) {
-      await mutation.mutateAsync({ absentStudentIds, absentId: null });
-    }
-  
-    // Sử dụng Promise.all để chờ đợi tất cả các cập nhật hoàn thành
-    if (presentStudentIds.length > 0 && existingAbsentId) {
-      await Promise.all(
-        presentStudentIds.map(studentId =>
-          mutation.mutateAsync({ absentStudentIds: [studentId], absentId: existingAbsentId })
-        )
-      );
-    } else if (presentStudentIds.length > 0 && !existingAbsentId) {
-      console.error('No valid absentId provided for updating existing record');
-    }
-  };
-  
-
-
-  const openModal = async (student) => {
-    try {
-      const scoresData = await ScoreSbujectService.getAllScoresBySubject(idSubject, idClass, semester, student._id);
-  
-      // Xử lý dữ liệu điểm từ scoreDetailId
-      const allScores = scoresData?.scoreDetailId?.flatMap(item => item.scores) || [];
-      const scoreId = scoresData?.scoreDetailId[0]?._id || null; // Lấy scoreId nếu có
-  
-      const categorizedScores = {
-        oralScore: allScores.filter(score => score.type === 'mieng').map(score => score.score),
-        quizScore: allScores.filter(score => score.type === '15-minute').map(score => score.score),
-        testScore: allScores.filter(score => score.type === '1 tiet').map(score => score.score),
-        finalScore: allScores.find(score => score.type === 'final')?.score || '',
-      };
-  
-      setStudentScores({
-        name: student.name,
-        id: student._id,
-        scoreId: scoreId, // Gán scoreId vào studentScores
-        scores: categorizedScores,
+    } else {
+      // Nếu không có absentId, tạo mới danh sách vắng mặt
+      const response = await AbsentStudentService.createAbsentStudent({
+        classId: idClass,
+        scheduleId: idSchedule,
+        slotId: idSlot,
+        studentIds: absentStudentIds,
       });
-      setShowModal(true);
-    } catch (error) {
-      console.error('Error fetching scores:', error);
-      setError(error.message || 'Error fetching scores. Please try again later.');
-      setStudentScores({
-        name: student.name,
-        id: student._id,
-        scoreId: null, // Không có scoreId nếu xảy ra lỗi
-        scores: {
-          oralScore: [],
-          quizScore: [],
-          testScore: [],
-          finalScore: '',
-        },
-      });
-      setShowModal(true);
+      return response;
     }
-  };
+  },
+  onSuccess: (data) => {
+    if (data && data.data && data.data.absentId) {
+      const newAbsentId = data.data.absentId;
+      console.log("Newly created absentId:", newAbsentId); // Để kiểm tra absentId mới
+      toast.success("Đã khởi tạo danh sách học sinh vắng mặt thành công!");
+    } else {
+      toast.success("Cập nhật danh sách học sinh vắng mặt thành công!");
+    }
+  },
+  onError: () => {
+    toast.error("Lưu danh sách học sinh vắng mặt thất bại.");
+  },
+});
+
+// Hàm saveStudents kiểm tra và gọi mutation với điều kiện
+const saveStudents = async () => {
+  if (!idClass || !idSchedule || !idSlot) {
+    console.error('Error: Missing required parameters');
+    return;
+  }
+
+  const absentStudentIds = students
+    .filter(student => !student.status && student._id)
+    .map(student => student._id);
+
+  const presentStudentIds = students
+    .filter(student => student.status && student._id && student.isAbsent)
+    .map(student => student._id);
+
+  // Tạo mới bản ghi vắng mặt nếu cần
+  if (absentStudentIds.length > 0) {
+    await mutation.mutateAsync({ absentStudentIds, absentId: null });
+  }
+
+  // Cập nhật bản ghi vắng mặt nếu có
+  if (presentStudentIds.length > 0 && existingAbsentId) {
+    for (const studentId of presentStudentIds) {
+      await mutation.mutateAsync({ absentStudentIds: [studentId], absentId: existingAbsentId });
+    }
+  } else if (presentStudentIds.length > 0 && !existingAbsentId) {
+    console.error('No valid absentId provided for updating existing record');
+  }
+};
+  
+          const openModal = async (student) => {
+            try {
+              const scoresData = await ScoreSbujectService.getAllScoresBySubject(idSubject, idClass, semester, student._id);
+
+              // Directly use the data response for the student's score details
+              const studentScoreDetails = scoresData; // Since your data has the correct structure
+
+              // Extract all scores from the scoreDetail response
+              const allScores = studentScoreDetails?.scores || [];
+              const scoreId = studentScoreDetails?._id || null; // Get scoreId from the correct scoreDetail
+
+              const categorizedScores = {
+                oralScore: allScores.filter(score => score.type === 'mieng').map(score => score.score),
+                quizScore: allScores.filter(score => score.type === '15-minute').map(score => score.score),
+                testScore: allScores.filter(score => score.type === '1 tiet').map(score => score.score),
+                finalScore: allScores.find(score => score.type === 'final')?.score || '',
+              };
+
+              // Update the state with the student scores and scoreId
+              setStudentScores({
+                name: student.name,
+                id: student._id,
+                scoreId: scoreId, // Attach the correct scoreId for the student
+                scores: categorizedScores,
+              });
+
+              // Display the modal after setting the scores
+              setShowModal(true);
+            } catch (error) {
+              console.error('Error fetching scores:', error);
+              setError(error.message || 'Error fetching scores. Please try again later.');
+
+              // Fallback in case of error
+              setStudentScores({
+                name: student.name,
+                id: student._id,
+                scoreId: null, // No scoreId if an error occurs
+                scores: {
+                  oralScore: [],
+                  quizScore: [],
+                  testScore: [],
+                  finalScore: '',
+                },
+              });
+              setShowModal(true);
+            }
+          };
   
   
 
@@ -343,50 +349,50 @@ const StudentTable = () => {
                   </td>
                   <td className="border px-4 py-2">
                     <div className="grid grid-cols-2 gap-2">
-                      {studentScores.scores.oralScore?.map((score, index) => (
-                        <input
-                          key={index}
-                          type="number"
-                          value={score}
-                          onChange={(e) => handleScoreChange('oralScore', index, e.target.value)}
-                          className="w-full border rounded px-2 py-1"
-                        />
-                      ))}
-                    </div>
-                  </td>
-                  <td className="border px-4 py-2">
-                    <div className="grid grid-cols-2 gap-2">
-                      {studentScores.scores.quizScore?.map((score, index) => (
-                        <input
-                          key={index}
-                          type="number"
-                          value={score}
-                          onChange={(e) => handleScoreChange('quizScore', index, e.target.value)}
-                          className="w-full border rounded px-2 py-1"
-                        />
-                      ))}
-                    </div>
-                  </td>
-                  <td className="border px-4 py-2">
-                    <div className="grid grid-cols-2 gap-2">
-                      {studentScores.scores.testScore?.map((score, index) => (
-                        <input
-                          key={index}
-                          type="number"
-                          value={score}
-                          onChange={(e) => handleScoreChange('testScore', index, e.target.value)}
-                          className="w-full border rounded px-2 py-1"
-                        />
-                      ))}
-                    </div>
-                  </td>
-                  <td className="border px-4 py-2">
+                    {studentScores.scores.oralScore?.map((score, index) => (
                     <input
+                      key={index}
                       type="number"
-                      value={studentScores.scores.finalScore || ''}
-                      onChange={(e) => handleScoreChange('finalScore', null, e.target.value)}
+                      value={score}
+                      onChange={(e) => handleScoreChange('oralScore', index, e.target.value)}
                       className="w-full border rounded px-2 py-1"
                     />
+                  ))}
+                    </div>
+                  </td>
+                  <td className="border px-4 py-2">
+                    <div className="grid grid-cols-2 gap-2">
+                    {studentScores.scores.quizScore?.map((score, index) => (
+                    <input
+                      key={index}
+                      type="number"
+                      value={score}
+                      onChange={(e) => handleScoreChange('quizScore', index, e.target.value)}
+                      className="w-full border rounded px-2 py-1"
+                    />
+                  ))}
+                    </div>
+                  </td>
+                  <td className="border px-4 py-2">
+                    <div className="grid grid-cols-2 gap-2">
+                    {studentScores.scores.testScore?.map((score, index) => (
+                    <input
+                      key={index}
+                      type="number"
+                      value={score}
+                      onChange={(e) => handleScoreChange('testScore', index, e.target.value)}
+                      className="w-full border rounded px-2 py-1"
+                    />
+                  ))}
+                    </div>
+                  </td>
+                  <td className="border px-4 py-2">
+                  <input
+                    type="number"
+                    value={studentScores.scores.finalScore || ''}
+                    onChange={(e) => handleScoreChange('finalScore', null, e.target.value)}
+                    className="w-full border rounded px-2 py-1"
+                  />
                   </td>
                 </tr>
               </tbody>
