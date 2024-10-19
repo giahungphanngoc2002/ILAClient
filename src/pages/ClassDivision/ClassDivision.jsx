@@ -91,6 +91,11 @@ const ClassDivision = () => {
         }
     };
 
+    const currentYear = new Date().getFullYear();
+    const nextYear = currentYear + 1;
+
+    console.log(`${currentYear}_${nextYear}`);
+
     return (
         <div className="container mx-auto p-5">
             <h2 className="text-3xl font-bold text-center mb-6 text-gray-800">Phân chia lớp học</h2>
