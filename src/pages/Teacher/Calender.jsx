@@ -10,7 +10,7 @@ const Calendar = ({ onClassClick }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
   const user = useSelector((state) => state.user);
-  const [teacherId, setTeacherId] = useState(user?.id); 
+  const [teacherId, setTeacherId] = useState(user?.id);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -31,13 +31,13 @@ const Calendar = ({ onClassClick }) => {
         setIsLoading(false);
       }
     };
-    
+
     if (teacherId) {
       fetchSchedule();
     }
   }, [teacherId]);
-
-  const days = ['Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy', 'Chủ nhật'];
+  console.log(scheduleData)
+  const days = ['Thứ 2', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy', 'Chủ nhật'];
   const slotTimes = [
     { start: '07:00', end: '08:00' },
     { start: '08:00', end: '09:00' },
@@ -66,41 +66,53 @@ const Calendar = ({ onClassClick }) => {
   const weekDates = getWeekDates(currentWeekOffset);
 
   const getScheduleForDay = (day, slotIndex) => {
-    const formattedDate = weekDates[days.indexOf(day)];
-    const currentDateTime = new Date();
-    const [startHour, startMinute] = slotTimes[slotIndex].start.split(':').map(Number);
-    const slotDate = new Date(formattedDate.split('/').reverse().join('-'));
-    slotDate.setHours(startHour, startMinute);
-  
-    const classData = scheduleData.find(
-      (cls) => new Date(cls.dayOfWeek).toLocaleDateString('en-GB') === formattedDate &&
-                cls.slots.some(slot => slot.slotNumber === slotIndex + 1)
-    );
+    const classData = scheduleData.find((cls) => cls.dayOfWeek === day);
 
-    console.log('class',classData)
-  
     if (classData) {
-      const slotData = classData.slots.find(slot => slot.slotNumber === slotIndex + 1);
-      
-      const scheduleId = classData._id;  
-      
+      const slotData = classData.slots.find((slot) => slot.slotNumber === slotIndex + 1);
       if (slotData) {
-        const isCompleted = classData.status;
-  
+        const scheduleId = classData._id;
+        const formattedDate = weekDates[days.indexOf(day)];
+        const currentDateTime = new Date();
+        const [startHour, startMinute] = slotTimes[slotIndex].start.split(':').map(Number);
+        const slotDate = new Date(formattedDate.split('/').reverse().join('-'));
+        slotDate.setHours(startHour, startMinute);
+
+        // Lấy startTime và endTime từ dữ liệu MongoDB (classData)
+        const scheduleStartTime = new Date(classData.startTime); // Chuyển đổi từ chuỗi ISO thành đối tượng Date
+        const scheduleEndTime = new Date(classData.endTime);
+
+        // Kiểm tra xem slotDate có nằm trong khoảng thời gian của startTime và endTime không
+        if (slotDate < scheduleStartTime || slotDate > scheduleEndTime) {
+          return null; // Slot không nằm trong khoảng thời gian, không hiển thị
+        }
+
+        // Kiểm tra attendanceStatus dựa trên slotDate
+        const attendanceForSlot = slotData.attendanceStatus.find((attendance) => {
+          const attendanceDate = new Date(attendance.createdAt);
+          return (
+            attendanceDate.toLocaleDateString('en-GB') === formattedDate &&
+            attendance.status === true
+          );
+        });
+
+        const isCompleted = !!attendanceForSlot; // True nếu trạng thái điểm danh tồn tại và là true
+
         if (slotDate < currentDateTime && !isCompleted) {
-          return { ...slotData, scheduleId, isMissed: true };
+          return { ...slotData, scheduleId, isMissed: true }; // Slot bị bỏ lỡ
         }
-  
         if (slotDate >= currentDateTime && !isCompleted) {
-          return { ...slotData, scheduleId, isMissed: false };
+          return { ...slotData, scheduleId, isMissed: false }; // Slot chưa hoàn thành nhưng sắp đến
         }
-  
-        return { ...slotData, scheduleId, isCompleted };
+
+        return { ...slotData, scheduleId, isCompleted }; // Slot đã hoàn thành
       }
     }
-  
     return null;
   };
+
+
+
 
   const handlePreviousWeek = () => setCurrentWeekOffset(currentWeekOffset - 1);
   const handleNextWeek = () => setCurrentWeekOffset(currentWeekOffset + 1);
