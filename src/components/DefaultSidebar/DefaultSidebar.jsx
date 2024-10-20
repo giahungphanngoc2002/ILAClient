@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { MdLogout } from "react-icons/md";
 import * as UserService from "../../services/UserService";
 import { resetUser } from "../../redux/slices/userSlide";
+import { FaBookReader } from "react-icons/fa";
 
 const DefaultSidebar = () => {
     const [expanded, setExpanded] = useState(false);
@@ -58,6 +59,11 @@ const DefaultSidebar = () => {
         navigate('/student/timeTable');
     };
 
+    const goToSelfLearning = () => {
+        setActiveItem('Tự học');
+        navigate('/student/selfLearning');
+    };
+
     return (
         <Sidebar expanded={expanded} setExpanded={setExpanded}>
             {user.role === "Teacher" &&
@@ -85,18 +91,7 @@ const DefaultSidebar = () => {
                     </>
                 )
             }
-            <SidebarItem
-                icon={<Bell size={20} />}
-                text="Thông báo"
-                active={activeItem === 'Thông báo'}
-                onClick={goToNotification}
-            />
-            <SidebarItem
-                icon={<MdLogout size={20} />}
-                text="Đăng xuất"
-                active={activeItem === 'Đăng xuất'}
-                onClick={handleLogout}
-            />
+
 
             {user.role === "Admin" && (
                 <>
@@ -123,13 +118,25 @@ const DefaultSidebar = () => {
                         onClick={goToTimeTable}
                     />
                     <SidebarItem
-                        icon={<Bell size={20} />}
-                        text="Chia lớp"
-                        active={activeItem === 'Chia lớp'}
-                        onClick={goToClassDivision}
+                        icon={<FaBookReader size={20} />}
+                        text="Tự học"
+                        active={activeItem === 'Tự học'}
+                        onClick={goToSelfLearning}
                     />
                 </>
             )}
+            <SidebarItem
+                icon={<Bell size={20} />}
+                text="Thông báo"
+                active={activeItem === 'Thông báo'}
+                onClick={goToNotification}
+            />
+            <SidebarItem
+                icon={<MdLogout size={20} />}
+                text="Đăng xuất"
+                active={activeItem === 'Đăng xuất'}
+                onClick={handleLogout}
+            />
         </Sidebar>
     );
 };

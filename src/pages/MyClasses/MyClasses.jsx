@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, Button } from 'react-bootstrap';
-import { FaUserGraduate, FaClipboardList, FaFileAlt } from 'react-icons/fa';
+import { FaUserGraduate, FaClipboardList, FaFileAlt, FaSearch } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import * as ClassService from "../../services/ClassService";
 import { useSelector } from 'react-redux';
@@ -13,6 +13,7 @@ function MyClasses() {
     const [isError, setIsError] = useState(false);
     const [selectedClass, setSelectedClass] = useState(null); // To store selected class details
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [searchYear, setSearchYear] = useState(""); // State to store selected year
 
     const navigate = useNavigate();
 
@@ -25,15 +26,15 @@ function MyClasses() {
             setIsLoading(true);
             try {
                 const response = await ClassService.getAllSubjectClassesByTeacherId(teacherId);
-                
+
                 // Logging the full response to check the structure
-                console.log('Full API response data:', response); 
-                
+                console.log('Full API response data:', response);
+
                 // Now extract the data properly
                 if (response && response.data && response.data.classes) {
                     setClasses(response.data.classes); // Properly extract classes
                 } else {
-                    console.error('Unexpected API response structure', response); 
+                    console.error('Unexpected API response structure', response);
                     setClasses([]); // Set empty array if classes are missing
                 }
 
@@ -51,8 +52,16 @@ function MyClasses() {
         }
     }, [teacherId]);
 
-    // Debugging: Log classes to ensure data is correctly set
-    console.log("Classes data:", classes);
+    // Handle search year change
+    const handleSearchChange = (e) => {
+        setSearchYear(e.target.value);
+    };
+
+    // Filter classes based on the selected year (searchYear)
+    const filteredClasses = classes.filter(classItem => {
+        console.log("search", searchYear, "data", classItem.year)
+        return classItem.year.includes(searchYear);
+    });
 
     const handleSelectClass = (classItem, subject) => {
         setSelectedClass({ ...classItem, selectedSubject: subject });
@@ -79,23 +88,59 @@ function MyClasses() {
 
     return (
         <div className="container mx-auto p-6">
-            <h1 className="text-2xl font-bold text-blue-600 mb-6">Lớp Học Của Tôi</h1>
+
+            {/* Search dropdown for filtering by year */}
+            <div className="mb-6 relative max-w-md flex justify-start">
+                {/* Biểu tượng kính lúp */}
+                <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+
+                {/* Dropdown chọn năm học */}
+                <select
+                    value={searchYear}
+                    onChange={handleSearchChange}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-300 ease-in-out"
+                >
+                    <option value="">Chọn năm học</option>
+                    <option value="2023-2024">2023-2024</option>
+                    <option value="2024-2025">2024-2025</option>
+                    <option value="2025-2026">2025-2026</option>
+                </select>
+            </div>
 
             {/* Separate cards for each subject */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                {classes.flatMap((classItem) =>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 mb-12 px-4">
+                {filteredClasses.flatMap((classItem) =>
                     classItem.subjects.map((subject, idx) => (
                         <div
                             key={`${classItem._id}-${subject._id}-${idx}`}
-                            className="bg-white p-6 rounded-lg shadow-md cursor-pointer hover:shadow-lg transition"
+                            className="bg-white p-8 rounded-2xl shadow-xl cursor-pointer hover:shadow-2xl transition-all ease-in-out transform hover:scale-105"
                             onClick={() => handleSelectClass(classItem, subject)}
                         >
-                            <h2 className="text-xl font-bold text-blue-600 mb-4">
-                                {classItem.nameClass.trim()} - {classItem.year}
+                            {/* Hình ảnh minh họa */}
+                            <img
+                                src="https://images.unsplash.com/photo-1509062522246-3755977927d7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzNjUyOXwwfDF8c2VhcmNofDE0fHxjbGFzc3Jvb218ZW58MHx8fHwxNjk4NDI2MDM2&ixlib=rb-4.0.3&q=80&w=1080"
+                                alt="Classroom"
+                                className="mb-6 w-full h-40 object-cover rounded-lg"
+                            />
+
+                            {/* Tiêu đề lớp học */}
+                            <h2 className="text-2xl font-bold text-blue-700 mb-4">
+                                {classItem.nameClass.trim()}
                             </h2>
-                            <h3 className="text-lg font-bold text-gray-800">Môn học: {subject.nameSubject}</h3>
+
+                            {/* Môn học */}
+                            <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                                Môn học: {subject.nameSubject}
+                            </h3>
+
+                            {/* Năm học */}
+                            <h3 className="text-lg text-gray-700 mb-3">
+                                Năm học: {classItem.year}
+                            </h3>
+
+                            {/* Số học sinh */}
                             <p className="text-gray-600">
-                                <FaUserGraduate className="inline-block mr-2" /> Số học sinh: {classItem.studentID.length}
+                                <FaUserGraduate className="inline-block text-blue-600 mr-2" /> Số học sinh: {classItem.studentID.length}
                             </p>
                         </div>
                     ))
@@ -171,6 +216,7 @@ function MyClasses() {
             </Modal>
         </div>
     );
+
 }
 
 export default MyClasses;

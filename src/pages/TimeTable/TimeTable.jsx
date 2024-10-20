@@ -101,12 +101,12 @@ export default function TimeTable() {
             {isError && <div>Error loading schedule. Please try again later.</div>}
 
             <div className="mb-4">
-                <label htmlFor="year-select" className="mr-2">Filter by Year:</label>
+                <label htmlFor="year-select" className="mr-2 font-semibold">Filter by Year:</label>
                 <select
                     id="year-select"
                     value={selectedYear}
                     onChange={handleYearChange}
-                    className="p-2 border border-gray-300 rounded-lg"
+                    className="p-2 border border-gray-300 rounded-lg shadow-lg focus:ring-2 focus:ring-blue-400"
                 >
                     {[2022, 2023, 2024, 2025].map(year => (
                         <option key={year} value={year}>{year}</option>
@@ -118,10 +118,10 @@ export default function TimeTable() {
                 <div className="grid grid-cols-8 gap-2 bg-gray-100 shadow-lg p-4 rounded-lg overflow-hidden">
                     <div className="col-span-1">
                         <div className="flex justify-between mb-4">
-                            <button onClick={handlePreviousWeek} className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-sm">
+                            <button onClick={handlePreviousWeek} className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-blue-600 hover:shadow-md transition">
                                 <GrPrevious />
                             </button>
-                            <button onClick={handleNextWeek} className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-sm">
+                            <button onClick={handleNextWeek} className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-blue-600 hover:shadow-md transition">
                                 <GrNext />
                             </button>
                         </div>
@@ -147,11 +147,12 @@ export default function TimeTable() {
                                     <div
                                         key={i}
                                         className={`py-3 border-b border-gray-300 ${classData ?
-                                            (classData.isCompleted ? 'bg-green-100' : 'bg-yellow-100') : 'bg-white'} rounded-lg shadow-sm my-1 h-16 flex items-center justify-center`}
+                                            (classData.isCompleted ? 'bg-green-100 hover:bg-green-200' : 'bg-yellow-100 hover:bg-yellow-200') : 'bg-white hover:bg-gray-200'} rounded-lg shadow-sm my-1 h-16 flex items-center justify-center transition-all duration-300`}
                                     >
                                         {classData ? (
                                             <button
                                                 onClick={() => console.log('Navigate to class', classData.classId._id)}
+                                                className="w-full h-full text-center"
                                             >
                                                 <div className="text-xs text-gray-700 w-full h-full flex flex-col items-center justify-center">
                                                     <div className="font-bold text-blue-800">{classData.subjectId.nameSubject}</div>
