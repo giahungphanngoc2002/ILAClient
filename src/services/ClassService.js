@@ -91,3 +91,22 @@ export const getAllSubjectClassesByTeacherId = async (teacherId) => {
     const res = await axios.get(`http://localhost:3001/api/class/teacher/${teacherId}/classes/subjects`);
     return res.data;
 };
+
+export const updateSubjectInClass = async (classId, subjectId, updateData) => {
+    const res = await axios.put(`http://localhost:3001/api/class/${classId}/subject/${subjectId}`, updateData);
+   return res.data;
+      
+     };
+export const getResourcesBySubject = async (classId, subjectId) => {
+       const res = await axios.get(`http://localhost:3001/api/class/${classId}/subjects/${subjectId}/resources`);
+       return res.data;
+};
+
+export const addResourceToSubject = async (classId, subjectId, linkResource) => {
+      const res = await axios.post(`http://localhost:3001/api/class/${classId}/subjects/${subjectId}/resources`, {
+        linkResource
+      });
+      return res.data;
+    
+  };
+   

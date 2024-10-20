@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CalendarClock, Bell, User, Settings, School } from "lucide-react";
+import { CalendarClock, Bell, User, School } from "lucide-react";
 import Sidebar from '../Sidebar/Sidebar';
 import { SidebarItem } from '../Sidebar/SidebarItem';
 import { useNavigate } from 'react-router-dom';
@@ -12,10 +12,9 @@ import { FaBookReader } from "react-icons/fa";
 const DefaultSidebar = () => {
     const [expanded, setExpanded] = useState(false);
     const dispatch = useDispatch();
-    const [activeItem, setActiveItem] = useState(''); // Thêm state cho active item
+    const [activeItem, setActiveItem] = useState('');
     const navigate = useNavigate();
     const user = useSelector((state) => state.user);
-    console.log(user)
 
     const handleLogout = async () => {
         await UserService.logoutUser();
@@ -66,77 +65,83 @@ const DefaultSidebar = () => {
 
     return (
         <Sidebar expanded={expanded} setExpanded={setExpanded}>
-            {user.role === "Teacher" &&
-                (
+            <div className="flex flex-col h-full">
+                
+                {user.role === "Teacher" &&
+                    (
+                        <>
+                            <SidebarItem
+                                icon={<CalendarClock size={20} />}
+                                text="Lịch làm việc"
+                                active={activeItem === 'Lịch làm việc'}
+                                onClick={goToScheduleTeacher}
+                            />
+                            <SidebarItem
+                                icon={<School size={20} />}
+                                text="Quản lý lớp"
+                                active={activeItem === 'Quản lý lớp'}
+                                onClick={goToMyClass}
+                            />
+                        </>
+                    )
+                }
+
+                {user.role === "Admin" && (
+<>
+                        <SidebarItem
+                            icon={<CalendarClock size={20} />}
+                            text="Thời khoá biểu"
+                            active={activeItem === 'Thời khoá biểu'}
+                            onClick={goToManageSchedule}
+                        />
+                        <SidebarItem
+                            icon={<Bell size={20} />}
+                            text="Chia lớp"
+                            active={activeItem === 'Chia lớp'}
+                            onClick={goToClassDivision}
+                        />
+                    </>
+                )}
+
+                {user.role === "User" && (
                     <>
                         <SidebarItem
                             icon={<CalendarClock size={20} />}
-                            text="Lịch làm việc"
-                            active={activeItem === 'Lịch làm việc'}
-                            onClick={goToScheduleTeacher}
+                            text="Thời khoá biểu"
+                            active={activeItem === 'Thời khoá biểu'}
+                            onClick={goToTimeTable}
                         />
                         <SidebarItem
-                            icon={<School size={20} />}
-                            text="Quản lý lớp"
-                            active={activeItem === 'Quản lý lớp'}
-                            onClick={goToMyClass}
+                            icon={<FaBookReader size={20} />}
+                            text="Tự học"
+                            active={activeItem === 'Tự học'}
+                            onClick={goToSelfLearning}
                         />
-                        <SidebarItem
-                            icon={<User size={20} />}
-                            text="Thông tin cá nhân"
-                            active={activeItem === 'Thông tin cá nhân'}
-                            onClick={goToProfile}
-                        />
-
                     </>
-                )
-            }
+                )}
 
-
-            {user.role === "Admin" && (
-                <>
-                    <SidebarItem
-                        icon={<CalendarClock size={20} />}
-                        text="Thời khoá biểu"
-                        active={activeItem === 'Thời khoá biểu'}
-                        onClick={goToManageSchedule}
-                    />
+                {/* Phần này nằm dưới cùng */}
+                <div className="mt-auto">
                     <SidebarItem
                         icon={<Bell size={20} />}
-                        text="Chia lớp"
-                        active={activeItem === 'Chia lớp'}
-                        onClick={goToClassDivision}
-                    />
-                </>
-            )}
-            {user.role === "User" && (
-                <>
-                    <SidebarItem
-                        icon={<CalendarClock size={20} />}
-                        text="Thời khoá biểu"
-                        active={activeItem === 'Thời khoá biểu'}
-                        onClick={goToTimeTable}
+                        text="Thông báo"
+                        active={activeItem === 'Thông báo'}
+                        onClick={goToNotification}
                     />
                     <SidebarItem
-                        icon={<FaBookReader size={20} />}
-                        text="Tự học"
-                        active={activeItem === 'Tự học'}
-                        onClick={goToSelfLearning}
+                        icon={<User size={20} />}
+                        text="Thông tin cá nhân"
+                        active={activeItem === 'Thông tin cá nhân'}
+                        onClick={goToProfile}
                     />
-                </>
-            )}
-            <SidebarItem
-                icon={<Bell size={20} />}
-                text="Thông báo"
-                active={activeItem === 'Thông báo'}
-                onClick={goToNotification}
-            />
-            <SidebarItem
-                icon={<MdLogout size={20} />}
-                text="Đăng xuất"
-                active={activeItem === 'Đăng xuất'}
-                onClick={handleLogout}
-            />
+                    <SidebarItem
+                        icon={<MdLogout size={20} />}
+                        text="Đăng xuất"
+                        active={activeItem === 'Đăng xuất'}
+                        onClick={handleLogout}
+                    />
+                </div>
+            </div>
         </Sidebar>
     );
 };

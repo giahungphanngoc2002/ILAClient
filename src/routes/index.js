@@ -19,8 +19,6 @@ import ManageSchedule from "../pages/ManageSchedule/ManageSchedule";
 import QuestionManager from "../pages/QuestionManage/QuestionManage";
 import TimeTable from "../pages/TimeTable/TimeTable";
 import ProtectedRoute from "../routes/ProtectedRoute"; // Đảm bảo bạn đã import ProtectedRoute
-import SelfLearning from "../pages/SelfLearning/SelfLearning";
-
 
 export const routes = [
   {
@@ -68,7 +66,7 @@ export const routes = [
     isShowHeader: false,
   },
   {
-    path: "manage/teachingMaterial",
+    path: "manage/teachingMaterial/:idClass/:idSubject",
     page: () => (
       <ProtectedRoute>
         <TeachingMaterials />
@@ -77,7 +75,7 @@ export const routes = [
     isShowHeader: false,
   },
   {
-    path: "manage/attendanceTable",
+    path: "manage/attendanceTable/:idClass/:idSubject/:idSlot",
     page: () => (
       <ProtectedRoute>
         <AttendanceTable />
@@ -199,16 +197,6 @@ export const routes = [
     page: () => (
       <ProtectedRoute>
         <TimeTable />
-      </ProtectedRoute>
-    ),
-    isShowHeader: false,
-    isShowSideBar: true,
-  },
-  {
-    path: "/student/selfLearning",
-    page: () => (
-      <ProtectedRoute>
-        <SelfLearning />
       </ProtectedRoute>
     ),
     isShowHeader: false,

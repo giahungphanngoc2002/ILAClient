@@ -11,7 +11,7 @@ export function SidebarItem({ icon, text, active, alert, onClick }) {
             ${active ? "bg-gradient-to-tr from-blue-200 to-blue-100 text-blue-800" : "hover:bg-blue-50 text-gray-600"}`}
         >
             {icon}
-            <span className={`overflow-hidden transition-all ${expanded ? "w-52 ml-3" : "w-0"}`}>
+            <span className={`overflow-hidden text-ellipsis whitespace-nowrap transition-all ${expanded ? "w-52 ml-3" : "w-0"}`}>
                 {text}
             </span>
             {alert && (

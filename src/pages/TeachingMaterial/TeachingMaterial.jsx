@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   AiOutlineCloudUpload,
   AiOutlineDownload,
@@ -6,12 +6,12 @@ import {
   AiOutlineFilePdf,
   AiOutlineFileWord,
   AiOutlineFileExcel,
-  AiOutlineSearch
 } from "react-icons/ai";
 import { ToastContainer, toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { FaArrowLeft } from "react-icons/fa";
+import * as ClassService from "../../services/ClassService"; // Import the API service
 
 const getFileTypeIcon = (fileName) => {
   const extension = fileName.split('.').pop();
@@ -28,26 +28,68 @@ const getFileTypeIcon = (fileName) => {
 };
 
 const TeachingMaterial = () => {
-  const [files, setFiles] = useState([]);
+  const [files, setFiles] = useState([]);  // Store the files (resources)
   const [selectedFile, setSelectedFile] = useState(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState('name');
-  const [filterType, setFilterType] = useState('all');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [isGridView, setIsGridView] = useState(false);
-  const filesPerPage = 10;
-
+  const { idClass, idSubject } = useParams();  // Get the classId and subjectId from URL parameters
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchSubjectData = async () => {
+      try {
+        // Gọi API để lấy danh sách tài nguyên
+        const response = await ClassService.getResourcesBySubject(idClass, idSubject);
+  
+        // Nhận danh sách tài nguyên từ response
+        const resources = response.data;
+  
+        if (resources && Array.isArray(resources)) {
+          // Map qua danh sách tài nguyên và chuẩn hóa dữ liệu cho từng file
+          const loadedFiles = resources.map((resource) => ({
+            file: { name: resource.linkResource },  // Lấy tên file từ 'linkResource'
+            uploadDate: new Date(resource.createdAt),  // Lấy ngày upload từ 'createdAt'
+            size: resource.size  // Lấy kích thước file từ 'size'
+          }));
+  
+          setFiles(loadedFiles);  // Cập nhật state với danh sách tài nguyên đã tải
+        }
+      } catch (error) {
+        console.error("Error fetching subject data:", error);
+        toast.error("Failed to load subject data.");
+      }
+    };
+  
+    fetchSubjectData();
+  }, [idClass, idSubject]);  // Chỉ gọi lại khi idClass hoặc idSubject thay đổi
+  
 
   const handleFileChange = (e) => {
     setSelectedFile(e.target.files[0]);
   };
 
-  const handleUpload = () => {
+  const handleUpload = async () => {
     if (selectedFile) {
-      setFiles([...files, { file: selectedFile, uploadDate: new Date(), size: selectedFile.size }]);
-      setSelectedFile(null);
-    //   toast.success("File uploaded successfully!");
+      const newFile = {
+        file: selectedFile,
+        uploadDate: new Date(),
+        size: selectedFile.size
+      };
+  
+      try {
+        // Gọi API addResourceToSubject để thêm file vào resource
+        const linkResource = selectedFile.name;  // Sử dụng tên file làm linkResource
+        await ClassService.addResourceToSubject(idClass, idSubject, linkResource);  // Gọi mutation để thêm tài nguyên
+  
+        // Cập nhật state sau khi upload thành công
+        setFiles([...files, newFile]);
+        setSelectedFile(null); 
+        toast.success("Cập nhập file thành công!");
+  
+      } catch (error) {
+        console.error("Error uploading file and updating resource:", error);
+        toast.error("Cập nhập file thất bại.");
+      }
+    } else {
+      toast.error("No file selected. Please choose a file to upload.");
     }
   };
 
@@ -63,29 +105,6 @@ const TeachingMaterial = () => {
   const handleDelete = (fileIndex) => {
     setFiles(files.filter((_, index) => index !== fileIndex));
   };
-
-  const filteredFiles = files
-    .filter(file => filterType === 'all' || file.file.name.endsWith(filterType))
-    .filter(file => file.file.name.toLowerCase().includes(searchQuery.toLowerCase()));
-
-  const sortedFiles = filteredFiles.sort((a, b) => {
-    if (sortBy === 'name') {
-      return a.file.name.localeCompare(b.file.name);
-    } else if (sortBy === 'date') {
-      return new Date(b.uploadDate) - new Date(a.uploadDate);
-    } else if (sortBy === 'size') {
-      return b.size - a.size;
-    }
-    return 0;
-  });
-
-  const indexOfLastFile = currentPage * filesPerPage;
-  const indexOfFirstFile = indexOfLastFile - filesPerPage;
-  const currentFiles = sortedFiles.slice(indexOfFirstFile, indexOfLastFile);
-
-  const totalPages = Math.ceil(sortedFiles.length / filesPerPage);
-
-  const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
 
   return (
     <div className="w-full h-screen p-8 bg-gray-50 shadow-lg font-openSans overflow-auto">
@@ -135,59 +154,44 @@ const TeachingMaterial = () => {
             </tr>
           </thead>
           <tbody>
-            {currentFiles.length === 0 ? (
-              <tr>
-                <td colSpan="4" className="px-4 py-6">
-                  <div className="flex flex-col items-center justify-center h-[30vh]">
-                    <AiOutlineCloudUpload className="text-gray-400 text-6xl" />
-                    <p className="text-gray-500 mt-2">Chưa có tệp nào được tải lên. Bắt đầu bằng cách chọn tệp.</p>
-                  </div>
-                </td>
-              </tr>
-            ) : (
-              currentFiles.map((file, index) => (
-                <tr key={index} className="border-b bg-white hover:bg-gray-100 transition-all">
-                  <td className="px-4 py-2 flex items-center">
-                    {getFileTypeIcon(file.file.name)}
-                    <span className="ml-2 text-gray-800 break-words">{file.file.name}</span>
-                  </td>
-                  <td className="px-4 py-2">{file.uploadDate.toLocaleDateString()}</td>
-                  <td className="px-4 py-2">{(file.size / 1024).toFixed(2)} KB</td>
-                  <td className="px-4 py-2">
-                    <button
-                      onClick={() => handleDownload(file)}
-                      className="bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600 transition-all"
-                    >
-                      <AiOutlineDownload />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(index)}
-                      className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600 transition-all ml-2"
-                    >
-                      <AiOutlineDelete />
-                    </button>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
+  {files.length === 0 ? (
+    <tr>
+      <td colSpan="4" className="px-4 py-6">
+        <div className="flex flex-col items-center justify-center h-[30vh]">
+          <AiOutlineCloudUpload className="text-gray-400 text-6xl" />
+          <p className="text-gray-500 mt-2">Chưa có tệp nào được tải lên. Bắt đầu bằng cách chọn tệp.</p>
+        </div>
+      </td>
+    </tr>
+  ) : (
+    files.map((file, index) => (
+      <tr key={index} className="border-b bg-white hover:bg-gray-100 transition-all">
+        <td className="px-4 py-2 flex items-center">
+          {getFileTypeIcon(file.file.name)}
+          <span className="ml-2 text-gray-800 break-words">{file.file.name}</span>
+        </td>
+        <td className="px-4 py-2">{file.uploadDate.toLocaleDateString()}</td>
+        <td className="px-4 py-2">{(file.size / 1024).toFixed(2)} KB</td>
+        <td className="px-4 py-2">
+          <button
+            onClick={() => handleDownload(file)}
+            className="bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600 transition-all"
+          >
+            <AiOutlineDownload />
+          </button>
+          <button
+            onClick={() => handleDelete(index)}
+            className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600 transition-all ml-2"
+          >
+            <AiOutlineDelete />
+          </button>
+        </td>
+      </tr>
+    ))
+  )}
+</tbody>
         </table>
       </div>
-
-      {/* Pagination */}
-      {currentFiles.length > 0 && (
-        <div className="mt-4">
-          {Array.from({ length: totalPages }, (_, index) => (
-            <button
-              key={index}
-              onClick={() => handlePageChange(index + 1)}
-              className={`mx-1 px-3 py-1 rounded-lg ${index + 1 === currentPage ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-            >
-              {index + 1}
-            </button>
-          ))}
-        </div>
-      )}
     </div>
   );
 };

@@ -46,7 +46,7 @@ export default function SignInPage() {
       }
 
       if (data?.role === "Admin") {
-        navigate("/admin/dashboard");
+        navigate("/dashboard");
       } else if (data?.role === "Teacher") {
         navigate("/manage");
       } else {
