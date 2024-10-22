@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-
+import React, { useEffect, useState } from "react";
+import * as BlockService from "../../services/BlockService";
 const gradesData = {
     10: [
         { id: 1, name: "Lớp 10A", students: 30 },
@@ -43,6 +43,22 @@ const ManageSchedule = () => {
     const [selectedClass, setSelectedClass] = useState(null);
     const [schedule, setSchedule] = useState({});
     const [error, setError] = useState("");
+    const [blocks, setBlocks] = useState([]);
+
+    useEffect(() => {
+        const fetchBlocks = async () => {
+            try {
+                const blocksData = await BlockService.getAllBlocks();
+                setBlocks(blocksData);
+            } catch (error) {
+                console.error("Error fetching blocks:", error);
+            }
+        };
+
+        fetchBlocks();
+    }, []);
+    console.log("blocks",blocks)
+
 
     const handleSelectSlot = (classId, day, slot, subject) => {
         if (!subject) {
