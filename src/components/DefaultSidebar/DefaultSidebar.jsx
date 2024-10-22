@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CalendarClock, Bell, User, School } from "lucide-react";
+import { CalendarClock, Bell, User, School, Search } from "lucide-react";
 import Sidebar from '../Sidebar/Sidebar';
 import { SidebarItem } from '../Sidebar/SidebarItem';
 import { useNavigate } from 'react-router-dom';
@@ -11,10 +11,22 @@ import { FaBookReader } from "react-icons/fa";
 
 const DefaultSidebar = () => {
     const [expanded, setExpanded] = useState(false);
-    const dispatch = useDispatch();
     const [activeItem, setActiveItem] = useState('');
+    const [searchTerm, setSearchTerm] = useState("");
     const navigate = useNavigate();
+    const dispatch = useDispatch();
     const user = useSelector((state) => state.user);
+
+    // Định nghĩa các hàm điều hướng
+    const goToNotification = () => {
+        setActiveItem('Thông báo');
+        navigate('/manage/notification');
+    };
+
+    const goToProfile = () => {
+        setActiveItem('Thông tin cá nhân');
+        navigate('/manage/profile');
+    };
 
     const handleLogout = async () => {
         await UserService.logoutUser();
@@ -23,102 +35,54 @@ const DefaultSidebar = () => {
         navigate("/");
     };
 
-    const goToScheduleTeacher = () => {
-        setActiveItem('Lịch làm việc');
-        navigate('/manage/calender');
-    };
+    const sidebarItems = [
+        { icon: <CalendarClock size={20} />, text: "Lịch làm việc", path: '/manage/calender', role: "Teacher" },
+        { icon: <School size={20} />, text: "Quản lý lớp", path: '/manage/myClass', role: "Teacher" },
+        { icon: <CalendarClock size={20} />, text: "Thời khoá biểu", path: '/manage/manageSchedule', role: "Admin" },
+        { icon: <Bell size={20} />, text: "Chia lớp", path: '/manage/classDivision', role: "Admin" },
+        { icon: <CalendarClock size={20} />, text: "Thời khoá biểu", path: '/student/timeTable', role: "User" },
+        { icon: <FaBookReader size={20} />, text: "Tự học", path: '/student/selfLearning', role: "User" },
+    ];
 
-    const goToMyClass = () => {
-        setActiveItem('Quản lý lớp');
-        navigate('/manage/myClass');
-    };
-
-    const goToProfile = () => {
-        setActiveItem('Thông tin cá nhân');
-        navigate('/manage/profile');
-    };
-
-    const goToNotification = () => {
-        setActiveItem('Thông báo');
-        navigate('/manage/notification');
-    };
-
-    const goToClassDivision = () => {
-        setActiveItem('Chia lớp');
-        navigate('/manage/classDivision');
-    };
-
-    const goToManageSchedule = () => {
-        setActiveItem('Thời khoá biểu');
-        navigate('/manage/manageSchedule');
-    };
-
-    const goToTimeTable = () => {
-        setActiveItem('Thời khoá biểu');
-        navigate('/student/timeTable');
-    };
-
-    const goToSelfLearning = () => {
-        setActiveItem('Tự học');
-        navigate('/student/selfLearning');
+    const filteredItems = () => {
+        return sidebarItems.filter(item =>
+            item.text.toLowerCase().includes(searchTerm.toLowerCase())
+        ).filter(item => item.role === user.role);
     };
 
     return (
         <Sidebar expanded={expanded} setExpanded={setExpanded}>
             <div className="flex flex-col h-full">
-                
-                {user.role === "Teacher" &&
-                    (
-                        <>
-                            <SidebarItem
-                                icon={<CalendarClock size={20} />}
-                                text="Lịch làm việc"
-                                active={activeItem === 'Lịch làm việc'}
-                                onClick={goToScheduleTeacher}
+                <div className={``}>
+                    <div
+                        className={`relative flex items-center py-2 px-3 my-1 font-medium rounded-md bg-gray-200 text-gray-600 cursor-pointer transition-colors group hover:bg-blue-50`}
+                    >
+                        <Search className="text-gray-500" size={20} />
+                        {expanded && (
+                            <input
+                                type="text"
+                                placeholder="Tìm kiếm"
+                                style={{ fontSize: "16px" }}
+                                className="ml-3 w-full text-ellipsis bg-transparent outline-none placeholder-gray-500"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)} // Cập nhật giá trị tìm kiếm
                             />
-                            <SidebarItem
-                                icon={<School size={20} />}
-                                text="Quản lý lớp"
-                                active={activeItem === 'Quản lý lớp'}
-                                onClick={goToMyClass}
-                            />
-                        </>
-                    )
-                }
+                        )}
+                    </div>
+                </div>
 
-                {user.role === "Admin" && (
-<>
-                        <SidebarItem
-                            icon={<CalendarClock size={20} />}
-                            text="Thời khoá biểu"
-                            active={activeItem === 'Thời khoá biểu'}
-                            onClick={goToManageSchedule}
-                        />
-                        <SidebarItem
-                            icon={<Bell size={20} />}
-                            text="Chia lớp"
-                            active={activeItem === 'Chia lớp'}
-                            onClick={goToClassDivision}
-                        />
-                    </>
-                )}
-
-                {user.role === "User" && (
-                    <>
-                        <SidebarItem
-                            icon={<CalendarClock size={20} />}
-                            text="Thời khoá biểu"
-                            active={activeItem === 'Thời khoá biểu'}
-                            onClick={goToTimeTable}
-                        />
-                        <SidebarItem
-                            icon={<FaBookReader size={20} />}
-                            text="Tự học"
-                            active={activeItem === 'Tự học'}
-                            onClick={goToSelfLearning}
-                        />
-                    </>
-                )}
+                {filteredItems().map((item) => (
+                    <SidebarItem
+                        key={item.text}
+                        icon={item.icon}
+                        text={item.text}
+                        active={activeItem === item.text}
+                        onClick={() => {
+                            setActiveItem(item.text);
+                            navigate(item.path); // Chuyển hướng theo đường dẫn
+                        }}
+                    />
+                ))}
 
                 {/* Phần này nằm dưới cùng */}
                 <div className="mt-auto">
@@ -126,19 +90,19 @@ const DefaultSidebar = () => {
                         icon={<Bell size={20} />}
                         text="Thông báo"
                         active={activeItem === 'Thông báo'}
-                        onClick={goToNotification}
+                        onClick={goToNotification} // Đã định nghĩa
                     />
                     <SidebarItem
                         icon={<User size={20} />}
                         text="Thông tin cá nhân"
                         active={activeItem === 'Thông tin cá nhân'}
-                        onClick={goToProfile}
+                        onClick={goToProfile} // Đã định nghĩa
                     />
                     <SidebarItem
                         icon={<MdLogout size={20} />}
                         text="Đăng xuất"
                         active={activeItem === 'Đăng xuất'}
-                        onClick={handleLogout}
+                        onClick={handleLogout} // Đã định nghĩa
                     />
                 </div>
             </div>

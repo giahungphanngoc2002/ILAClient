@@ -17,11 +17,6 @@ export function SidebarItem({ icon, text, active, alert, onClick }) {
             {alert && (
                 <div className={`absolute right-2 w-2 h-2 rounded bg-blue-400 ${expanded ? "" : "top-2"}`} />
             )}
-            {!expanded && (
-                <div className="absolute left-full whitespace-nowrap rounded-md px-2 py-1 ml-3 bg-blue-100 text-blue-800 text-sm invisible opacity-0 -translate-x-3 transition-all duration-300 ease-in-out group-hover:visible group-hover:opacity-100 group-hover:translate-x-0">
-                    {text}
-                </div>
-            )}
         </li>
     );
 }
