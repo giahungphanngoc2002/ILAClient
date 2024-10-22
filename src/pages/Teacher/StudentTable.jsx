@@ -95,6 +95,7 @@ const StudentTable = () => {
     setStudents(updatedStudents);
   };
   
+  console.log("students",students)
  console.log("existingAbsentId",existingAbsentId)
 
  const mutation = useMutation({
@@ -163,7 +164,7 @@ const saveStudents = async () => {
   }
 };
   
-          const openModal = async (student) => {
+      const openModal = async (student) => {
             try {
               const scoresData = await ScoreSbujectService.getAllScoresBySubject(idSubject, idClass, semester, student._id);
 
