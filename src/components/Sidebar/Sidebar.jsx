@@ -35,22 +35,7 @@ export default function Sidebar({ children, expanded, setExpanded }) {
         </div>
 
         {/* Search Input */}
-        <div className={`mt-3 px-3`}>
-          <div
-            className={`relative flex items-center py-2 px-3 my-1 font-medium rounded-md bg-gray-200 text-gray-600 cursor-pointer transition-colors group
-    hover:bg-blue-50`}
-          >
-            <Search className="text-gray-500" size={20} />
-            {expanded && (
-              <input
-                type="text"
-                placeholder="Tìm kiếm"
-                style={{ fontSize: "16px" }}
-                className="ml-3 w-full text-ellipsis bg-transparent outline-none placeholder-gray-500"
-              />
-            )}
-          </div>
-        </div>
+        
 
         <SidebarContext.Provider value={{ expanded }}>
           <ul className="flex-1 px-3 overflow-y-auto">{children}</ul>
