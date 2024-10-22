@@ -38,18 +38,17 @@ const Calendar = ({ onClassClick }) => {
     }
   }, [teacherId]);
 
-
   useEffect(() => {
     const today = new Date();
     if (selectedYear === today.getFullYear()) {
-      const currentWeek = getWeekNumber(today); // Tính tuần hiện tại
-      setCurrentWeekOffset(currentWeek - getWeekNumber(new Date(selectedYear, 0, 1))); // Cập nhật offset dựa trên tuần hiện tại
+      const currentWeek = getWeekNumber(today);
+      setCurrentWeekOffset(currentWeek - getWeekNumber(new Date(selectedYear, 0, 1)));
     } else {
-      setCurrentWeekOffset(0); // Nếu chọn năm khác, offset về tuần đầu tiên
+      setCurrentWeekOffset(0);
     }
   }, [selectedYear]);
 
-  const days = ['Thứ 2', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy', 'Chủ nhật'];
+  const days = ['Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy', 'Chủ nhật'];
   const slotTimes = [
     { start: '07:00', end: '08:00' },
     { start: '08:00', end: '09:00' },
@@ -63,17 +62,15 @@ const Calendar = ({ onClassClick }) => {
     { start: '17:00', end: '18:00' }
   ];
 
-  // Hàm tính tuần thứ mấy của năm
   const getWeekNumber = (date) => {
     const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
     const pastDaysOfYear = (date - firstDayOfYear) / 86400000;
     return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
   };
 
-  // Hàm tính ngày đầu tuần dựa trên tuần offset và năm
   const getWeekDates = (weekOffset) => {
-    const today = new Date(selectedYear, 0, 1); // Thay đổi để bắt đầu từ ngày đầu tiên của năm đã chọn
-    const firstDayOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + 1 + (weekOffset * 7))); // Ngày đầu tuần
+    const today = new Date(selectedYear, 0, 1);
+    const firstDayOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + 1 + (weekOffset * 7)));
 
     const currentWeekDates = [];
     for (let i = 0; i < 7; i++) {
@@ -88,7 +85,11 @@ const Calendar = ({ onClassClick }) => {
   const currentWeekNumber = getWeekNumber(new Date(weekDates[0].split('/').reverse().join('-')));
 
   const getScheduleForDay = (day, slotIndex) => {
-    const classData = scheduleData.find((cls) => cls.dayOfWeek === day);
+    const filteredScheduleData = scheduleData.filter(schedule => 
+      schedule.year === String(selectedYear) && schedule.week === String(currentWeekNumber)
+    );
+
+    const classData = filteredScheduleData.find((cls) => cls.dayOfWeek === day);
 
     if (classData) {
       const slotData = classData.slots.find((slot) => slot.slotNumber === slotIndex + 1);
@@ -100,22 +101,7 @@ const Calendar = ({ onClassClick }) => {
         const slotDate = new Date(formattedDate.split('/').reverse().join('-'));
         slotDate.setHours(startHour, startMinute);
 
-        const scheduleStartTime = new Date(classData.startTime);
-        const scheduleEndTime = new Date(classData.endTime);
-
-        if (slotDate < scheduleStartTime || slotDate > scheduleEndTime) {
-          return null;
-        }
-
-        const attendanceForSlot = slotData.attendanceStatus.find((attendance) => {
-          const attendanceDate = new Date(attendance.createdAt);
-          return (
-            attendanceDate.toLocaleDateString('en-GB') === formattedDate &&
-            attendance.status === true
-          );
-        });
-
-        const isCompleted = !!attendanceForSlot;
+        const isCompleted = slotData.attendanceStatus.status === true;
 
         if (slotDate < currentDateTime && !isCompleted) {
           return { ...slotData, scheduleId, isMissed: true };
@@ -131,30 +117,25 @@ const Calendar = ({ onClassClick }) => {
   };
 
   const handlePreviousWeek = () => {
-    // Tính tuần hiện tại của năm đã chọn
-    const currentDate = new Date(selectedYear, 0, 1); // Ngày đầu tiên của năm đã chọn
-    currentDate.setDate(currentDate.getDate() + currentWeekOffset * 7); // Thêm offset để biết ngày hiện tại
+    const currentDate = new Date(selectedYear, 0, 1);
+    currentDate.setDate(currentDate.getDate() + currentWeekOffset * 7);
 
-    // Nếu tuần đầu tiên của năm đã chọn thì không lùi thêm nữa
     if (getWeekNumber(currentDate) > 1) {
       setCurrentWeekOffset(currentWeekOffset - 1);
     }
   };
 
   const handleNextWeek = () => {
-    // Tính tổng số tuần của năm hiện tại
-    const lastDayOfYear = new Date(selectedYear, 11, 31); // Ngày cuối cùng của năm đã chọn
+    const lastDayOfYear = new Date(selectedYear, 11, 31);
     const totalWeeksInYear = getWeekNumber(lastDayOfYear);
 
-    const currentDate = new Date(selectedYear, 0, 1); // Ngày đầu tiên của năm đã chọn
-    currentDate.setDate(currentDate.getDate() + currentWeekOffset * 7); // Thêm offset để biết ngày hiện tại
+    const currentDate = new Date(selectedYear, 0, 1);
+    currentDate.setDate(currentDate.getDate() + currentWeekOffset * 7);
 
-    // Nếu chưa đến tuần cuối của năm thì tiếp tục next
     if (getWeekNumber(currentDate) < totalWeeksInYear) {
       setCurrentWeekOffset(currentWeekOffset + 1);
     }
   };
-
 
   const goToClass = (idClass, idSchedule, idSlot, idSubject, semester) => {
     navigate(`/manage/calender/${idClass}/${idSchedule}/${idSlot}/${idSubject}/${semester}`);
@@ -167,7 +148,6 @@ const Calendar = ({ onClassClick }) => {
 
       {!isLoading && !isError && (
         <div>
-          {/* Filter by Year */}
           <div className="mb-4">
             <label htmlFor="yearFilter" className="mr-2">Chọn năm:</label>
             <select
@@ -182,7 +162,6 @@ const Calendar = ({ onClassClick }) => {
             </select>
           </div>
 
-          {/* Show week number */}
           <div className="text-center font-bold mb-4">
             <span>Tuần thứ {currentWeekNumber} của năm {selectedYear}</span>
           </div>
