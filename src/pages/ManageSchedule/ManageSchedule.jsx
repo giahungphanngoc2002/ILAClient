@@ -1,19 +1,6 @@
 import React, { useEffect, useState } from "react";
 import * as BlockService from "../../services/BlockService";
-const gradesData = {
-    10: [
-        { id: 1, name: "Lớp 10A", students: 30 },
-        { id: 2, name: "Lớp 10B", students: 25 },
-    ],
-    11: [
-        { id: 3, name: "Lớp 11A", students: 28 },
-        { id: 4, name: "Lớp 11B", students: 32 },
-    ],
-    12: [
-        { id: 5, name: "Lớp 12A", students: 26 },
-        { id: 6, name: "Lớp 12B", students: 24 },
-    ],
-};
+import * as ClassService from "../../services/ClassService";
 
 const timeSlots = [
     { slot: "Tiết 1" },
@@ -28,22 +15,20 @@ const timeSlots = [
     { slot: "Tiết 10" },
 ];
 
-const subjects = [
-    { name: "Toán", teacher: "GV1" },
-    { name: "Văn", teacher: "GV2" },
-    { name: "Anh", teacher: "GV3" },
-    { name: "Hoá", teacher: "GV4" },
-    { name: "Sử", teacher: "GV5" },
-];
 
 const daysOfWeek = ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"];
 
 const ManageSchedule = () => {
-    const [selectedGrade, setSelectedGrade] = useState(null);
+    const [selectedBlock, setSelectedBlock] = useState(null);
     const [selectedClass, setSelectedClass] = useState(null);
     const [schedule, setSchedule] = useState({});
     const [error, setError] = useState("");
     const [blocks, setBlocks] = useState([]);
+    const [classDetail, setClassDetail] = useState(null);
+    const [startWeek, setStartWeek] = useState(null);
+    const [endWeek, setEndWeek] = useState(null);
+    const [startYearWeek, setStartYearWeek] = useState({ year: "", week: "" });
+    const [endYearWeek, setEndYearWeek] = useState({ year: "", week: "" });
 
     useEffect(() => {
         const fetchBlocks = async () => {
@@ -57,7 +42,48 @@ const ManageSchedule = () => {
 
         fetchBlocks();
     }, []);
-    console.log("blocks",blocks)
+
+    useEffect(() => {
+        const fetchClassDetail = async () => {
+            if (!selectedClass) {
+                return;  // Không gọi API nếu selectedClass là null
+            }
+            try {
+                const classData = await ClassService.getDetailClass(selectedClass);
+                setClassDetail(classData?.data);
+            } catch (error) {
+                console.error("Error fetching class details:", error);
+            }
+        };
+
+        fetchClassDetail();
+    }, [selectedClass]);
+
+    // Hàm tách year và week từ giá trị week
+    const getYearAndWeekFromValue = (weekValue) => {
+        const [year, week] = weekValue.split('-W');
+        return { year, week };
+    };
+
+    const handleStartWeekChange = (e) => {
+        const startWeekValue = e.target.value;
+        setStartWeek(startWeekValue);
+        const yearWeek = getYearAndWeekFromValue(startWeekValue);
+        setStartYearWeek(yearWeek);
+    };
+
+    const handleEndWeekChange = (e) => {
+        const endWeekValue = e.target.value;
+        setEndWeek(endWeekValue);
+        const yearWeek = getYearAndWeekFromValue(endWeekValue);
+        setEndYearWeek(yearWeek);
+    };
+
+    console.log("Start Week:", startYearWeek.week);
+    console.log("End Week:", endYearWeek.week);
+
+    console.log(classDetail?.subjects)
+
 
 
     const handleSelectSlot = (classId, day, slot, subject) => {
@@ -80,49 +106,84 @@ const ManageSchedule = () => {
 
     return (
         <div className="container mx-auto p-6 bg-gray-100 rounded-lg shadow-md">
-            {/* <h1 className="text-4xl font-bold mb-6 text-center text-indigo-600">Xếp thời khoá biểu</h1> */}
-
-            <div className="mb-6">
-                <label className="font-semibold text-lg">Chọn khối:</label>
-                <select
-                    className="border p-3 rounded w-full mt-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    onChange={(e) => {
-                        setSelectedGrade(e.target.value);
-                        setSelectedClass(null);
-                    }}
-                    value={selectedGrade || ""}
-                >
-                    <option value="">-- Chọn khối --</option>
-                    <option value={10}>Khối 10</option>
-                    <option value={11}>Khối 11</option>
-                    <option value={12}>Khối 12</option>
-                </select>
-            </div>
-
-            {selectedGrade && (
-                <div className="mb-6">
-                    <label className="font-semibold text-lg">Chọn lớp:</label>
+            {/* Chọn khối */}
+            <div className="flex space-x-4 mb-6">
+                <div className="w-1/2">
+                    <label className="font-semibold text-lg">Chọn khối:</label>
                     <select
-                        className="border p-3 rounded w-full mt-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                        onChange={(e) => setSelectedClass(e.target.value)}
-                        value={selectedClass || ""}
+                        className="border p-2 rounded w-full mt-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        onChange={(e) => {
+                            setSelectedBlock(e.target.value);
+                            setSelectedClass(null);
+                        }}
+                        value={selectedBlock || ""}
                     >
-                        <option value="">-- Select a class --</option>
-                        {gradesData[selectedGrade].map((classItem) => (
-                            <option key={classItem.id} value={classItem.id}>
-                                {classItem.name}
+                        <option value="">-- Chọn khối --</option>
+                        {blocks.map((block) => (
+                            <option key={block._id} value={block._id}>
+                                {block.nameBlock}
                             </option>
                         ))}
                     </select>
                 </div>
-            )}
+
+                <div className="w-1/2">
+                    <label className="font-semibold text-lg">Chọn lớp:</label>
+                    <select
+                        className="border p-2 rounded w-full mt-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        onChange={(e) => setSelectedClass(e.target.value)}
+                        value={selectedClass || ""}
+                    >
+                        <option value="">-- Chọn lớp --</option>
+                        {blocks
+                            .find((block) => block._id === selectedBlock)
+                            ?.classIds.map((classItem) => (
+                                <option key={classItem._id} value={classItem._id}>
+                                    {classItem.nameClass}
+                                </option>
+                            ))}
+                    </select>
+                </div>
+            </div>
+
 
             {selectedClass && (
                 <div className="bg-white p-6 rounded-lg shadow-lg">
                     <h2 className="font-bold text-2xl mb-4 text-indigo-700">
-                        {gradesData[selectedGrade].find((cls) => cls.id === Number(selectedClass))?.name}
+                        {blocks
+                            .find((block) => block._id === selectedBlock)
+                            ?.classIds.find((cls) => cls._id === selectedClass)?.nameClass}
                     </h2>
 
+                    {/* Thời gian bắt đầu và kết thúc */}
+                    <div className="flex">
+                        <div className="mb-4 w-1/2 pr-2">
+                            <label className="block text-lg font-semibold">Thời gian bắt đầu:</label>
+                            <input
+                                type="week"
+                                className="border p-2 rounded w-full mt-1 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                value={startWeek || ""}
+                                onChange={handleStartWeekChange}
+                            />
+                            {startYearWeek.year && startYearWeek.week && (
+                                <p>Năm: {startYearWeek.year}, Tuần: {startYearWeek.week}</p>
+                            )}
+                        </div>
+                        <div className="mb-4 w-1/2 pl-2">
+                            <label className="block text-lg font-semibold">Thời gian kết thúc:</label>
+                            <input
+                                type="week"
+                                className="border p-2 rounded w-full mt-1 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                value={endWeek || ""}
+                                onChange={handleEndWeekChange}
+                            />
+                            {endYearWeek.year && endYearWeek.week && (
+                                <p>Năm: {endYearWeek.year}, Tuần: {endYearWeek.week}</p>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Hiển thị lịch */}
                     <table className="table-auto w-full text-left border-collapse">
                         <thead>
                             <tr className="bg-indigo-100">
@@ -146,9 +207,9 @@ const ManageSchedule = () => {
                                                 value={schedule[selectedClass]?.[day]?.[slot.slot] || ""}
                                             >
                                                 <option value=""></option>
-                                                {subjects.map((subject, subIndex) => (
-                                                    <option key={subIndex} value={subject.name}>
-                                                        {subject.name} - {subject.teacher}
+                                                {classDetail?.subjects.map((subject, index) => (
+                                                    <option key={index} value={subject._id}>
+                                                        {subject.nameSubject} - {subject.teacherId.name}
                                                     </option>
                                                 ))}
                                             </select>
