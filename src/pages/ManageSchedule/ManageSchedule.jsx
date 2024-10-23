@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import * as BlockService from "../../services/BlockService";
 import * as ClassService from "../../services/ClassService";
+import * as ScheduleService from "../../services/ScheduleService";
 
 const timeSlots = [
     { slot: "Tiết 1" },
@@ -41,12 +42,12 @@ const ManageSchedule = () => {
         };
 
         fetchBlocks();
-    }, []);
+    }, []); // Chỉ gọi một lần khi component mount
 
     useEffect(() => {
         const fetchClassDetail = async () => {
             if (!selectedClass) {
-                return;  // Không gọi API nếu selectedClass là null
+                return;
             }
             try {
                 const classData = await ClassService.getDetailClass(selectedClass);
@@ -57,7 +58,8 @@ const ManageSchedule = () => {
         };
 
         fetchClassDetail();
-    }, [selectedClass]);
+    }, [selectedClass]); // Thêm selectedClass vào dependency array
+
 
     // Hàm tách year và week từ giá trị week
     const getYearAndWeekFromValue = (weekValue) => {
@@ -103,6 +105,58 @@ const ManageSchedule = () => {
             },
         }));
     };
+
+    const handleSaveSchedule = async () => {
+        if (!selectedClass) {
+            setError("Please select a class before saving the schedule.");
+            return;
+        }
+
+        try {
+            // Tạo scheduleData theo định dạng yêu cầu
+            const scheduleData = {
+                yearNumber: startYearWeek.year,  // Lấy year từ thời gian bắt đầu
+                weekNumber: startYearWeek.week,  // Lấy week từ thời gian bắt đầu
+                days: daysOfWeek.map((day, dayIndex) => ({
+                    dayOfWeek: day, // Ngày trong tuần
+                    slots: timeSlots
+                        .filter((slot) => schedule[selectedClass]?.[day]?.[slot.slot])
+                        .map((slot, slotIndex) => {
+                            const subjectId = schedule[selectedClass]?.[day]?.[slot.slot];
+                            return {
+                                slotNumber: slotIndex + 1, // Tạo số tiết học
+                                subjectId: subjectId,
+                                classId: selectedClass, // Class ID
+                                attendanceStatus: {
+                                    createdAt: new Date().toISOString(), // Thời gian hiện tại
+                                    status: false // Đặt trạng thái mặc định là có mặt (có thể tùy chỉnh)
+                                },
+                                absentStudentId: [] // Đặt mặc định là không có học sinh vắng (có thể cập nhật logic)
+                            };
+                        })
+                })).filter(day => day.slots.length > 0) // Lọc những ngày có slots
+            };
+
+            console.log(scheduleData)
+
+            // Kiểm tra nếu scheduleData không có slots hợp lệ
+            if (!scheduleData.days || scheduleData.days.length === 0) {
+                setError("Schedule is empty, please select at least one subject per time slot.");
+                return;
+            }
+
+            // Gọi API lưu schedule
+            await ScheduleService.createScheduleByClassId(selectedClass, scheduleData);
+            setError("");
+            alert("Schedule saved successfully!");
+        } catch (error) {
+            console.error("Error saving schedule:", error);
+            setError("An error occurred while saving the schedule.");
+        }
+    };
+
+
+
 
     return (
         <div className="container mx-auto p-6 bg-gray-100 rounded-lg shadow-md">
@@ -224,7 +278,9 @@ const ManageSchedule = () => {
 
             {selectedClass && (
                 <div className="mt-6 text-center">
-                    <button className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded shadow-lg transition duration-200">
+                    <button
+                        onClick={handleSaveSchedule}
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded shadow-lg transition duration-200">
                         Save Schedule
                     </button>
                     {Object.keys(schedule).length > 0 && (
