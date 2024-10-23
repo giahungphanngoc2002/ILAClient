@@ -107,54 +107,77 @@ const ManageSchedule = () => {
         }));
     };
 
+    const isEndWeekGreaterThanStartWeek = (startYearWeek, endYearWeek) => {
+        const startYear = parseInt(startYearWeek.year, 10);
+        const endYear = parseInt(endYearWeek.year, 10);
+        const startWeek = parseInt(startYearWeek.week, 10);
+        const endWeek = parseInt(endYearWeek.week, 10);
+
+        // First check if the year is valid
+        if (endYear > startYear) return true;
+        if (endYear === startYear && endWeek > startWeek) return true;
+
+        return false;
+    };
+
     const handleSaveSchedule = async () => {
         if (!selectedClass) {
             setError("Please select a class before saving the schedule.");
             return;
         }
-    
+
+        if (!isEndWeekGreaterThanStartWeek(startYearWeek, endYearWeek)) {
+            toast.error("Tuần kết thúc nhỏ hơn tuần bắt đầu!!")
+            return;
+        }
+
         try {
-            const scheduleData = {
-                yearNumber: startYearWeek.year,
-                weekNumber: startYearWeek.week,
-                days: daysOfWeek.map((day) => ({
-                    dayOfWeek: day,
-                    slots: timeSlots
-                        .filter((slot) => schedule[selectedClass]?.[day]?.[slot.slot])
-                        .map((slot) => {
-                            const subjectId = schedule[selectedClass]?.[day]?.[slot.slot];
-                            return {
-                                slotNumber: parseInt(slot.slot.replace('Tiết ', '')), // Use the actual slot number (e.g., Tiết 4 => 4)
-                                subjectId: subjectId,
-                                classId: selectedClass,
-                                attendanceStatus: {
-                                    createdAt: new Date().toISOString(),
-                                    status: false
-                                },
-                                absentStudentId: []
-                            };
-                        })
-                })).filter(day => day.slots.length > 0)
-            };
-    
-            console.log(scheduleData);
-    
-            if (!scheduleData.days || scheduleData.days.length === 0) {
-                setError("Schedule is empty, please select at least one subject per time slot.");
-                return;
+            const startWeekNumber = parseInt(startYearWeek.week, 10);
+            const endWeekNumber = parseInt(endYearWeek.week, 10);
+
+            // Lặp qua các tuần từ tuần bắt đầu đến tuần kết thúc
+            for (let currentWeek = startWeekNumber; currentWeek <= endWeekNumber; currentWeek++) {
+                const scheduleData = {
+                    yearNumber: startYearWeek.year, // Năm của tuần bắt đầu (giả định các tuần đều trong cùng một năm)
+                    weekNumber: currentWeek, // Tuần hiện tại trong vòng lặp
+                    days: daysOfWeek.map((day) => ({
+                        dayOfWeek: day,
+                        slots: timeSlots
+                            .filter((slot) => schedule[selectedClass]?.[day]?.[slot.slot])
+                            .map((slot) => {
+                                const subjectId = schedule[selectedClass]?.[day]?.[slot.slot];
+                                return {
+                                    slotNumber: parseInt(slot.slot.replace('Tiết ', '')), // Use the actual slot number (e.g., Tiết 4 => 4)
+                                    subjectId: subjectId,
+                                    classId: selectedClass,
+                                    attendanceStatus: {
+                                        createdAt: new Date().toISOString(),
+                                        status: false
+                                    },
+                                    absentStudentId: []
+                                };
+                            })
+                    })).filter(day => day.slots.length > 0)
+                };
+
+                console.log(`Saving schedule for week: ${currentWeek}`, scheduleData);
+
+                if (!scheduleData.days || scheduleData.days.length === 0) {
+                    setError("Schedule is empty, please select at least one subject per time slot.");
+                    return;
+                }
+
+                await ScheduleService.createScheduleByClassId(selectedClass, scheduleData);
             }
-    
-            await ScheduleService.createScheduleByClassId(selectedClass, scheduleData);
+
             setError("");
-            toast.success("Schedule saved successfully!");
+            toast.success("Schedule saved successfully for all weeks!");
+
         } catch (error) {
             console.error("Error saving schedule:", error);
             setError("An error occurred while saving the schedule.");
         }
     };
-    
-
-
 
 
     return (

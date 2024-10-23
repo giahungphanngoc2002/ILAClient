@@ -3,6 +3,7 @@ import { GrNext, GrPrevious } from "react-icons/gr";
 import { useNavigate } from 'react-router-dom';
 import * as ScheduleService from "../../services/ScheduleService";
 import { useSelector } from 'react-redux';
+import moment from 'moment';
 
 const Calendar = ({ onClassClick }) => {
   const [currentWeekOffset, setCurrentWeekOffset] = useState(0);
@@ -41,8 +42,8 @@ const Calendar = ({ onClassClick }) => {
   useEffect(() => {
     const today = new Date();
     if (selectedYear === today.getFullYear()) {
-      const currentWeek = getWeekNumber(today);
-      setCurrentWeekOffset(currentWeek - getWeekNumber(new Date(selectedYear, 0, 1)));
+      const currentWeek = moment(today).isoWeek();
+      setCurrentWeekOffset(currentWeek - moment(new Date(selectedYear, 0, 1)).isoWeek());
     } else {
       setCurrentWeekOffset(0);
     }
@@ -63,29 +64,23 @@ const Calendar = ({ onClassClick }) => {
   ];
 
   const getWeekNumber = (date) => {
-    const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
-    const pastDaysOfYear = (date - firstDayOfYear) / 86400000;
-    return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
+    return moment(date).isoWeek();
+  };
+
+  const getLastWeekNumberOfYear = (year) => {
+    return moment(new Date(year, 11, 31)).isoWeeksInYear();
   };
 
   const getWeekDates = (weekOffset) => {
-    const today = new Date(selectedYear, 0, 1);
-    const firstDayOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + 1 + (weekOffset * 7)));
-
-    const currentWeekDates = [];
-    for (let i = 0; i < 7; i++) {
-      const date = new Date(firstDayOfWeek);
-      date.setDate(firstDayOfWeek.getDate() + i);
-      currentWeekDates.push(date.toLocaleDateString('en-GB'));
-    }
-    return currentWeekDates;
+    const startOfWeek = moment().year(selectedYear).week(1).startOf('isoWeek').add(weekOffset, 'weeks');
+    return Array.from({ length: 7 }, (_, i) => startOfWeek.clone().add(i, 'days').format('DD/MM/YYYY'));
   };
 
   const weekDates = getWeekDates(currentWeekOffset);
-  const currentWeekNumber = getWeekNumber(new Date(weekDates[0].split('/').reverse().join('-')));
+  const currentWeekNumber = getWeekNumber(moment(weekDates[0], 'DD/MM/YYYY'));
 
   const getScheduleForDay = (day, slotIndex) => {
-    const filteredScheduleData = scheduleData.filter(schedule => 
+    const filteredScheduleData = scheduleData.filter(schedule =>
       schedule.year === String(selectedYear) && schedule.week === String(currentWeekNumber)
     );
 
@@ -117,23 +112,17 @@ const Calendar = ({ onClassClick }) => {
   };
 
   const handlePreviousWeek = () => {
-    const currentDate = new Date(selectedYear, 0, 1);
-    currentDate.setDate(currentDate.getDate() + currentWeekOffset * 7);
-
-    if (getWeekNumber(currentDate) > 1) {
+    if (currentWeekOffset > 0) {
       setCurrentWeekOffset(currentWeekOffset - 1);
     }
   };
 
   const handleNextWeek = () => {
-    const lastDayOfYear = new Date(selectedYear, 11, 31);
-    const totalWeeksInYear = getWeekNumber(lastDayOfYear);
-
-    const currentDate = new Date(selectedYear, 0, 1);
-    currentDate.setDate(currentDate.getDate() + currentWeekOffset * 7);
-
-    if (getWeekNumber(currentDate) < totalWeeksInYear) {
+    const totalWeeksInYear = getLastWeekNumberOfYear(selectedYear);
+    if (currentWeekOffset + 1 < totalWeeksInYear) {
       setCurrentWeekOffset(currentWeekOffset + 1);
+    } else {
+      console.log("Không thể tăng tuần, đây là tuần cuối cùng của năm");
     }
   };
 
