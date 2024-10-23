@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import * as BlockService from "../../services/BlockService";
 import * as ClassService from "../../services/ClassService";
 import * as ScheduleService from "../../services/ScheduleService";
+import { toast } from "react-toastify";
 
 const timeSlots = [
     { slot: "Tiết 1" },
@@ -17,7 +18,7 @@ const timeSlots = [
 ];
 
 
-const daysOfWeek = ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"];
+const daysOfWeek = ['Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy'];
 
 const ManageSchedule = () => {
     const [selectedBlock, setSelectedBlock] = useState(null);
@@ -111,49 +112,47 @@ const ManageSchedule = () => {
             setError("Please select a class before saving the schedule.");
             return;
         }
-
+    
         try {
-            // Tạo scheduleData theo định dạng yêu cầu
             const scheduleData = {
-                yearNumber: startYearWeek.year,  // Lấy year từ thời gian bắt đầu
-                weekNumber: startYearWeek.week,  // Lấy week từ thời gian bắt đầu
-                days: daysOfWeek.map((day, dayIndex) => ({
-                    dayOfWeek: day, // Ngày trong tuần
+                yearNumber: startYearWeek.year,
+                weekNumber: startYearWeek.week,
+                days: daysOfWeek.map((day) => ({
+                    dayOfWeek: day,
                     slots: timeSlots
                         .filter((slot) => schedule[selectedClass]?.[day]?.[slot.slot])
-                        .map((slot, slotIndex) => {
+                        .map((slot) => {
                             const subjectId = schedule[selectedClass]?.[day]?.[slot.slot];
                             return {
-                                slotNumber: slotIndex + 1, // Tạo số tiết học
+                                slotNumber: parseInt(slot.slot.replace('Tiết ', '')), // Use the actual slot number (e.g., Tiết 4 => 4)
                                 subjectId: subjectId,
-                                classId: selectedClass, // Class ID
+                                classId: selectedClass,
                                 attendanceStatus: {
-                                    createdAt: new Date().toISOString(), // Thời gian hiện tại
-                                    status: false // Đặt trạng thái mặc định là có mặt (có thể tùy chỉnh)
+                                    createdAt: new Date().toISOString(),
+                                    status: false
                                 },
-                                absentStudentId: [] // Đặt mặc định là không có học sinh vắng (có thể cập nhật logic)
+                                absentStudentId: []
                             };
                         })
-                })).filter(day => day.slots.length > 0) // Lọc những ngày có slots
+                })).filter(day => day.slots.length > 0)
             };
-
-            console.log(scheduleData)
-
-            // Kiểm tra nếu scheduleData không có slots hợp lệ
+    
+            console.log(scheduleData);
+    
             if (!scheduleData.days || scheduleData.days.length === 0) {
                 setError("Schedule is empty, please select at least one subject per time slot.");
                 return;
             }
-
-            // Gọi API lưu schedule
+    
             await ScheduleService.createScheduleByClassId(selectedClass, scheduleData);
             setError("");
-            alert("Schedule saved successfully!");
+            toast.success("Schedule saved successfully!");
         } catch (error) {
             console.error("Error saving schedule:", error);
             setError("An error occurred while saving the schedule.");
         }
     };
+    
 
 
 
