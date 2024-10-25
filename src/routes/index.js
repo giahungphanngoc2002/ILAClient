@@ -20,6 +20,7 @@ import QuestionManager from "../pages/QuestionManage/QuestionManage";
 import TimeTable from "../pages/TimeTable/TimeTable";
 import ProtectedRoute from "../routes/ProtectedRoute"; // Đảm bảo bạn đã import ProtectedRoute
 import SelfLearning from "../pages/SelfLearning/SelfLearning";
+import Quiz from "../pages/Quiz/Quiz";
 
 export const routes = [
   {
@@ -208,6 +209,16 @@ export const routes = [
     page: () => (
       <ProtectedRoute>
         <SelfLearning />
+      </ProtectedRoute>
+    ),
+    isShowHeader: false,
+    isShowSideBar: true,
+  },
+  {
+    path: "/student/selfLearning/quiz",
+    page: () => (
+      <ProtectedRoute>
+        <Quiz />
       </ProtectedRoute>
     ),
     isShowHeader: false,

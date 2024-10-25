@@ -1,49 +1,53 @@
-import React, { useState } from 'react';
-
-// Danh sách các môn học kèm theo ảnh từ mạng
-const subjects = [
-    {
-        name: 'Toán học',
-        image: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400', // Hình ảnh Toán học
-    },
-    {
-        name: 'Vật lý',
-        image: 'https://images.unsplash.com/photo-1581091012184-7f35469b8329?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400', // Hình ảnh Vật lý
-    },
-    {
-        name: 'Hóa học',
-        image: 'https://images.unsplash.com/photo-1581093588401-7162a178a4b2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400', // Hình ảnh Hóa học
-    },
-    {
-        name: 'Sinh học',
-        image: 'https://images.unsplash.com/photo-1552845683-b6d95a48e0f0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400', // Hình ảnh Sinh học
-    },
-    {
-        name: 'Lịch sử',
-        image: 'https://images.unsplash.com/photo-1554731617-45260a2563f9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400', // Hình ảnh Lịch sử
-    },
-    {
-        name: 'Địa lý',
-        image: 'https://images.unsplash.com/photo-1507120410856-1f35574c3b45?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400', // Hình ảnh Địa lý
-    },
-    {
-        name: 'Ngữ văn',
-        image: 'https://images.unsplash.com/photo-1517964603305-611b54f68947?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400', // Hình ảnh Ngữ văn
-    },
-    {
-        name: 'Tiếng Anh',
-        image: 'https://images.unsplash.com/photo-1511974035430-5de47d3b95da?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400', // Hình ảnh Tiếng Anh
-    },
-];
+import React, { useEffect, useState } from 'react';
+import * as ClassService from "../../services/ClassService";
+import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 
 const SelfLearning = () => {
-    // State để lưu môn học được chọn
     const [selectedSubject, setSelectedSubject] = useState(null);
+    const [userClass, setUserClass] = useState(null);
+    const [error, setError] = useState(null);
+    const user = useSelector((state) => state.user);
+    const navigate = useNavigate();
 
-    // Hàm xử lý khi chọn một môn học
-    const handleSelectSubject = (subject) => {
-        setSelectedSubject(subject);
+
+    useEffect(() => {
+        const fetchSchedule = async () => {
+            try {
+                const data = await ClassService.getAllClass();
+                const userClassData = data.data.find(cls =>
+                    cls.studentID.some(student => student._id === user.id)
+                );
+                if (userClassData) {
+                    setUserClass(userClassData);
+                } else {
+                    console.error('User class not found');
+                    setError('User class not found');
+                }
+            } catch (error) {
+                setError('Error fetching schedule data');
+                console.error('Error fetching schedule data:', error);
+            }
+        };
+        fetchSchedule();
+    }, [user.id]);
+
+    const handleSelectSubject = (subjectName) => {
+        setSelectedSubject(subjectName);
     };
+
+    // Danh sách ảnh cho từng môn học
+    const subjectImages = {
+        'Toán': '/images/ToanHoc.jpg',
+        'Ngữ Văn': '/images/VanHoc.jpg',
+        'Vật Lý': '/images/VatLi.jpg',
+        'Hóa': '/images/chemistry.jpg',
+        'Âm Nhạc': '/images/AmNhac.jpg',
+        // Thêm các môn học khác và ảnh tương ứng
+    };
+
+    // Nếu không có hình ảnh, ta hiển thị tên môn học
+    const subjects = userClass?.subjects || [];
 
     return (
         <div className="container mx-auto p-6">
@@ -55,27 +59,20 @@ const SelfLearning = () => {
                     <div
                         key={index}
                         className="bg-white p-6 rounded-lg shadow-lg text-center cursor-pointer transition-transform transform hover:scale-105 hover:bg-blue-100 hover:shadow-xl"
-                        onClick={() => handleSelectSubject(subject.name)}
+                        onClick={() => navigate('/student/selfLearning/quiz')}
                     >
-                        {/* Hình ảnh môn học */}
-                        <img 
-                            src={subject.image} 
-                            alt={subject.name} 
-                            className="w-full h-32 object-cover mb-4 rounded-md transition-opacity duration-300 hover:opacity-80"
-                        />
-                        <h3 className="text-lg font-semibold text-gray-700">{subject.name}</h3>
+                        {/* Hiển thị ảnh tương ứng hoặc ảnh mặc định */}
+                        <div className="w-full h-32 flex items-center justify-center mb-4 bg-gray-100 rounded-md">
+                            <img
+                                src={subjectImages[subject.nameSubject] || '/images/default.jpg'}
+                                alt={subject.nameSubject}
+                                className="object-cover w-full h-full rounded-md"
+                            />
+                        </div>
+                        <h3 className="text-lg font-semibold text-gray-700">{subject.nameSubject}</h3>
                     </div>
                 ))}
             </div>
-
-            {/* Hiển thị thông báo môn học được chọn */}
-            {selectedSubject && (
-                <div className="mt-6 text-center">
-                    <p className="text-xl text-blue-700 font-bold">
-                        Bạn đã chọn môn học: {selectedSubject}
-                    </p>
-                </div>
-            )}
         </div>
     );
 };

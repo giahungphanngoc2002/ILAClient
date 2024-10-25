@@ -63,6 +63,8 @@ export default function TimeTable() {
         fetchSchedule();
     }, [user.id, currentWeek, selectedYear]);
 
+    console.log(userClass)
+
     const handlePreviousWeek = () => {
         const newDate = new Date(currentWeek);
         newDate.setDate(currentWeek.getDate() - 7);
