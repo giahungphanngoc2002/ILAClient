@@ -75,7 +75,7 @@ const TeachingMaterial = () => {
       };
   
       try {
-        // Gọi API addResourceToSubject để thêm file vào resource
+       
         const linkResource = selectedFile.name;  // Sử dụng tên file làm linkResource
         await ClassService.addResourceToSubject(idClass, idSubject, linkResource);  // Gọi mutation để thêm tài nguyên
   

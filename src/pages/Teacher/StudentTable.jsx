@@ -208,10 +208,7 @@ scores: categorizedScores,
     // In ra để kiểm tra
     console.log("inactiveStudentIds", newAbsentStudentIds);
   
-    if (newAbsentStudentIds.length === 0) {
-      toast.info("No inactive students to update.");
-      return;
-    }
+   
   
     // Đảm bảo inactiveStudentIds là mảng
     if (!Array.isArray(newAbsentStudentIds)) {

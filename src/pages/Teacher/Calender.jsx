@@ -72,7 +72,7 @@ const Calendar = ({ onClassClick }) => {
   };
 
   const getWeekDates = (weekOffset) => {
-    const startOfWeek = moment().year(selectedYear).week(1).startOf('isoWeek').add(weekOffset, 'weeks');
+    const startOfWeek = moment().year(selectedYear).isoWeek(1).startOf('isoWeek').add(weekOffset, 'weeks');
     return Array.from({ length: 7 }, (_, i) => startOfWeek.clone().add(i, 'days').format('DD/MM/YYYY'));
   };
 

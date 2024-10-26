@@ -1,16 +1,56 @@
-import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux'; // Assuming you're using redux for state management
-import * as ClassService from "../../services/ClassService";
-import { GrPrevious, GrNext } from 'react-icons/gr';
+import React, { useState, useEffect } from 'react';
+import { GrNext, GrPrevious } from "react-icons/gr";
+import { useNavigate } from 'react-router-dom';
+import * as ScheduleService from "../../services/ScheduleService";
+import { useSelector } from 'react-redux';
+import moment from 'moment';
 
-export default function TimeTable() {
+const TimeTable = ({ onClassClick }) => {
+    const [currentWeekOffset, setCurrentWeekOffset] = useState(0);
+    const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+    const [scheduleData, setScheduleData] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isError, setIsError] = useState(false);
-    const [userClass, setUserClass] = useState(null);
-    const [currentWeek, setCurrentWeek] = useState(new Date());
-    const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
     const user = useSelector((state) => state.user);
+    const [studentId, setStudentId] = useState(user?.id);
+    const navigate = useNavigate();
 
+    useEffect(() => {
+        setStudentId(user?.id);
+    }, [user]);
+
+    useEffect(() => {
+        const fetchSchedule = async () => {
+            setIsLoading(true);
+            try {
+                const data = await ScheduleService.getAllScheduleByStudentId(studentId);
+                console.log("API Data:", data); // Log dữ liệu trả về từ API
+                setScheduleData(data || []);
+                setIsError(false);
+            } catch (error) {
+                setIsError(true);
+                console.error('Error fetching schedule data:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        if (studentId) {
+            fetchSchedule();
+        }
+    }, [studentId]);
+
+    useEffect(() => {
+        const today = new Date();
+        if (selectedYear === today.getFullYear()) {
+            const currentWeek = moment(today).isoWeek();
+            setCurrentWeekOffset(currentWeek - moment(new Date(selectedYear, 0, 1)).isoWeek());
+        } else {
+            setCurrentWeekOffset(0);
+        }
+    }, [selectedYear]);
+
+    const days = ['Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy', 'Chủ nhật'];
     const slotTimes = [
         { start: '07:00', end: '08:00' },
         { start: '08:00', end: '09:00' },
@@ -24,156 +64,161 @@ export default function TimeTable() {
         { start: '17:00', end: '18:00' }
     ];
 
-    const daysOfWeek = ['Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy', 'Chủ nhật'];
-
-    const getWeekDates = (date) => {
-        const startOfWeek = new Date(date.setDate(date.getDate() - date.getDay() + 1));
-        const weekDates = [];
-        for (let i = 0; i < 7; i++) {
-            const nextDay = new Date(startOfWeek);
-            nextDay.setDate(startOfWeek.getDate() + i);
-            weekDates.push(nextDay);
-        }
-        return weekDates;
+    const getWeekNumber = (date) => {
+        return moment(date).isoWeek();
     };
 
-    const currentWeekDates = getWeekDates(new Date(currentWeek));
-
-    useEffect(() => {
-        const fetchSchedule = async () => {
-            setIsLoading(true);
-            try {
-                const data = await ClassService.getAllClass();
-                const userClass = data.data.find(cls =>
-                    cls.studentID.some(student => student._id === user.id)
-                );
-                if (userClass) {
-                    setUserClass(userClass);
-                } else {
-                    console.error('User class not found');
-                }
-                setIsError(false);
-            } catch (error) {
-                setIsError(true);
-                console.error('Error fetching schedule data:', error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-        fetchSchedule();
-    }, [user.id, currentWeek, selectedYear]);
-
-    console.log(userClass)
-
-    const handlePreviousWeek = () => {
-        const newDate = new Date(currentWeek);
-        newDate.setDate(currentWeek.getDate() - 7);
-        setCurrentWeek(newDate);
+    const getLastWeekNumberOfYear = (year) => {
+        return moment(new Date(year, 11, 31)).isoWeeksInYear();
     };
 
-    const handleNextWeek = () => {
-        const newDate = new Date(currentWeek);
-        newDate.setDate(currentWeek.getDate() + 7);
-        setCurrentWeek(newDate);
-    };
+    const getWeekDates = (weekOffset) => {
+        const startOfWeek = moment().year(selectedYear).isoWeek(1).startOf('isoWeek').add(weekOffset, 'weeks');
+        return Array.from({ length: 7 }, (_, i) => startOfWeek.clone().add(i, 'days').format('DD/MM/YYYY'));
+      };
 
-    const handleYearChange = (event) => {
-        setSelectedYear(Number(event.target.value));
-    };
+    const weekDates = getWeekDates(currentWeekOffset);
+    const currentWeekNumber = getWeekNumber(moment(weekDates[0], 'DD/MM/YYYY'));
+
 
     const getScheduleForDay = (day, slotIndex) => {
-        if (!userClass || !userClass.schedule) return null;
+        const filteredScheduleData = scheduleData.find(schedule => {
+            return schedule.year === String(selectedYear) && schedule.week === String(currentWeekNumber);
+        });
 
-        const daySchedule = userClass.schedule.find(sch =>
-            new Date(sch.dayOfWeek).getDate() === day.getDate() &&
-            new Date(sch.dayOfWeek).getFullYear() === selectedYear
-        );
 
-        if (daySchedule) {
-            return daySchedule.slots.find(slot => slot.slotNumber === slotIndex + 1);
+        if (filteredScheduleData) {
+            const classData = filteredScheduleData.schedules.find((cls) => cls.dayOfWeek === day);
+
+            if (classData) {
+                const slotData = classData.slots.find((slot) => slot.slotNumber === slotIndex + 1);
+                if (slotData) {
+                    const scheduleId = classData._id;
+                    const formattedDate = weekDates[days.indexOf(day)];
+                    const currentDateTime = new Date();
+                    const [startHour, startMinute] = slotTimes[slotIndex].start.split(':').map(Number);
+                    const slotDate = new Date(formattedDate.split('/').reverse().join('-'));
+                    slotDate.setHours(startHour, startMinute);
+
+                    const isCompleted = slotData.attendanceStatus?.status === true;
+
+                    if (slotDate < currentDateTime && !isCompleted) {
+                        return { ...slotData, scheduleId, isMissed: true };
+                    }
+                    if (slotDate >= currentDateTime && !isCompleted) {
+                        return { ...slotData, scheduleId, isMissed: false };
+                    }
+
+                    return { ...slotData, scheduleId, isCompleted };
+                }
+            }
         }
         return null;
     };
 
-    console.log(userClass)
+    const handlePreviousWeek = () => {
+        if (currentWeekOffset > 0) {
+            setCurrentWeekOffset(currentWeekOffset - 1);
+        }
+    };
+
+    const handleNextWeek = () => {
+        const totalWeeksInYear = getLastWeekNumberOfYear(selectedYear);
+        if (currentWeekOffset + 1 < totalWeeksInYear) {
+            setCurrentWeekOffset(currentWeekOffset + 1);
+        } else {
+            console.log("Không thể tăng tuần, đây là tuần cuối cùng của năm");
+        }
+    };
+
+    const goToClass = (idClass, idSchedule, idSlot, idSubject, semester) => {
+        navigate(`/manage/calender/${idClass}/${idSchedule}/${idSlot}/${idSubject}/${semester}`);
+    };
 
     return (
         <div className="container mx-auto p-4">
             {isLoading && <div>Loading schedule...</div>}
             {isError && <div>Error loading schedule. Please try again later.</div>}
 
-            <div className="mb-4">
-                <label htmlFor="year-select" className="mr-2 font-semibold">Filter by Year:</label>
-                <select
-                    id="year-select"
-                    value={selectedYear}
-                    onChange={handleYearChange}
-                    className="p-2 border border-gray-300 rounded-lg shadow-lg focus:ring-2 focus:ring-blue-400"
-                >
-                    {[2022, 2023, 2024, 2025].map(year => (
-                        <option key={year} value={year}>{year}</option>
-                    ))}
-                </select>
-            </div>
-
             {!isLoading && !isError && (
-                <div className="grid grid-cols-8 gap-2 bg-gray-100 shadow-lg p-4 rounded-lg overflow-hidden">
-                    <div className="col-span-1">
-                        <div className="flex justify-between mb-4">
-                            <button onClick={handlePreviousWeek} className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-blue-600 hover:shadow-md transition">
-                                <GrPrevious />
-                            </button>
-                            <button onClick={handleNextWeek} className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-blue-600 hover:shadow-md transition">
-                                <GrNext />
-                            </button>
-                        </div>
-                        {slotTimes.map((slot, i) => (
-                            <div key={i} className="py-3 border-b border-gray-300 text-center font-bold bg-blue-50 rounded-lg shadow-sm text-sm my-1 h-16 flex items-center justify-center">
-                                <div>
-                                    <div>Slot {i + 1}</div>
-                                    <div className="text-xs text-gray-500">{slot.start} - {slot.end}</div>
+                <div>
+                    <div className="mb-4">
+                        <label htmlFor="yearFilter" className="mr-2">Chọn năm:</label>
+                        <select
+                            id="yearFilter"
+                            value={selectedYear}
+                            onChange={(e) => setSelectedYear(Number(e.target.value))}
+                            className="p-2 border border-gray-300 rounded-lg"
+                        >
+                            {Array.from({ length: new Date().getFullYear() - 2020 + 1 }, (_, i) => 2020 + i).map((year) => (
+                                <option key={year} value={year}>{year}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className="text-center font-bold mb-4">
+                        <span>Tuần thứ {currentWeekNumber} của năm {selectedYear}</span>
+                    </div>
+
+                    <div className="grid grid-cols-8 gap-2 bg-gray-100 shadow-lg p-4 rounded-lg overflow-hidden">
+                        <div className="col-span-1">
+                            <div className="flex justify-between mb-4">
+                                <button onClick={handlePreviousWeek} className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-sm">
+                                    <GrPrevious />
+                                </button>
+                                <button onClick={handleNextWeek} className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-sm">
+                                    <GrNext />
+                                </button>
+                            </div>
+                            {slotTimes.map((slot, i) => (
+                                <div key={i} className="py-3 border-b border-gray-300 text-center font-bold bg-blue-50 rounded-lg shadow-sm text-sm my-1 h-16 flex items-center justify-center">
+                                    <div>
+                                        <div>Slot {i + 1}</div>
+                                        <div className="text-xs text-gray-500">{slot.start} - {slot.end}</div>
+                                    </div>
                                 </div>
+                            ))}
+                        </div>
+
+                        {days.map((day, index) => (
+                            <div key={index} className="col-span-1">
+                                <div className="font-bold text-center text-white bg-blue-500 p-2 rounded-lg mb-2 shadow-sm text-xs">
+                                    {day} <br />
+                                    <span className="text-xs">{weekDates[index]}</span>
+                                </div>
+                                {slotTimes.map((slot, i) => {
+                                    const classData = getScheduleForDay(day, i);
+                                    // console.log(classData)
+                                    return (
+                                        <div
+                                            key={i}
+                                            className={`py-3 border-b border-gray-300 ${classData ? (classData.isCompleted ? 'bg-green-100' : (classData.isMissed ? 'bg-red-100' : 'bg-yellow-100')) : 'bg-white'} rounded-lg shadow-sm my-1 h-16 flex items-center justify-center`}
+                                        >
+                                            {classData ? (
+                                                <button
+                                                    onClick={() => goToClass(classData.classId._id, classData.scheduleId, classData._id, classData.subjectId._id, classData.subjectId.semester)}
+                                                >
+                                                    <div className="text-xs text-gray-700 w-full h-full flex flex-col items-center justify-center">
+                                                        <div className="font-bold text-blue-800">{classData.subjectId.nameSubject}</div>
+                                                        <div>{classData.classId.nameClass}</div>
+                                                        <div className={`text-${classData.isCompleted ? 'green' : (classData.isMissed ? 'red' : 'yellow')}-600`}>
+                                                            {classData.isCompleted ? 'Hoàn thành' : (classData.isMissed ? 'Bỏ lỡ' : 'Sắp đến')}
+                                                        </div>
+                                                    </div>
+                                                </button>
+                                            ) : (
+                                                <div className="text-center text-gray-400">Trống</div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
                             </div>
                         ))}
                     </div>
-
-                    {currentWeekDates.map((day, index) => (
-                        <div key={index} className="col-span-1">
-                            <div className="font-bold text-center text-white bg-blue-500 p-2 rounded-lg mb-2 shadow-sm text-xs">
-                                {daysOfWeek[index]} <br />
-                                <span className="text-xs">{day.toLocaleDateString()}</span>
-                            </div>
-                            {slotTimes.map((slot, i) => {
-                                const classData = getScheduleForDay(day, i);
-                                return (
-                                    <div
-                                        key={i}
-                                        className={`py-3 border-b border-gray-300 ${classData ?
-                                            (classData.isCompleted ? 'bg-green-100 hover:bg-green-200' : 'bg-yellow-100 hover:bg-yellow-200') : 'bg-white hover:bg-gray-200'} rounded-lg shadow-sm my-1 h-16 flex items-center justify-center transition-all duration-300`}
-                                    >
-                                        {classData ? (
-                                            <button
-                                                onClick={() => console.log('Navigate to class', classData.classId._id)}
-                                                className="w-full h-full text-center"
-                                            >
-                                                <div className="text-xs text-gray-700 w-full h-full flex flex-col items-center justify-center">
-                                                    <div className="font-bold text-blue-800">{classData.subjectId.nameSubject}</div>
-                                                    <div>{classData.teacherId.name}</div>
-                                                    <div className={`text-${classData.isCompleted ? 'green' : 'yellow'}-600`}>
-                                                        {classData.isCompleted ? 'Hoàn thành' : 'Sắp đến'}
-                                                    </div>
-                                                </div>
-                                            </button>
-                                        ) : (
-                                            <div className="text-center text-gray-400">Trống</div>
-                                        )}
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    ))}
                 </div>
             )}
         </div>
     );
-}
+};
+
+export default TimeTable;

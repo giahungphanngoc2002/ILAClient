@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CalendarClock, Bell, User, School, Search } from "lucide-react";
+import { CalendarClock, Bell, User, School, Search, Book } from "lucide-react";
 import Sidebar from '../Sidebar/Sidebar';
 import { SidebarItem } from '../Sidebar/SidebarItem';
 import { useNavigate } from 'react-router-dom';
@@ -42,6 +42,7 @@ const DefaultSidebar = () => {
         { icon: <Bell size={20} />, text: "Chia lớp", path: '/manage/classDivision', role: "Admin" },
         { icon: <CalendarClock size={20} />, text: "Thời khoá biểu", path: '/student/timeTable', role: "User" },
         { icon: <FaBookReader size={20} />, text: "Tự học", path: '/student/selfLearning', role: "User" },
+        { icon: <Book size={20} />, text: "Điểm danh", path: '/student/attendaceStudent', role: "User" },
     ];
 
     const filteredItems = () => {

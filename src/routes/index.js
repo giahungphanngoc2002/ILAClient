@@ -21,6 +21,7 @@ import TimeTable from "../pages/TimeTable/TimeTable";
 import ProtectedRoute from "../routes/ProtectedRoute"; // Đảm bảo bạn đã import ProtectedRoute
 import SelfLearning from "../pages/SelfLearning/SelfLearning";
 import Quiz from "../pages/Quiz/Quiz";
+import AttendanceStudent from "../pages/AttendanceStudent/AttendanceStudent";
 
 export const routes = [
   {
@@ -219,6 +220,16 @@ export const routes = [
     page: () => (
       <ProtectedRoute>
         <Quiz />
+      </ProtectedRoute>
+    ),
+    isShowHeader: false,
+    isShowSideBar: true,
+  },
+  {
+    path: "/student/attendaceStudent",
+    page: () => (
+      <ProtectedRoute>
+        <AttendanceStudent />
       </ProtectedRoute>
     ),
     isShowHeader: false,

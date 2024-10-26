@@ -10,6 +10,11 @@ export const getAllScheduleByTeacherId = async (teacherId) => {
     return res.data;
 };
 
+export const getAllScheduleByStudentId = async (studentId) => {
+    const res = await axios.get(`http://localhost:3001/api/schedule/student/${studentId}/schedules`);
+    return res.data;
+};
+
 export const getAllAbsentStudentId = async (classId, scheduleId, slotId) => {
     const res = await axios.get(`http://localhost:3001/api/schedule/${classId}/${scheduleId}/${slotId}`);
     return res.data;

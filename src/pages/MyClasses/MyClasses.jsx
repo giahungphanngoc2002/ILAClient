@@ -11,7 +11,7 @@ function MyClasses() {
     const [classes, setClasses] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isError, setIsError] = useState(false);
-    const [selectedClass, setSelectedClass] = useState(null); // To store selected class details
+    const [selectedClass, setSelectedClass] = useState(null); 
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const navigate = useNavigate();
