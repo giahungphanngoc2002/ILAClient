@@ -131,13 +131,11 @@ const TimeTable = ({ onClassClick }) => {
         }
     };
 
-    // const goToClass = (idClass, idSchedule, idSlot, idSubject, semester) => {
-    //     navigate(`/manage/calender/${idClass}/${idSchedule}/${idSlot}/${idSubject}/${semester}`);
-    // };
+    
 
-    const goToInfoSlot = () => {
-        navigate(`/student/timeTable/infoSlot`)
-    }
+    const goToInfoSlot = (idSchedule, idSlot) => {
+        navigate(`/student/timeTable/infoSlot/${idSchedule}/${idSlot}`);
+    };
     return (
         <div className="container mx-auto p-4">
             {isLoading && <div>Loading schedule...</div>}
@@ -186,7 +184,7 @@ const TimeTable = ({ onClassClick }) => {
                                 </div>
                                 {slotTimes.map((slot, i) => {
                                     const classData = getScheduleForDay(day, i);
-                                    // console.log(classData)
+                                    console.log("123123",classData)
                                     return (
                                         <div
                                             key={i}
@@ -194,7 +192,7 @@ const TimeTable = ({ onClassClick }) => {
                                         >
                                             {classData ? (
                                                 <button
-                                                    onClick={() => goToInfoSlot()}
+                                                    onClick={() => goToInfoSlot(classData.scheduleId,classData._id )}
                                                 >
                                                     <div className="text-xs text-gray-700 w-full h-full flex flex-col items-center justify-center">
                                                         <div className="font-bold text-blue-800">{classData.subjectId.nameSubject}</div>

@@ -1,23 +1,39 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { FaArrowLeft, FaCalendarAlt, FaChalkboardTeacher, FaBook, FaDoorOpen, FaClock } from 'react-icons/fa';
+import { useParams } from 'react-router-dom';
+import * as ScheduleService from "../../services/ScheduleService";
 
 const InfoSlot = () => {
     const handleBack = () => {
         window.history.back();
     };
+    const {  idSchedule, idSlot} = useParams();
+    const [data, setData] = useState(null);
+    const [schedule, setSchdule] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-    const data = {
-        date: "Thứ 2 11/11/2024",
-        slot: 2,
-        studentGroup: "Lớp 10/1",
-        instructor: {
-            name: "Nguyễn Văn C",
-        },
-        course: "Toán học",
-        room: 9,
-        startTime: "07:00",
-        endTime: "07:45",
-    };
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const result = await ScheduleService.getDetailSlotById(idSchedule, idSlot);
+                const schedule = result.data.schedule.dayOfWeek;
+                const slotData = result.data.schedule.slots.find(slot => slot._id === idSlot);
+                setData(slotData);
+                setSchdule(schedule)
+                setLoading(false);
+            } catch (error) {
+                setError("Failed to load slot details");
+                setLoading(false);
+            }
+        };
+        fetchData();
+    }, [idSchedule, idSlot]);
+    console.log("123123",data)
+    console.log("123123asd3",schedule)
+
+    if (loading) return <p>Loading...</p>;
+    if (error) return <p>{error}</p>;
 
     return (
         <div className="min-h-screen bg-gray-100 flex items-center justify-center py-8 px-4">
@@ -36,37 +52,37 @@ const InfoSlot = () => {
                         <FaCalendarAlt className="text-blue-500" />
                         <p className="font-semibold m-0">Ngày:</p>
                     </div>
-                    <p className="text-gray-800 m-0">{data.date}</p>
+                    <p className="text-gray-800 m-0">{schedule}</p>
 
                     <div className="flex items-center gap-3 text-gray-600">
                         <FaClock className="text-indigo-500" />
                         <p className="font-semibold m-0">Tiết:</p>
                     </div>
-                    <p className="text-gray-800 m-0">{data.slot}</p>
+                    <p className="text-gray-800 m-0">{data.slotNumber}</p>
 
                     <div className="flex items-center gap-3 text-gray-600">
                         <FaBook className="text-green-500" />
                         <p className="font-semibold m-0">Môn học:</p>
                     </div>
-                    <p className="text-gray-800 m-0">{data.course}</p>
+                    <p className="text-gray-800 m-0">{data.subjectId.nameSubject}</p>
 
                     <div className="flex items-center gap-3 text-gray-600">
                         <FaChalkboardTeacher className="text-purple-500" />
                         <p className="font-semibold m-0">Giáo viên:</p>
                     </div>
-                    <p className="text-gray-800 m-0">{data.instructor.name}</p>
+                    <p className="text-gray-800 m-0">{data.subjectId.teacherId.name}</p>
 
                     <div className="flex items-center gap-3 text-gray-600">
                         <FaDoorOpen className="text-red-500" />
                         <p className="font-semibold m-0">Phòng:</p>
                     </div>
-                    <p className="text-gray-800 m-0">{data.room}</p>
+                    <p className="text-gray-800 m-0">{data.classId.nameClass}</p>
 
                     <div className="flex items-center gap-3 text-gray-600">
                         <FaClock className="text-indigo-500" />
                         <p className="font-semibold m-0">Thời gian:</p>
                     </div>
-                    <p className="text-gray-800 m-0">{data.startTime} - {data.endTime}</p>
+                    <p className="text-gray-800 m-0">{data.slotNumber} - {data.slotNumber}</p>
                 </div>
             </div>
         </div>

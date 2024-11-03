@@ -25,14 +25,19 @@ export const getDetailScheduleById = async (scheduleId) => {
     return res.data;
 };
 
+export const getDetailSlotById = async (scheduleId,slotId) => {
+    const res = await axios.get(`http://localhost:3001/api/schedule/schedule/${scheduleId}/slot/${slotId}`);
+    return res.data;
+};
+
 export const createAbsentstudentId = async (scheduleId, classId, slotId) => {
     const res = await axios.post(`http://localhost:3001/api/schedule/createAbsent/${scheduleId}/${classId}/${slotId}`);
     return res.data;
 };
 
-export const updateAbsentstudentId = async (scheduleId, classId, slotId, newAbsentStudentIds) => {
+export const updateAbsentstudentId = async (scheduleId, classId, slotId, newAbsentStudents) => {
     const res = await axios.put(`http://localhost:3001/api/schedule/updateAbsent/${scheduleId}/${classId}/${slotId}`, {
-        newAbsentStudentIds
+        newAbsentStudents
     });
     return res.data;
 };

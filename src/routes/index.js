@@ -229,7 +229,7 @@ export const routes = [
     isShowSideBar: true,
   },
   {
-    path: "/student/timeTable/infoSlot",
+    path: "/student/timeTable/infoSlot/:idSchedule/:idSlot",
     page: () => (
       <ProtectedRoute>
         <InfoSlot />

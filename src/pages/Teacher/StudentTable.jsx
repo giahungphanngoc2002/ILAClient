@@ -44,32 +44,41 @@ const StudentTable = () => {
       try {
         // Lấy dữ liệu về lịch học (schedules)
         const schedulesData = await ScheduleService.getDetailScheduleById(idSchedule);
-
+  
         // Tìm slot dựa vào slotId
         const targetSlot = schedulesData?.data?.slots?.find(slot => slot._id === idSlot);
-
+  
         if (targetSlot) {
           // Lấy danh sách absentStudentId từ slot tương ứng
           const absentStudents = targetSlot.absentStudentId;
           setStudentsAbsent(absentStudents);
-
+  
           // Lấy danh sách học sinh trong lớp (students)
           const studentsData = await ClassService.getStudentInClass(idClass);
           if (!studentsData || !studentsData.data) {
             setError('Class not found');
           } else {
-            // Duyệt qua danh sách students và cập nhật trạng thái dựa vào danh sách absentStudent
+            // Duyệt qua danh sách students và cập nhật trạng thái dựa vào danh sách absentStudents
             const updatedStudents = studentsData.data.map(student => {
-              const isAbsent = absentStudents.some(absentStudent => absentStudent._id === student._id);
+              const absentInfo = absentStudents.find(absentStudent => absentStudent._id === student._id);
+  
               return {
                 ...student,
-                status: !isAbsent // Nếu sinh viên có trong danh sách vắng mặt thì đặt status là false
+                status: !absentInfo, // Đặt `status` là false nếu học sinh có mặt trong `absentStudents`
+                isExcused: absentInfo ? absentInfo.isExcused : false // Đặt `isExcused` dựa trên `absentInfo`
               };
             });
-
+  
             // Cập nhật danh sách sinh viên
             setStudents(updatedStudents);
             setIsInitialLoadComplete(true); // Đánh dấu đã tải xong dữ liệu
+  
+            // Khởi tạo `absenceTypes` với giá trị ban đầu từ `absentStudents`
+            const initialAbsenceTypes = {};
+            absentStudents.forEach(absent => {
+              initialAbsenceTypes[absent.studentId] = absent.isExcused ? 'Excused' : 'Unexcused';
+            });
+            setAbsenceTypes(initialAbsenceTypes);
           }
         } else {
           console.log(`Slot với ID ${idSlot} không được tìm thấy.`);
@@ -79,13 +88,12 @@ const StudentTable = () => {
         setError('Error fetching data. Please try again later.');
       }
     };
-
+  
     fetchData();
   }, [idClass, idSchedule, idSlot]);
-
+  
 
   // Chạy khi students hoặc studentsAbsent thay đổi
-
 
 
   const toggleStatus = (id) => {
@@ -198,9 +206,9 @@ const StudentTable = () => {
 
 
   const mutation = useMutation({
-    mutationFn: async (newAbsentStudentIds) => {
+    mutationFn: async (newAbsentStudents) => {
       // Call the ScheduleService để gửi dữ liệu cập nhật absent students
-      return ScheduleService.updateAbsentstudentId(idSchedule, idClass, idSlot, newAbsentStudentIds);
+      return ScheduleService.updateAbsentstudentId(idSchedule, idClass, idSlot, newAbsentStudents);
     },
     onSuccess: (data) => {
       // Display success toast và log dữ liệu đã cập nhật
@@ -215,23 +223,23 @@ const StudentTable = () => {
   });
 
   const saveStudents = () => {
-    const newAbsentStudentIds = students
-      .filter(student => student.status === false)
+    const newAbsentStudents = students
+      .filter(student => student.status === false) // Lọc học sinh vắng mặt
       .map(student => ({
-        id: student._id,
-        absenceType: absenceTypes[student._id] || 'Unexcused' // Default to 'Unexcused' if not selected
+        studentId: student._id, // Sử dụng studentId thay vì id
+        isExcused: absenceTypes[student._id] === 'Excused' // Đặt isExcused dựa trên absenceTypes
       }));
-
-    console.log("Inactive Student IDs with Absence Type:", newAbsentStudentIds);
-
+  
+    console.log("Inactive Student IDs with Absence Type:", newAbsentStudents);
+  
     // Đảm bảo inactiveStudentIds là mảng
-    if (!Array.isArray(newAbsentStudentIds)) {
-      console.error("inactiveStudentIds is not an array:", newAbsentStudentIds);
+    if (!Array.isArray(newAbsentStudents)) {
+      console.error("newAbsentStudents is not an array:", newAbsentStudents);
       return;
     }
-
+  
     // Gọi mutation để cập nhật danh sách học sinh vắng
-    // mutation.mutate(newAbsentStudentIds);
+    mutation.mutate(newAbsentStudents);
   };
 
 
