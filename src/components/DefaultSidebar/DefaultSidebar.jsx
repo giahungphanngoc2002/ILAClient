@@ -8,6 +8,7 @@ import { MdLogout } from "react-icons/md";
 import * as UserService from "../../services/UserService";
 import { resetUser } from "../../redux/slices/userSlide";
 import { FaBookReader } from "react-icons/fa";
+import { TbReport } from 'react-icons/tb';
 
 const DefaultSidebar = () => {
     const [expanded, setExpanded] = useState(false);
@@ -37,6 +38,7 @@ const DefaultSidebar = () => {
 
     const sidebarItems = [
         { icon: <CalendarClock size={20} />, text: "Lịch làm việc", path: '/manage/calender', role: "Teacher" },
+        { icon: <TbReport size={20} />, text: "Báo cáo", path: '/manage/report', role: "Teacher" },
         { icon: <School size={20} />, text: "Quản lý lớp", path: '/manage/myClass', role: "Teacher" },
         { icon: <CalendarClock size={20} />, text: "Thời khoá biểu", path: '/manage/manageSchedule', role: "Admin" },
         { icon: <Bell size={20} />, text: "Chia lớp", path: '/manage/classDivision', role: "Admin" },

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Toggle from '../../components/Toggle/Toggle';
-import { Modal, Button } from 'react-bootstrap';
+import { Modal, Button, Dropdown } from 'react-bootstrap';
 import { FaArrowLeft } from 'react-icons/fa';
 import * as ClassService from "../../services/ClassService";
 import * as ScoreSbujectService from "../../services/ScoreSbujectService";
@@ -19,6 +19,7 @@ const StudentTable = () => {
   const navigate = useNavigate();
   const { idClass, idSchedule, idSlot, idSubject, semester } = useParams();
   const [isInitialLoadComplete, setIsInitialLoadComplete] = useState(false);
+  const [absenceTypes, setAbsenceTypes] = useState({});
 
   useEffect(() => {
     const fetchData = async () => {
@@ -37,21 +38,21 @@ const StudentTable = () => {
     };
     fetchData();
   }, [idClass]);
-  
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         // Lấy dữ liệu về lịch học (schedules)
         const schedulesData = await ScheduleService.getDetailScheduleById(idSchedule);
-        
+
         // Tìm slot dựa vào slotId
         const targetSlot = schedulesData?.data?.slots?.find(slot => slot._id === idSlot);
-        
+
         if (targetSlot) {
           // Lấy danh sách absentStudentId từ slot tương ứng
           const absentStudents = targetSlot.absentStudentId;
           setStudentsAbsent(absentStudents);
-  
+
           // Lấy danh sách học sinh trong lớp (students)
           const studentsData = await ClassService.getStudentInClass(idClass);
           if (!studentsData || !studentsData.data) {
@@ -65,7 +66,7 @@ const StudentTable = () => {
                 status: !isAbsent // Nếu sinh viên có trong danh sách vắng mặt thì đặt status là false
               };
             });
-  
+
             // Cập nhật danh sách sinh viên
             setStudents(updatedStudents);
             setIsInitialLoadComplete(true); // Đánh dấu đã tải xong dữ liệu
@@ -78,27 +79,40 @@ const StudentTable = () => {
         setError('Error fetching data. Please try again later.');
       }
     };
-  
+
     fetchData();
   }, [idClass, idSchedule, idSlot]);
-  
-  
+
+
   // Chạy khi students hoặc studentsAbsent thay đổi
-  
-  
+
+
 
   const toggleStatus = (id) => {
-  setStudents((prevStudents) => {
-    const updatedStudents = prevStudents.map(student =>
-      student._id === id ? { ...student, status: !student.status } : student
-    );
-    console.log("Updated Students: ", updatedStudents);
-    return updatedStudents;
-  });
-};
+    setStudents((prevStudents) => {
+      const updatedStudents = prevStudents.map(student =>
+        student._id === id ? { ...student, status: !student.status } : student
+      );
+      console.log("Updated Students: ", updatedStudents);
+      return updatedStudents;
+    });
 
-console.log(" Students: ", students);
-console.log(" absstuden: ", studentsAbsent);
+
+    setAbsenceTypes(prevTypes => ({
+      ...prevTypes,
+      [id]: prevTypes[id] || 'Unexcused'
+    }));
+  };
+
+  const handleAbsenceTypeChange = (id, type) => {
+    setAbsenceTypes(prevTypes => ({
+      ...prevTypes,
+      [id]: type
+    }));
+  };
+
+  console.log(" Students: ", students);
+  console.log(" absstuden: ", studentsAbsent);
 
 
   const openModal = async (student) => {
@@ -124,7 +138,7 @@ console.log(" absstuden: ", studentsAbsent);
         name: student.name,
         id: student._id,
         scoreId: scoreId, // Attach the correct scoreId for the student
-scores: categorizedScores,
+        scores: categorizedScores,
       });
 
       // Display the modal after setting the scores
@@ -199,27 +213,27 @@ scores: categorizedScores,
       console.error("Error updating absent students:", error.message);
     },
   });
-  
+
   const saveStudents = () => {
     const newAbsentStudentIds = students
       .filter(student => student.status === false)
-      .map(student => student._id);
-  
-    // In ra để kiểm tra
-    console.log("inactiveStudentIds", newAbsentStudentIds);
-  
-   
-  
+      .map(student => ({
+        id: student._id,
+        absenceType: absenceTypes[student._id] || 'Unexcused' // Default to 'Unexcused' if not selected
+      }));
+
+    console.log("Inactive Student IDs with Absence Type:", newAbsentStudentIds);
+
     // Đảm bảo inactiveStudentIds là mảng
     if (!Array.isArray(newAbsentStudentIds)) {
       console.error("inactiveStudentIds is not an array:", newAbsentStudentIds);
       return;
     }
-  
+
     // Gọi mutation để cập nhật danh sách học sinh vắng
-    mutation.mutate(newAbsentStudentIds);
+    // mutation.mutate(newAbsentStudentIds);
   };
-  
+
 
   return (
     <div className="container mx-auto p-4">
@@ -231,15 +245,17 @@ scores: categorizedScores,
           <table className="min-w-full bg-white table-auto">
             <thead>
               <tr>
-                <th className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
-                <th className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tên</th>
-                <th className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ngày sinh</th>
-                <th className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Điểm danh</th>
-                <th className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Xem</th>
+                <th style={{ width: "5%" }} className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
+                <th style={{ width: "25%" }} className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tên</th>
+                <th style={{ width: "20%" }} className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ngày sinh</th>
+                <th style={{ width: "20%" }} className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Điểm danh</th>
+                <th style={{ width: "15%" }} className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng thái</th>
+                <th style={{ width: "15%" }} className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Xem</th>
               </tr>
             </thead>
+
             <tbody className="bg-white divide-y divide-gray-200">
-            {students.map((student, index) => (
+              {students.map((student, index) => (
                 <tr key={index} className={index % 2 === 0 ? 'bg-gray-50' : ''}>
                   <td className="px-6 py-4 whitespace-nowrap font-semibold text-gray-800">{index + 1}</td>
                   <td className="px-6 py-4 whitespace-nowrap flex items-center font-semibold text-gray-800">
@@ -259,6 +275,19 @@ scores: categorizedScores,
 
 
                   </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {!student.status && (
+                      <select
+                        value={absenceTypes[student._id] || ""}
+                        onChange={(e) => handleAbsenceTypeChange(student._id, e.target.value)}
+                        className="border border-gray-300 rounded px-2 py-1 bg-white"
+                      >
+                        <option value="Excused">Có phép</option>
+                        <option value="Unexcused">Không phép</option>
+                      </select>
+                    )}
+                  </td>
+
 
                   <td className="px-6 py-4 whitespace-nowrap">
                     <GrView
@@ -301,7 +330,7 @@ scores: categorizedScores,
                       <th className="border px-4 py-2 cursor-pointer" onClick={() => handleAddNewInput('oralScore')}>
                         Điểm miệng
                       </th>
-<th className="border px-4 py-2 cursor-pointer" onClick={() => handleAddNewInput('quizScore')}>
+                      <th className="border px-4 py-2 cursor-pointer" onClick={() => handleAddNewInput('quizScore')}>
                         Điểm 15 phút
                       </th>
                       <th className="border px-4 py-2 cursor-pointer" onClick={() => handleAddNewInput('testScore')}>
@@ -360,7 +389,7 @@ scores: categorizedScores,
                           ))}
                         </div>
                       </td>
-<td className="border px-4 py-2">
+                      <td className="border px-4 py-2">
                         <input
                           type="number"
                           value={studentScores.scores.finalScore || ''}
@@ -425,7 +454,7 @@ scores: categorizedScores,
               Lưu
             </Button>
           </Modal.Footer>
-</Modal>
+        </Modal>
       )}
     </div>
   );

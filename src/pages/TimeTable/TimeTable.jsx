@@ -75,7 +75,7 @@ const TimeTable = ({ onClassClick }) => {
     const getWeekDates = (weekOffset) => {
         const startOfWeek = moment().year(selectedYear).isoWeek(1).startOf('isoWeek').add(weekOffset, 'weeks');
         return Array.from({ length: 7 }, (_, i) => startOfWeek.clone().add(i, 'days').format('DD/MM/YYYY'));
-      };
+    };
 
     const weekDates = getWeekDates(currentWeekOffset);
     const currentWeekNumber = getWeekNumber(moment(weekDates[0], 'DD/MM/YYYY'));
@@ -131,10 +131,13 @@ const TimeTable = ({ onClassClick }) => {
         }
     };
 
-    const goToClass = (idClass, idSchedule, idSlot, idSubject, semester) => {
-        navigate(`/manage/calender/${idClass}/${idSchedule}/${idSlot}/${idSubject}/${semester}`);
-    };
+    // const goToClass = (idClass, idSchedule, idSlot, idSubject, semester) => {
+    //     navigate(`/manage/calender/${idClass}/${idSchedule}/${idSlot}/${idSubject}/${semester}`);
+    // };
 
+    const goToInfoSlot = () => {
+        navigate(`/student/timeTable/infoSlot`)
+    }
     return (
         <div className="container mx-auto p-4">
             {isLoading && <div>Loading schedule...</div>}
@@ -155,11 +158,6 @@ const TimeTable = ({ onClassClick }) => {
                             ))}
                         </select>
                     </div>
-
-                    <div className="text-center font-bold mb-4">
-                        <span>Tuần thứ {currentWeekNumber} của năm {selectedYear}</span>
-                    </div>
-
                     <div className="grid grid-cols-8 gap-2 bg-gray-100 shadow-lg p-4 rounded-lg overflow-hidden">
                         <div className="col-span-1">
                             <div className="flex justify-between mb-4">
@@ -196,7 +194,7 @@ const TimeTable = ({ onClassClick }) => {
                                         >
                                             {classData ? (
                                                 <button
-                                                    onClick={() => goToClass(classData.classId._id, classData.scheduleId, classData._id, classData.subjectId._id, classData.subjectId.semester)}
+                                                    onClick={() => goToInfoSlot()}
                                                 >
                                                     <div className="text-xs text-gray-700 w-full h-full flex flex-col items-center justify-center">
                                                         <div className="font-bold text-blue-800">{classData.subjectId.nameSubject}</div>

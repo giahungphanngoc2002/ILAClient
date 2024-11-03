@@ -22,6 +22,9 @@ import ProtectedRoute from "../routes/ProtectedRoute"; // Đảm bảo bạn đ�
 import SelfLearning from "../pages/SelfLearning/SelfLearning";
 import Quiz from "../pages/Quiz/Quiz";
 import AttendanceStudent from "../pages/AttendanceStudent/AttendanceStudent";
+import Report from "../pages/Report/Report";
+import FormReport from "../pages/FormReport/FormReport";
+import InfoSlot from "../pages/InfoSlot/InfoSlot";
 
 export const routes = [
   {
@@ -186,6 +189,26 @@ export const routes = [
     isShowSideBar: true,
   },
   {
+    path: "/manage/report",
+    page: () => (
+      <ProtectedRoute>
+        <Report />
+      </ProtectedRoute>
+    ),
+    isShowHeader: false,
+    isShowSideBar: true,
+  },
+  {
+    path: "/manage/report/formReport",
+    page: () => (
+      <ProtectedRoute>
+        <FormReport />
+      </ProtectedRoute>
+    ),
+    isShowHeader: false,
+    isShowSideBar: true,
+  },
+  {
     path: "/manage/manageSchedule",
     page: () => (
       <ProtectedRoute>
@@ -204,6 +227,16 @@ export const routes = [
     ),
     isShowHeader: false,
     isShowSideBar: true,
+  },
+  {
+    path: "/student/timeTable/infoSlot",
+    page: () => (
+      <ProtectedRoute>
+        <InfoSlot />
+      </ProtectedRoute>
+    ),
+    isShowHeader: false,
+    isShowSideBar: false,
   },
   {
     path: "/student/selfLearning",
