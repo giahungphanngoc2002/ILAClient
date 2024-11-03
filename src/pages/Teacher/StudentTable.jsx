@@ -44,15 +44,15 @@ const StudentTable = () => {
       try {
         // Lấy dữ liệu về lịch học (schedules)
         const schedulesData = await ScheduleService.getDetailScheduleById(idSchedule);
-  
+        console.log(schedulesData)
         // Tìm slot dựa vào slotId
         const targetSlot = schedulesData?.data?.slots?.find(slot => slot._id === idSlot);
-  
+        console.log(targetSlot)
         if (targetSlot) {
           // Lấy danh sách absentStudentId từ slot tương ứng
           const absentStudents = targetSlot.absentStudentId;
           setStudentsAbsent(absentStudents);
-  
+
           // Lấy danh sách học sinh trong lớp (students)
           const studentsData = await ClassService.getStudentInClass(idClass);
           if (!studentsData || !studentsData.data) {
@@ -60,19 +60,20 @@ const StudentTable = () => {
           } else {
             // Duyệt qua danh sách students và cập nhật trạng thái dựa vào danh sách absentStudents
             const updatedStudents = studentsData.data.map(student => {
-              const absentInfo = absentStudents.find(absentStudent => absentStudent._id === student._id);
-  
+              console.log(absentStudents)
+              const absentInfo = absentStudents.find(absentStudent => absentStudent.studentId === student._id);
+              console.log(absentInfo)
               return {
                 ...student,
                 status: !absentInfo, // Đặt `status` là false nếu học sinh có mặt trong `absentStudents`
                 isExcused: absentInfo ? absentInfo.isExcused : false // Đặt `isExcused` dựa trên `absentInfo`
               };
             });
-  
+
             // Cập nhật danh sách sinh viên
             setStudents(updatedStudents);
             setIsInitialLoadComplete(true); // Đánh dấu đã tải xong dữ liệu
-  
+
             // Khởi tạo `absenceTypes` với giá trị ban đầu từ `absentStudents`
             const initialAbsenceTypes = {};
             absentStudents.forEach(absent => {
@@ -88,10 +89,10 @@ const StudentTable = () => {
         setError('Error fetching data. Please try again later.');
       }
     };
-  
+
     fetchData();
   }, [idClass, idSchedule, idSlot]);
-  
+
 
   // Chạy khi students hoặc studentsAbsent thay đổi
 
@@ -229,15 +230,15 @@ const StudentTable = () => {
         studentId: student._id, // Sử dụng studentId thay vì id
         isExcused: absenceTypes[student._id] === 'Excused' // Đặt isExcused dựa trên absenceTypes
       }));
-  
+
     console.log("Inactive Student IDs with Absence Type:", newAbsentStudents);
-  
+
     // Đảm bảo inactiveStudentIds là mảng
     if (!Array.isArray(newAbsentStudents)) {
       console.error("newAbsentStudents is not an array:", newAbsentStudents);
       return;
     }
-  
+
     // Gọi mutation để cập nhật danh sách học sinh vắng
     mutation.mutate(newAbsentStudents);
   };

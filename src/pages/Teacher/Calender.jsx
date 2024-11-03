@@ -150,11 +150,6 @@ const Calendar = ({ onClassClick }) => {
               ))}
             </select>
           </div>
-
-          <div className="text-center font-bold mb-4">
-            <span>Tuần thứ {currentWeekNumber} của năm {selectedYear}</span>
-          </div>
-
           <div className="grid grid-cols-8 gap-2 bg-gray-100 shadow-lg p-4 rounded-lg overflow-hidden">
             <div className="col-span-1">
               <div className="flex justify-between mb-4">
