@@ -14,12 +14,15 @@ export default function Sidebar({ children, expanded, setExpanded }) {
   console.log(user)
 
   return (
-    <aside className={`h-screen ${expanded ? "w-64" : "w-20"} transition-all duration-300 overflow-x-hidden`}>
+    <aside
+      className={`h-screen transition-all duration-300 overflow-x-hidden`}
+      style={{ width: expanded ? "16%" : "5%" }}
+    >
       <nav className="fixed h-full flex flex-col bg-white border-r shadow-sm">
         <div className="px-4 flex justify-between items-center">
           <button
             onClick={() => navigate('/')}
-            className={`flex items-center justify-center no-underline overflow-hidden transition-all ${expanded ? "w-32" : "w-0"}`}
+            className={`flex items-center justify-center no-underline overflow-hidden transition-all ${expanded ? "w-full" : "w-0"}`}
             style={{ background: "none", border: "none", padding: 0, cursor: "pointer" }}
           >
             <img src="/images/logoILA.png" alt="Logo" className="h-16 scale-150" />
@@ -34,9 +37,6 @@ export default function Sidebar({ children, expanded, setExpanded }) {
           </button>
         </div>
 
-        {/* Search Input */}
-        
-
         <SidebarContext.Provider value={{ expanded }}>
           <ul className="flex-1 px-3 overflow-y-auto">{children}</ul>
         </SidebarContext.Provider>
@@ -47,7 +47,7 @@ export default function Sidebar({ children, expanded, setExpanded }) {
             alt="User Avatar"
             className="w-10 h-10 rounded-md"
           />
-          <div className={`overflow-hidden transition-all ${expanded ? "w-52 ml-3" : "w-0"}`}>
+          <div className={`overflow-hidden transition-all ${expanded ? "w-full ml-3" : "w-0"}`}>
             <div className="leading-4">
               <h4 className="font-semibold truncate">{user.name}</h4>
               <span className="text-xs text-gray-600 truncate">{user.email}</span>
@@ -56,5 +56,6 @@ export default function Sidebar({ children, expanded, setExpanded }) {
         </div>
       </nav>
     </aside>
+
   );
 }

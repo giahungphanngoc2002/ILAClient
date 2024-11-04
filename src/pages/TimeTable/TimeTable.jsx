@@ -4,8 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import * as ScheduleService from "../../services/ScheduleService";
 import { useSelector } from 'react-redux';
 import moment from 'moment';
+import InfoSlot from '../InfoSlot/InfoSlot';
 
-const TimeTable = ({ onClassClick }) => {
+const TimeTable = ({  }) => {
     const [currentWeekOffset, setCurrentWeekOffset] = useState(0);
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
     const [scheduleData, setScheduleData] = useState([]);
@@ -14,7 +15,7 @@ const TimeTable = ({ onClassClick }) => {
     const user = useSelector((state) => state.user);
     const [studentId, setStudentId] = useState(user?.id);
     const navigate = useNavigate();
-
+    const [modalData, setModalData] = useState({ show: false, idSchedule: null, idSlot: null , slotTime: '' }); // Modal state
     useEffect(() => {
         setStudentId(user?.id);
     }, [user]);
@@ -131,11 +132,19 @@ const TimeTable = ({ onClassClick }) => {
         }
     };
 
-    
 
-    const goToInfoSlot = (idSchedule, idSlot) => {
-        navigate(`/student/timeTable/infoSlot/${idSchedule}/${idSlot}`);
+
+    // const goToInfoSlot = (idSchedule, idSlot) => {
+    //     // navigate(`/student/timeTable/infoSlot/${idSchedule}/${idSlot}`);
+    // };
+
+
+    const goToInfoSlot = (idSchedule, idSlot , slotTime) => {
+        setModalData({ show: true, idSchedule, idSlot , slotTime });
     };
+
+    const closeModal = () => setModalData({ ...modalData, show: false });
+
     return (
         <div className="container mx-auto p-4">
             {isLoading && <div>Loading schedule...</div>}
@@ -184,7 +193,6 @@ const TimeTable = ({ onClassClick }) => {
                                 </div>
                                 {slotTimes.map((slot, i) => {
                                     const classData = getScheduleForDay(day, i);
-                                    console.log("123123",classData)
                                     return (
                                         <div
                                             key={i}
@@ -192,7 +200,7 @@ const TimeTable = ({ onClassClick }) => {
                                         >
                                             {classData ? (
                                                 <button
-                                                    onClick={() => goToInfoSlot(classData.scheduleId,classData._id )}
+                                                    onClick={() => goToInfoSlot(classData.scheduleId, classData._id , slotTimes[i])}
                                                 >
                                                     <div className="text-xs text-gray-700 w-full h-full flex flex-col items-center justify-center">
                                                         <div className="font-bold text-blue-800">{classData.subjectId.nameSubject}</div>
@@ -213,6 +221,14 @@ const TimeTable = ({ onClassClick }) => {
                     </div>
                 </div>
             )}
+
+            <InfoSlot
+                show={modalData.show}
+                handleClose={closeModal}
+                idSchedule={modalData.idSchedule}
+                idSlot={modalData.idSlot}
+                slotTime={modalData.slotTime} // Truyền thời gian slot
+            />
         </div>
     );
 };

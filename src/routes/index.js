@@ -25,6 +25,9 @@ import AttendanceStudent from "../pages/AttendanceStudent/AttendanceStudent";
 import Report from "../pages/Report/Report";
 import FormReport from "../pages/FormReport/FormReport";
 import InfoSlot from "../pages/InfoSlot/InfoSlot";
+import NotificationToStudent from "../pages/NotificationToStudent/NotificationToStudent";
+import HistorySendNotification from "../pages/HistorySendNotification/HistorySendNotification";
+import ExamSchedule from "../pages/ExamSchedule/ExamSchedule";
 
 export const routes = [
   {
@@ -209,10 +212,40 @@ export const routes = [
     isShowSideBar: true,
   },
   {
+    path: "/manage/notificationToStudent",
+    page: () => (
+      <ProtectedRoute>
+        <NotificationToStudent />
+      </ProtectedRoute>
+    ),
+    isShowHeader: false,
+    isShowSideBar: false,
+  },
+  {
+    path: "/manage/historySendNotification",
+    page: () => (
+      <ProtectedRoute>
+        <HistorySendNotification />
+      </ProtectedRoute>
+    ),
+    isShowHeader: false,
+    isShowSideBar: true,
+  },
+  {
     path: "/manage/manageSchedule",
     page: () => (
       <ProtectedRoute>
         <ManageSchedule />
+      </ProtectedRoute>
+    ),
+    isShowHeader: false,
+    isShowSideBar: true,
+  },
+  {
+    path: "/manage/examSchedule",
+    page: () => (
+      <ProtectedRoute>
+        <ExamSchedule />
       </ProtectedRoute>
     ),
     isShowHeader: false,
