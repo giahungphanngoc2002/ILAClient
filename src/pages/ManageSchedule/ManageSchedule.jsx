@@ -85,7 +85,7 @@ const ManageSchedule = () => {
     console.log("Start Week:", startYearWeek.week);
     console.log("End Week:", endYearWeek.week);
 
-    console.log(classDetail?.subjects)
+    console.log(classDetail)
 
 
 
@@ -283,7 +283,7 @@ const ManageSchedule = () => {
                                                 value={schedule[selectedClass]?.[day]?.[slot.slot] || ""}
                                             >
                                                 <option value=""></option>
-                                                {classDetail?.subjects.map((subject, index) => (
+                                                {classDetail?.subjectGroup?.SubjectsId.map((subject, index) => (
                                                     <option key={index} value={subject._id}>
                                                         {subject.nameSubject} - {subject.teacherId.name}
                                                     </option>

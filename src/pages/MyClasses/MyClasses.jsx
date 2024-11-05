@@ -88,7 +88,7 @@ function MyClasses() {
             {/* Separate cards for each subject */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                 {classes.flatMap((classItem) =>
-                    classItem.subjects.map((subject, idx) => (
+                    classItem.subjectGroup.map((subject, idx) => (
                         <div
                             key={`${classItem._id}-${subject._id}-${idx}`}
                             className="bg-white p-6 rounded-lg shadow-md cursor-pointer hover:shadow-lg transition"
