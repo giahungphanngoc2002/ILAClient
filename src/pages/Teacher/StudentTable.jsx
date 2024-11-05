@@ -20,6 +20,20 @@ const StudentTable = () => {
   const { idClass, idSchedule, idSlot, idSubject, semester } = useParams();
   const [isInitialLoadComplete, setIsInitialLoadComplete] = useState(false);
   const [absenceTypes, setAbsenceTypes] = useState({});
+  const [selectedSemester, setSelectedSemester] = useState(1);
+  const [semesterScores, setSemesterScores] = useState({
+    1: { diemThuongXuyen: [], diemGiuaKi: [], diemCuoiKi: '' },
+    2: { diemThuongXuyen: [], diemGiuaKi: [], diemCuoiKi: '' }
+  });
+
+  useEffect(() => {
+    if (semesterScores[selectedSemester]) {
+      setStudentScores((prev) => ({
+        ...prev,
+        scores: semesterScores[selectedSemester],
+      }));
+    }
+  }, [selectedSemester, semesterScores]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -119,58 +133,90 @@ const StudentTable = () => {
       [id]: type
     }));
   };
+  const processScores = (scoresData, semester) => {
+    const allScoresData = scoresData || [];  // Nếu không có dữ liệu, sử dụng mảng rỗng
+    const scoreId = allScoresData.length > 0 ? allScoresData[0]._id : null;
 
-  console.log(" Students: ", students);
-  console.log(" absstuden: ", studentsAbsent);
+    // Phân loại điểm theo loại và học kỳ
+    const categorizedScores = {
+      diemThuongXuyen: allScoresData
+        .flatMap(data => data.scores)
+        .filter(score => score.type === 'thuongXuyen' && score.semester === semester)
+        .map(score => score.score),
+      diemGiuaKi: allScoresData
+        .flatMap(data => data.scores)
+        .filter(score => score.type === 'giuaKi' && score.semester === semester)
+        .map(score => score.score),
+      diemCuoiKi: allScoresData
+        .flatMap(data => data.scores)
+        .filter(score => score.type === 'cuoiKi' && score.semester === semester)
+        .map(score => score.score)[0] || '',  // Nếu không có điểm cuối kỳ, mặc định là chuỗi rỗng
+    };
+
+    return { categorizedScores, scoreId };
+  };
 
 
   const openModal = async (student) => {
     try {
-      const scoresData = await ScoreSbujectService.getAllScoresBySubject(idSubject, idClass, semester, student._id);
+      // Fetch scores for semester 1
+      const scoresDataSemester1 = await ScoreSbujectService.getAllScoresBySubject(idSubject, idClass, 1, student._id);
+      const semester1 = processScores(scoresDataSemester1, 1);
 
-      // Directly use the data response for the student's score details
-      const studentScoreDetails = scoresData; // Since your data has the correct structure
+      // Try to fetch scores for semester 2, but handle any potential errors for semester 2 independently
+      let semester2 = { categorizedScores: { diemThuongXuyen: [], diemGiuaKi: [], diemCuoiKi: '' }, scoreId: null };
+      try {
+        const scoresDataSemester2 = await ScoreSbujectService.getAllScoresBySubject(idSubject, idClass, 2, student._id);
+        semester2 = processScores(scoresDataSemester2, 2);
+      } catch (error) {
+        console.warn('Error fetching scores for semester 2:', error);
+      }
 
-      // Extract all scores from the scoreDetail response
-      const allScores = studentScoreDetails?.scores || [];
-      const scoreId = studentScoreDetails?._id || null; // Get scoreId from the correct scoreDetail
+      // Initialize semesterScores with the data that was successfully fetched
+      setSemesterScores({
+        1: semester1.categorizedScores,
+        2: semester2.categorizedScores,
+      });
 
-      const categorizedScores = {
-        oralScore: allScores.filter(score => score.type === 'mieng').map(score => score.score),
-        quizScore: allScores.filter(score => score.type === '15-minute').map(score => score.score),
-        testScore: allScores.filter(score => score.type === '1 tiet').map(score => score.score),
-        finalScore: allScores.find(score => score.type === 'final')?.score || '',
-      };
-
-      // Update the state with the student scores and scoreId
+      // Store scoreId per semester and set student scores
       setStudentScores({
         name: student.name,
         id: student._id,
-        scoreId: scoreId, // Attach the correct scoreId for the student
-        scores: categorizedScores,
+        scoreIds: { 1: semester1.scoreId, 2: semester2.scoreId },
+        scores: {
+          1: semester1.categorizedScores,
+          2: semester2.categorizedScores,
+        },
       });
 
-      // Display the modal after setting the scores
       setShowModal(true);
     } catch (error) {
       console.error('Error fetching scores:', error);
       setError(error.message || 'Error fetching scores. Please try again later.');
 
-      // Fallback in case of error
+      // Initialize with empty data if there's an error
+      setSemesterScores({
+        1: { diemThuongXuyen: [], diemGiuaKi: [], diemCuoiKi: '' },
+        2: { diemThuongXuyen: [], diemGiuaKi: [], diemCuoiKi: '' },
+      });
+
       setStudentScores({
         name: student.name,
         id: student._id,
-        scoreId: null, // No scoreId if an error occurs
+        scoreIds: { 1: null, 2: null },
         scores: {
-          oralScore: [],
-          quizScore: [],
-          testScore: [],
-          finalScore: '',
+          1: { diemThuongXuyen: [], diemGiuaKi: [], diemCuoiKi: '' },
+          2: { diemThuongXuyen: [], diemGiuaKi: [], diemCuoiKi: '' },
         },
       });
+
       setShowModal(true);
     }
   };
+
+
+
+
 
   const closeModal = () => {
     setShowModal(false);
@@ -178,28 +224,33 @@ const StudentTable = () => {
   };
 
   const handleScoreChange = (type, index, value) => {
-    setStudentScores(prevState => {
-      const updatedScores = { ...prevState.scores };
-      if (type === 'finalScore') {
-        updatedScores.finalScore = value;
+    setSemesterScores((prevSemesterScores) => {
+      const updatedScores = { ...prevSemesterScores[selectedSemester] };
+      if (type === 'diemCuoiKi') {
+        updatedScores.diemCuoiKi = value;
       } else {
         updatedScores[type][index] = value;
       }
-      return { ...prevState, scores: updatedScores };
+      return {
+        ...prevSemesterScores,
+        [selectedSemester]: updatedScores,
+      };
     });
   };
 
   const handleAddNewInput = (type) => {
-    setStudentScores(prevState => {
-      const updatedScores = { ...prevState.scores };
-      if (type === 'finalScore') {
-        return prevState;
-      } else {
+    setSemesterScores((prevSemesterScores) => {
+      const updatedScores = { ...prevSemesterScores[selectedSemester] };
+      if (type !== 'diemCuoiKi') {
         updatedScores[type].push('');
       }
-      return { ...prevState, scores: updatedScores };
+      return {
+        ...prevSemesterScores,
+        [selectedSemester]: updatedScores,
+      };
     });
   };
+
 
   const handleBackSchedule = () => {
     navigate('/manage/calender');
@@ -243,6 +294,8 @@ const StudentTable = () => {
     mutation.mutate(newAbsentStudents);
   };
 
+
+  console.log(studentScores)
 
   return (
     <div className="container mx-auto p-4">
@@ -332,81 +385,127 @@ const StudentTable = () => {
             <div className="bg-gray-100 flex justify-center">
               <div className="bg-white p-8 rounded-lg shadow-lg w-full">
                 <h2 className="text-2xl font-bold mb-4 text-center">Bảng Điểm Học Sinh</h2>
+                <div className="flex justify-center mb-4">
+                  <button
+                    className={`px-4 py-2 font-semibold ${selectedSemester === 1 ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                    onClick={() => setSelectedSemester(1)}
+                  >
+                    Kỳ 1
+                  </button>
+                  <button
+                    className={`px-4 py-2 font-semibold ${selectedSemester === 2 ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                    onClick={() => setSelectedSemester(2)}
+                  >
+                    Kỳ 2
+                  </button>
+                </div>
                 <table className="table-auto w-full border-collapse">
                   <thead>
                     <tr>
                       <th className="border px-4 py-2">Tên học sinh</th>
-                      <th className="border px-4 py-2 cursor-pointer" onClick={() => handleAddNewInput('oralScore')}>
-                        Điểm miệng
+                      <th className="border px-4 py-2 cursor-pointer" onClick={() => handleAddNewInput('diemThuongXuyen')}>
+                        Điểm thường xuyên
                       </th>
-                      <th className="border px-4 py-2 cursor-pointer" onClick={() => handleAddNewInput('quizScore')}>
-                        Điểm 15 phút
-                      </th>
-                      <th className="border px-4 py-2 cursor-pointer" onClick={() => handleAddNewInput('testScore')}>
-                        Điểm 1 tiết
+                      <th className="border px-4 py-2 cursor-pointer" onClick={() => handleAddNewInput('diemGiuaKi')}>
+                        Điểm giữa kì
                       </th>
                       <th className="border px-4 py-2">Điểm cuối kì</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr>
-                      <td className="border px-4 py-2">
-                        <input
-                          type="text"
-                          name="name"
-                          value={studentScores.name}
-                          readOnly
-                          className="w-full border rounded px-2 py-1 bg-gray-100"
-                        />
-                      </td>
-                      <td className="border px-4 py-2">
-                        <div className="grid grid-cols-2 gap-2">
-                          {studentScores.scores.oralScore?.map((score, index) => (
-                            <input
-                              key={index}
-                              type="number"
-                              value={score}
-                              onChange={(e) => handleScoreChange('oralScore', index, e.target.value)}
-                              className="w-full border rounded px-2 py-1"
-                            />
-                          ))}
-                        </div>
-                      </td>
-                      <td className="border px-4 py-2">
-                        <div className="grid grid-cols-2 gap-2">
-                          {studentScores.scores.quizScore?.map((score, index) => (
-                            <input
-                              key={index}
-                              type="number"
-                              value={score}
-                              onChange={(e) => handleScoreChange('quizScore', index, e.target.value)}
-                              className="w-full border rounded px-2 py-1"
-                            />
-                          ))}
-                        </div>
-                      </td>
-                      <td className="border px-4 py-2">
-                        <div className="grid grid-cols-2 gap-2">
-                          {studentScores.scores.testScore?.map((score, index) => (
-                            <input
-                              key={index}
-                              type="number"
-                              value={score}
-                              onChange={(e) => handleScoreChange('testScore', index, e.target.value)}
-                              className="w-full border rounded px-2 py-1"
-                            />
-                          ))}
-                        </div>
-                      </td>
-                      <td className="border px-4 py-2">
-                        <input
-                          type="number"
-                          value={studentScores.scores.finalScore || ''}
-                          onChange={(e) => handleScoreChange('finalScore', null, e.target.value)}
-                          className="w-full border rounded px-2 py-1"
-                        />
-                      </td>
-                    </tr>
+                    {selectedSemester === 1 ? (
+                      <tr>
+                        <td className="border px-4 py-2">
+                          <input
+                            type="text"
+                            name="name"
+                            value={studentScores.name}
+                            readOnly
+                            className="w-full border rounded px-2 py-1 bg-gray-100"
+                          />
+                        </td>
+                        <td className="border px-4 py-2">
+                          <div className="grid grid-cols-2 gap-2">
+                            {studentScores.scores.diemThuongXuyen?.map((score, index) => (
+                              <input
+                                key={index}
+                                type="number"
+                                value={score}
+                                onChange={(e) => handleScoreChange('diemThuongXuyen', index, e.target.value)}
+                                className="w-full border rounded px-2 py-1"
+                              />
+                            ))}
+                          </div>
+                        </td>
+                        <td className="border px-4 py-2">
+                          <div className="grid grid-cols-2 gap-2">
+                            {studentScores.scores.diemGiuaKi?.map((score, index) => (
+                              <input
+                                key={index}
+                                type="number"
+                                value={score}
+                                onChange={(e) => handleScoreChange('diemGiuaKi', index, e.target.value)}
+                                className="w-full border rounded px-2 py-1"
+                              />
+                            ))}
+                          </div>
+                        </td>
+                        <td className="border px-4 py-2">
+                          <input
+                            type="number"
+                            value={studentScores.scores.diemCuoiKi || ''}
+                            onChange={(e) => handleScoreChange('diemCuoiKi', null, e.target.value)}
+                            className="w-full border rounded px-2 py-1"
+                          />
+                        </td>
+                      </tr>
+                    ) : (
+                      <tr>
+                        <td className="border px-4 py-2">
+                          <input
+                            type="text"
+                            name="name"
+                            value={studentScores.name}
+                            readOnly
+                            className="w-full border rounded px-2 py-1 bg-gray-100"
+                          />
+                        </td>
+                        <td className="border px-4 py-2">
+                          <div className="grid grid-cols-2 gap-2">
+                            {studentScores.scores.diemThuongXuyen?.map((score, index) => (
+                              <input
+                                key={index}
+                                type="number"
+                                value={score}
+                                onChange={(e) => handleScoreChange('diemThuongXuyen', index, e.target.value)}
+                                className="w-full border rounded px-2 py-1"
+                              />
+                            ))}
+                          </div>
+                        </td>
+                        <td className="border px-4 py-2">
+                          <div className="grid grid-cols-2 gap-2">
+                            {studentScores.scores.diemGiuaKi?.map((score, index) => (
+                              <input
+                                key={index}
+                                type="number"
+                                value={score}
+                                onChange={(e) => handleScoreChange('diemGiuaKi', index, e.target.value)}
+                                className="w-full border rounded px-2 py-1"
+                              />
+                            ))}
+                          </div>
+                        </td>
+                        <td className="border px-4 py-2">
+                          <input
+                            type="number"
+                            value={studentScores.scores.diemCuoiKi || ''}
+                            onChange={(e) => handleScoreChange('diemCuoiKi', null, e.target.value)}
+                            className="w-full border rounded px-2 py-1"
+                          />
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -423,37 +522,42 @@ const StudentTable = () => {
               onClick={async () => {
                 const scoreData = {
                   scores: [
-                    ...studentScores.scores.oralScore.map(score => ({ type: 'mieng', score })),
-                    ...studentScores.scores.quizScore.map(score => ({ type: '15-minute', score })),
-                    ...studentScores.scores.testScore.map(score => ({ type: '1 tiet', score })),
-                    studentScores.scores.finalScore ? { type: 'final', score: studentScores.scores.finalScore } : null
-                  ].filter(scoreItem => scoreItem && scoreItem.score), // Lọc bỏ các điểm rỗng hoặc không có giá trị
+                    ...studentScores.scores.diemThuongXuyen.map(score => ({ type: 'thuongXuyen', score, semester: selectedSemester })),
+                    ...studentScores.scores.diemGiuaKi.map(score => ({ type: 'giuaKi', score, semester: selectedSemester })),
+                    studentScores.scores.diemCuoiKi ? { type: 'cuoiKi', score: studentScores.scores.diemCuoiKi, semester: selectedSemester } : null,
+                  ].filter(scoreItem => scoreItem && scoreItem.score !== ''), // Ensure scores are valid
                   studentId: studentScores.id,
                   subjectId: idSubject,
-                  classId: idClass
+                  classId: idClass,
                 };
-                console.log("studentScores", studentScores.scoreId)
+                console.log(scoreData)
+                const currentScoreId = studentScores.scoreIds[selectedSemester];
 
                 try {
-                  // Kiểm tra nếu đã có scoreId thì dùng updateScore, nếu chưa thì dùng createScore
                   let response;
-                  if (studentScores.scoreId) {
-                    // Nếu scoreId tồn tại, gọi updateScore
-                    response = await ScoreSbujectService.updateScore(studentScores.scoreId, scoreData);
+                  if (currentScoreId) {
+                    response = await ScoreSbujectService.updateScore(currentScoreId, scoreData);
                     toast.success("Đã cập nhật điểm thành công!");
-                    console.log('Score updated:', response);
                   } else {
-                    // Nếu chưa có scoreId, gọi createScore
                     response = await ScoreSbujectService.createScore(scoreData);
                     toast.success("Đã khởi tạo điểm thành công!");
-                    console.log('Score created:', response);
                   }
 
-                  // Cập nhật danh sách sinh viên với dữ liệu điểm mới
-                  const updatedStudents = students.map((user) =>
-                    user._id === studentScores.id ? { ...user, score: response } : user
-                  );
-                  setStudents(updatedStudents);
+                  // Update scoreId for the semester
+                  setStudentScores((prev) => ({
+                    ...prev,
+                    scoreIds: {
+                      ...prev.scoreIds,
+                      [selectedSemester]: response._id, // Assuming response contains the new scoreId
+                    },
+                  }));
+
+                  // Update semesterScores with saved data
+                  setSemesterScores((prevSemesterScores) => ({
+                    ...prevSemesterScores,
+                    [selectedSemester]: studentScores.scores,
+                  }));
+
                   closeModal();
                 } catch (error) {
                   console.error("Error handling score:", error);
@@ -462,6 +566,7 @@ const StudentTable = () => {
             >
               Lưu
             </Button>
+
           </Modal.Footer>
         </Modal>
       )}
