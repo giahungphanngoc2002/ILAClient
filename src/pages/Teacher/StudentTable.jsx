@@ -9,6 +9,9 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { GrView } from "react-icons/gr";
 import { toast } from "react-toastify";
+import AbsenceRequestList from '../../components/AbsentRequestList/AbsentRequestList';
+import AttendanceSummary from '../../components/AttendanceSummary/AttendanceSummary';
+import SearchInput from '../../components/InputSearchComponent/InputSearchComponent';
 
 const StudentTable = () => {
   const [students, setStudents] = useState([]);
@@ -25,6 +28,7 @@ const StudentTable = () => {
     1: { diemThuongXuyen: [], diemGiuaKi: [], diemCuoiKi: '' },
     2: { diemThuongXuyen: [], diemGiuaKi: [], diemCuoiKi: '' }
   });
+  const [filteredStudents, setFilteredStudents] = useState(students);
 
   useEffect(() => {
     if (semesterScores[selectedSemester]) {
@@ -107,6 +111,9 @@ const StudentTable = () => {
     fetchData();
   }, [idClass, idSchedule, idSlot]);
 
+  useEffect(() => {
+    setFilteredStudents(students); // Khởi tạo filteredStudents với toàn bộ danh sách students khi trang tải
+  }, [students]);
 
   // Chạy khi students hoặc studentsAbsent thay đổi
 
@@ -116,16 +123,27 @@ const StudentTable = () => {
       const updatedStudents = prevStudents.map(student =>
         student._id === id ? { ...student, status: !student.status } : student
       );
-      console.log("Updated Students: ", updatedStudents);
       return updatedStudents;
     });
 
+    setAbsenceTypes(prevTypes => {
+      const updatedTypes = { ...prevTypes };
 
-    setAbsenceTypes(prevTypes => ({
-      ...prevTypes,
-      [id]: prevTypes[id] || 'Unexcused'
-    }));
+      // Check the current status of the student
+      const student = students.find(student => student._id === id);
+
+      if (student && student.status === true) {
+        // If the student is being toggled to absent (status: false), set to "Unexcused" if undefined
+        updatedTypes[id] = updatedTypes[id] || 'Unexcused';
+      } else {
+        // If the student is being toggled to present (status: true), remove the absence record
+        delete updatedTypes[id];
+      }
+
+      return updatedTypes;
+    });
   };
+
 
   const handleAbsenceTypeChange = (id, type) => {
     setAbsenceTypes(prevTypes => ({
@@ -214,10 +232,6 @@ const StudentTable = () => {
     }
   };
 
-
-
-
-
   const closeModal = () => {
     setShowModal(false);
     setStudentScores(null);
@@ -295,90 +309,128 @@ const StudentTable = () => {
   };
 
 
-  console.log(studentScores)
+
+  const handleSearch = (query) => {
+    const lowercasedQuery = query.toLowerCase();
+    setFilteredStudents(
+      students.filter((student) =>
+        student.name.toLowerCase().includes(lowercasedQuery)
+      )
+    );
+  };
+
+  const totalStudents = students.length;
+  const presentCount = students.filter(student => student.status).length;
+  const excusedCount = students.filter(student => absenceTypes[student._id] === 'Excused').length;
+  const unexcusedCount = students.filter(student => absenceTypes[student._id] === 'Unexcused').length;
+
+  // Create the data object for attendance summary
+  const attendanceSummary = {
+    total: totalStudents,
+    present: presentCount,
+    excused: excusedCount,
+    unexcused: unexcusedCount,
+  };
 
   return (
-    <div className="container mx-auto p-4">
-      <div className="overflow-x-auto">
-        <div className="bg-white shadow-md rounded-lg p-6">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold text-blue-500">Student Management</h2>
-          </div>
-          <table className="min-w-full bg-white table-auto">
-            <thead>
-              <tr>
-                <th style={{ width: "5%" }} className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
-                <th style={{ width: "25%" }} className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tên</th>
-                <th style={{ width: "20%" }} className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ngày sinh</th>
-                <th style={{ width: "20%" }} className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Điểm danh</th>
-                <th style={{ width: "15%" }} className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng thái</th>
-                <th style={{ width: "15%" }} className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Xem</th>
-              </tr>
-            </thead>
-
-            <tbody className="bg-white divide-y divide-gray-200">
-              {students.map((student, index) => (
-                <tr key={index} className={index % 2 === 0 ? 'bg-gray-50' : ''}>
-                  <td className="px-6 py-4 whitespace-nowrap font-semibold text-gray-800">{index + 1}</td>
-                  <td className="px-6 py-4 whitespace-nowrap flex items-center font-semibold text-gray-800">
-                    <img src={student.avatar} alt={student.name} className="w-10 h-10 rounded-full mr-4" />
-                    {student.name}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-gray-600">{student.date}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <Toggle
-                      isOn={student.status} // Dùng status để kiểm soát trạng thái của Toggle
-                      handleToggle={() => toggleStatus(student._id)}
-                      userId={student._id}
-                      onColor="bg-green-500"
-                      offColor="bg-red-500"
-                      tooltipText={student.status ? (student.isAbsent ? 'Vắng mặt' : 'Đã điểm danh') : 'Chưa điểm danh'}
-                    />
+    <div className="flex flex-col w-full h-screen px-4">
+      <div className="bg-white pt-2 pr-4 flex justify-end">
+        <button
+          onClick={saveStudents}
+          className="bg-blue-500 text-white font-bold text-sm px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-300 transform hover:scale-105"
+        >
+          Hoàn thành điểm danh
+        </button>
+      </div>
+      <div className="flex h-full overflow-hidden">
 
 
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {!student.status && (
-                      <select
-                        value={absenceTypes[student._id] || ""}
-                        onChange={(e) => handleAbsenceTypeChange(student._id, e.target.value)}
-                        className="border border-gray-300 rounded px-2 py-1 bg-white"
-                      >
-                        <option value="Excused">Có phép</option>
-                        <option value="Unexcused">Không phép</option>
-                      </select>
-                    )}
-                  </td>
-
-
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <GrView
-                      className="cursor-pointer"
-                      onClick={() => openModal(student)}
-                      title="Xem chi tiết"
-                    />
-                  </td>
+        <div className="w-3/4 overflow-x-auto h-full">
+          <div className="bg-white h-full">
+            <div className="mb-4 w-full" style={{ width: "100%" }}>
+              <AttendanceSummary data={attendanceSummary} className="w-full" style={{ width: "100%" }} />
+            </div>
+            <div className="mx-4">
+              <SearchInput onSearch={handleSearch} />
+            </div>
+            <table className="min-w-full bg-white table-auto">
+              <thead>
+                <tr>
+                  <th style={{ width: "5%" }} className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"></th>
+                  <th style={{ width: "25%" }} className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tên</th>
+                  <th style={{ width: "20%" }} className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ngày sinh</th>
+                  <th style={{ width: "20%" }} className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Điểm danh</th>
+                  <th style={{ width: "15%" }} className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng thái</th>
+                  <th style={{ width: "15%" }} className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Xem</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-          <div className="mt-4 flex justify-between">
-            <button
-              className="flex items-center px-4 py-2 bg-gray-200 text-gray-800 rounded-lg shadow hover:bg-gray-300 transition duration-300"
-              onClick={handleBackSchedule}
-            >
-              <FaArrowLeft className="mr-2" /> Trở về
-            </button>
-            <button
-              onClick={saveStudents}
-              className="bg-green-600 text-white font-bold text-lg px-6 py-3 rounded-lg hover:bg-green-700 transition duration-300 transform hover:scale-105"
-            >
-              Lưu thay đổi
-            </button>
+              </thead>
+
+              <tbody className="bg-white divide-y divide-gray-200">
+                {filteredStudents.map((student, index) => (
+                  <tr key={index}>
+                    <td className="px-6 py-4 whitespace-nowrap font-semibold text-gray-800">{index + 1}</td>
+                    <td className="px-6 py-4 whitespace-nowrap font-semibold text-gray-800">
+                      {/* <img src={student.avatar} alt={student.name} className="w-10 h-10 rounded-full mr-4" /> */}
+                      {student.name}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-gray-600">{student.date}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <Toggle
+                        isOn={student.status} // Dùng status để kiểm soát trạng thái của Toggle
+                        handleToggle={() => toggleStatus(student._id)}
+                        userId={student._id}
+                        onColor="bg-green-500"
+                        offColor="bg-red-500"
+                        tooltipText={student.status ? (student.isAbsent ? 'Vắng mặt' : 'Đã điểm danh') : 'Chưa điểm danh'}
+                      />
+
+
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {!student.status && (
+                        <select
+                          value={absenceTypes[student._id] || ""}
+                          onChange={(e) => handleAbsenceTypeChange(student._id, e.target.value)}
+                          className="border border-gray-300 rounded px-2 py-1 bg-white"
+                        >
+                          <option value="Excused">Có phép</option>
+                          <option value="Unexcused">Không phép</option>
+                        </select>
+                      )}
+                    </td>
+
+
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <GrView
+                        className="cursor-pointer"
+                        onClick={() => openModal(student)}
+                        title="Xem chi tiết"
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {/* <div className="mt-4 flex justify-between">
+              <button
+                className="flex items-center px-4 py-2 bg-gray-200 text-gray-800 rounded-lg shadow hover:bg-gray-300 transition duration-300"
+                onClick={handleBackSchedule}
+              >
+                <FaArrowLeft className="mr-2" /> Trở về
+              </button>
+              <button
+                onClick={saveStudents}
+                className="bg-blue-500 text-white font-bold text-lg px-6 py-3 rounded-lg hover:bg-green-700 transition duration-300 transform hover:scale-105"
+              >
+                Lưu thay đổi
+              </button>
+            </div> */}
           </div>
         </div>
+        <div className="w-1/4 h-full flex flex-col overflow-auto">
+          <AbsenceRequestList />
+        </div>
       </div>
-
       {showModal && studentScores && (
         <Modal show={showModal} onHide={closeModal} size="xl">
           <Modal.Body>
@@ -402,14 +454,14 @@ const StudentTable = () => {
                 <table className="table-auto w-full border-collapse">
                   <thead>
                     <tr>
-                      <th className="border px-4 py-2">Tên học sinh</th>
-                      <th className="border px-4 py-2 cursor-pointer" onClick={() => handleAddNewInput('diemThuongXuyen')}>
+                      <th className="border px-4 py-2" style={{ width: '25%' }}>Tên học sinh</th>
+                      <th className="border px-4 py-2 cursor-pointer" style={{ width: '30%' }} onClick={() => handleAddNewInput('diemThuongXuyen')}>
                         Điểm thường xuyên
                       </th>
-                      <th className="border px-4 py-2 cursor-pointer" onClick={() => handleAddNewInput('diemGiuaKi')}>
+                      <th className="border px-4 py-2 cursor-pointer" style={{ width: '30%' }} onClick={() => handleAddNewInput('diemGiuaKi')}>
                         Điểm giữa kì
                       </th>
-                      <th className="border px-4 py-2">Điểm cuối kì</th>
+                      <th className="border px-4 py-2" style={{ width: '15%' }}>Điểm cuối kì</th>
                     </tr>
                   </thead>
                   <tbody>

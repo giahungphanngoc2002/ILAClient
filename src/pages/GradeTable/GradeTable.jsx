@@ -9,29 +9,29 @@ const GradeTable = () => {
     const { idClass, idSubject, semester } = useParams();
     const [searchTerm, setSearchTerm] = useState("");
     const [filterScore, setFilterScore] = useState("");
+    const [semesterFilter, setSemesterFilter] = useState(1); // Thêm state cho bộ lọc kỳ
 
     useEffect(() => {
         const fetchScores = async () => {
             try {
-                const scoresData = await ScoreSubjectService.getAllScoresBySubjectSemester(idSubject, idClass, semester);
+                const scoresData = await ScoreSubjectService.getAllScoresBySubjectSemester(idSubject, idClass, semesterFilter);
+                console.log(scoresData);
 
-                // Cấu trúc lại dữ liệu cho phù hợp với bảng
-                const formattedStudents = scoresData.scoreDetailId.map((detail) => {
-                    const scores = { oral: [], test15: [], test45: [], final: [] };
-                    
-                    detail.scores.forEach((score) => {
+                const formattedStudents = scoresData.map((detail) => {
+                    // Filter scores by the selected semester
+                    const filteredScores = detail.scores.filter(score => score.semester === parseInt(semesterFilter));
+                    console.log(filteredScores)
+                    const scores = { diemThuongXuyen: [], diemGiuaKi: [], diemCuoiKi: [] };
+                    filteredScores.forEach((score) => {
                         switch (score.type) {
-                            case "mieng":
-                                scores.oral.push(score.score);
+                            case "thuongXuyen":
+                                scores.diemThuongXuyen.push(score.score);
                                 break;
-                            case "15-minute":
-                                scores.test15.push(score.score);
+                            case "giuaKi":
+                                scores.diemGiuaKi.push(score.score);
                                 break;
-                            case "1 tiet":
-                                scores.test45.push(score.score);
-                                break;
-                            case "final":
-                                scores.final.push(score.score);
+                            case "cuoiKi":
+                                scores.diemCuoiKi.push(score.score);
                                 break;
                             default:
                                 break;
@@ -54,8 +54,8 @@ const GradeTable = () => {
         };
 
         fetchScores();
-    }, [idClass, idSubject, semester]);
-    console.log("formattedStudents",students)
+    }, [idClass, idSubject, semesterFilter]);
+
 
     const calculateAverage = (grades) =>
         grades.length > 0
@@ -66,15 +66,13 @@ const GradeTable = () => {
         const worksheet = XLSX.utils.json_to_sheet(
             filteredStudents.map((student) => ({
                 "Họ Tên": student.name,
-                "Điểm Miệng": student.oral.join(", "),
-                "Điểm 15 Phút": student.test15.join(", "),
-                "Điểm 1 Tiết": student.test45.join(", "),
-                "Điểm Học Kỳ": student.final.join(", "),
+                "Điểm Thường Xuyên": student.diemThuongXuyen.join(", "),
+                "Điểm Giữa Kỳ": student.diemGiuaKi.join(", "),
+                "Điểm Cuối Kỳ": student.diemCuoiKi.join(", "),
                 "Trung Bình": (
-                    (calculateAverage(student.oral) * 1 +
-                        calculateAverage(student.test15) * 2 +
-                        calculateAverage(student.test45) * 3 +
-                        calculateAverage(student.final) * 4) / 10
+                    (calculateAverage(student.diemThuongXuyen) * 1 +
+                        calculateAverage(student.diemGiuaKi) * 2 +
+                        calculateAverage(student.diemCuoiKi) * 3) / 6
                 ).toFixed(1),
             }))
         );
@@ -85,10 +83,9 @@ const GradeTable = () => {
 
     const filteredStudents = students.filter((student) => {
         const averageScore = (
-            (calculateAverage(student.oral) * 1 +
-                calculateAverage(student.test15) * 2 +
-                calculateAverage(student.test45) * 3 +
-                calculateAverage(student.final) * 4) / 10
+            (calculateAverage(student.diemThuongXuyen) * 1 +
+                calculateAverage(student.diemGiuaKi) * 2 +
+                calculateAverage(student.diemCuoiKi) * 3) / 6
         ).toFixed(1);
 
         const matchName = student?.name?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -99,15 +96,15 @@ const GradeTable = () => {
 
         return matchName && matchScore;
     });
+
     const nameClass = students.length > 0 ? students[0].nameClass : "";
     const nameSubject = students.length > 0 ? students[0].nameSubject : "";
-
 
     return (
         <div className="container mx-auto p-6 min-h-screen">
             <h1 className="text-2xl font-bold mb-6 text-center">Bảng Điểm Môn {nameSubject} Lớp {nameClass}</h1>
 
-            {/* Tìm kiếm và lọc */}
+            {/* Tìm kiếm, lọc và chọn kỳ */}
             <div className="flex justify-between items-center mb-4">
                 <div className="flex items-center">
                     <FaSearch className="text-gray-500 mr-2" />
@@ -118,17 +115,29 @@ const GradeTable = () => {
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none"
                     />
-                </div>
 
-                <select
-                    value={filterScore}
-                    onChange={(e) => setFilterScore(e.target.value)}
-                    className="px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none"
-                >
-                    <option value="">Lọc theo loại điểm</option>
-                    <option value="high">Điểm cao ({"\u2265"}8)</option>
-                    <option value="low">Điểm thấp (&lt;8)</option>
-                </select>
+
+                    {/* Bộ lọc kỳ */}
+                    <select
+                        value={semesterFilter}
+                        onChange={(e) => setSemesterFilter(e.target.value)}
+                        className="px-4 py-2 mx-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none"
+                    >
+                        <option value="1">Kỳ 1</option>
+                        <option value="2">Kỳ 2</option>
+                        {/* Thêm các lựa chọn kỳ khác nếu cần */}
+                    </select>
+
+                    <select
+                        value={filterScore}
+                        onChange={(e) => setFilterScore(e.target.value)}
+                        className="px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none"
+                    >
+                        <option value="">Lọc theo loại điểm</option>
+                        <option value="high">Điểm cao ({"\u2265"}8)</option>
+                        <option value="low">Điểm thấp (&lt;8)</option>
+                    </select>
+                </div>
 
                 <div className="flex items-center space-x-2">
                     <button
@@ -147,32 +156,34 @@ const GradeTable = () => {
             </div>
 
             {/* Bảng điểm */}
-            <div className="overflow-x-auto shadow-md rounded-lg">
+            <div className="overflow-x-auto shadow-lg rounded-lg bg-white">
                 <table className="table-auto w-full border-collapse">
                     <thead>
-                        <tr className="bg-gray-200 text-left text-gray-600 uppercase tracking-wider">
-                            <th className="border px-4 py-2">Họ Tên</th>
-                            <th className="border px-4 py-2">Điểm Miệng</th>
-                            <th className="border px-4 py-2">Điểm 15 Phút</th>
-                            <th className="border px-4 py-2">Điểm 1 Tiết</th>
-                            <th className="border px-4 py-2">Điểm Học Kỳ</th>
-                            <th className="border px-4 py-2">Trung Bình</th>
+                        <tr className="bg-blue-500 text-left text-white uppercase tracking-wider">
+                            <th className="border px-4 py-3">Họ Tên</th>
+                            <th className="border px-4 py-3">Điểm Thường Xuyên</th>
+                            <th className="border px-4 py-3">Điểm Giữa Kỳ</th>
+                            <th className="border px-4 py-3">Điểm Cuối Kỳ</th>
+                            <th className="border px-4 py-3">Trung Bình</th>
                         </tr>
                     </thead>
                     <tbody>
                         {filteredStudents.map((student, index) => (
-                            <tr key={index} className="bg-white hover:bg-gray-50 border-t border-gray-300">
-                                <td className="border px-4 py-2">{student.name}</td>
-                                <td className="border px-4 py-2">{student.oral.join(", ")}</td>
-                                <td className="border px-4 py-2">{student.test15.join(", ")}</td>
-                                <td className="border px-4 py-2">{student.test45.join(", ")}</td>
-                                <td className="border px-4 py-2">{student.final.join(", ")}</td>
-                                <td className="border px-4 py-2">
+                            <tr
+                                key={index}
+                                className={`${index % 2 === 0 ? "bg-blue-100" : "bg-blue-50"
+                                    } hover:bg-blue-200 transition duration-200`}
+                            >
+                                <td className="border px-4 py-3">{student.name}</td>
+                                <td className="border px-4 py-3">{student.diemThuongXuyen.join(", ")}</td>
+                                <td className="border px-4 py-3">{student.diemGiuaKi.join(", ")}</td>
+                                <td className="border px-4 py-3">{student.diemCuoiKi.join(", ")}</td>
+                                <td className="border px-4 py-3 font-semibold text-blue-700">
                                     {(
-                                        (calculateAverage(student.oral) * 1 +
-                                            calculateAverage(student.test15) * 2 +
-                                            calculateAverage(student.test45) * 3 +
-                                            calculateAverage(student.final) * 4) / 10
+                                        (calculateAverage(student.diemThuongXuyen) * 1 +
+                                            calculateAverage(student.diemGiuaKi) * 2 +
+                                            calculateAverage(student.diemCuoiKi) * 3) /
+                                        6
                                     ).toFixed(1)}
                                 </td>
                             </tr>
