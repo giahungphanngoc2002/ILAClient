@@ -1,20 +1,42 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import NotificationItem from './NotificationItem';
-
-const initialNotifications = [
-    { id: 1, type: 'School Announcement', label: 'New School Policy Updates', description: 'Check out the latest updates from the administration.', status: 'announcement', date: '24 Nov 2018 at 9:30 AM', isNew: true },
-    { id: 2, type: 'New Message', label: 'Message from your Teacher', description: 'Your teacher has sent a new assignment update.', status: 'message', date: '24 Nov 2018 at 10:00 AM', isNew: true },
-    { id: 3, type: 'School Announcement', label: 'Upcoming Parent-Teacher Meeting', description: 'Don\'t forget the parent-teacher meeting on Friday.', status: 'announcement', date: '24 Nov 2018 at 11:00 AM', isNew: true },
-    { id: 4, type: 'New Message', label: 'Message from Classmate', description: 'Darren sent a message regarding the group project.', status: 'message', date: '24 Nov 2018 at 12:00 PM', isNew: false }
-];
+import { useSelector } from 'react-redux';
+import * as NotificationService from "../../services/NotificationService";
 
 const Notifications = () => {
-    const [notifications, setNotifications] = useState(initialNotifications);
+    const [notifications, setNotifications] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const user = useSelector((state) => state.user);
+    const [receiverId, setReceiverId] = useState(user?.id);
 
-    const markAsRead = (id) => {
+    useEffect(() => {
+        setReceiverId(user?.id);
+    }, [user]);
+
+    useEffect(() => {
+        const fetchNotifications = async () => {
+            if (!receiverId) return; // Chỉ tiếp tục nếu có receiverId
+    
+            try {
+                const response = await NotificationService.getNotificationsForReceiver(receiverId);
+                setNotifications(response.data); // Lấy mảng thông báo từ `response.data`
+            } catch (err) {
+                setError("Failed to load notifications");
+            } finally {
+                setLoading(false);
+            }
+        };
+    
+        fetchNotifications();
+    }, [receiverId]);
+
+    console.log(notifications);
+
+    const markAsRead = (_id) => {
         setNotifications((prevNotifications) =>
             prevNotifications.map((notification) =>
-                notification.id === id ? { ...notification, isNew: false } : notification
+                notification._id === _id ? { ...notification, isNew: false } : notification
             )
         );
     };
@@ -24,11 +46,18 @@ const Notifications = () => {
         return notifications.filter(notification => notification.isNew).length;
     };
 
+    if (loading) {
+        return <div>Loading...</div>;
+    }
+
+    if (error) {
+        return <div>{error}</div>;
+    }
+
     return (
         <div className="mx-auto bg-white rounded-lg shadow-md mt-8" style={{ width: '70%' }}>
-            
             {notifications.map((notification) => (
-                <NotificationItem key={notification.id} {...notification} markAsRead={markAsRead} />
+                <NotificationItem key={notification._id} {...notification} markAsRead={markAsRead} />
             ))}
         </div>
     );
