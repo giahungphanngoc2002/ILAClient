@@ -133,7 +133,7 @@ export default function SignInPage() {
           <form onSubmit={handleSignin} className="space-y-4">
             <input
               className="w-full px-4 py-2 border rounded bg-gray-100 focus:outline-none"
-              type="email"
+              type="text"
               name="email"
               value={email}
               onChange={handleOnChangeEmail}

@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
@@ -99,12 +97,11 @@ export default function SignUp() {
           <form onSubmit={handleSignup} className="space-y-4">
             <input
               className="w-full px-4 py-2 border rounded bg-gray-100 focus:outline-none"
-              type="email"
+              type="text"
               name="email"
               value={email}
               onChange={handleOnChangeEmail}
               placeholder="Địa chỉ Email"
-              required
             />
             <div className="relative">
               <input

@@ -28,6 +28,7 @@ import InfoSlot from "../pages/InfoSlot/InfoSlot";
 import NotificationToStudent from "../pages/NotificationToStudent/NotificationToStudent";
 import HistorySendNotification from "../pages/HistorySendNotification/HistorySendNotification";
 import ExamSchedule from "../pages/ExamSchedule/ExamSchedule";
+import Message from "../pages/Message/Message";
 
 export const routes = [
   {
@@ -131,6 +132,7 @@ export const routes = [
     isShowHeader: false,
     isShowSideBar: true,
   },
+ 
   {
     path: "manage/questionManage/",
     page: () => (
@@ -156,6 +158,16 @@ export const routes = [
     page: () => (
       <ProtectedRoute>
         <MyClasses />
+      </ProtectedRoute>
+    ),
+    isShowHeader: false,
+    isShowSideBar: true,
+  },
+   {
+    path: "/manage/message",
+    page: () => (
+      <ProtectedRoute>
+        <Message />
       </ProtectedRoute>
     ),
     isShowHeader: false,
@@ -270,6 +282,16 @@ export const routes = [
     ),
     isShowHeader: false,
     isShowSideBar: false,
+  },
+     {
+    path: "/student/message",
+    page: () => (
+      <ProtectedRoute>
+        <Message />
+      </ProtectedRoute>
+    ),
+    isShowHeader: false,
+    isShowSideBar: true,
   },
   {
     path: "/student/selfLearning",
