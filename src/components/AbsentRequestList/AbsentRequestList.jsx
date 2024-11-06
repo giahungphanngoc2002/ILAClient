@@ -45,11 +45,20 @@ const absenceRequests = [
 
 const AbsenceRequestList = () => {
     return (
-        <div className=" bg-white">
+        <div
+            className="bg-white overflow-hidden"
+            style={{
+                borderRadius: "20px",
+                borderLeft: "1px solid rgb(229, 231, 235)",
+                borderRight: "1px solid rgb(229, 231, 235)",
+                borderBottom: "1px solid rgb(229, 231, 235)",
+                boxShadow: "rgb(213, 213, 213) 0px 0px 3px 0px"
+            }}
+        >
             <div className="sticky top-0 bg-white z-10 p-6">
                 <h2 className="text-xl font-bold text-blue-500 m-0">Danh sách đơn nghỉ học</h2>
             </div>
-            <div className=" overflow-y-auto">
+            <div className="overflow-y-auto h-full" >
                 {absenceRequests.map((request) => (
                     <div key={request.id} className="p-4 mb-2 bg-white">
                         <div className="grid grid-cols-12 mb-2">
@@ -74,10 +83,7 @@ const AbsenceRequestList = () => {
             </div>
         </div>
     );
-
-
-
-
 };
+
 
 export default AbsenceRequestList;

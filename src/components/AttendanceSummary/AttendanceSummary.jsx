@@ -1,10 +1,11 @@
 import React from "react";
 
-const AttendanceSummary = ({data}) => {
+const AttendanceSummary = ({ data }) => {
 
 
     return (
-        <div className="bg-gray-50 py-4 flex justify-around text-center">
+        <div
+            className="bg-gray-50 py-4 flex justify-around text-center">
             <div className="w-1/4 border-r-[1px] border-solid border-gray-200">
                 <p className="text-xl font-bold text-black">{data.total}</p>
                 <p className="text-gray-600 m-0">Tổng số</p>

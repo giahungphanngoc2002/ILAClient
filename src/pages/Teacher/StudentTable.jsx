@@ -333,7 +333,7 @@ const StudentTable = () => {
   };
 
   return (
-    <div className="flex flex-col w-full h-screen px-4">
+    <div className="flex flex-col w-full h-screen bg-white w-[95%] mx-auto pb-4">
       <div className="bg-white pt-2 pr-4 flex justify-end">
         <button
           onClick={saveStudents}
@@ -343,9 +343,15 @@ const StudentTable = () => {
         </button>
       </div>
       <div className="flex h-full overflow-hidden">
-
-
-        <div className="w-3/4 overflow-x-auto h-full">
+        <div
+          style={{
+            borderRadius: "20px",
+            borderLeft: "1px solid rgb(229, 231, 235)",
+            borderRight: "1px solid rgb(229, 231, 235)",
+            borderBottom: "1px solid rgb(229, 231, 235)",
+            boxShadow: "rgb(213, 213, 213) 0px 0px 3px 0px"
+          }}
+          className="w-3/4 overflow-x-auto h-full mr-6 ml-4">
           <div className="bg-white h-full">
             <div className="mb-4 w-full" style={{ width: "100%" }}>
               <AttendanceSummary data={attendanceSummary} className="w-full" style={{ width: "100%" }} />
@@ -353,15 +359,15 @@ const StudentTable = () => {
             <div className="mx-4">
               <SearchInput onSearch={handleSearch} />
             </div>
-            <table className="min-w-full bg-white table-auto">
+            <table className="min-w-full bg-blue-500 table-auto">
               <thead>
                 <tr>
-                  <th style={{ width: "5%" }} className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"></th>
-                  <th style={{ width: "25%" }} className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tên</th>
-                  <th style={{ width: "20%" }} className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ngày sinh</th>
-                  <th style={{ width: "20%" }} className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Điểm danh</th>
-                  <th style={{ width: "15%" }} className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng thái</th>
-                  <th style={{ width: "15%" }} className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Xem</th>
+                  <th style={{ width: "5%" }} className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-white uppercase tracking-wider"></th>
+                  <th style={{ width: "25%" }} className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-white uppercase tracking-wider">Tên</th>
+                  <th style={{ width: "20%" }} className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-white uppercase tracking-wider">Ngày sinh</th>
+                  <th style={{ width: "20%" }} className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-white uppercase tracking-wider">Điểm danh</th>
+                  <th style={{ width: "15%" }} className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-white uppercase tracking-wider">Trạng thái</th>
+                  <th style={{ width: "15%" }} className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-white uppercase tracking-wider">Xem</th>
                 </tr>
               </thead>
 
@@ -427,7 +433,7 @@ const StudentTable = () => {
             </div> */}
           </div>
         </div>
-        <div className="w-1/4 h-full flex flex-col overflow-auto">
+        <div className="w-1/4 h-full flex flex-col overflow-auto mr-4">
           <AbsenceRequestList />
         </div>
       </div>
