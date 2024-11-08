@@ -3,7 +3,8 @@ import { FaArrowLeft, FaPlus } from 'react-icons/fa';
 import UpdateQuestionModal from '../Modal/UpdateQuestionModal';
 import * as SubjectService from "../../services/SubjectService";
 import { useNavigate, useParams } from 'react-router-dom';
-
+import { useMutation } from '@tanstack/react-query';
+import { toast } from "react-toastify";
 const QuestionManager = () => {
     const [selectedChapter, setSelectedChapter] = useState('All');
     const [selectedLesson, setSelectedLesson] = useState('All');
@@ -14,21 +15,81 @@ const QuestionManager = () => {
     const [questionsData, setQuestionsData] = useState([]);
     const { idClass, idSubject } = useParams();
     const [filteredQuestions, setFilteredQuestions] = useState([]);
+    const [toggleEditQuestion, setToggleEditQuestion] = useState(false);
+    const [toggleEditLevel, setToggleEditLevel] = useState(false);
+    const [toggleEditChapter, setToggleEditChapter] = useState(false);
+    const [toggleEditLession, setToggleEditLession] = useState(false);
+    const [toggleEditCA, setToggleEditCA] = useState(false);
+    const [textQuestion, setTextQuestion] = useState("");
+    const [textAnswer, setTextAnswer] = useState("");
+    const [editingAnswerIndex, setEditingAnswerIndex] = useState(null);
+    const [textCA, setTextCA] = useState("");
+    const [textLevel, setTextLevel] = useState("");
+    const [textChapter, setTextChapTer] = useState("");
+    const [textLession, setTextLession] = useState("");
+    const [isLoading, setIsLoading] = useState(false); 
 
+    
+
+    
+
+    
+    const fetchQuestions = async () => {
+        setIsLoading(true);
+        try {
+            const response = await SubjectService.getQuestions(idClass, idSubject);
+            const questions = response.questions || [];
+            setQuestionsData(questions);
+            setFilteredQuestions(questions);
+        } catch (error) {
+            console.error("Error fetching questions:", error);
+        }
+        setIsLoading(false);
+    };
+
+    // Gọi fetchQuestions khi component được mount lần đầu
     useEffect(() => {
-        const fetchQuestions = async () => {
-            try {
-                const response = await SubjectService.getQuestions(idClass, idSubject);
-                const questions = response.questions || []; // Lấy dữ liệu câu hỏi từ API
-                setQuestionsData(questions);
-                setFilteredQuestions(questions);
-            } catch (error) {
-                console.error("Error fetching questions:", error);
-            }
-        };
-
         fetchQuestions();
     }, [idClass, idSubject]);
+
+    const updateMutation = useMutation({
+        mutationFn: async ({ classId, subjectId, questionId, updatedQuestion }) => {
+            return SubjectService.updateQuestionById(classId, subjectId, questionId, updatedQuestion);
+        },
+        onMutate: () => setIsLoading(true), // Set loading state on mutation start
+        onSuccess: (data) => {
+            setIsLoading(false);
+            toast.success("Question updated successfully");
+            fetchQuestions(); // Tải lại danh sách câu hỏi sau khi cập nhật thành công
+            // Reset loading state on success
+            setShowUpdateModal(false);
+           
+        },
+        onError: (error) => {
+            toast.error("Error updating question.");
+            setIsLoading(false); // Reset loading state on error
+           
+        },
+    });
+
+    const deleteMutation = useMutation({
+        mutationFn: async ({ classId, subjectId, questionId }) => {
+            return SubjectService.deleteQuestionById(classId, subjectId, questionId); // Assuming deleteQuestionById exists in SubjectService
+        },
+        onMutate: () => setIsLoading(true), // Set loading state on mutation start
+        onSuccess: () => {
+            toast.success("Question deleted successfully");
+            setIsLoading(false); // Reset loading state on success
+            fetchQuestions(); // T
+           
+        },
+        onError: (error) => {
+            toast.error("Error deleting question.");
+            setIsLoading(false); // Reset loading state on error
+           
+        },
+    });
+    
 
     useEffect(() => {
         let filtered = questionsData;
@@ -50,6 +111,8 @@ const QuestionManager = () => {
         setFilteredQuestions(filtered);
     }, [selectedChapter, selectedLesson, searchTerm, questionsData]);
 
+    
+
     const resetFilters = () => {
         window.history.back();
     };
@@ -65,14 +128,141 @@ const QuestionManager = () => {
         setQuestion(question);
         setShowUpdateModal(true);
     };
+    
 
     const handleCloseUpdateModal = () => {
         setQuestion(null);
         setShowUpdateModal(false);
     };
+    const handleQuestionChange = (e) => {
+        setTextQuestion(e.target.value);
+    };
+
+    const saveQuestion = () => {
+        setQuestion((prev) => ({
+            ...prev,
+            question: textQuestion,
+        }));
+        setToggleEditQuestion(!toggleEditQuestion);
+    };
+
+    const saveLevel = () => {
+        setQuestion((prev) => ({
+            ...prev,
+            level: textLevel,
+        }));
+        setToggleEditLevel(!toggleEditLevel);
+    };
+    const saveLession = () => {
+        setQuestion((prev) => ({
+            ...prev,
+            lession: textLession,
+        }));
+        setToggleEditLession(!toggleEditLession);
+    };
+
+    const saveChapter = () => {
+        setQuestion((prev) => ({
+            ...prev,
+            chapter: textChapter,
+        }));
+        setToggleEditChapter(!toggleEditChapter);
+    };
+
+    const handleEditQuestionn = (question) => {
+        setTextQuestion(question);
+        setToggleEditQuestion(!toggleEditQuestion);
+    };
+
+    const handleCorrectAnswerChange = (e) => {
+        setTextCA(e.target.value);
+    };
+
+    const handleEditLevel = () => {
+        setToggleEditLevel(!toggleEditLevel);
+    };
+    const handleEditLession = () => {
+        setToggleEditLession(!toggleEditLession);
+    };
+    const handleEditChapter = () => {
+        setToggleEditChapter(!toggleEditChapter);
+    };
+   
+    const handleUpdateQuestion = () => {
+        const updatedQuestion = {
+            question: textQuestion,
+            correctAnswer: question.correctAnswer,
+            options: question.options,
+            level: question.level,
+            lession: question.lession,
+            chapter:question.chapter
+        };
+    
+        updateMutation.mutate({
+            classId: idClass,
+            subjectId: idSubject,
+            questionId: question._id,
+            updatedQuestion,
+        });
+    };
+
+    const handleEditAnswer = (index, answer) => {
+        setEditingAnswerIndex(index);
+        setTextAnswer(answer);
+    };
+
+    const saveAnswer = () => {
+        const updatedAnswers = [...question.options];
+        updatedAnswers[editingAnswerIndex] = textAnswer;
+        setQuestion((prev) => ({
+            ...prev,
+            options: updatedAnswers,
+        }));
+        setEditingAnswerIndex(null);
+        setTextAnswer("");
+    };
+
+    const handleAnswerChange = (e) => {
+        setTextAnswer(e.target.value);
+    };
+
+    const handleEditCA = () => {
+        setToggleEditCA(!toggleEditCA);
+    };
+
+    const saveCorrectQuestion = () => {
+        setQuestion((prev) => ({
+            ...prev,
+            correctAnswer: textCA,
+        }));
+        setToggleEditCA(!toggleEditCA);
+    };
+
+    const handleLevelChange = (e) => {
+        setTextLevel(e.target.value);
+    };
+    const handleChapterChange = (e) => {
+        setTextChapTer(e.target.value);
+    };
+    const handleLessionChange = (e) => {
+        setTextLession(e.target.value);
+    };
+
+
+
+    const handleDeleteQuestion = (id) => {
+        deleteMutation.mutate({
+            classId: idClass,
+            subjectId: idSubject,
+            questionId: id,
+        });
+    };
+    const uniqueChapters = [...new Set(filteredQuestions.map((q) => q.chapter))];
+    const uniqueLessions = [...new Set(filteredQuestions.map((q) => q.lession))];
 
     return (
         <div className="p-6 bg-gray-100 min-h-screen">
+             {isLoading && <p>Loading...</p>}
             <h1 className="text-2xl font-bold mb-6 text-center">Quản lý câu hỏi</h1>
 
             {/* Bộ lọc theo Chương, Bài và Tìm kiếm */}
@@ -85,9 +275,11 @@ const QuestionManager = () => {
                         onChange={(e) => setSelectedChapter(e.target.value)}
                     >
                         <option value="All">All Chapters</option>
-                        <option value="Geography">Geography</option>
-                        <option value="History">History</option>
-                        {/* Thêm các chương khác nếu có */}
+                        {uniqueChapters.map((chapter) => (
+                        <option key={chapter} value={chapter}>
+                            {chapter}
+                        </option>
+                    ))}
                     </select>
                 </div>
 
@@ -98,10 +290,13 @@ const QuestionManager = () => {
                         value={selectedLesson}
                         onChange={(e) => setSelectedLesson(e.target.value)}
                     >
-                        <option value="All">All Lessons</option>
-                        <option value="1">Lesson 1</option>
-                        <option value="2">Lesson 2</option>
-                        {/* Thêm các bài học khác nếu có */}
+                        <option value="All">All Lessions</option>
+                        {uniqueLessions.map((lession) => (
+                        <option key={lession} value={lession}>
+                            Lesson {lession}
+                        </option>
+                    ))}
+                        
                     </select>
                 </div>
 
@@ -160,9 +355,10 @@ const QuestionManager = () => {
                                     Correct Answer: {question.correctAnswer}
                                 </p>
                                 <p className="mt-1 text-gray-500">
-                                    Chapter: {question.chapter} - Lesson: {question.lesson || question.lession}
+                                    Chapter: {question.chapter} - Lession: {question.lession}
                                 </p>
 
+                                {/* Nút cập nhật và xóa */}
                                 <div className="absolute top-4 right-4 space-x-2">
                                     <button
                                         className="bg-yellow-500 text-white py-1 px-3 rounded-md hover:bg-yellow-600"
@@ -172,7 +368,7 @@ const QuestionManager = () => {
                                     </button>
                                     <button
                                         className="bg-red-500 text-white py-1 px-3 rounded-md hover:bg-red-600"
-                                        onClick={() => {}}
+                                        onClick={() => handleDeleteQuestion(question._id)}
                                     >
                                         Delete
                                     </button>
@@ -182,16 +378,49 @@ const QuestionManager = () => {
                     </ul>
                 )}
             </div>
-
             {showUpdateModal && (
                 <UpdateQuestionModal
                     showUpdateModal={showUpdateModal}
                     handleCloseUpdateModal={handleCloseUpdateModal}
                     question={question}
+                    toggleEditQuestion={toggleEditQuestion}
+                    textQuestion={textQuestion}
+                    handleQuestionChange={handleQuestionChange}
+                    saveQuestion={saveQuestion}
+                    saveLevel={saveLevel}
+                    handleEditQuestionn={handleEditQuestionn}
+                    toggleEditCA={toggleEditCA}
+                    textCA={textCA}
+                    textLevel={textLevel}
+                    handleCorrectAnswerChange={handleCorrectAnswerChange}
+                    handleLevelChange={handleLevelChange}
+                    saveCorrectQuestion={saveCorrectQuestion}
+                    handleEditCA={handleEditCA}
+                    editingAnswerIndex={editingAnswerIndex}
+                    textAnswer={textAnswer}
+                    handleAnswerChange={handleAnswerChange}
+                    saveAnswer={saveAnswer}
+                    handleEditAnswer={handleEditAnswer}
+                    handleUpdateQuestion={handleUpdateQuestion}
+                    toggleEditLevel={toggleEditLevel}
+                    handleEditLevel={handleEditLevel}
+
+                    textLession={textLession}
+                    handleLessionChange={handleLessionChange}
+                    toggleEditLession={toggleEditLession}
+                    handleEditLession={handleEditLession}
+                    saveLession={saveLession}
+                    textChapter={textChapter}
+                    handleChapterChange={handleChapterChange}
+                    toggleEditChapter={toggleEditChapter}
+                    handleEditChapter={handleEditChapter}
+                    saveChapter={saveChapter}
                 />
             )}
         </div>
     );
+
+
 };
 
 export default QuestionManager;
