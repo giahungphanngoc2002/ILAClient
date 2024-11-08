@@ -29,7 +29,7 @@ import NotificationToStudent from "../pages/NotificationToStudent/NotificationTo
 import HistorySendNotification from "../pages/HistorySendNotification/HistorySendNotification";
 import ExamSchedule from "../pages/ExamSchedule/ExamSchedule";
 import Message from "../pages/Message/Message";
-
+import QuestionAI from "../pages/QuestionManage/goToCreateQuestionByAI";
 export const routes = [
   {
     path: "/",
@@ -75,6 +75,7 @@ export const routes = [
     ),
     isShowHeader: false,
   },
+
   {
     path: "manage/teachingMaterial/:idClass/:idSubject",
     page: () => (
@@ -134,7 +135,7 @@ export const routes = [
   },
  
   {
-    path: "manage/questionManage/",
+    path: "manage/questionManage/:idClass/:idSubject",
     page: () => (
       <ProtectedRoute>
         <QuestionManager />
@@ -143,6 +144,16 @@ export const routes = [
     isShowHeader: false,
     isShowSideBar: false,
   },
+  {
+    path: "/questionAI/:idClass/:idSubject",
+    page: () => (
+      <ProtectedRoute>
+        <QuestionAI />
+      </ProtectedRoute>
+    ),
+    isShowHeader: false,
+    isShowSideBar: false,
+},
   {
     path: "manage/calender/:idClass/:idSchedule/:idSlot/:idSubject/:semester",
     page: () => (

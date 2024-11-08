@@ -25,9 +25,9 @@ const NotificationForm = () => {
 
     useEffect(() => {
         setSenderId(user?.id);
-      }, [user]);
+    }, [user]);
 
-      console.log(senderId)
+    console.log(senderId)
     useEffect(() => {
         const fetchClasses = async () => {
             try {
@@ -45,7 +45,7 @@ const NotificationForm = () => {
     }, []);
 
     // Filter for recipientsTab1 (students)
-    const recipientsTab1 = classData.flatMap((classItem) => 
+    const recipientsTab1 = classData.flatMap((classItem) =>
         classItem.studentID.map(student => ({
             id: student._id,
             name: student.email.split('@')[0], // Derive "name" from email if needed
@@ -53,7 +53,7 @@ const NotificationForm = () => {
             class: classItem.nameClass
         }))
     );
-    
+
     // Filter for recipientsTab2 (teachers)
     const recipientsTab2 = classData.map((classItem) => ({
         id: classItem.teacherHR._id,
@@ -61,10 +61,10 @@ const NotificationForm = () => {
         phone: classItem.teacherHR.phone || 'N/A', // Default phone if not available
         class: classItem.nameClass
     }));
-    
+
     // Extract classes
     const classes = classData.map((classItem) => classItem.nameClass);
-    
+
     const handleRecipientToggle = (id) => {
         setSelectedRecipients((prev) =>
             prev.includes(id) ? prev.filter((r) => r !== id) : [...prev, id]
@@ -78,17 +78,17 @@ const NotificationForm = () => {
     const handleSubmit = async () => {
         const notificationData = {
             title,
-            content,
+content: content.replace(/^<p>|<\/p>$/g, ''),
             senderId, // Set senderId from the user data
             receiverId: selectedRecipients, // Assuming selectedRecipients is an array of recipient IDs
         };
         console.log(senderId)
         console.log(selectedRecipients)
-    
+
         try {
             const response = await NotificationService.createNotification(notificationData);
             console.log('Notification created successfully:', response);
-    
+
             // Navigate to history or show success message
             navigate('/manage/historySendNotification');
         } catch (error) {
@@ -99,41 +99,43 @@ const NotificationForm = () => {
 
     // Filter recipients based on name and class filters for each tab
     const filteredRecipients =
-                selectedTab === 'tab1'
-                    ? recipientsTab1.filter((recipient) => {
-                        const matchesName = recipient.name.toLowerCase().includes(nameFilter.toLowerCase());
-                        const matchesClass = classFilter === '' || recipient.class === classFilter;
-                        return matchesName && matchesClass;
-                    })
-                    : recipientsTab2.filter((recipient) => {
-                        const matchesName = recipient.name.toLowerCase().includes(nameFilter.toLowerCase());
-                        const matchesClass = classFilter === '' || recipient.class === classFilter;
-                        return matchesName && matchesClass;
-                    });
+        selectedTab === 'tab1'
+            ? recipientsTab1.filter((recipient) => {
+                const matchesName = recipient.name.toLowerCase().includes(nameFilter.toLowerCase());
+                const matchesClass = classFilter === '' || recipient.class === classFilter;
+                return matchesName && matchesClass;
+            })
+            : recipientsTab2.filter((recipient) => {
+                const matchesName = recipient.name.toLowerCase().includes(nameFilter.toLowerCase());
+                const matchesClass = classFilter === '' || recipient.class === classFilter;
+                return matchesName && matchesClass;
+            });
 
-            // Update handleSelectAllToggle to only select filtered students
-            const handleSelectAllToggle = () => {
-                if (selectAll) {
-                    setSelectedRecipients([]);
-                } else {
-                    const selectedIds = filteredRecipients.map((recipient) => recipient.id);
-                    setSelectedRecipients(selectedIds);
-                }
-                setSelectAll(!selectAll);
-            };
+    // Update handleSelectAllToggle to only select filtered students
+    const handleSelectAllToggle = () => {
+        if (selectAll) {
+            setSelectedRecipients([]);
+        } else {
+            const selectedIds = filteredRecipients.map((recipient) => recipient.id);
+            setSelectedRecipients(selectedIds);
+        }
+        setSelectAll(!selectAll);
+    };
 
-            // Count selected recipients for each tab
-            const selectedRecipientsTab1 = selectedRecipients.filter((id) =>
-                recipientsTab1.some((recipient) => recipient.id === id)
-            ).length;
-            const selectedRecipientsTab2 = selectedRecipients.filter((id) =>
-                recipientsTab2.some((recipient) => recipient.id === id)
-            ).length;
+    // Count selected recipients for each tab
+    const selectedRecipientsTab1 = selectedRecipients.filter((id) =>
+        recipientsTab1.some((recipient) => recipient.id === id)
+    ).length;
+    const selectedRecipientsTab2 = selectedRecipients.filter((id) =>
+        recipientsTab2.some((recipient) => recipient.id === id)
+    ).length;
 
 
     const onBack = () => {
         navigate('/manage/historySendNotification')
     }
+
+    console.log(content)
 
     return (
         <div>
@@ -149,7 +151,7 @@ const NotificationForm = () => {
                 <div className="flex gap-4 h-[calc(100vh-150px)]">
                     {/* Left Side: Text editor */}
                     <div className="w-1/2 bg-white p-4 rounded-lg shadow overflow-y-auto">
-                        <label className="block font-medium mb-2">Tiêu đề</label>
+<label className="block font-medium mb-2">Tiêu đề</label>
                         <input
                             type="text"
                             value={title}
@@ -199,7 +201,7 @@ const NotificationForm = () => {
                         </div>
                         <div className="flex mb-4 border-b">
                             <button
-                                className={`px-4 py-2 font-semibold ${selectedTab === 'tab1' ? 'border-b-2 border-blue-500 text-blue-500' : 'text-gray-500'}`}
+className={`px-4 py-2 font-semibold ${selectedTab === 'tab1' ? 'border-b-2 border-blue-500 text-blue-500' : 'text-gray-500'}`}
                                 onClick={() => setSelectedTab('tab1')}
                             >
                                 Học sinh - Số người nhận: {selectedRecipientsTab1 || 0}
@@ -244,7 +246,7 @@ const NotificationForm = () => {
                                             />
                                         </td>
                                     </tr>
-                                ))}
+))}
                             </tbody>
                         </table>
                     </div>

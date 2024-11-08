@@ -17,7 +17,7 @@ const Notifications = () => {
     useEffect(() => {
         const fetchNotifications = async () => {
             if (!receiverId) return; // Chỉ tiếp tục nếu có receiverId
-    
+
             try {
                 const response = await NotificationService.getNotificationsForReceiver(receiverId);
                 setNotifications(response.data); // Lấy mảng thông báo từ `response.data`
@@ -27,7 +27,7 @@ const Notifications = () => {
                 setLoading(false);
             }
         };
-    
+
         fetchNotifications();
     }, [receiverId]);
 
@@ -39,11 +39,6 @@ const Notifications = () => {
                 notification._id === _id ? { ...notification, isNew: false } : notification
             )
         );
-    };
-
-    // Hàm đếm số lượng thông báo mới
-    const countNewNotifications = () => {
-        return notifications.filter(notification => notification.isNew).length;
     };
 
     if (loading) {
