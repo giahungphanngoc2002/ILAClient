@@ -1,11 +1,12 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import * as message from "../../components/MessageComponent/Message";
-import * as ClassService from "../../services/ClassService";
+import * as SubjectService from "../../services/SubjectService";
 import { useSelector } from "react-redux";
 import ButtonComponent from "../../components/ButtonComponent/ButtonComponent";
 import { useNavigate, useParams } from "react-router-dom";
 import mammoth from "mammoth";
+import { toast } from "react-toastify";
 
 const Loading = () => {
   return (
@@ -50,36 +51,42 @@ export default function SearchQuestionByAI() {
       setShowWarning(false); // Nếu đủ 400 từ, ẩn cảnh báo
     }
   }, [question]);
-  const { id } = useParams();
 
-  const handleGetDetailsClass = async (id) => {
-    const classDetails = await ClassService.getDetailClass(id);
-    return classDetails;
-  };
+  const { idClass ,idSubject } = useParams();
+
+  // const handleGetDetailsClass = async (id) => {
+  //   const classDetails = await ClassService.getDetailClass(id);
+  //   return classDetails;
+  // };
 
   const handleUpdate = async () => {
     try {
-      const classDetails = await handleGetDetailsClass(id);
-      const currentQuestions = classDetails.questions || [];
-
-      console.log("Current Questions:", currentQuestions);
-
-      const updatedQuestions = [...currentQuestions, ...questions];
-
-      const result = await ClassService.addQuestionById(id, updatedQuestions);
-
-      if (result.status === "OK") {
-        message.success(result.message);
-        handleGetDetailsClass(id);
-        navigate(`/viewClass/${id}`);
+      // Kiểm tra nếu có câu hỏi để thêm
+      if (questions.length === 0) {
+        message.error("No questions available to add.");
+        return;
+      }
+      
+      setLoading(true); // Hiển thị trạng thái loading
+  
+      // Thực hiện gửi dữ liệu đến API, truyền classId, subjectId và questions
+      const response = await SubjectService.createQuestion(idClass, idSubject, questions);
+  
+      // Kiểm tra kết quả từ server
+      if (response.status === 201) {
+        toast.success("Questions added successfully!");
+        setQuestions([]); // Reset danh sách câu hỏi sau khi thêm thành công
       } else {
-        message.error(result.message);
+        message.error("Failed to add questions. Please try again.");
       }
     } catch (error) {
-      console.error("Error while adding question:", error);
+      console.error("Error adding questions:", error);
       message.error("An error occurred while adding questions.");
+    } finally {
+      setLoading(false); // Tắt trạng thái loading
     }
   };
+  
 
   async function generateAnswer() {
     setLoading(true);
@@ -87,37 +94,46 @@ export default function SearchQuestionByAI() {
     const addText = `
       xin 10 câu hỏi trắc nghiệm về đoạn văn này theo format dưới đây
       [
-      {
-      "question": "Điền câu hỏi vào đây",
-      "answers": [
+  {
+    "question": "Điền câu hỏi vào đây",
+    "options": [
       "Điền các kết quả để chọn vào đây",
       "Điền các kết quả để chọn vào đây",
       "Điền các kết quả để chọn vào đây",
       "Điền các kết quả để chọn vào đây"
-      ],
-      "correctAnswer": "Điền đáp án vào đây."
-      },
-      {
-      "question": "Điền câu hỏi vào đây",
-      "answers": [
+    ],
+    "correctAnswer": "Điền đáp án vào đây",
+    "level": 1,
+    "chapter": "Tên chương học",
+    "lession": "Tên bài học"
+  },
+  {
+    "question": "Điền câu hỏi vào đây",
+    "options": [
       "Điền các kết quả để chọn vào đây",
       "Điền các kết quả để chọn vào đây",
       "Điền các kết quả để chọn vào đây",
       "Điền các kết quả để chọn vào đây"
-      ],
-      "correctAnswer": "Điền đáp án vào đây."
-      },
-      {
-      "question": "Điền câu hỏi vào đây",
-      "answers": [
+    ],
+    "correctAnswer": "Điền đáp án vào đây",
+    "level": 1,
+    "chapter": "Tên chương học",
+    "lession": "Tên bài học"
+  },
+  {
+    "question": "Điền câu hỏi vào đây",
+    "options": [
       "Điền các kết quả để chọn vào đây",
       "Điền các kết quả để chọn vào đây",
       "Điền các kết quả để chọn vào đây",
       "Điền các kết quả để chọn vào đây"
-      ],
-      "correctAnswer": "Điền đáp án vào đây."
-      },
-      ]
+    ],
+    "correctAnswer": "Điền đáp án vào đây",
+    "level": 1,
+    "chapter": "Tên chương học",
+    "lession": "Tên bài học"
+  }
+]
       `;
     const addText2 = `chỉnh lại cho chuẩn json`;
 
@@ -252,10 +268,10 @@ export default function SearchQuestionByAI() {
             <div key={key} className="bg-white shadow-lg rounded-lg p-6 mb-6">
               <div className="mb-4">
                 <h2 className="text-xl font-semibold text-left text-gray-800 mb-2">
-                  Question: {questionn.question}
+                  Question: {questionn?.question}
                 </h2>
                 <div className="flex flex-wrap -mx-2">
-                  {questionn.answers.map((answer, index) => (
+                  {questionn?.options.map((answer, index) => (
                     <div key={index} className="w-full sm:w-1/2 px-2 mb-4">
                       <li className="p-3 bg-blue-100 rounded-lg border border-blue-300 list-none">
                         <label className="flex items-center">
@@ -272,9 +288,20 @@ export default function SearchQuestionByAI() {
                   ))}
                 </div>
                 <p className="border-2 rounded-lg bg-green-200 p-3 text-left border-green-500">
-                  Correct answer: {questionn.correctAnswer}
+                  Correct answer: {questionn?.correctAnswer}
+                </p>
+                <p className="border-2 rounded-lg bg-green-200 p-3 text-left border-green-500">
+                level: {questionn?.level}
+                </p>
+                <p className="border-2 rounded-lg bg-green-200 p-3 text-left border-green-500">
+                chapter: {questionn?.chapter}
+                </p>
+
+                <p className="border-2 rounded-lg bg-green-200 p-3 text-left border-green-500">
+                lession: {questionn?.lession}
                 </p>
               </div>
+              
               <div className="text-right">
                 <button
                   className="btn btn-danger bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition duration-200"
