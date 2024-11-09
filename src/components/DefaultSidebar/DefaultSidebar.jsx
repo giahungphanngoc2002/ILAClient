@@ -11,6 +11,7 @@ import { FaBookReader } from "react-icons/fa";
 import { TbReport } from 'react-icons/tb';
 import { BiMailSend } from "react-icons/bi";
 import { MdOutlineMessage } from "react-icons/md";
+import { FaHome } from "react-icons/fa";
 
 const DefaultSidebar = () => {
     const [expanded, setExpanded] = useState(false);
@@ -38,18 +39,16 @@ const DefaultSidebar = () => {
         navigate("/");
     };
 
+    const goToHome = () => {
+        setActiveItem('Trang chủ');
+        navigate('/manage');
+    }
+
     const sidebarItems = [
-        { icon: <CalendarClock size={20} />, text: "Lịch làm việc", path: '/manage/calender', role: "Teacher" },
-        { icon: <TbReport size={20} />, text: "Báo cáo", path: '/manage/report', role: "Teacher" },
-        { icon: <School size={20} />, text: "Quản lý lớp", path: '/manage/myClass', role: "Teacher" },
-        { icon: <BiMailSend size={20} />, text: "Gửi thông báo", path: '/manage/historySendNotification', role: "Teacher" },
         { icon: <MdOutlineMessage size={20} />, text: "Tin nhắn", path: '/manage/message', role: "Teacher" },
         { icon: <CalendarClock size={20} />, text: "Thời khoá biểu", path: '/manage/manageSchedule', role: "Admin" },
         { icon: <Bell size={20} />, text: "Chia lớp", path: '/manage/classDivision', role: "Admin" },
         { icon: <Bell size={20} />, text: "Tạo lịch thi", path: '/manage/examSchedule', role: "Admin" },
-        { icon: <CalendarClock size={20} />, text: "Thời khoá biểu", path: '/student/timeTable', role: "User" },
-        { icon: <FaBookReader size={20} />, text: "Tự học", path: '/student/selfLearning', role: "User" },
-        { icon: <Book size={20} />, text: "Điểm danh", path: '/student/attendaceStudent', role: "User" },
         { icon: <MdOutlineMessage size={20} />, text: "Tin nhắn", path: '/student/message', role: "User" },
     ];
 
@@ -69,7 +68,7 @@ const DefaultSidebar = () => {
                         <Search className="text-gray-500" size={20} />
                         {expanded && (
                             <input
-                                type="text"
+type="text"
                                 placeholder="Tìm kiếm"
                                 style={{ fontSize: "16px" }}
                                 className="ml-3 w-full text-ellipsis bg-transparent outline-none placeholder-gray-500"
@@ -79,6 +78,13 @@ const DefaultSidebar = () => {
                         )}
                     </div>
                 </div>
+                <SidebarItem
+                    key='Trang chủ'
+                    icon={<FaHome size={20} />}
+                    text='Trang chủ'
+                    active={activeItem === 'Trang chủ'}
+                    onClick={goToHome}
+                />
 
                 {filteredItems().map((item) => (
                     <SidebarItem

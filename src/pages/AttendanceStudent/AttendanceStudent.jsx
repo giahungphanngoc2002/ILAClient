@@ -1,142 +1,118 @@
 import React, { useState } from 'react';
 
-const AttendanceComponent = () => {
-    const [selectedSubject, setSelectedSubject] = useState('');
-    const [filteredData, setFilteredData] = useState([]);
-    const [summary, setSummary] = useState({
-        present: 0,
-        absent: 0,
-        late: 0,
-        excused: 0,
-    });
-    const [currentPage, setCurrentPage] = useState(1);
-    const recordsPerPage = 5; // Số bản ghi trên mỗi trang
+const daysOfWeek = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
+const periods = ["Tiết 1", "Tiết 2", "Tiết 3", "Tiết 4", "Tiết 5", "Tiết 6", "Tiết 7", "Tiết 8", "Tiết 9", "Tiết 10"];
+const years = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i);
+const months = Array.from({ length: 12 }, (_, i) => i + 1);
 
-    const subjects = ['Toán', 'Vật Lý', 'Hóa Học']; // Các môn học
+const attendanceData = {
+    "2024-11-01": { periods: { 1: { hasExcuse: true }, 3: { hasExcuse: false }, 7: { hasExcuse: true } } },
+    "2024-11-02": { periods: { 2: { hasExcuse: false }, 4: { hasExcuse: true }, 9: { hasExcuse: false } } },
+    // Thêm các ngày khác vào đây...
+};
 
-    // Dữ liệu điểm danh cứng
-    const attendanceData = {
-        Toán: [
-            { date: '2024-10-01', slot: '1', status: '✔' },
-            { date: '2024-10-02', slot: '2', status: '✘' },
-            { date: '2024-10-03', slot: '3', status: '✘' },
-            { date: '2024-10-04', slot: '1', status: '📝' },
-            { date: '2024-10-05', slot: '1', status: '✔' },
-            { date: '2024-10-06', slot: '2', status: '✔' },
-            { date: '2024-10-07', slot: '1', status: '✘' },
-            { date: '2024-10-08', slot: '2', status: '✔' },
-        ],
-        'Vật Lý': [
-            { date: '2024-10-05', slot: '1', status: '✔' },
-            { date: '2024-10-06', slot: '2', status: '✔' },
-            { date: '2024-10-07', slot: '1', status: '✘' },
-        ],
-        'Hóa Học': [
-            { date: '2024-10-08', slot: '1', status: '✔' },
-            { date: '2024-10-09', slot: '2', status: '✔' },
-            { date: '2024-10-10', slot: '1', status: '✔' },
-        ],
+const AttendanceTable = () => {
+    const currentYear = new Date().getFullYear();
+    const currentMonth = new Date().getMonth() + 1;
+    const [selectedYear, setSelectedYear] = useState(currentYear);
+    const [selectedMonth, setSelectedMonth] = useState(currentMonth);
+
+    const daysInMonth = new Date(selectedYear, selectedMonth, 0).getDate();
+
+    const getDayOfWeek = (day) => {
+        const date = new Date(selectedYear, selectedMonth - 1, day);
+        return daysOfWeek[date.getDay()];
     };
 
-    // Xử lý chọn môn học
-    const handleSubjectChange = (e) => {
-        const subject = e.target.value;
-        setSelectedSubject(subject);
-        const subjectData = attendanceData[subject] || [];
-        setFilteredData(subjectData);
-        calculateSummary(subjectData);
-        setCurrentPage(1); // Reset lại trang khi chọn môn mới
-    };
-
-    // Tính toán thống kê
-    const calculateSummary = (data) => {
-        const summaryData = {
-            present: data.filter((item) => item.status === '✔').length,
-            absent: data.filter((item) => item.status === '✘').length,
-            excused: data.filter((item) => item.status === '📝').length,
-        };
-        setSummary(summaryData);
-    };
-
-    // Phân trang
-    const indexOfLastRecord = currentPage * recordsPerPage;
-    const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
-    const currentRecords = filteredData.slice(indexOfFirstRecord, indexOfLastRecord);
-    const totalPages = Math.ceil(filteredData.length / recordsPerPage);
-
-    const handlePageChange = (page) => {
-        if (page >= 1 && page <= totalPages) {
-            setCurrentPage(page);
-        }
+    const getAttendanceStatus = (day, period) => {
+        const dateKey = `${selectedYear}-${String(selectedMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        return attendanceData[dateKey]?.periods[period];
     };
 
     return (
-        <div className="p-6">
-            <h1 className="text-2xl font-bold mb-4">Xem Điểm Danh Cá Nhân Theo Môn</h1>
-            <div className="mb-4">
-                <label className="block text-sm font-medium mb-2">Chọn Môn Học</label>
-<select
-                    value={selectedSubject}
-                    onChange={handleSubjectChange}
-                    className="border border-gray-300 p-2 rounded-md w-full"
+        <div className="p-4">
+            <div className="flex flex-wrap gap-4 mb-4">
+                <select
+                    className="p-2 border rounded"
+                    value={selectedYear}
+                    onChange={(e) => setSelectedYear(Number(e.target.value))}
                 >
-                    <option value="">Chọn môn học</option>
-                    {subjects.map((subject, idx) => (
-                        <option key={idx} value={subject}>
-                            {subject}
-                        </option>
+                    <option>Năm</option>
+                    {years.map((year) => (
+                        <option key={year} value={year}>{year}</option>
                     ))}
                 </select>
+                <select
+                    className="p-2 border rounded"
+                    value={selectedMonth}
+                    onChange={(e) => setSelectedMonth(Number(e.target.value))}
+                >
+                    <option>Tháng</option>
+                    {months.map((month) => (
+                        <option key={month} value={month}>{month}</option>
+                    ))}
+                </select>
+                <select className="p-2 border rounded">
+                    <option>Tuần</option>
+                </select>
+                <select className="p-2 border rounded">
+                    <option>Ngày</option>
+                </select>
+                <select className="p-2 border rounded">
+                    <option>Khối</option>
+                    <option>10</option>
+                </select>
+                <select className="p-2 border rounded">
+                    <option>Lớp</option>
+                    <option>10/10</option>
+                </select>
+<input type="text" placeholder="Mã học sinh" className="p-2 border rounded" />
+                <input type="text" placeholder="Tên học sinh" className="p-2 border rounded" />
             </div>
-            {filteredData.length > 0 && (
-                <>
-                    <table className="table-auto w-full border border-gray-300 mb-4">
-                        <thead>
-                            <tr className="bg-gray-200">
-                                <th className="border px-4 py-2">Ngày học</th>
-                                <th className="border px-4 py-2">Slot</th>
-                                <th className="border px-4 py-2">Trạng thái</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {currentRecords.map((item, idx) => (
-                                <tr key={idx}>
-                                    <td className="border px-4 py-2">{item.date}</td>
-                                    <td className="border px-4 py-2">{item.slot}</td>
-                                    <td className="border px-4 py-2">{item.status}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                    <div className="flex justify-between items-center">
-                        <button
-                            onClick={() => handlePageChange(currentPage - 1)}
-                            className={`px-4 py-2 rounded-md ${currentPage === 1 ? 'bg-gray-400' : 'bg-blue-500 text-white'}`}
-                            disabled={currentPage === 1}
-                        >
-                            Trang trước
-                        </button>
-                        <p>
-                            Trang {currentPage} trên {totalPages}
-                        </p>
-                        <button
-                            onClick={() => handlePageChange(currentPage + 1)}
-                            className={`px-4 py-2 rounded-md ${currentPage === totalPages ? 'bg-gray-400' : 'bg-blue-500 text-white'}`}
-                            disabled={currentPage === totalPages}
-                        >
-                            Trang sau
-                        </button>
-                    </div>
-                    <div className="mb-4 mt-4">
-                        <h2 className="text-lg font-bold mb-2">Thống kê trạng thái</h2>
-                        <p>✔ Có mặt: {summary.present}</p>
-                        <p>✘ Vắng mặt: {summary.absent}</p>
-                        <p>📝 Nghỉ có phép: {summary.excused}</p>
-                    </div>
-</>
-            )}
+
+            <table className="w-full border-collapse bg-white">
+                <thead>
+                    <tr className="bg-gray-200">
+                        <th className="border p-2 text-center" rowSpan="2">Tiết học</th>
+                        {Array.from({ length: daysInMonth }, (_, i) => (
+                            <th key={i} className="border p-2 text-center">{String(i + 1).padStart(2, '0')}</th>
+                        ))}
+                    </tr>
+                    <tr className="bg-gray-100">
+                        {Array.from({ length: daysInMonth }, (_, i) => (
+                            <th key={i} className="border p-2 text-center">
+                                {getDayOfWeek(i + 1)}
+                            </th>
+                        ))}
+                    </tr>
+                </thead>
+                <tbody>
+                    {periods.map((period, index) => (
+                        <tr key={index} className={index % 2 === 0 ? "bg-gray-100" : ""}>
+                            <td className="border p-2 text-center">{period}</td>
+                            {Array.from({ length: daysInMonth }, (_, i) => {
+                                const attendanceStatus = getAttendanceStatus(i + 1, index + 1);
+                                return (
+                                    <td key={i} className="border p-2 text-center">
+                                        {attendanceStatus ? (
+                                            <span
+                                                className={`px-2 py-1 rounded ${attendanceStatus.hasExcuse ? "bg-green-300" : "bg-red-300"
+                                                    }`}
+                                            >
+                                                {attendanceStatus.hasExcuse ? "CP" : "KP"}
+                                            </span>
+                                        ) : (
+                                            <input type="checkbox" className="form-checkbox" />
+                                        )}
+                                    </td>
+                                );
+                            })}
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
         </div>
     );
 };
 
-export default AttendanceComponent;
+export default AttendanceTable;

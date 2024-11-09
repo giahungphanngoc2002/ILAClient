@@ -5,6 +5,8 @@ import { FaClipboardQuestion } from "react-icons/fa6";
 import { useSelector } from 'react-redux';
 import * as ClassService from "../../services/ClassService";
 import { useNavigate } from 'react-router-dom';
+import { BiMailSend } from "react-icons/bi";
+import { CalendarClock } from 'lucide-react';
 
 const Dashboard = () => {
     const user = useSelector((state) => state.user);
@@ -79,10 +81,10 @@ const Dashboard = () => {
         if (!selectedClass) return;  // Kiểm tra xem lớp đã được chọn chưa
 
         // Tìm lớp được chọn
-        const selectedClassData = classes.find((classItem) => classItem._id === selectedClass);
+const selectedClassData = classes.find((classItem) => classItem._id === selectedClass);
 
         if (selectedClassData) {
-// Lọc danh sách môn học mà giáo viên đang dạy trong lớp đó
+            // Lọc danh sách môn học mà giáo viên đang dạy trong lớp đó
             const teacherSubjects = selectedClassData.subjectGroup.filter(
                 (subject) => subject.teacherId === user.id
             );
@@ -120,6 +122,44 @@ const Dashboard = () => {
         }
     };
 
+    const handleGoToManageAbsentRequest = () => {
+        navigate('/manage/addAbsenceRequest')
+    }
+
+    const handleGoToProfileStudentInClass = () => {
+        navigate('/manage/profileStudentInClass')
+    }
+
+    const handleGoToSendNotification = () => {
+        navigate('/manage/thrNotification')
+    }
+
+    const handleGoToCalendar = () => {
+        navigate('/manage/calender')
+    }
+
+    const handleGoToReport = () => {
+        navigate('/manage/report')
+    }
+
+    const handleGoToSendNoti = () => {
+        navigate('/manage/historySendNotification')
+    }
+
+    const handleGoToTimeTable = () => {
+        navigate('/student/timeTable')
+    }
+
+    const handleGoToSelfLearning = () => {
+        navigate('/student/selfLearning')
+    }
+
+    const handleGoToAttendanceStudent = () => {
+        navigate('/student/attendaceStudent')
+    }
+
+    console.log(user)
+
     return (
         <div className="flex flex-col p-6 bg-gray-100 min-h-screen">
             {/* Tabs for Class Selection */}
@@ -128,7 +168,7 @@ const Dashboard = () => {
                     <button
                         key={classItem._id}
                         onClick={() => handleClassClick(classItem._id)}
-                        className={`px-4 py-2 text-gray-700 rounded-lg focus:outline-none 
+className={`px-4 py-2 text-gray-700 rounded-lg focus:outline-none 
                         ${selectedClass === classItem._id ? 'bg-blue-500 text-white ' : ''}`}
                     >
                         {classItem.nameClass}
@@ -145,7 +185,7 @@ const Dashboard = () => {
                         <p className="text-lg">Trang liên lạc và truyền thông nhà trường</p>
                     </div>
                     <div className="mt-4 md:mt-0 flex justify-center md:justify-end">
-<img src="path/to/student-image.png" alt="Students" className="w-32 h-32" />
+                        <img src="path/to/student-image.png" alt="Students" className="w-32 h-32" />
                     </div>
                 </div>
 
@@ -169,51 +209,148 @@ const Dashboard = () => {
                     </div>
                 </div>
             </div>
+            {user.role === "Teacher" && (
+                <div>
+                    <div className="flex flex-col bg-white p-6 rounded-lg shadow-md w-full mt-8">
+                        {/* Header */}
+                        <h2 className="text-xl font-bold mb-6">Quản lý - Nhập liệu</h2>
 
-            <div className="flex flex-col bg-white p-6 rounded-lg shadow-md w-full mt-8">
-                {/* Header */}
-                <h2 className="text-xl font-bold mb-6">Quản lý - Nhập liệu</h2>
+                        {/* Cards Container */}
+                        <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
+<div onClick={() => handleCardClick("attendance")} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
+                                <div className="bg-orange-400 p-4 rounded-full mb-2">
+                                    <GrScorecard size={32} className="text-white" />
+                                </div>
+                                <p className="font-semibold">Quản lí điểm danh</p>
+                            </div>
 
-                {/* Cards Container */}
-                <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
-                    <div onClick={() => handleCardClick("attendance")} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
-                        <div className="bg-orange-400 p-4 rounded-full mb-2">
-                            <GrScorecard size={32} className="text-white" />
+                            {/* Other Cards */}
+                            <div onClick={() => handleCardClick("grade")} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
+                                <div className="bg-green-400 p-4 rounded-full mb-2">
+                                    <GrScorecard size={32} className="text-white" />
+                                </div>
+                                <p className="font-semibold">Bảng điểm</p>
+                            </div>
+
+                            <div onClick={() => handleCardClick("homework")} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
+                                <div className="bg-teal-400 p-4 rounded-full mb-2">
+                                    <FaBook size={32} className="text-white" />
+                                </div>
+                                <p className="font-semibold">Giao bài tập, tài liệu</p>
+                            </div>
+
+                            <div onClick={() => handleCardClick("question")} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
+                                <div className="bg-red-400 p-4 rounded-full mb-2">
+                                    <FaClipboardQuestion size={32} className="text-white" />
+                                </div>
+                                <p className="font-semibold">Quản lí câu hỏi</p>
+                            </div>
                         </div>
-                        <p className="font-semibold">Quản lí điểm danh</p>
                     </div>
 
-                    {/* Other Cards */}
-                    <div onClick={() => handleCardClick("grade")} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
-                        <div className="bg-green-400 p-4 rounded-full mb-2">
-                            <GrScorecard size={32} className="text-white" />
+                    <div className="flex flex-col bg-white p-6 rounded-lg shadow-md w-full mt-8">
+                        <h2 className="text-xl font-bold mb-6">Quản lớp học</h2>
+                        <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
+                            <div onClick={handleGoToManageAbsentRequest} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
+                                <div className="bg-orange-400 p-4 rounded-full mb-2">
+                                    <GrScorecard size={32} className="text-white" />
+                                </div>
+                                <p className="font-semibold">Quản lí đơn nghỉ học</p>
+                            </div>
+
+                            {/* Other Cards */}
+<div onClick={handleGoToProfileStudentInClass} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
+                                <div className="bg-green-400 p-4 rounded-full mb-2">
+                                    <GrScorecard size={32} className="text-white" />
+                                </div>
+                                <p className="font-semibold">Điểm số</p>
+                            </div>
+
+                            <div onClick={handleGoToProfileStudentInClass} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
+                                <div className="bg-teal-400 p-4 rounded-full mb-2">
+                                    <FaBook size={32} className="text-white" />
+                                </div>
+                                <p className="font-semibold">Thông tin học sinh</p>
+                            </div>
+
+                            <div onClick={handleGoToSendNotification} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
+                                <div className="bg-red-400 p-4 rounded-full mb-2">
+                                    <FaClipboardQuestion size={32} className="text-white" />
+                                </div>
+                                <p className="font-semibold">Gửi thông báo</p>
+                            </div>
                         </div>
-                        <p className="font-semibold">Bảng điểm</p>
                     </div>
 
-                    <div onClick={() => handleCardClick("homework")} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
-                        <div className="bg-teal-400 p-4 rounded-full mb-2">
-<FaBook size={32} className="text-white" />
-                        </div>
-                        <p className="font-semibold">Giao bài tập, tài liệu</p>
-                    </div>
+                    <div className="flex flex-col bg-white p-6 rounded-lg shadow-md w-full mt-8">
+                        <h2 className="text-xl font-bold mb-6">Tác vụ</h2>
+                        <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
+                            <div onClick={handleGoToCalendar} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
+                                <div className="bg-teal-400 p-4 rounded-full mb-2">
+                                    <CalendarClock size={32} className="text-white" />
+                                </div>
+                                <p className="font-semibold">Lịch làm việc</p>
+                            </div>
 
-                    <div onClick={() => handleCardClick("question")} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
-                        <div className="bg-red-400 p-4 rounded-full mb-2">
-                            <FaClipboardQuestion size={32} className="text-white" />
+                            <div onClick={handleGoToSendNoti} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
+                                <div className="bg-orange-400 p-4 rounded-full mb-2">
+                                    <BiMailSend size={32} className="text-white" />
+                                </div>
+                                <p className="font-semibold">Gửi thông báo</p>
+                            </div>
+
+                            {/* Other Cards */}
+<div onClick={handleGoToReport} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
+                                <div className="bg-green-400 p-4 rounded-full mb-2">
+                                    <GrScorecard size={32} className="text-white" />
+                                </div>
+                                <p className="font-semibold">Báo cáo</p>
+                            </div>
+
+
                         </div>
-                        <p className="font-semibold">Quản lí câu hỏi</p>
                     </div>
                 </div>
-            </div>
+            )}
+            {user.role === "User" && (
+                <div>
+                    <div className="flex flex-col bg-white p-6 rounded-lg shadow-md w-full mt-8">
+                        <h2 className="text-xl font-bold mb-6">Tác vụ</h2>
+                        <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
+                            <div onClick={handleGoToTimeTable} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
+                                <div className="bg-teal-400 p-4 rounded-full mb-2">
+                                    <CalendarClock size={32} className="text-white" />
+                                </div>
+                                <p className="font-semibold">Thời khoá biểu</p>
+                            </div>
 
+                            <div onClick={handleGoToSelfLearning} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
+                                <div className="bg-orange-400 p-4 rounded-full mb-2">
+                                    <BiMailSend size={32} className="text-white" />
+                                </div>
+                                <p className="font-semibold">Tự học</p>
+                            </div>
+
+                            {/* Other Cards */}
+                            <div onClick={handleGoToAttendanceStudent} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
+                                <div className="bg-green-400 p-4 rounded-full mb-2">
+                                    <GrScorecard size={32} className="text-white" />
+                                </div>
+                                <p className="font-semibold">Xem điểm danh</p>
+                            </div>
+
+
+                        </div>
+                    </div>
+                </div>
+            )}
             {/* Modal */}
             {isModalOpen && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
                     <div className="bg-white p-6 rounded-lg shadow-lg w-3/4">
                         <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Danh sách các môn bạn dạy</h2>
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                            {subjects.map((subject) => (
+{subjects.map((subject) => (
                                 <button
                                     onClick={() => handleModalClick(subject._id)}
                                     key={subject._id}

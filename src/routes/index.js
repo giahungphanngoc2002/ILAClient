@@ -30,6 +30,9 @@ import HistorySendNotification from "../pages/HistorySendNotification/HistorySen
 import ExamSchedule from "../pages/ExamSchedule/ExamSchedule";
 import Message from "../pages/Message/Message";
 import QuestionAI from "../pages/QuestionManage/goToCreateQuestionByAI";
+import AddAbsenceRequest from "../pages/AddAbsenceRequest/AddAbsenceRequest";
+import ProfileStudentInClass from "../pages/ProfileStudentInClass/ProfileStudentInClass";
+import THRSendNoti from "../pages/THRSendNotification/THRSendNoti";
 export const routes = [
   {
     path: "/",
@@ -70,7 +73,7 @@ export const routes = [
     path: "manage/gradeTable/:idSubject/:idClass/:semester",
     page: () => (
       <ProtectedRoute>
-        <GradeTable />
+<GradeTable />
       </ProtectedRoute>
     ),
     isShowHeader: false,
@@ -133,7 +136,7 @@ export const routes = [
     isShowHeader: false,
     isShowSideBar: true,
   },
- 
+
   {
     path: "manage/questionManage/:idClass/:idSubject",
     page: () => (
@@ -153,7 +156,7 @@ export const routes = [
     ),
     isShowHeader: false,
     isShowSideBar: false,
-},
+  },
   {
     path: "manage/calender/:idClass/:idSchedule/:idSlot/:idSubject/:semester",
     page: () => (
@@ -174,7 +177,7 @@ export const routes = [
     isShowHeader: false,
     isShowSideBar: true,
   },
-   {
+  {
     path: "/manage/message",
     page: () => (
       <ProtectedRoute>
@@ -228,7 +231,7 @@ export const routes = [
     path: "/manage/report/formReport",
     page: () => (
       <ProtectedRoute>
-        <FormReport />
+<FormReport />
       </ProtectedRoute>
     ),
     isShowHeader: false,
@@ -275,6 +278,36 @@ export const routes = [
     isShowSideBar: true,
   },
   {
+    path: "/manage/addAbsenceRequest",
+    page: () => (
+      <ProtectedRoute>
+        <AddAbsenceRequest />
+      </ProtectedRoute>
+    ),
+    isShowHeader: false,
+    isShowSideBar: false,
+  },
+  {
+    path: "/manage/profileStudentInClass",
+    page: () => (
+      <ProtectedRoute>
+        <ProfileStudentInClass />
+      </ProtectedRoute>
+    ),
+    isShowHeader: false,
+    isShowSideBar: false,
+  },
+  {
+    path: "/manage/thrNotification",
+    page: () => (
+      <ProtectedRoute>
+        <THRSendNoti />
+      </ProtectedRoute>
+    ),
+    isShowHeader: false,
+    isShowSideBar: false,
+  },
+  {
     path: "/student/timeTable",
     page: () => (
       <ProtectedRoute>
@@ -294,7 +327,7 @@ export const routes = [
     isShowHeader: false,
     isShowSideBar: false,
   },
-     {
+  {
     path: "/student/message",
     page: () => (
       <ProtectedRoute>

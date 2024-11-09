@@ -1,105 +1,118 @@
 import React, { useState } from 'react';
-import { FaArrowLeft, FaCheckCircle, FaTimesCircle, FaFileExcel } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
-import * as XLSX from 'xlsx';
 
-const studentsData = [
-  { name: 'Nguyễn Văn A', status: [true, false, true, true, false, true, false, true, true, false, true, true, true, false, true, false, true, true, false, true] },
-  { name: 'Trần Thị B', status: [true, true, false, false, true, true, false, true, false, true, false, true, true, true, false, true, true, false, true, false] },
-  // Thêm dữ liệu sinh viên khác...
-];
+const daysOfWeek = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
+const periods = ["Tiết 1", "Tiết 2", "Tiết 3", "Tiết 4", "Tiết 5", "Tiết 6", "Tiết 7", "Tiết 8", "Tiết 9", "Tiết 10"];
+const years = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i);
+const months = Array.from({ length: 12 }, (_, i) => i + 1);
+
+const attendanceData = {
+    "2024-11-01": { periods: { 1: { hasExcuse: true }, 3: { hasExcuse: false }, 7: { hasExcuse: true } } },
+    "2024-11-02": { periods: { 2: { hasExcuse: false }, 4: { hasExcuse: true }, 9: { hasExcuse: false } } },
+    // Thêm các ngày khác vào đây...
+};
 
 const AttendanceTable = () => {
-  const navigate = useNavigate();
-  const [filter, setFilter] = useState('');
-  const filteredStudents = studentsData.filter((student) =>
-    student.name.toLowerCase().includes(filter.toLowerCase())
-  );
+    const currentYear = new Date().getFullYear();
+    const currentMonth = new Date().getMonth() + 1;
+    const [selectedYear, setSelectedYear] = useState(currentYear);
+    const [selectedMonth, setSelectedMonth] = useState(currentMonth);
 
-  const handleDownloadExcel = () => {
-    const worksheet = XLSX.utils.json_to_sheet(
-      filteredStudents.map((student) => ({
-        Name: student.name,
-        ...student.status.reduce((acc, cur, idx) => ({ ...acc, [`Period ${idx + 1}`]: cur ? 'O' : 'X' }), {}),
-        Absences: student.status.filter(status => !status).length,
-      }))
-    );
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Attendance');
-    XLSX.writeFile(workbook, 'attendance.xlsx');
-  };
+    const daysInMonth = new Date(selectedYear, selectedMonth, 0).getDate();
 
-  const handleBackMyClass = () => {
-    navigate('/manage/myClass');
-  };
+    const getDayOfWeek = (day) => {
+        const date = new Date(selectedYear, selectedMonth - 1, day);
+        return daysOfWeek[date.getDay()];
+    };
 
-  return (
-    <div className="overflow-x-auto p-4 min-h-screen">
-      <div className="mb-4 flex justify-between items-center">
-        <input
-          type="text"
-          placeholder="Tìm kiếm học sinh..."
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-          className="border border-gray-300 rounded-full px-4 py-2 shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
+    const getAttendanceStatus = (day, period) => {
+        const dateKey = `${selectedYear}-${String(selectedMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        return attendanceData[dateKey]?.periods[period];
+    };
 
-        <div className="flex items-center space-x-2">
-          <button
-            className="px-4 py-2 bg-green-600 text-white rounded-lg shadow-lg flex items-center hover:bg-green-700 transition duration-300"
-            onClick={handleDownloadExcel}
-          >
-            <FaFileExcel className="mr-2" /> Tải xuống Excel
-          </button>
-          <button
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg shadow-lg flex items-center hover:bg-blue-600 transition duration-300"
-            onClick={handleBackMyClass}
-          >
-            <FaArrowLeft className="mr-2" /> Trở về
-          </button>
+    return (
+        <div className="p-4">
+            <div className="flex flex-wrap gap-4 mb-4">
+                <select
+                    className="p-2 border rounded"
+                    value={selectedYear}
+                    onChange={(e) => setSelectedYear(Number(e.target.value))}
+                >
+                    <option>Năm</option>
+                    {years.map((year) => (
+                        <option key={year} value={year}>{year}</option>
+                    ))}
+                </select>
+                <select
+                    className="p-2 border rounded"
+                    value={selectedMonth}
+                    onChange={(e) => setSelectedMonth(Number(e.target.value))}
+                >
+                    <option>Tháng</option>
+                    {months.map((month) => (
+                        <option key={month} value={month}>{month}</option>
+                    ))}
+                </select>
+                <select className="p-2 border rounded">
+                    <option>Tuần</option>
+                </select>
+                <select className="p-2 border rounded">
+                    <option>Ngày</option>
+                </select>
+                <select className="p-2 border rounded">
+                    <option>Khối</option>
+                    <option>10</option>
+                </select>
+                <select className="p-2 border rounded">
+                    <option>Lớp</option>
+                    <option>10/10</option>
+                </select>
+<input type="text" placeholder="Mã học sinh" className="p-2 border rounded" />
+                <input type="text" placeholder="Tên học sinh" className="p-2 border rounded" />
+            </div>
+
+            <table className="w-full border-collapse bg-white">
+                <thead>
+                    <tr className="bg-gray-200">
+                        <th className="border p-2 text-center" rowSpan="2">Tiết học</th>
+                        {Array.from({ length: daysInMonth }, (_, i) => (
+                            <th key={i} className="border p-2 text-center">{String(i + 1).padStart(2, '0')}</th>
+                        ))}
+                    </tr>
+                    <tr className="bg-gray-100">
+                        {Array.from({ length: daysInMonth }, (_, i) => (
+                            <th key={i} className="border p-2 text-center">
+                                {getDayOfWeek(i + 1)}
+                            </th>
+                        ))}
+                    </tr>
+                </thead>
+                <tbody>
+                    {periods.map((period, index) => (
+                        <tr key={index} className={index % 2 === 0 ? "bg-gray-100" : ""}>
+                            <td className="border p-2 text-center">{period}</td>
+                            {Array.from({ length: daysInMonth }, (_, i) => {
+                                const attendanceStatus = getAttendanceStatus(i + 1, index + 1);
+                                return (
+                                    <td key={i} className="border p-2 text-center">
+                                        {attendanceStatus ? (
+                                            <span
+                                                className={`px-2 py-1 rounded ${attendanceStatus.hasExcuse ? "bg-green-300" : "bg-red-300"
+                                                    }`}
+                                            >
+                                                {attendanceStatus.hasExcuse ? "CP" : "KP"}
+                                            </span>
+                                        ) : (
+                                            <input type="checkbox" className="form-checkbox" />
+                                        )}
+                                    </td>
+                                );
+                            })}
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
         </div>
-      </div>
-
-      <div className="overflow-x-auto">
-        <table className="min-w-full bg-white border border-gray-300 shadow-lg rounded-lg">
-          <thead>
-            <tr className="bg-gradient-to-r from-blue-500 to-blue-700 text-white">
-              <th className="px-4 py-2 font-bold border-b border-gray-300 sticky left-0" style={{ minWidth: '200px', maxWidth: '200px', whiteSpace: 'nowrap' }}>
-                Họ và Tên
-              </th>
-              {Array.from({ length: studentsData[0].status.length }).map((_, idx) => (
-                <th key={idx} className="px-4 py-2 font-bold border-b border-gray-300 text-center">{idx + 1}</th>
-              ))}
-              <th className="px-4 py-2 font-bold border-b border-gray-300">Số tiết vắng</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredStudents.map((student, index) => (
-              <tr key={index} className={`hover:bg-gray-100 ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}>
-                <td className="border px-4 py-2 font-semibold text-left sticky left-0" style={{ minWidth: '200px', maxWidth: '200px', whiteSpace: 'nowrap' }}>
-                  {student.name}
-                </td>
-                {student.status.map((status, idx) => (
-                  <td key={idx} className="border px-4 py-2 text-center">
-                    <div className="flex justify-center items-center">
-                      {status ? (
-                        <FaCheckCircle className="text-green-500" title="Present" />
-                      ) : (
-                        <FaTimesCircle className="text-red-500" title="Absent" />
-                      )}
-                    </div>
-                  </td>
-                ))}
-                <td className="border px-4 py-2 text-center">
-                  {student.status.filter(status => !status).length}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
+    );
 };
 
 export default AttendanceTable;
