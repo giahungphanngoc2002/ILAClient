@@ -58,6 +58,31 @@ const Dashboard = () => {
 
     console.log(classes);
 
+    useEffect(() => {
+        const fetchDetailClassByTeacherHR = async () => {
+            setIsLoading(true);
+            try {
+                const response = await ClassService.getAllClassByTeacherHR(teacherId);
+
+                console.log('123123Class:', response);
+
+               
+
+                setIsError(false);
+            } catch (error) {
+                setIsError(true);
+                console.error('Error fetching schedule data:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        if (teacherId) {
+            fetchDetailClassByTeacherHR();
+        }
+    }, [teacherId]);
+
+
     const handleClassClick = (classId) => {
         setSelectedClass(classId); // Cập nhật lớp được chọn
     };

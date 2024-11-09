@@ -109,4 +109,10 @@ export const addResourceToSubject = async (classId, subjectId, linkResource) => 
       return res.data;
     
   };
+  
+
+  export const getAllClassByTeacherHR = async (teacherId) => {
+    const res = await axios.get(`http://localhost:3001/api/class/classes/teacher/${teacherId}`);
+    return res.data;
+};
    
