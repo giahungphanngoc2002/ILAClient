@@ -78,7 +78,7 @@ const NotificationToStudent = () => {
     const handleSubmit = async () => {
         const notificationData = {
             title,
-content: content.replace(/^<p>|<\/p>$/g, ''),
+            content: content.replace(/^<p>|<\/p>$/g, ''),
             senderId, // Set senderId from the user data
             receiverId: selectedRecipients, // Assuming selectedRecipients is an array of recipient IDs
         };
@@ -147,12 +147,12 @@ content: content.replace(/^<p>|<\/p>$/g, ''),
 
             <div style={{ height: '60px' }}></div>
 
-            <div className="px-8 bg-gray-100 mt-8">
+            <div className="px-8 bg-gray-100 mt-8 pb-14">
                 <div className="flex gap-4 h-[calc(100vh-150px)]">
                     {/* Left Side: Text editor */}
                     <div className="w-1/2 bg-white p-4 rounded-lg shadow overflow-y-auto">
                         <label className="block font-medium mb-2">Tiêu đề</label>
-<input
+                        <input
                             type="text"
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
@@ -203,7 +203,7 @@ content: content.replace(/^<p>|<\/p>$/g, ''),
                             <button
                                 className={`px-4 py-2 font-semibold ${selectedTab === 'tab1' ? 'border-b-2 border-blue-500 text-blue-500' : 'text-gray-500'}`}
                                 onClick={() => setSelectedTab('tab1')}
->
+                            >
                                 Học sinh - Số người nhận: {selectedRecipientsTab1 || 0}
                             </button>
                             <button

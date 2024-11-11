@@ -16,7 +16,7 @@ export default function Sidebar({ children, expanded, setExpanded }) {
   return (
     <aside
       className={`h-screen transition-all duration-300 overflow-x-hidden`}
-      style={{ width: expanded ? "16%" : "5%" }}
+      style={{ width: expanded ? "16%" : "4%" }}
     >
       <nav className="fixed h-full flex flex-col bg-white border-r shadow-sm">
         <div className="px-4 flex justify-between items-center">

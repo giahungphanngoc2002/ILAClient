@@ -21,7 +21,6 @@ const students = [
     { id: 10, name: "Hoàng Thị K", class: "10A" }
 ];
 
-
 function AddAbsenceRequest() {
     const [title, setTitle] = useState("");
     const [reason, setReason] = useState("");
@@ -31,6 +30,7 @@ function AddAbsenceRequest() {
     const [selectAll, setSelectAll] = useState(false);
     const [dateRange, setDateRange] = useState([null, null]);
     const [startDate, endDate] = dateRange;
+    const [selectedPeriods, setSelectedPeriods] = useState([]); // State để lưu các tiết được chọn
 
     const handleFileChange = (e) => {
         // Handle file upload logic here
@@ -51,15 +51,21 @@ function AddAbsenceRequest() {
         (classFilter ? student.class === classFilter : true)
     );
 
-    const handleSubmit = () => {
+    const handlePeriodToggle = (period) => {
+        setSelectedPeriods((prev) =>
+            prev.includes(period) ? prev.filter(p => p !== period) : [...prev, period]
+        );
+    };
 
-    }
+    const handleSubmit = () => {
+        // Logic để xử lý khi bấm nút Lưu đơn
+    };
 
     const onBack = () => {
         window.history.back();
-    }
+    };
 
-    console.log(dateRange)
+    console.log(dateRange);
 
     function getDatesBetween(startDate, endDate) {
         let dates = [];
@@ -75,13 +81,13 @@ function AddAbsenceRequest() {
 
     let result = getDatesBetween(dateRange[0], dateRange[1]);
 
-    console.log(result)
+    console.log(result);
 
     function getDateInfo(dateRange) {
         return dateRange.map(date => {
-            const dayOfWeek = format(date, 'EEEE', { locale: vi }); // Ngày thứ mấy trong tuần
-            const weekOfYear = getISOWeek(date); // Tuần thứ mấy trong năm
-            const year = format(date, 'yyyy'); // Năm
+            const dayOfWeek = format(date, 'EEEE', { locale: vi });
+            const weekOfYear = getISOWeek(date);
+            const year = format(date, 'yyyy');
 
             return { day: dayOfWeek, week: weekOfYear, year: year };
         });
@@ -89,13 +95,11 @@ function AddAbsenceRequest() {
 
     console.log(getDateInfo(result));
 
-
-
     return (
         <div>
             <Breadcrumb
                 title="Thêm đơn nghỉ học"
-buttonText="Lưu đơn"
+                buttonText="Lưu đơn"
                 onButtonClick={handleSubmit}
                 onBack={onBack}
             />
@@ -104,7 +108,6 @@ buttonText="Lưu đơn"
 
             <div className="px-8 bg-gray-100 mt-8">
                 <div className="flex gap-4 h-[calc(100vh-150px)]">
-                    {/* Left Side: Form nhập thông tin nghỉ học */}
                     <div className="w-1/2 bg-white p-4 rounded-lg shadow overflow-y-auto">
                         <label className="block font-medium mb-2">Phạm vi ngày nghỉ</label>
                         <DatePicker
@@ -117,6 +120,20 @@ buttonText="Lưu đơn"
                             placeholderText="Chọn phạm vi ngày nghỉ"
                         />
 
+                        <label className="block font-medium mb-2">Chọn số tiết nghỉ</label>
+                        <div className="grid grid-cols-5 gap-2 mb-4">
+                            {[...Array(10)].map((_, index) => (
+                                <label key={index} className="flex items-center gap-2">
+                                    <input
+                                        type="checkbox"
+                                        value={index + 1}
+                                        checked={selectedPeriods.includes(index + 1)}
+                                        onChange={() => handlePeriodToggle(index + 1)}
+                                    />
+                                    Tiết {index + 1}
+                                </label>
+                            ))}
+                        </div>
                         <label className="block font-medium mb-2">Lý do nghỉ học</label>
                         <ReactQuill
                             value={reason}
@@ -125,7 +142,6 @@ buttonText="Lưu đơn"
                         />
                     </div>
 
-                    {/* Right Side: Bảng chọn học sinh */}
                     <div className="w-1/2 bg-white p-4 rounded-lg shadow overflow-y-auto">
                         <div className="flex justify-between items-center mb-4">
                             <h2 className="text-lg font-semibold">Chọn học sinh</h2>
@@ -140,7 +156,6 @@ buttonText="Lưu đơn"
                             </div>
                         </div>
 
-                        {/* Bảng danh sách học sinh */}
                         <table className="min-w-full bg-white">
                             <thead>
                                 <tr>
@@ -151,7 +166,7 @@ buttonText="Lưu đơn"
                                         <input
                                             type="checkbox"
                                             checked={selectAll}
-onChange={handleSelectAllToggle}
+                                            onChange={handleSelectAllToggle}
                                         />
                                     </th>
                                 </tr>

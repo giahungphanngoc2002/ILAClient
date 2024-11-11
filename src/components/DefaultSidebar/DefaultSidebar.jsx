@@ -68,7 +68,7 @@ const DefaultSidebar = () => {
                         <Search className="text-gray-500" size={20} />
                         {expanded && (
                             <input
-type="text"
+                                type="text"
                                 placeholder="Tìm kiếm"
                                 style={{ fontSize: "16px" }}
                                 className="ml-3 w-full text-ellipsis bg-transparent outline-none placeholder-gray-500"

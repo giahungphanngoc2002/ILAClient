@@ -19,6 +19,7 @@ const Dashboard = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [subjects, setSubjects] = useState([]); // Môn học của giáo viên
     const [selectedCard, setSelectedCard] = useState(null);
+    const [classHR, setClassHR] = useState(null);
 
     const navigate = useNavigate();
 
@@ -63,10 +64,12 @@ const Dashboard = () => {
             setIsLoading(true);
             try {
                 const response = await ClassService.getAllClassByTeacherHR(teacherId);
-
-                console.log('123123Class:', response);
-
-               
+                if (response && response.data) {
+                    setClassHR(response.data)
+                } else {
+                    console.error('Unexpected API response structure', response);
+                    setClasses([]);
+                }
 
                 setIsError(false);
             } catch (error) {
@@ -106,7 +109,7 @@ const Dashboard = () => {
         if (!selectedClass) return;  // Kiểm tra xem lớp đã được chọn chưa
 
         // Tìm lớp được chọn
-const selectedClassData = classes.find((classItem) => classItem._id === selectedClass);
+        const selectedClassData = classes.find((classItem) => classItem._id === selectedClass);
 
         if (selectedClassData) {
             // Lọc danh sách môn học mà giáo viên đang dạy trong lớp đó
@@ -183,8 +186,6 @@ const selectedClassData = classes.find((classItem) => classItem._id === selected
         navigate('/student/attendaceStudent')
     }
 
-    console.log(user)
-
     return (
         <div className="flex flex-col p-6 bg-gray-100 min-h-screen">
             {/* Tabs for Class Selection */}
@@ -193,7 +194,7 @@ const selectedClassData = classes.find((classItem) => classItem._id === selected
                     <button
                         key={classItem._id}
                         onClick={() => handleClassClick(classItem._id)}
-className={`px-4 py-2 text-gray-700 rounded-lg focus:outline-none 
+                        className={`px-4 py-2 text-gray-700 rounded-lg focus:outline-none 
                         ${selectedClass === classItem._id ? 'bg-blue-500 text-white ' : ''}`}
                     >
                         {classItem.nameClass}
@@ -242,7 +243,7 @@ className={`px-4 py-2 text-gray-700 rounded-lg focus:outline-none
 
                         {/* Cards Container */}
                         <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
-<div onClick={() => handleCardClick("attendance")} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
+                            <div onClick={() => handleCardClick("attendance")} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
                                 <div className="bg-orange-400 p-4 rounded-full mb-2">
                                     <GrScorecard size={32} className="text-white" />
                                 </div>
@@ -273,6 +274,7 @@ className={`px-4 py-2 text-gray-700 rounded-lg focus:outline-none
                         </div>
                     </div>
 
+
                     <div className="flex flex-col bg-white p-6 rounded-lg shadow-md w-full mt-8">
                         <h2 className="text-xl font-bold mb-6">Quản lớp học</h2>
                         <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
@@ -284,7 +286,7 @@ className={`px-4 py-2 text-gray-700 rounded-lg focus:outline-none
                             </div>
 
                             {/* Other Cards */}
-<div onClick={handleGoToProfileStudentInClass} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
+                            <div onClick={handleGoToProfileStudentInClass} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
                                 <div className="bg-green-400 p-4 rounded-full mb-2">
                                     <GrScorecard size={32} className="text-white" />
                                 </div>
@@ -325,7 +327,7 @@ className={`px-4 py-2 text-gray-700 rounded-lg focus:outline-none
                             </div>
 
                             {/* Other Cards */}
-<div onClick={handleGoToReport} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
+                            <div onClick={handleGoToReport} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
                                 <div className="bg-green-400 p-4 rounded-full mb-2">
                                     <GrScorecard size={32} className="text-white" />
                                 </div>
@@ -375,7 +377,7 @@ className={`px-4 py-2 text-gray-700 rounded-lg focus:outline-none
                     <div className="bg-white p-6 rounded-lg shadow-lg w-3/4">
                         <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Danh sách các môn bạn dạy</h2>
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-{subjects.map((subject) => (
+                            {subjects.map((subject) => (
                                 <button
                                     onClick={() => handleModalClick(subject._id)}
                                     key={subject._id}

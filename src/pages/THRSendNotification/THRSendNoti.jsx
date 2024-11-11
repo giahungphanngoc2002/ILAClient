@@ -83,7 +83,7 @@ const THRSendNoti = () => {
       navigate('/manage/historySendNotification');
     } catch (error) {
       console.error("Error creating notification:", error);
-// Optionally, display an error message to the user
+      // Optionally, display an error message to the user
     }
   };
 
@@ -130,7 +130,7 @@ const THRSendNoti = () => {
 
       <div style={{ height: '60px' }}></div>
 
-      <div className="px-8 bg-gray-100 mt-8">
+      <div className="px-8 bg-gray-100 mt-8 pb-14">
         <div className="flex gap-4 h-[calc(100vh-150px)]">
           {/* Left Side: Text editor */}
           <div className="w-1/2 bg-white p-4 rounded-lg shadow overflow-y-auto">
@@ -166,7 +166,7 @@ const THRSendNoti = () => {
                   placeholder="Lọc theo tên"
                   value={nameFilter}
                   onChange={(e) => setNameFilter(e.target.value)}
-className="px-3 py-2 border border-gray-300 rounded-lg"
+                  className="px-3 py-2 border border-gray-300 rounded-lg"
                 />
               </div>
             </div>
