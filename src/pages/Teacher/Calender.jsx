@@ -39,6 +39,8 @@ const Calendar = ({ onClassClick }) => {
     }
   }, [teacherId]);
 
+  console.log("123123",scheduleData)
+
   useEffect(() => {
     const today = new Date();
     if (selectedYear === today.getFullYear()) {

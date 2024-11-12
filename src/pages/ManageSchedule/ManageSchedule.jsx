@@ -251,7 +251,7 @@ const ManageSchedule = () => {
                                                 {classDetail?.subjectGroup?.SubjectsId.map((subject, index) => (
                                                     <option
                                                         key={index}
-                                                        value={JSON.stringify({ subjectId: subject._id, subjectChuyendeId: null })}
+                                                        value={JSON.stringify({ subjectId: subject._id, subjectChuyendeId: subject?.subjectChuyendeId?._id })}
                                                     >
                                                         {subject?.nameSubject} - {subject?.teacherId?.name}
                                                     </option>
@@ -259,7 +259,7 @@ const ManageSchedule = () => {
                                                 {classDetail?.subjectGroup?.SubjectsChuyendeId.map((subject, index) => (
                                                     <option
                                                         key={index}
-                                                        value={JSON.stringify({ subjectId: null, subjectChuyendeId: subject._id })}
+                                                        value={JSON.stringify({ subjectId: subject?.SubjectsId?._id, subjectChuyendeId: subject._id })}
                                                     >
                                                         {subject?.nameSubject} - {subject?.teacherId?.name}
                                                     </option>
