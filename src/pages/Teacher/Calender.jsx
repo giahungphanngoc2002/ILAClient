@@ -126,8 +126,8 @@ const Calendar = ({ onClassClick }) => {
     }
   };
 
-  const goToClass = (idClass, idSchedule, idSlot, idSubject, semester) => {
-    navigate(`/manage/calender/${idClass}/${idSchedule}/${idSlot}/${idSubject}/${semester}`);
+  const goToClass = (idClass, idSchedule, idSlot, idSubject, ) => {
+    navigate(`/manage/calender/${idClass}/${idSchedule}/${idSlot}/${idSubject}`);
   };
 
   return (
@@ -185,10 +185,14 @@ const Calendar = ({ onClassClick }) => {
                     >
                       {classData ? (
                         <button
-                          onClick={() => goToClass(classData.classId._id, classData.scheduleId, classData._id, classData.subjectId._id, classData.subjectId.semester)}
+                        onClick={() => goToClass(classData.classId._id,
+                           classData.scheduleId, classData._id, classData.subjectId?._id || 
+                           classData.subjectChuyendeId?._id
+                            )}
                         >
                           <div className="text-xs text-gray-700 w-full h-full flex flex-col items-center justify-center">
-                            <div className="font-bold text-blue-800">{classData.subjectId.nameSubject}</div>
+                          <div className="font-bold text-blue-800">{classData?.subjectId?.nameSubject || classData?.subjectChuyendeId?.nameSubject}</div>
+                            
                             <div>{classData.classId.nameClass}</div>
                             <div className={`text-${classData.isCompleted ? 'green' : (classData.isMissed ? 'red' : 'yellow')}-600`}>
                               {classData.isCompleted ? 'Hoàn thành' : (classData.isMissed ? 'Bỏ lỡ' : 'Sắp đến')}

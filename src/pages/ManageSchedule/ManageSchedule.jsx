@@ -17,7 +17,6 @@ const timeSlots = [
     { slot: "Tiết 10" },
 ];
 
-
 const daysOfWeek = ['Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy'];
 
 const ManageSchedule = () => {
@@ -41,15 +40,12 @@ const ManageSchedule = () => {
                 console.error("Error fetching blocks:", error);
             }
         };
-
         fetchBlocks();
-    }, []); // Chỉ gọi một lần khi component mount
+    }, []);
 
     useEffect(() => {
         const fetchClassDetail = async () => {
-            if (!selectedClass) {
-                return;
-            }
+            if (!selectedClass) return;
             try {
                 const classData = await ClassService.getDetailClass(selectedClass);
                 setClassDetail(classData?.data);
@@ -57,12 +53,9 @@ const ManageSchedule = () => {
                 console.error("Error fetching class details:", error);
             }
         };
-
         fetchClassDetail();
-    }, [selectedClass]); // Thêm selectedClass vào dependency array
+    }, [selectedClass]);
 
-
-    // Hàm tách year và week từ giá trị week
     const getYearAndWeekFromValue = (weekValue) => {
         const [year, week] = weekValue.split('-W');
         return { year, week };
@@ -71,26 +64,18 @@ const ManageSchedule = () => {
     const handleStartWeekChange = (e) => {
         const startWeekValue = e.target.value;
         setStartWeek(startWeekValue);
-        const yearWeek = getYearAndWeekFromValue(startWeekValue);
-        setStartYearWeek(yearWeek);
+        setStartYearWeek(getYearAndWeekFromValue(startWeekValue));
     };
 
     const handleEndWeekChange = (e) => {
         const endWeekValue = e.target.value;
         setEndWeek(endWeekValue);
-        const yearWeek = getYearAndWeekFromValue(endWeekValue);
-        setEndYearWeek(yearWeek);
+        setEndYearWeek(getYearAndWeekFromValue(endWeekValue));
     };
 
-    console.log("Start Week:", startYearWeek.week);
-    console.log("End Week:", endYearWeek.week);
-
-    console.log(classDetail)
-
-
-
-    const handleSelectSlot = (classId, day, slot, subject) => {
-        if (!subject) {
+    const handleSelectSlot = (classId, day, slot, subjectData) => {
+        const { subjectId, subjectChuyendeId } = JSON.parse(subjectData);
+        if (!subjectId && !subjectChuyendeId) {
             setError("You need to select a subject for each time slot.");
             return;
         }
@@ -101,7 +86,10 @@ const ManageSchedule = () => {
                 ...prev[classId],
                 [day]: {
                     ...(prev[classId]?.[day] || {}),
-                    [slot]: subject,
+                    [slot]: {
+                        subjectId,
+                        subjectChuyendeId,
+                    },
                 },
             },
         }));
@@ -112,12 +100,7 @@ const ManageSchedule = () => {
         const endYear = parseInt(endYearWeek.year, 10);
         const startWeek = parseInt(startYearWeek.week, 10);
         const endWeek = parseInt(endYearWeek.week, 10);
-
-        // First check if the year is valid
-        if (endYear > startYear) return true;
-        if (endYear === startYear && endWeek > startWeek) return true;
-
-        return false;
+        return endYear > startYear || (endYear === startYear && endWeek > startWeek);
     };
 
     const handleSaveSchedule = async () => {
@@ -125,64 +108,53 @@ const ManageSchedule = () => {
             setError("Please select a class before saving the schedule.");
             return;
         }
-
         if (!isEndWeekGreaterThanStartWeek(startYearWeek, endYearWeek)) {
-            toast.error("Tuần kết thúc nhỏ hơn tuần bắt đầu!!")
+            toast.error("Tuần kết thúc nhỏ hơn tuần bắt đầu!!");
             return;
         }
-
         try {
             const startWeekNumber = parseInt(startYearWeek.week, 10);
             const endWeekNumber = parseInt(endYearWeek.week, 10);
-
-            // Lặp qua các tuần từ tuần bắt đầu đến tuần kết thúc
             for (let currentWeek = startWeekNumber; currentWeek <= endWeekNumber; currentWeek++) {
                 const scheduleData = {
-                    yearNumber: startYearWeek.year, // Năm của tuần bắt đầu (giả định các tuần đều trong cùng một năm)
-                    weekNumber: currentWeek, // Tuần hiện tại trong vòng lặp
+                    yearNumber: startYearWeek.year,
+                    weekNumber: currentWeek,
                     days: daysOfWeek.map((day) => ({
                         dayOfWeek: day,
                         slots: timeSlots
                             .filter((slot) => schedule[selectedClass]?.[day]?.[slot.slot])
                             .map((slot) => {
-                                const subjectId = schedule[selectedClass]?.[day]?.[slot.slot];
+                                const slotData = schedule[selectedClass]?.[day]?.[slot.slot];
                                 return {
-                                    slotNumber: parseInt(slot.slot.replace('Tiết ', '')), // Use the actual slot number (e.g., Tiết 4 => 4)
-                                    subjectId: subjectId,
+                                    slotNumber: parseInt(slot.slot.replace('Tiết ', '')),
+                                    subjectId: slotData.subjectId,
+                                    subjectChuyendeId: slotData.subjectChuyendeId,
                                     classId: selectedClass,
                                     attendanceStatus: {
                                         createdAt: new Date().toISOString(),
-                                        status: false
+                                        status: false,
                                     },
-                                    absentStudentId: []
+                                    absentStudentId: [],
                                 };
-                            })
-                    })).filter(day => day.slots.length > 0)
+                            }),
+                    })).filter((day) => day.slots.length > 0),
                 };
-
-                console.log(`Saving schedule for week: ${currentWeek}`, scheduleData);
-
                 if (!scheduleData.days || scheduleData.days.length === 0) {
                     setError("Schedule is empty, please select at least one subject per time slot.");
                     return;
                 }
-
                 await ScheduleService.createScheduleByClassId(selectedClass, scheduleData);
             }
-
             setError("");
             toast.success("Schedule saved successfully for all weeks!");
-
         } catch (error) {
             console.error("Error saving schedule:", error);
             setError("An error occurred while saving the schedule.");
         }
     };
 
-
     return (
         <div className="container mx-auto p-6 bg-gray-100 rounded-lg shadow-md">
-            {/* Chọn khối */}
             <div className="flex space-x-4 mb-6">
                 <div className="w-1/2">
                     <label className="font-semibold text-lg">Chọn khối:</label>
@@ -202,7 +174,6 @@ const ManageSchedule = () => {
                         ))}
                     </select>
                 </div>
-
                 <div className="w-1/2">
                     <label className="font-semibold text-lg">Chọn lớp:</label>
                     <select
@@ -221,17 +192,11 @@ const ManageSchedule = () => {
                     </select>
                 </div>
             </div>
-
-
             {selectedClass && (
                 <div className="bg-white p-6 rounded-lg shadow-lg">
                     <h2 className="font-bold text-2xl mb-4 text-indigo-700">
-                        {blocks
-                            .find((block) => block._id === selectedBlock)
-                            ?.classIds.find((cls) => cls._id === selectedClass)?.nameClass}
+                        {blocks.find((block) => block._id === selectedBlock)?.classIds.find((cls) => cls._id === selectedClass)?.nameClass}
                     </h2>
-
-                    {/* Thời gian bắt đầu và kết thúc */}
                     <div className="flex">
                         <div className="mb-4 w-1/2 pr-2">
                             <label className="block text-lg font-semibold">Thời gian bắt đầu:</label>
@@ -258,8 +223,6 @@ const ManageSchedule = () => {
                             )}
                         </div>
                     </div>
-
-                    {/* Hiển thị lịch */}
                     <table className="table-auto w-full text-left border-collapse">
                         <thead>
                             <tr className="bg-indigo-100">
@@ -277,15 +240,28 @@ const ManageSchedule = () => {
                                         <td key={dayIndex} className="border px-4 py-2">
                                             <select
                                                 className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                                                onChange={(e) =>
-                                                    handleSelectSlot(selectedClass, day, slot.slot, e.target.value)
+                                                onChange={(e) => handleSelectSlot(selectedClass, day, slot.slot, e.target.value)}
+                                                value={
+                                                    schedule[selectedClass]?.[day]?.[slot.slot]
+                                                        ? JSON.stringify(schedule[selectedClass]?.[day]?.[slot.slot])
+                                                        : ""
                                                 }
-                                                value={schedule[selectedClass]?.[day]?.[slot.slot] || ""}
                                             >
                                                 <option value=""></option>
                                                 {classDetail?.subjectGroup?.SubjectsId.map((subject, index) => (
-                                                    <option key={index} value={subject._id}>
-                                                        {subject.nameSubject} - {subject.teacherId.name}
+                                                    <option
+                                                        key={index}
+                                                        value={JSON.stringify({ subjectId: subject._id, subjectChuyendeId: null })}
+                                                    >
+                                                        {subject?.nameSubject} - {subject?.teacherId?.name}
+                                                    </option>
+                                                ))}
+                                                {classDetail?.subjectGroup?.SubjectsChuyendeId.map((subject, index) => (
+                                                    <option
+                                                        key={index}
+                                                        value={JSON.stringify({ subjectId: null, subjectChuyendeId: subject._id })}
+                                                    >
+                                                        {subject?.nameSubject} - {subject?.teacherId?.name}
                                                     </option>
                                                 ))}
                                             </select>
@@ -297,12 +273,12 @@ const ManageSchedule = () => {
                     </table>
                 </div>
             )}
-
             {selectedClass && (
                 <div className="mt-6 text-center">
                     <button
                         onClick={handleSaveSchedule}
-                        className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded shadow-lg transition duration-200">
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded shadow-lg transition duration-200"
+                    >
                         Save Schedule
                     </button>
                     {Object.keys(schedule).length > 0 && (

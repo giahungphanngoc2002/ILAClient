@@ -417,20 +417,6 @@ const StudentTable = () => {
                 ))}
               </tbody>
             </table>
-            {/* <div className="mt-4 flex justify-between">
-              <button
-                className="flex items-center px-4 py-2 bg-gray-200 text-gray-800 rounded-lg shadow hover:bg-gray-300 transition duration-300"
-                onClick={handleBackSchedule}
-              >
-                <FaArrowLeft className="mr-2" /> Trở về
-              </button>
-              <button
-                onClick={saveStudents}
-                className="bg-blue-500 text-white font-bold text-lg px-6 py-3 rounded-lg hover:bg-green-700 transition duration-300 transform hover:scale-105"
-              >
-                Lưu thay đổi
-              </button>
-            </div> */}
           </div>
         </div>
         <div className="w-1/4 h-full flex flex-col overflow-auto mr-4">

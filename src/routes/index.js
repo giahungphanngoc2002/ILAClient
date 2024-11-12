@@ -158,7 +158,7 @@ export const routes = [
     isShowSideBar: false,
   },
   {
-    path: "manage/calender/:idClass/:idSchedule/:idSlot/:idSubject/:semester",
+    path: "manage/calender/:idClass/:idSchedule/:idSlot/:idSubject",
     page: () => (
       <ProtectedRoute>
         <StudentTable />
