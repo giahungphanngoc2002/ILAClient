@@ -60,15 +60,17 @@ const Dashboard = () => {
     console.log(classes);
 
     useEffect(() => {
+        if (!teacherId) return;
+
         const fetchDetailClassByTeacherHR = async () => {
             setIsLoading(true);
             try {
                 const response = await ClassService.getAllClassByTeacherHR(teacherId);
                 if (response && response.data) {
-                    setClassHR(response.data)
+                    setClassHR(response.data);
                 } else {
                     console.error('Unexpected API response structure', response);
-                    setClasses([]);
+                    setClassHR([]);
                 }
 
                 setIsError(false);
@@ -80,10 +82,11 @@ const Dashboard = () => {
             }
         };
 
-        if (teacherId) {
-            fetchDetailClassByTeacherHR();
-        }
+        fetchDetailClassByTeacherHR();
     }, [teacherId]);
+
+
+    console.log(classHR)
 
 
     const handleClassClick = (classId) => {
@@ -186,6 +189,8 @@ const Dashboard = () => {
         navigate('/student/attendaceStudent')
     }
 
+    console.log(classHR && classHR.teacherHR !== null && classHR.teacherHR === user.id)
+
     return (
         <div className="flex flex-col p-6 bg-gray-100 min-h-screen">
             {/* Tabs for Class Selection */}
@@ -275,39 +280,46 @@ const Dashboard = () => {
                     </div>
 
 
-                    <div className="flex flex-col bg-white p-6 rounded-lg shadow-md w-full mt-8">
-                        <h2 className="text-xl font-bold mb-6">Quản lớp học</h2>
-                        <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
-                            <div onClick={handleGoToManageAbsentRequest} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
-                                <div className="bg-orange-400 p-4 rounded-full mb-2">
-                                    <GrScorecard size={32} className="text-white" />
-                                </div>
-                                <p className="font-semibold">Quản lí đơn nghỉ học</p>
-                            </div>
 
-                            {/* Other Cards */}
-                            <div onClick={handleGoToProfileStudentInClass} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
-                                <div className="bg-green-400 p-4 rounded-full mb-2">
-                                    <GrScorecard size={32} className="text-white" />
-                                </div>
-                                <p className="font-semibold">Điểm số</p>
-                            </div>
+                    {classHR && classHR.teacherHR !== null && classHR.teacherHR === user.id && (
+                        <div>
+                            <div className="flex flex-col bg-white p-6 rounded-lg shadow-md w-full mt-8">
+                                <h2 className="text-xl font-bold mb-6">Quản lớp học</h2>
+                                <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
+                                    <div onClick={handleGoToManageAbsentRequest} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
+                                        <div className="bg-orange-400 p-4 rounded-full mb-2">
+                                            <GrScorecard size={32} className="text-white" />
+                                        </div>
+                                        <p className="font-semibold">Quản lí đơn nghỉ học</p>
+                                    </div>
 
-                            <div onClick={handleGoToProfileStudentInClass} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
-                                <div className="bg-teal-400 p-4 rounded-full mb-2">
-                                    <FaBook size={32} className="text-white" />
-                                </div>
-                                <p className="font-semibold">Thông tin học sinh</p>
-                            </div>
+                                    {/* Other Cards */}
+                                    <div onClick={handleGoToProfileStudentInClass} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
+                                        <div className="bg-green-400 p-4 rounded-full mb-2">
+                                            <GrScorecard size={32} className="text-white" />
+                                        </div>
+                                        <p className="font-semibold">Điểm số</p>
+                                    </div>
 
-                            <div onClick={handleGoToSendNotification} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
-                                <div className="bg-red-400 p-4 rounded-full mb-2">
-                                    <FaClipboardQuestion size={32} className="text-white" />
+                                    <div onClick={handleGoToProfileStudentInClass} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
+                                        <div className="bg-teal-400 p-4 rounded-full mb-2">
+                                            <FaBook size={32} className="text-white" />
+                                        </div>
+                                        <p className="font-semibold">Thông tin học sinh</p>
+                                    </div>
+
+                                    <div onClick={handleGoToSendNotification} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
+                                        <div className="bg-red-400 p-4 rounded-full mb-2">
+                                            <FaClipboardQuestion size={32} className="text-white" />
+                                        </div>
+                                        <p className="font-semibold">Gửi thông báo</p>
+                                    </div>
                                 </div>
-                                <p className="font-semibold">Gửi thông báo</p>
                             </div>
                         </div>
-                    </div>
+                    )}
+
+
 
                     <div className="flex flex-col bg-white p-6 rounded-lg shadow-md w-full mt-8">
                         <h2 className="text-xl font-bold mb-6">Tác vụ</h2>
