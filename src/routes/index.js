@@ -311,7 +311,7 @@ export const routes = [
     isShowSideBar: false,
   },
   {
-    path: "/manage/thrNotification",
+    path: "/manage/thrNotification/:idClass",
     page: () => (
       <ProtectedRoute>
         <THRSendNoti />

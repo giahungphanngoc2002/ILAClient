@@ -159,8 +159,8 @@ const Dashboard = () => {
         navigate(`/manage/profileStudentInClass/${idClass}`)
     }
 
-    const handleGoToSendNotification = () => {
-        navigate('/manage/thrNotification')
+    const handleGoToSendNotification = (idClass) => {
+        navigate(`/manage/thrNotification/${idClass}`)
     }
 
     const handleGoToCalendar = () => {
@@ -318,7 +318,7 @@ const Dashboard = () => {
                                         <p className="font-semibold">Thông tin học sinh</p>
                                     </div>
 
-                                    <div onClick={handleGoToSendNotification} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
+                                    <div onClick={() =>handleGoToSendNotification(classHR._id)} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
                                         <div className="bg-red-400 p-4 rounded-full mb-2">
                                             <FaClipboardQuestion size={32} className="text-white" />
                                         </div>

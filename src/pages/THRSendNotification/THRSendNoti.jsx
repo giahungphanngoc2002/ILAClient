@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Breadcrumb from '../../components/Breadcrumb/Breadcrumb';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import * as ClassService from "../../services/ClassService";
 import * as NotificationService from "../../services/NotificationService";
 import { useSelector } from 'react-redux';
@@ -14,24 +14,24 @@ const THRSendNoti = () => {
   const [file, setFile] = useState(null);
   const [nameFilter, setNameFilter] = useState('');
   const [classFilter, setClassFilter] = useState('');
-  const [selectedTab, setSelectedTab] = useState('tab1'); // Tab state
+  const [selectedTab, setSelectedTab] = useState('tab1');
   const [selectAll, setSelectAll] = useState(false);
   const navigate = useNavigate();
-  const [classData, setClassData] = useState([]);
+  const [classData, setClassData] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const user = useSelector((state) => state.user);
   const [senderId, setSenderId] = useState(user?.id);
+  const { idClass } = useParams();
 
   useEffect(() => {
     setSenderId(user?.id);
   }, [user]);
 
-  console.log(senderId)
   useEffect(() => {
     const fetchClasses = async () => {
       try {
-        const response = await ClassService.getAllClass();
+        const response = await ClassService.getDetailClass(idClass);
         setClassData(response.data);
       } catch (error) {
         console.error("Failed to fetch notifications:", error);
@@ -42,18 +42,15 @@ const THRSendNoti = () => {
     };
 
     fetchClasses();
-  }, []);
+  }, [idClass]);
 
   // Filter for recipientsTab1 (students)
-  const recipientsTab1 = classData.flatMap((classItem) =>
-    classItem.studentID.map(student => ({
-      id: student._id,
-      name: student.email.split('@')[0], // Derive "name" from email if needed
-      phone: student.phone || 'N/A', // Default phone if not available
-      class: classItem.nameClass
-    }))
-  );
-
+  const recipientsTab1 = classData?.studentID?.map(student => ({
+    id: student._id,
+    name: student.email.split('@')[0],
+    phone: student.phone || 'N/A',
+    class: classData.nameClass
+  })) || [];
 
   const handleRecipientToggle = (id) => {
     setSelectedRecipients((prev) =>
@@ -69,34 +66,25 @@ const THRSendNoti = () => {
     const notificationData = {
       title,
       content: content.replace(/^<p>|<\/p>$/g, ''),
-      senderId, // Set senderId from the user data
-      receiverId: selectedRecipients, // Assuming selectedRecipients is an array of recipient IDs
+      senderId,
+      receiverId: selectedRecipients,
     };
-    console.log(senderId)
-    console.log(selectedRecipients)
 
     try {
       const response = await NotificationService.createNotification(notificationData);
       console.log('Notification created successfully:', response);
-
-      // Navigate to history or show success message
       navigate('/manage/historySendNotification');
     } catch (error) {
       console.error("Error creating notification:", error);
-      // Optionally, display an error message to the user
     }
   };
 
-  // Filter recipients based on name and class filters for each tab
-  const filteredRecipients =
-    recipientsTab1.filter((recipient) => {
-      const matchesName = recipient.name.toLowerCase().includes(nameFilter.toLowerCase());
-      const matchesClass = classFilter === '' || recipient.class === classFilter;
-      return matchesName && matchesClass;
-    })
-    ;
+  const filteredRecipients = recipientsTab1.filter((recipient) => {
+    const matchesName = recipient.name.toLowerCase().includes(nameFilter.toLowerCase());
+    const matchesClass = classFilter === '' || recipient.class === classFilter;
+    return matchesName && matchesClass;
+  });
 
-  // Update handleSelectAllToggle to only select filtered students
   const handleSelectAllToggle = () => {
     if (selectAll) {
       setSelectedRecipients([]);
@@ -107,18 +95,13 @@ const THRSendNoti = () => {
     setSelectAll(!selectAll);
   };
 
-  // Count selected recipients for each tab
   const selectedRecipientsTab1 = selectedRecipients.filter((id) =>
     recipientsTab1.some((recipient) => recipient.id === id)
   ).length;
 
-
-
   const onBack = () => {
-    navigate('/manage')
-  }
-
-  console.log(content)
+    navigate('/manage');
+  };
 
   return (
     <div>

@@ -4,40 +4,6 @@ import { FaSearch } from "react-icons/fa";
 import * as ClassService from "../../services/ClassService";
 import { useParams } from "react-router-dom";
 
-const rows = [
-  {
-    id: 1, name: "Thái Quang Bình", cccd: "001092758273", phone: "0913290582", address: "123 Đường A, Quận 1",
-    parent: { name: "Thái Văn Thành", cccd: "101092758273", phone: "0901234567", address: "123 Đường A, Quận 1" }
-  },
-  {
-    id: 2, name: "Nguyễn Thị Mộng Thơ", cccd: "002837462739", phone: "0906448523", address: "456 Đường B, Quận 2",
-    parent: { name: "Thái Văn Thành", cccd: "101092758273", phone: "0901234567", address: "123 Đường A, Quận 1" }
-  },
-  {
-    id: 3, name: "Lê Quang Tuấn", cccd: "003948572739", phone: "0905227389", address: "789 Đường C, Quận 3",
-    parent: { name: "Thái Văn Thành", cccd: "101092758273", phone: "0901234567", address: "123 Đường A, Quận 1" }
-  },
-  {
-    id: 4, name: "Trần Thị Thanh Hà", cccd: "004826382902", phone: "0976280706", address: "101 Đường D, Quận 4",
-    parent: { name: "Thái Văn Thành", cccd: "101092758273", phone: "0901234567", address: "123 Đường A, Quận 1" }
-  },
-  {
-    id: 5, name: "Nguyễn Thị Thúy An", cccd: "005927384920", phone: "0905611298", address: "202 Đường E, Quận 5",
-    parent: { name: "Thái Văn Thành", cccd: "101092758273", phone: "0901234567", address: "123 Đường A, Quận 1" }
-  },
-  {
-    id: 6, name: "Phạm Văn Đức", cccd: "006827384939", phone: "0932738910", address: "303 Đường F, Quận 6",
-    parent: { name: "Thái Văn Thành", cccd: "101092758273", phone: "0901234567", address: "123 Đường A, Quận 1" }
-  },
-  { id: 7, name: "Vũ Minh Tuấn", cccd: "007928473820", phone: "0926283749", address: "404 Đường G, Quận 7" },
-  { id: 8, name: "Bùi Văn Phúc", cccd: "008028374920", phone: "0912384762", address: "505 Đường H, Quận 8" },
-  { id: 9, name: "Hoàng Thị Thanh", cccd: "009129487363", phone: "0962738492", address: "606 Đường I, Quận 9" },
-  { id: 10, name: "Đỗ Thị Lan", cccd: "010238476291", phone: "0952738491", address: "707 Đường J, Quận 10" },
-  { id: 11, name: "Nguyễn Văn Long", cccd: "011283746591", phone: "0948273629", address: "808 Đường K, Quận 11" },
-  { id: 12, name: "Trần Thị Ngọc Huyền", cccd: "012364827193", phone: "0932817364", address: "909 Đường L, Quận 12" },
-  { id: 13, name: "Phan Thị Minh", cccd: "013492837465", phone: "0973827465", address: "1010 Đường M, Quận Tân Bình" },
-];
-
 function ProfileStudentInClass() {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("Học sinh");
@@ -59,16 +25,15 @@ function ProfileStudentInClass() {
     }
   }, [idClass]);
 
-  const filteredRows = rows.filter(row => {
+  // Lọc dữ liệu theo tab và searchTerm
+  const filteredRows = classDetail?.studentID?.filter(student => {
     if (activeTab === "Học sinh") {
-      return row.name.toLowerCase().includes(searchTerm.toLowerCase());
-    } else if (activeTab === "Phụ huynh" && row.parent) {
-      return row.parent.name.toLowerCase().includes(searchTerm.toLowerCase());
+      return student.name?.toLowerCase().includes(searchTerm.toLowerCase());
+    } else if (activeTab === "Phụ huynh" && student.infoContactId) {
+      return student.infoContactId.name?.toLowerCase().includes(searchTerm.toLowerCase());
     }
     return false;
-  });
-
-
+  }) || [];
 
   const onBack = () => {
     window.history.back();
@@ -123,113 +88,50 @@ function ProfileStudentInClass() {
         </div>
 
         <div className="overflow-y-auto mt-4" style={{ maxHeight: '66vh' }}>
-          <table className="min-w-full bg-white " style={{
-            borderCollapse: 'separate', // Đảm bảo không mất border khi sticky
-            width: '100%',
-            minWidth: '800px',
-          }}>
+          <table className="min-w-full bg-white" style={{ borderCollapse: 'separate', width: '100%', minWidth: '800px' }}>
             <thead>
               <tr>
-                <th
-                  style={{
-                    position: 'sticky',
-                    top: 0,
-                    zIndex: 10,
-                    width: "2%",
-                    padding: '8px',
-                    border: '1px solid #ddd',
-                    textAlign: 'center',
-                    backgroundColor: '#f8f9fa',
-                    backgroundClip: 'padding-box', // Đảm bảo không mất border
-                  }}
-                >
+                <th style={{ position: 'sticky', top: 0, zIndex: 10, width: "2%", padding: '8px', border: '1px solid #ddd', textAlign: 'center', backgroundColor: '#f8f9fa' }}>
                   ID
                 </th>
                 {activeTab === "Phụ huynh" && (
-                  <th
-                    style={{
-                      position: 'sticky',
-                      top: 0,
-                      zIndex: 10,
-                      width: "20%",
-                      padding: '8px',
-                      border: '1px solid #ddd',
-                      backgroundColor: '#f8f9fa',
-                      backgroundClip: 'padding-box',
-                    }}
-                  >
+                  <th style={{ position: 'sticky', top: 0, zIndex: 10, width: "20%", padding: '8px', border: '1px solid #ddd', backgroundColor: '#f8f9fa' }}>
                     Tên Học Sinh
                   </th>
                 )}
-                <th
-                  style={{
-                    position: 'sticky',
-                    top: 0,
-                    zIndex: 10,
-                    width: "28%",
-                    padding: '8px',
-                    border: '1px solid #ddd',
-                    backgroundColor: '#f8f9fa',
-                    backgroundClip: 'padding-box',
-                  }}
-                >
+                <th style={{ position: 'sticky', top: 0, zIndex: 10, width: "28%", padding: '8px', border: '1px solid #ddd', backgroundColor: '#f8f9fa' }}>
                   Tên
                 </th>
-                <th
-                  style={{
-                    position: 'sticky',
-                    top: 0,
-                    zIndex: 10,
-                    width: "15%",
-                    padding: '8px',
-                    border: '1px solid #ddd',
-                    backgroundColor: '#f8f9fa',
-                    backgroundClip: 'padding-box',
-                  }}
-                >
+                <th style={{ position: 'sticky', top: 0, zIndex: 10, width: "15%", padding: '8px', border: '1px solid #ddd', backgroundColor: '#f8f9fa' }}>
                   CCCD
                 </th>
-                <th
-                  style={{
-                    position: 'sticky',
-                    top: 0,
-                    zIndex: 10,
-                    width: "15%",
-                    padding: '8px',
-                    border: '1px solid #ddd',
-                    backgroundColor: '#f8f9fa',
-                    backgroundClip: 'padding-box',
-                  }}
-                >
+                <th style={{ position: 'sticky', top: 0, zIndex: 10, width: "15%", padding: '8px', border: '1px solid #ddd', backgroundColor: '#f8f9fa' }}>
                   Số điện thoại
                 </th>
-                <th
-                  style={{
-                    position: 'sticky',
-                    top: 0,
-                    zIndex: 10,
-                    width: "40%",
-                    padding: '8px',
-                    border: '1px solid #ddd',
-                    backgroundColor: '#f8f9fa',
-                    backgroundClip: 'padding-box',
-                  }}
-                >
+                <th style={{ position: 'sticky', top: 0, zIndex: 10, width: "40%", padding: '8px', border: '1px solid #ddd', backgroundColor: '#f8f9fa' }}>
                   Địa chỉ
                 </th>
               </tr>
             </thead>
             <tbody>
-              {filteredRows.map((row) => (
-                <tr key={row.id} className="hover:bg-gray-200 odd:bg-gray-100">
-                  <td style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'center' }}>{row.id}</td>
+              {filteredRows.map((student, index) => (
+                <tr key={student._id || index} className="hover:bg-gray-200 odd:bg-gray-100">
+                  <td style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'center' }}>{index + 1}</td>
                   {activeTab === "Phụ huynh" && (
-                    <td style={{ padding: '8px', border: '1px solid #ddd' }}>{row.name}</td>
+                    <td style={{ padding: '8px', border: '1px solid #ddd' }}>{student.name}</td>
                   )}
-                  <td style={{ padding: '8px', border: '1px solid #ddd' }}>{activeTab === "Học sinh" ? row.name : row.parent.name}</td>
-                  <td style={{ padding: '8px', border: '1px solid #ddd' }}>{activeTab === "Học sinh" ? row.cccd : row.parent.cccd}</td>
-                  <td style={{ padding: '8px', border: '1px solid #ddd' }}>{activeTab === "Học sinh" ? row.phone : row.parent.phone}</td>
-                  <td style={{ padding: '8px', border: '1px solid #ddd' }}>{activeTab === "Học sinh" ? row.address : row.parent.address}</td>
+                  <td style={{ padding: '8px', border: '1px solid #ddd' }}>
+                    {activeTab === "Học sinh" ? student.name : student.infoContactId?.name}
+                  </td>
+                  <td style={{ padding: '8px', border: '1px solid #ddd' }}>
+                    {activeTab === "Học sinh" ? student.cccd : student.infoContactId?.cccd}
+                  </td>
+                  <td style={{ padding: '8px', border: '1px solid #ddd' }}>
+                    {activeTab === "Học sinh" ? student.phone : student.infoContactId?.phone}
+                  </td>
+                  <td style={{ padding: '8px', border: '1px solid #ddd' }}>
+                    {activeTab === "Học sinh" ? student.address : student.infoContactId?.address}
+                  </td>
                 </tr>
               ))}
               {filteredRows.length < 10 &&
