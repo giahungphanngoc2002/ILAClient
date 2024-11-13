@@ -5,7 +5,7 @@ import { FaArrowLeft } from 'react-icons/fa';
 import * as ClassService from "../../services/ClassService";
 import * as ScoreSbujectService from "../../services/ScoreSbujectService";
 import * as ScheduleService from "../../services/ScheduleService";
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { GrView } from "react-icons/gr";
 import { toast } from "react-toastify";
@@ -29,6 +29,17 @@ const StudentTable = () => {
     2: { diemThuongXuyen: [], diemGiuaKi: [], diemCuoiKi: '' }
   });
   const [filteredStudents, setFilteredStudents] = useState(students);
+  const location = useLocation();
+  const { year, week } = location.state || {};
+  const [dayOfWeek, setDayOfWeek] = useState(null);
+  const [targetSlot, setTargetSlot] = useState(null);
+
+  useEffect(() => {
+    if (year && week) {
+      console.log('Year:', year, 'Week:', week);
+      // Sử dụng `year` và `week` theo yêu cầu của bạn
+    }
+  }, [year, week]);
 
   useEffect(() => {
     if (semesterScores[selectedSemester]) {
@@ -62,9 +73,14 @@ const StudentTable = () => {
       try {
         // Lấy dữ liệu về lịch học (schedules)
         const schedulesData = await ScheduleService.getDetailScheduleById(idSchedule);
-        console.log(schedulesData)
+
+        console.log("schedule",schedulesData)
+        setDayOfWeek(schedulesData.data.dayOfWeek);
+        
+      
         // Tìm slot dựa vào slotId
         const targetSlot = schedulesData?.data?.slots?.find(slot => slot._id === idSlot);
+        setTargetSlot(targetSlot);
         console.log(targetSlot)
         if (targetSlot) {
           // Lấy danh sách absentStudentId từ slot tương ứng
@@ -117,7 +133,6 @@ const StudentTable = () => {
 
   // Chạy khi students hoặc studentsAbsent thay đổi
 
-
   const toggleStatus = (id) => {
     setStudents((prevStudents) => {
       const updatedStudents = prevStudents.map(student =>
@@ -143,7 +158,6 @@ const StudentTable = () => {
       return updatedTypes;
     });
   };
-
 
   const handleAbsenceTypeChange = (id, type) => {
     setAbsenceTypes(prevTypes => ({
@@ -173,7 +187,6 @@ const StudentTable = () => {
 
     return { categorizedScores, scoreId };
   };
-
 
   const openModal = async (student) => {
     try {
@@ -265,11 +278,9 @@ const StudentTable = () => {
     });
   };
 
-
   const handleBackSchedule = () => {
     navigate('/manage/calender');
   };
-
 
   const mutation = useMutation({
     mutationFn: async (newAbsentStudents) => {
@@ -307,7 +318,6 @@ const StudentTable = () => {
     // Gọi mutation để cập nhật danh sách học sinh vắng
     mutation.mutate(newAbsentStudents);
   };
-
 
 
   const handleSearch = (query) => {
@@ -390,7 +400,6 @@ const StudentTable = () => {
                         tooltipText={student.status ? (student.isAbsent ? 'Vắng mặt' : 'Đã điểm danh') : 'Chưa điểm danh'}
                       />
 
-
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {!student.status && (
@@ -404,7 +413,6 @@ const StudentTable = () => {
                         </select>
                       )}
                     </td>
-
 
                     <td className="px-6 py-4 whitespace-nowrap">
                       <GrView
@@ -420,7 +428,8 @@ const StudentTable = () => {
           </div>
         </div>
         <div className="w-1/4 h-full flex flex-col overflow-auto mr-4">
-          <AbsenceRequestList />
+          <AbsenceRequestList idClass={idClass} year={year} week={week} dayOfWeek={dayOfWeek}
+        targetSlot={targetSlot} />
         </div>
       </div>
       {showModal && studentScores && (
@@ -559,7 +568,6 @@ const StudentTable = () => {
             <Button variant="secondary" onClick={closeModal}>
               Tắt
             </Button>
-
 
             <Button
               variant="primary"

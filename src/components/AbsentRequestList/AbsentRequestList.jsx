@@ -1,49 +1,74 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import * as ClassService from "../../services/ClassService";
 
-const absenceRequests = [
-    {
-        id: 1,
-        studentName: "Hoàng Thị Kim Thảo",
-        absenceDate: "15/10/2024",
-        reason: "Gia đình có việc quan trọng",
-        parentName: "Hoàng Thị Hồng",
-        submittedTime: "21h10, 15/10/2024"
-    },
-    {
-        id: 2,
-        studentName: "Nguyễn Văn Bình",
-        absenceDate: "16/10/2024",
-        reason: "Bị ốm",
-        parentName: "Nguyễn Thị Lan",
-        submittedTime: "08h30, 16/10/2024"
-    },
-    {
-        id: 3,
-        studentName: "Trần Thị Mai",
-        absenceDate: "17/10/2024",
-        reason: "Đi du lịch cùng gia đình",
-        parentName: "Trần Văn Hùng",
-        submittedTime: "19h45, 16/10/2024"
-    },
-    {
-        id: 4,
-        studentName: "Lê Quốc Anh",
-        absenceDate: "18/10/2024",
-        reason: "Tham gia cuộc thi thể thao",
-        parentName: "Lê Văn Nam",
-        submittedTime: "17h20, 17/10/2024"
-    },
-    {
-        id: 5,
-        studentName: "Phạm Thị Lan Hương",
-        absenceDate: "19/10/2024",
-        reason: "Bận việc gia đình",
-        parentName: "Phạm Văn Bình",
-        submittedTime: "12h50, 18/10/2024"
+const AbsenceRequestList = ({ idClass, year, week, dayOfWeek, targetSlot }) => {
+    const [absenceRequests, setAbsenceRequests] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isError, setIsError] = useState(false);
+
+    useEffect(() => {
+        console.log("Year:", year, "Week:", week, "Day of Week:", dayOfWeek, "Target Slot:", targetSlot);
+    }, [year, week, dayOfWeek, targetSlot]);
+
+    useEffect(() => {
+        const fetchAbsenceRequests = async () => {
+            setIsLoading(true);
+            setIsError(false);
+            try {
+                const response = await ClassService.getDetailApplicationAbsentByIdClass(idClass);
+                if (response && Array.isArray(response.applications)) {
+                    setAbsenceRequests(response.applications);
+                } else {
+                    console.error("Unexpected response format:", response);
+                    setAbsenceRequests([]);
+                }
+            } catch (error) {
+                console.error("Failed to fetch absence requests:", error);
+                setIsError(true);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        if (idClass) {
+            fetchAbsenceRequests();
+        }
+    }, [idClass]);
+
+    // Hàm để tính số tuần của một ngày nhất định
+
+// Lọc các yêu cầu nghỉ học khớp với các điều kiện về ngày, tuần, và tiết
+// Lọc các yêu cầu nghỉ học khớp với các điều kiện về năm, tuần, và tiết
+const filteredAbsenceRequests = absenceRequests.filter(request => {
+    const requestWeek = parseInt(request.week); // Lấy tuần từ request
+    const requestYear = parseInt(request.year); // Lấy năm từ request
+    const requestSlot = request.slot;
+
+    console.log("Request Year:", requestYear);
+    console.log("Request Week:", requestWeek);
+    console.log("Expected Year:", year);
+    console.log("Expected Week:", week);
+    console.log("Expected DayOfWeek:", dayOfWeek);
+    console.log("Expected Slot Number:", targetSlot?.slotNumber);
+
+    // So sánh năm, tuần, và slot để xác nhận yêu cầu nghỉ học
+    return (
+        requestYear === parseInt(year) && // So sánh năm
+        requestWeek === parseInt(week) && // So sánh tuần
+        requestSlot.includes(targetSlot.slotNumber) // So sánh slot
+    );
+});
+
+    
+
+    if (isLoading) {
+        return <div>Loading...</div>;
     }
-];
 
-const AbsenceRequestList = () => {
+    if (isError) {
+        return <div>Error loading absence requests.</div>;
+    }
+
     return (
         <div
             className="bg-white overflow-hidden"
@@ -58,32 +83,35 @@ const AbsenceRequestList = () => {
             <div className="sticky top-0 bg-white z-10 p-6">
                 <h2 className="text-xl font-bold text-blue-500 m-0">Danh sách đơn nghỉ học</h2>
             </div>
-            <div className="overflow-y-auto h-full" >
-                {absenceRequests.map((request) => (
-                    <div key={request.id} className="p-4 mb-2 bg-white">
-                        <div className="grid grid-cols-12 mb-2">
-                            <div className="col-span-6 font-medium">
-                                {request.id}. {request.studentName}
+            <div className="overflow-y-auto h-full">
+                {filteredAbsenceRequests.length > 0 ? (
+                    filteredAbsenceRequests.map((request, index) => (
+                        <div key={request._id || index} className="p-4 mb-2 bg-white">
+                            <div className="grid grid-cols-12 mb-2">
+                                <div className="col-span-6 font-medium">
+                                    {index + 1}. {request.studentId?.name || "Unknown"}
+                                </div>
+                            </div>
+                            <div className="text-gray-700 mb-1">
+                                Ngày xin nghỉ: <span className="font-semibold">{request.dateOff}</span>
+                            </div>
+                            <div className="text-gray-700 mb-1">
+                                Tiết Nghỉ: <span className="font-semibold">{request.slot}</span>
+                            </div>
+                            <div className="text-gray-700 mb-1">
+                                Lý do: <span className="font-semibold" dangerouslySetInnerHTML={{ __html: request.content }} />
+                            </div>
+                            <div className="text-gray-700">
+                                Gửi lúc: <span className="font-semibold">{new Date(request.createdAt).toLocaleString()}</span>
                             </div>
                         </div>
-                        <div className="text-gray-700 mb-1">
-                            Ngày xin nghỉ: <span className="font-semibold">{request.absenceDate}</span>
-                        </div>
-                        <div className="text-gray-700 mb-1">
-                            Lý do: <span className="font-semibold">{request.reason}</span>
-                        </div>
-                        <div className="text-gray-700 mb-1">
-                            Phụ huynh gửi: <span className="font-semibold">{request.parentName}</span>
-                        </div>
-                        <div className="text-gray-700">
-                            Gửi lúc: <span className="font-semibold">{request.submittedTime}</span>
-                        </div>
-                    </div>
-                ))}
+                    ))
+                ) : (
+                    <div className="text-gray-700 p-4">Không có yêu cầu nghỉ học nào phù hợp.</div>
+                )}
             </div>
         </div>
     );
 };
-
 
 export default AbsenceRequestList;

@@ -280,7 +280,7 @@ export const routes = [
     isShowSideBar: true,
   },
   {
-    path: "/manage/addAbsenceRequest",
+    path: "/manage/addAbsenceRequest/:idClass",
     page: () => (
       <ProtectedRoute>
         <AddAbsenceRequest />
@@ -289,6 +289,7 @@ export const routes = [
     isShowHeader: false,
     isShowSideBar: false,
   },
+
   {
     path: "/manage/profileStudentInClass",
     page: () => (

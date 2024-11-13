@@ -128,8 +128,10 @@ const Calendar = ({ onClassClick }) => {
     }
   };
 
-  const goToClass = (idClass, idSchedule, idSlot, idSubject, ) => {
-    navigate(`/manage/calender/${idClass}/${idSchedule}/${idSlot}/${idSubject}`);
+  const goToClass = (idClass, idSchedule, idSlot, idSubject) => {
+    navigate(`/manage/calender/${idClass}/${idSchedule}/${idSlot}/${idSubject}`, {
+      state: { year: selectedYear, week: currentWeekNumber }
+    });
   };
 
   return (
@@ -189,7 +191,7 @@ const Calendar = ({ onClassClick }) => {
                         <button
                         onClick={() => goToClass(classData.classId._id,
                            classData.scheduleId, classData._id, classData.subjectId?._id || 
-                           classData.subjectChuyendeId?._id
+                           classData.subjectChuyendeId?._id, // Truyền `day` vào goToClass
                             )}
                         >
                           <div className="text-xs text-gray-700 w-full h-full flex flex-col items-center justify-center">

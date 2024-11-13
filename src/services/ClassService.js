@@ -5,7 +5,6 @@ export const createClass = async (data) => {
     return res.data
 }
 
-
 export const updateClass = async (id, data) => {
     const res = await axios.put(`http://localhost:3001/api/class/updateClass/${id}`, data)
     return res.data
@@ -25,7 +24,6 @@ export const getAllClass = async () => {
     const res = await axios.get(`http://localhost:3001/api/class/getAllClass`)
     return res.data
 }
-
 
 export const addClassHistory = async (classId, historyData) => {
     const res = await axios.post(`http://localhost:3001/api/class/class/${classId}/history`, historyData);
@@ -110,9 +108,22 @@ export const addResourceToSubject = async (classId, subjectId, linkResource) => 
     
   };
   
-
-  export const getAllClassByTeacherHR = async (teacherId) => {
+  export const getDetailClassByTeacherHR = async (teacherId) => {
     const res = await axios.get(`http://localhost:3001/api/class/classes/teacher/${teacherId}`);
     return res.data;
+};
+export const getAllStudentsByTeacherHR = async (teacherId) => {
+    const res = await axios.get(`http://localhost:3001/api/class/students/teacher/${teacherId}`);
+    return res.data;
+};
+
+export const createApplication = async (classId, applicationData) => {
+    const res = await axios.post(`http://localhost:3001/api/class/classes/${classId}/applicationabsent`, applicationData);
+    return res.data;  
+};
+
+export const getDetailApplicationAbsentByIdClass = async (classId) => {
+    const res = await axios.get(`http://localhost:3001/api/class/classes/${classId}/applicationabsent`);
+    return res.data; 
 };
    

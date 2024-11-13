@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import ReactQuill from "react-quill";
@@ -6,20 +6,11 @@ import "react-quill/dist/quill.snow.css";
 import Breadcrumb from "../../components/Breadcrumb/Breadcrumb";
 import { format, getISOWeek } from 'date-fns';
 import { vi } from 'date-fns/locale';
-
+import { useParams } from "react-router-dom";
+import * as ClassService from "../../services/ClassService";
+import { useSelector } from "react-redux";
+import { toast } from "react-toastify";
 // Các dữ liệu mẫu cho học sinh
-const students = [
-    { id: 1, name: "Nguyễn Văn A", class: "10A" },
-    { id: 2, name: "Trần Thị B", class: "10A" },
-    { id: 3, name: "Lê Văn C", class: "10A" },
-    { id: 4, name: "Phạm Thị D", class: "10A" },
-    { id: 5, name: "Ngô Văn E", class: "10A" },
-    { id: 6, name: "Đinh Thị F", class: "10A" },
-    { id: 7, name: "Lý Văn G", class: "10A" },
-    { id: 8, name: "Vũ Thị H", class: "10A" },
-    { id: 9, name: "Trịnh Văn I", class: "10A" },
-    { id: 10, name: "Hoàng Thị K", class: "10A" }
-];
 
 function AddAbsenceRequest() {
     const [title, setTitle] = useState("");
@@ -31,7 +22,53 @@ function AddAbsenceRequest() {
     const [dateRange, setDateRange] = useState([null, null]);
     const [startDate, endDate] = dateRange;
     const [selectedPeriods, setSelectedPeriods] = useState([]); // State để lưu các tiết được chọn
+    const [students, setStudents] = useState("");
+    const{idClass} = useParams();
+    const user = useSelector((state) => state.user);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isError, setIsError] = useState(false);
+    const [teacherId, setTeacherId] = useState(user?.id);
 
+    useEffect(() => {
+        setTeacherId(user?.id);
+    }, [user]);
+
+    useEffect(() => {
+        const fetchStudentsinClass = async () => {
+            setIsLoading(true);
+            try {
+                const response = await ClassService.getDetailClass(idClass);
+    
+                if (response && response.data) {
+                    const { nameClass, studentID } = response.data;
+                    
+                    // Giả sử `studentID` là mảng chứa id của học sinh. Bạn có thể tạo mẫu dữ liệu như sau:
+                    const formattedStudents = studentID.map((studentId, index) => ({
+                        id: studentId, // Sử dụng id từ studentID
+                        name: studentId.name, // Bạn cần thay thế tên này nếu có API khác để lấy tên thực
+                        class: nameClass // Đặt `class` bằng `nameClass`
+                    }));
+    
+                    setStudents(formattedStudents); // Đổ dữ liệu học sinh đã format
+                    setIsError(false);
+                } else {
+                    console.error('Unexpected API response structure', response);
+                    setStudents([]);
+                }
+            } catch (error) {
+                setIsError(true);
+                console.error('Error fetching schedule data:', error);
+                setStudents([]);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+    
+        if (idClass) {
+            fetchStudentsinClass();
+        }
+    }, [ idClass]);
+    
     const handleFileChange = (e) => {
         // Handle file upload logic here
     };
@@ -46,10 +83,12 @@ function AddAbsenceRequest() {
         );
     };
 
-    const filteredStudents = students.filter((student) =>
+    const filteredStudents = Array.isArray(students)
+    ? students.filter((student) =>
         student.name.toLowerCase().includes(nameFilter.toLowerCase()) &&
         (classFilter ? student.class === classFilter : true)
-    );
+    )
+    : [];
 
     const handlePeriodToggle = (period) => {
         setSelectedPeriods((prev) =>
@@ -57,8 +96,32 @@ function AddAbsenceRequest() {
         );
     };
 
-    const handleSubmit = () => {
-        // Logic để xử lý khi bấm nút Lưu đơn
+    const handleSubmit = async () => {
+        try {
+            // Lấy thông tin tuần, năm và ngày nghỉ từ `dateRange`
+            const formattedDates = dateRange.map(date => ({
+                week: getISOWeek(date),
+                year: format(date, 'yyyy'),
+                dateOff: format(date, 'yyyy-MM-dd'),
+            }));
+    
+            // Chuẩn bị dữ liệu theo đúng model
+            const applicationData = {
+                week: formattedDates[0]?.week.toString(), // Lấy tuần từ ngày bắt đầu
+                year: formattedDates[0]?.year.toString(), // Lấy năm từ ngày bắt đầu
+                dateOff: formattedDates.map(date => date.dateOff).join(', '), // Ghép ngày nghỉ thành chuỗi
+                content: reason, // Nội dung lý do nghỉ học
+                slot: selectedPeriods, // Danh sách tiết nghỉ
+                studentId: selectedStudent, // ID học sinh
+            };
+    
+            const response = await ClassService.createApplication(idClass, applicationData);
+            toast.success("Gửi Đơn Thành Công");
+            // Thông báo cho người dùng khi thành công hoặc điều hướng
+        } catch (error) {
+            console.error("Failed to create application:", error);
+            // Xử lý lỗi nếu cần
+        }
     };
 
     const onBack = () => {
