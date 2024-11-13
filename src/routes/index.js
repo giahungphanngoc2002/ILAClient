@@ -33,6 +33,8 @@ import QuestionAI from "../pages/QuestionManage/goToCreateQuestionByAI";
 import AddAbsenceRequest from "../pages/AddAbsenceRequest/AddAbsenceRequest";
 import ProfileStudentInClass from "../pages/ProfileStudentInClass/ProfileStudentInClass";
 import THRSendNoti from "../pages/THRSendNotification/THRSendNoti";
+import ScoreTableStudent from "../pages/ScoreTableStudent/ScoreTableStudent";
+import ConductEvaluation from "../pages/ConductEvaluation/ConductEvaluation";
 export const routes = [
   {
     path: "/",
@@ -298,10 +300,30 @@ export const routes = [
     isShowSideBar: false,
   },
   {
+    path: "/manage/scoreTableStudent",
+    page: () => (
+      <ProtectedRoute>
+        <ScoreTableStudent />
+      </ProtectedRoute>
+    ),
+    isShowHeader: false,
+    isShowSideBar: false,
+  },
+  {
     path: "/manage/thrNotification",
     page: () => (
       <ProtectedRoute>
         <THRSendNoti />
+      </ProtectedRoute>
+    ),
+    isShowHeader: false,
+    isShowSideBar: false,
+  },
+  {
+    path: "/manage/conductEvaluation",
+    page: () => (
+      <ProtectedRoute>
+        <ConductEvaluation />
       </ProtectedRoute>
     ),
     isShowHeader: false,
@@ -365,7 +387,7 @@ export const routes = [
       </ProtectedRoute>
     ),
     isShowHeader: false,
-    isShowSideBar: true,
+    isShowSideBar: false,
   },
   {
     path: "*",

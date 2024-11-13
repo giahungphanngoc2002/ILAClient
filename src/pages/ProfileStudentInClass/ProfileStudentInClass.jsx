@@ -37,28 +37,18 @@ const rows = [
 ];
 
 function ProfileStudentInClass() {
-  const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("Học sinh");
-
-  const rowsPerPage = 10;
 
   // Lọc danh sách dựa trên tab hiện tại
   const filteredRows = rows.filter(row => {
     if (activeTab === "Học sinh") {
       return row.name.toLowerCase().includes(searchTerm.toLowerCase());
     } else if (activeTab === "Phụ huynh" && row.parent) {
-return row.parent.name.toLowerCase().includes(searchTerm.toLowerCase());
+      return row.parent.name.toLowerCase().includes(searchTerm.toLowerCase());
     }
     return false;
   });
-
-  const indexOfLastRow = currentPage * rowsPerPage;
-  const indexOfFirstRow = indexOfLastRow - rowsPerPage;
-  const currentRows = filteredRows.slice(indexOfFirstRow, indexOfLastRow);
-
-  const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
-  const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
 
   const handleSubmit = () => {
     // Xử lý khi nhấn lưu
@@ -68,18 +58,12 @@ return row.parent.name.toLowerCase().includes(searchTerm.toLowerCase());
     window.history.back();
   };
 
-  const goToPage = (pageNumber) => {
-    setCurrentPage(pageNumber);
-  };
-
   const handleSearch = (event) => {
     setSearchTerm(event.target.value);
-    setCurrentPage(1);
   };
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
-    setCurrentPage(1);
     setSearchTerm("");
   };
 
@@ -107,7 +91,7 @@ return row.parent.name.toLowerCase().includes(searchTerm.toLowerCase());
         </button>
       </div>
 
-      <div className="bg-white mt-1 rounded-lg">
+      <div className="bg-white mt-1 rounded-lg overflow-x-auto" style={{ maxWidth: '100%' }}>
         <div className="mt-4 flex items-center border border-gray-300 rounded-md p-2 bg-white">
           <FaSearch className="text-gray-400 mr-2" />
           <input
@@ -120,34 +104,40 @@ return row.parent.name.toLowerCase().includes(searchTerm.toLowerCase());
         </div>
 
         <div className="overflow-x-auto mt-4">
-          <table className="min-w-full bg-white border border-gray-200 rounded-lg shadow-md" style={{ minHeight: '400px' }}>
+          <table className="min-w-full bg-white border border-gray-200 rounded-lg shadow-md" style={{
+            borderCollapse: 'collapse',
+            width: '100%',
+            minWidth: '800px',
+            minHeight: '400px', // Đặt chiều cao tối thiểu để giữ nguyên kích thước bảng
+          }}>
             <thead>
               <tr>
-                <th style={{ width: "2%" }} className="py-3 px-4 text-left text-sm font-semibold text-gray-700 border text-center">ID</th>
+                <th style={{ width: "2%", padding: '8px', border: '1px solid #ddd', textAlign: 'center', backgroundColor: '#f8f9fa' }}>ID</th>
                 {activeTab === "Phụ huynh" && (
-                  <th style={{ width: "20%" }} className="py-3 px-4 text-left text-sm font-semibold text-gray-700 border">Tên Học Sinh</th>
+                  <th style={{ width: "20%", padding: '8px', border: '1px solid #ddd', backgroundColor: '#f8f9fa' }}>Tên Học Sinh</th>
                 )}
-                <th style={{ width: "28%" }} className="py-3 px-4 text-left text-sm font-semibold text-gray-700 border">Tên</th>
-                <th style={{ width: "15%" }} className="py-3 px-4 text-left text-sm font-semibold text-gray-700 border">CCCD</th>
-<th style={{ width: "15%" }} className="py-3 px-4 text-left text-sm font-semibold text-gray-700 border">Số điện thoại</th>
-                <th style={{ width: "40%" }} className="py-3 px-4 text-left text-sm font-semibold text-gray-700 border">Địa chỉ</th>
+                <th style={{ width: "28%", padding: '8px', border: '1px solid #ddd', backgroundColor: '#f8f9fa' }}>Tên</th>
+                <th style={{ width: "15%", padding: '8px', border: '1px solid #ddd', backgroundColor: '#f8f9fa' }}>CCCD</th>
+                <th style={{ width: "15%", padding: '8px', border: '1px solid #ddd', backgroundColor: '#f8f9fa' }}>Số điện thoại</th>
+                <th style={{ width: "40%", padding: '8px', border: '1px solid #ddd', backgroundColor: '#f8f9fa' }}>Địa chỉ</th>
               </tr>
             </thead>
             <tbody>
-              {currentRows.map((row) => (
+              {filteredRows.map((row) => (
                 <tr key={row.id} className="hover:bg-gray-200 odd:bg-gray-100">
-                  <td className="py-3 px-4 border text-gray-700 text-center">{row.id}</td>
+                  <td style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'center' }}>{row.id}</td>
                   {activeTab === "Phụ huynh" && (
-                    <td className="py-3 px-4 border text-gray-700">{row.name}</td>
+                    <td style={{ padding: '8px', border: '1px solid #ddd' }}>{row.name}</td>
                   )}
-                  <td className="py-3 px-4 border text-gray-700">{activeTab === "Học sinh" ? row.name : row.parent.name}</td>
-                  <td className="py-3 px-4 border text-gray-700">{activeTab === "Học sinh" ? row.cccd : row.parent.cccd}</td>
-                  <td className="py-3 px-4 border text-gray-700">{activeTab === "Học sinh" ? row.phone : row.parent.phone}</td>
-                  <td className="py-3 px-4 border text-gray-700">{activeTab === "Học sinh" ? row.address : row.parent.address}</td>
+                  <td style={{ padding: '8px', border: '1px solid #ddd' }}>{activeTab === "Học sinh" ? row.name : row.parent.name}</td>
+                  <td style={{ padding: '8px', border: '1px solid #ddd' }}>{activeTab === "Học sinh" ? row.cccd : row.parent.cccd}</td>
+                  <td style={{ padding: '8px', border: '1px solid #ddd' }}>{activeTab === "Học sinh" ? row.phone : row.parent.phone}</td>
+                  <td style={{ padding: '8px', border: '1px solid #ddd' }}>{activeTab === "Học sinh" ? row.address : row.parent.address}</td>
                 </tr>
               ))}
-              {currentRows.length < rowsPerPage &&
-                Array.from({ length: rowsPerPage - currentRows.length }).map((_, index) => (
+              {/* Thêm hàng trống nếu số lượng hàng hiện tại ít hơn 10 */}
+              {filteredRows.length < 10 &&
+                Array.from({ length: 10 - filteredRows.length }).map((_, index) => (
                   <tr key={`empty-${index}`} className="bg-white">
                     <td className="py-3 px-4 border text-gray-700 text-center">&nbsp;</td>
                     {activeTab === "Phụ huynh" && <td className="py-3 px-4 border text-gray-700">&nbsp;</td>}
@@ -159,21 +149,6 @@ return row.parent.name.toLowerCase().includes(searchTerm.toLowerCase());
                 ))}
             </tbody>
           </table>
-        </div>
-
-        <div className="flex justify-center my-6 space-x-2">
-          {pages.map((page) => (
-            <button
-              key={page}
-              onClick={() => goToPage(page)}
-              className={`px-4 py-2 rounded-lg text-sm font-semibold ${currentPage === page
-                ? "bg-blue-500 text-white"
-                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                }`}
-            >
-              {page}
-            </button>
-          ))}
         </div>
       </div>
     </div>

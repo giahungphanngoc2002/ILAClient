@@ -7,6 +7,7 @@ import * as ClassService from "../../services/ClassService";
 import { useNavigate } from 'react-router-dom';
 import { BiMailSend } from "react-icons/bi";
 import { CalendarClock } from 'lucide-react';
+import { AiOutlineTrophy } from "react-icons/ai";
 
 const Dashboard = () => {
     const user = useSelector((state) => state.user);
@@ -189,6 +190,14 @@ const Dashboard = () => {
         navigate('/student/attendaceStudent')
     }
 
+    const handleGoToScoreTableStudent = () => {
+        navigate('/manage/scoreTableStudent')
+    }
+
+    const handleGoToConductEvaluation = () => {
+        navigate('/manage/conductEvaluation')
+    }
+
     console.log(classHR && classHR.teacherHR !== null && classHR.teacherHR === user.id)
 
     return (
@@ -284,7 +293,7 @@ const Dashboard = () => {
                     {classHR && classHR.teacherHR !== null && classHR.teacherHR === user.id && (
                         <div>
                             <div className="flex flex-col bg-white p-6 rounded-lg shadow-md w-full mt-8">
-                                <h2 className="text-xl font-bold mb-6">Quản lớp học</h2>
+                                <h2 className="text-xl font-bold mb-6">Quản lý lớp học</h2>
                                 <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
                                     <div onClick={handleGoToManageAbsentRequest} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
                                         <div className="bg-orange-400 p-4 rounded-full mb-2">
@@ -313,6 +322,12 @@ const Dashboard = () => {
                                             <FaClipboardQuestion size={32} className="text-white" />
                                         </div>
                                         <p className="font-semibold">Gửi thông báo</p>
+                                    </div>
+                                    <div onClick={handleGoToConductEvaluation} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
+                                        <div className="bg-red-400 p-4 rounded-full mb-2">
+                                            <FaClipboardQuestion size={32} className="text-white" />
+                                        </div>
+                                        <p className="font-semibold">Hạnh kiểm</p>
                                     </div>
                                 </div>
                             </div>
@@ -345,8 +360,6 @@ const Dashboard = () => {
                                 </div>
                                 <p className="font-semibold">Báo cáo</p>
                             </div>
-
-
                         </div>
                     </div>
                 </div>
@@ -377,7 +390,18 @@ const Dashboard = () => {
                                 </div>
                                 <p className="font-semibold">Xem điểm danh</p>
                             </div>
-
+                            <div onClick={handleGoToScoreTableStudent} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
+                                <div className="bg-green-400 p-4 rounded-full mb-2">
+                                    <AiOutlineTrophy size={32} className="text-white" />
+                                </div>
+                                <p className="font-semibold">Xem điểm</p>
+                            </div>
+                            <div onClick={handleGoToScoreTableStudent} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
+                                <div className="bg-green-400 p-4 rounded-full mb-2">
+                                    <AiOutlineTrophy size={32} className="text-white" />
+                                </div>
+                                <p className="font-semibold">Xem lịch thi</p>
+                            </div>
 
                         </div>
                     </div>
