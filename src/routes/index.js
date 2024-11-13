@@ -291,7 +291,7 @@ export const routes = [
   },
 
   {
-    path: "/manage/profileStudentInClass",
+    path: "/manage/profileStudentInClass/:idClass",
     page: () => (
       <ProtectedRoute>
         <ProfileStudentInClass />

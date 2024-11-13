@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Breadcrumb from "../../components/Breadcrumb/Breadcrumb";
 import { FaSearch } from "react-icons/fa";
+import * as ClassService from "../../services/ClassService";
+import { useParams } from "react-router-dom";
 
 const rows = [
   {
@@ -39,8 +41,24 @@ const rows = [
 function ProfileStudentInClass() {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("Học sinh");
+  const [classDetail, setClassDetail] = useState(null);
+  const { idClass } = useParams();
 
-  // Lọc danh sách dựa trên tab hiện tại
+  useEffect(() => {
+    const fetchClassDetails = async () => {
+      try {
+        const response = await ClassService.getDetailClass(idClass);
+        setClassDetail(response?.data);
+      } catch (error) {
+        console.error("Lỗi khi lấy chi tiết lớp:", error);
+      }
+    };
+
+    if (idClass) {
+      fetchClassDetails();
+    }
+  }, [idClass]);
+
   const filteredRows = rows.filter(row => {
     if (activeTab === "Học sinh") {
       return row.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -50,9 +68,7 @@ function ProfileStudentInClass() {
     return false;
   });
 
-  const handleSubmit = () => {
-    // Xử lý khi nhấn lưu
-  };
+
 
   const onBack = () => {
     window.history.back();
@@ -72,7 +88,7 @@ function ProfileStudentInClass() {
       <Breadcrumb
         title="Quản lí học sinh trong lớp"
         buttonText="Lưu đơn"
-        onButtonClick={handleSubmit}
+        displayButton={false}
         onBack={onBack}
       />
 
@@ -92,7 +108,10 @@ function ProfileStudentInClass() {
       </div>
 
       <div className="bg-white mt-1 rounded-lg overflow-x-auto" style={{ maxWidth: '100%' }}>
-        <div className="mt-4 flex items-center border border-gray-300 rounded-md p-2 bg-white">
+        <div
+          className="mt-4 flex items-center border border-gray-300 rounded-md p-2 bg-white"
+          style={{ position: 'sticky', top: 0, zIndex: 10 }}
+        >
           <FaSearch className="text-gray-400 mr-2" />
           <input
             type="text"
@@ -103,23 +122,101 @@ function ProfileStudentInClass() {
           />
         </div>
 
-        <div className="overflow-x-auto mt-4">
-          <table className="min-w-full bg-white border border-gray-200 rounded-lg shadow-md" style={{
-            borderCollapse: 'collapse',
+        <div className="overflow-y-auto mt-4" style={{ maxHeight: '66vh' }}>
+          <table className="min-w-full bg-white " style={{
+            borderCollapse: 'separate', // Đảm bảo không mất border khi sticky
             width: '100%',
             minWidth: '800px',
-            minHeight: '400px', // Đặt chiều cao tối thiểu để giữ nguyên kích thước bảng
           }}>
             <thead>
               <tr>
-                <th style={{ width: "2%", padding: '8px', border: '1px solid #ddd', textAlign: 'center', backgroundColor: '#f8f9fa' }}>ID</th>
+                <th
+                  style={{
+                    position: 'sticky',
+                    top: 0,
+                    zIndex: 10,
+                    width: "2%",
+                    padding: '8px',
+                    border: '1px solid #ddd',
+                    textAlign: 'center',
+                    backgroundColor: '#f8f9fa',
+                    backgroundClip: 'padding-box', // Đảm bảo không mất border
+                  }}
+                >
+                  ID
+                </th>
                 {activeTab === "Phụ huynh" && (
-                  <th style={{ width: "20%", padding: '8px', border: '1px solid #ddd', backgroundColor: '#f8f9fa' }}>Tên Học Sinh</th>
+                  <th
+                    style={{
+                      position: 'sticky',
+                      top: 0,
+                      zIndex: 10,
+                      width: "20%",
+                      padding: '8px',
+                      border: '1px solid #ddd',
+                      backgroundColor: '#f8f9fa',
+                      backgroundClip: 'padding-box',
+                    }}
+                  >
+                    Tên Học Sinh
+                  </th>
                 )}
-                <th style={{ width: "28%", padding: '8px', border: '1px solid #ddd', backgroundColor: '#f8f9fa' }}>Tên</th>
-                <th style={{ width: "15%", padding: '8px', border: '1px solid #ddd', backgroundColor: '#f8f9fa' }}>CCCD</th>
-                <th style={{ width: "15%", padding: '8px', border: '1px solid #ddd', backgroundColor: '#f8f9fa' }}>Số điện thoại</th>
-                <th style={{ width: "40%", padding: '8px', border: '1px solid #ddd', backgroundColor: '#f8f9fa' }}>Địa chỉ</th>
+                <th
+                  style={{
+                    position: 'sticky',
+                    top: 0,
+                    zIndex: 10,
+                    width: "28%",
+                    padding: '8px',
+                    border: '1px solid #ddd',
+                    backgroundColor: '#f8f9fa',
+                    backgroundClip: 'padding-box',
+                  }}
+                >
+                  Tên
+                </th>
+                <th
+                  style={{
+                    position: 'sticky',
+                    top: 0,
+                    zIndex: 10,
+                    width: "15%",
+                    padding: '8px',
+                    border: '1px solid #ddd',
+                    backgroundColor: '#f8f9fa',
+                    backgroundClip: 'padding-box',
+                  }}
+                >
+                  CCCD
+                </th>
+                <th
+                  style={{
+                    position: 'sticky',
+                    top: 0,
+                    zIndex: 10,
+                    width: "15%",
+                    padding: '8px',
+                    border: '1px solid #ddd',
+                    backgroundColor: '#f8f9fa',
+                    backgroundClip: 'padding-box',
+                  }}
+                >
+                  Số điện thoại
+                </th>
+                <th
+                  style={{
+                    position: 'sticky',
+                    top: 0,
+                    zIndex: 10,
+                    width: "40%",
+                    padding: '8px',
+                    border: '1px solid #ddd',
+                    backgroundColor: '#f8f9fa',
+                    backgroundClip: 'padding-box',
+                  }}
+                >
+                  Địa chỉ
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -135,7 +232,6 @@ function ProfileStudentInClass() {
                   <td style={{ padding: '8px', border: '1px solid #ddd' }}>{activeTab === "Học sinh" ? row.address : row.parent.address}</td>
                 </tr>
               ))}
-              {/* Thêm hàng trống nếu số lượng hàng hiện tại ít hơn 10 */}
               {filteredRows.length < 10 &&
                 Array.from({ length: 10 - filteredRows.length }).map((_, index) => (
                   <tr key={`empty-${index}`} className="bg-white">
