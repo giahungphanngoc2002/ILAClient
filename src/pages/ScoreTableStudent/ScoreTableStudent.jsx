@@ -14,7 +14,7 @@ const ScoreTableStudent = () => {
             const data = [
                 {
                     subject: 'Toán',
-                    regular: [8.0, 8.5, 8.3 , 8.3 ,8.5],
+                    regular: [8.0, 8.5, 8.3, 8.3, 8.5],
                     midterm: [9.0, 8.7],
                     final: [8.7, 8.9]
                 },

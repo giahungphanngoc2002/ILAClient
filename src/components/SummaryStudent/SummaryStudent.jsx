@@ -43,7 +43,7 @@ const SummaryStudent = () => {
                 <HiClipboardList className="text-blue-600 w-6 h-6 mr-2" />
                 <span className="text-xl font-bold text-blue-600">TỔNG KẾT</span>
             </div>
-            <div className="flex flex-col md:flex-row gap-4 w-full max-w-6xl items-center">
+            <div className="flex flex-col md:flex-row gap-4 w-full items-center justify-between">
                 {data.map((item, index) => (
                     <div key={index} className="flex flex-col bg-white rounded-lg p-4 shadow-md w-full md:w-1/3">
                         <div className="flex items-center justify-between mb-2">
@@ -67,6 +67,7 @@ const SummaryStudent = () => {
                     </div>
                 ))}
             </div>
+
         </div>
     );
 };

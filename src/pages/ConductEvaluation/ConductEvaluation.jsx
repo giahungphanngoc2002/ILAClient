@@ -15,20 +15,11 @@ const rows = [
   { id: 8, name: "Bùi Thị H" },
   { id: 9, name: "Vũ Văn I" },
   { id: 10, name: "Đặng Thị J" },
-  { id: 11, name: "Nguyễn Văn A" },
-  { id: 12, name: "Trần Thị B" },
-  { id: 13, name: "Lê Văn C" },
-  { id: 14, name: "Phạm Thị D" },
-  { id: 15, name: "Hoàng Văn E" },
-  { id: 16, name: "Đỗ Thị F" },
-  { id: 17, name: "Ngô Văn G" },
-  { id: 18, name: "Bùi Thị H" },
-  { id: 19, name: "Vũ Văn I" },
-  { id: 20, name: "Đặng Thị J" },
 ];
 
 function ConductEvaluation() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedSemester, setSelectedSemester] = useState("semester1");
   const [classDetail, setClassDetail] = useState(null);
   const { idClass } = useParams();
 
@@ -47,7 +38,7 @@ function ConductEvaluation() {
     }
   }, [idClass]);
 
-  const filteredRows = rows.filter(row =>
+  const filteredRows = rows.filter((row) =>
     row.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -60,8 +51,12 @@ function ConductEvaluation() {
   };
 
   const handleSubmitConductEvaluation = () => {
+    console.log("Selected Semester:", selectedSemester);
+  };
 
-  }
+  const handleSemesterChange = (semester) => {
+    setSelectedSemester(semester);
+  };
 
   return (
     <div className="w-full h-screen flex flex-col p-6 bg-gray-100">
@@ -74,69 +69,88 @@ function ConductEvaluation() {
 
       <div className="pt-12"></div>
 
-      <div className="bg-white mt-4 rounded-lg shadow-lg overflow-x-auto" style={{ maxWidth: '100%' }}>
-        <div
-          className="flex items-center border border-gray-300 rounded-lg p-3 bg-gray-50 sticky top-0 z-10"
-        >
-          <FaSearch className="text-gray-400 mr-3" />
-          <input
-            type="text"
-            placeholder="Tìm kiếm theo tên Học sinh"
-            value={searchTerm}
-            onChange={handleSearch}
-            className="w-full outline-none bg-transparent text-gray-700 placeholder-gray-500"
-          />
+      <div className="bg-white mt-4 rounded-lg shadow-lg overflow-x-auto" style={{ maxWidth: "100%" }}>
+        <div className="pt-3 pb-1 flex justify-between items-center px-4">
+          {/* Search Input */}
+          <div style={{width:"30%"}} className="flex items-center border border-gray-300 rounded-lg p-2 bg-gray-50">
+            <FaSearch className="text-gray-400 mr-3" />
+            <input
+              type="text"
+              placeholder="Tìm kiếm theo tên Học sinh"
+              value={searchTerm}
+              onChange={handleSearch}
+              className="w-full outline-none bg-transparent text-gray-700 placeholder-gray-500"
+            />
+          </div>
+          {/* Semester Selection Buttons */}
+          <div className="flex gap-2">
+            <button
+              className={`px-4 py-2 rounded-lg font-semibold ${selectedSemester === "semester1" ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700"
+                }`}
+              onClick={() => handleSemesterChange("semester1")}
+            >
+              Kỳ 1
+            </button>
+            <button
+              className={`px-4 py-2 rounded-lg font-semibold ${selectedSemester === "semester2" ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700"
+                }`}
+              onClick={() => handleSemesterChange("semester2")}
+            >
+              Kỳ 2
+            </button>
+          </div>
         </div>
 
-        <div className="overflow-y-auto mt-2" style={{ maxHeight: '69vh' }}>
-          <table className="min-w-full bg-white" style={{ borderCollapse: 'separate', width: '100%', minWidth: '800px' }}>
+        <div className="overflow-y-auto mt-2" style={{ maxHeight: "69vh" }}>
+          <table className="min-w-full bg-white" style={{ borderCollapse: "separate", width: "100%", minWidth: "800px" }}>
             <thead>
               <tr>
                 <th
                   style={{
-                    position: 'sticky',
+                    position: "sticky",
                     top: 0,
                     zIndex: 10,
                     width: "10%",
-                    padding: '12px',
-                    border: '1px solid #ddd',
-                    textAlign: 'center',
-                    backgroundColor: '#007ACC',
-                    color: 'white',
-                    fontWeight: '600',
-                    fontSize: '0.875rem',
+                    padding: "12px",
+                    border: "1px solid #ddd",
+                    textAlign: "center",
+                    backgroundColor: "#007ACC",
+                    color: "white",
+                    fontWeight: "600",
+                    fontSize: "0.875rem",
                   }}
                 >
                   ID
                 </th>
                 <th
                   style={{
-                    position: 'sticky',
+                    position: "sticky",
                     top: 0,
                     zIndex: 10,
                     width: "45%",
-                    padding: '12px',
-                    border: '1px solid #ddd',
-                    backgroundColor: '#007ACC',
-                    color: 'white',
-                    fontWeight: '600',
-                    fontSize: '0.875rem',
+                    padding: "12px",
+                    border: "1px solid #ddd",
+                    backgroundColor: "#007ACC",
+                    color: "white",
+                    fontWeight: "600",
+                    fontSize: "0.875rem",
                   }}
                 >
                   Tên
                 </th>
-                <th className="text-center"
+                <th
+                  className="text-center"
                   style={{
-                    position: 'sticky',
+                    position: "sticky",
                     top: 0,
                     zIndex: 10,
                     width: "45%",
-                    padding: '12px',
-                    border: '1px solid #ddd',
-                    backgroundColor: '#007ACC',
-                    color: 'white',
-                    fontWeight: '600',
-                    fontSize: '0.875rem',
+                    padding: "12px",
+                    border: "1px solid #ddd",
+                    backgroundColor: "#007ACC",
+                    color: "white",
+                    fontWeight: "600",
+                    fontSize: "0.875rem",
                   }}
                 >
                   Hạnh kiểm
@@ -146,9 +160,9 @@ function ConductEvaluation() {
             <tbody>
               {filteredRows.map((row) => (
                 <tr key={row.id} className="hover:bg-gray-100 even:bg-gray-50">
-                  <td style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'center' }}>{row.id}</td>
-                  <td style={{ padding: '12px', border: '1px solid #ddd' }}>{row.name}</td>
-                  <td style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'center' }}>
+                  <td style={{ padding: "12px", border: "1px solid #ddd", textAlign: "center" }}>{row.id}</td>
+                  <td style={{ padding: "12px", border: "1px solid #ddd" }}>{row.name}</td>
+                  <td style={{ padding: "12px", border: "1px solid #ddd", textAlign: "center" }}>
                     <select className="border border-blue-700 rounded-md p-1 focus:ring-2 focus:ring-blue-700 focus:border-blue-700">
                       <option value="tốt">Tốt</option>
                       <option value="khá">Khá</option>
@@ -172,7 +186,6 @@ function ConductEvaluation() {
       </div>
     </div>
   );
-
 }
 
 export default ConductEvaluation;

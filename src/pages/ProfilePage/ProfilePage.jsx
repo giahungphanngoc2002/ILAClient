@@ -31,40 +31,40 @@ const ProfilePage = () => {
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
   const [passwordError, setPasswordError] = useState("");
   const [activeTab, setActiveTab] = useState("edit-profile");
-  const [nameIC , setNameIC] = useState();
-  const [phoneIC , setPhoneIC] = useState();
-  const [emailIC , setEmailIC] = useState();
-  const [cccdIC , setCccdIC] = useState();
-  const [typeIC , setTypeIC] = useState();
-  const [userId , setUserId] = useState();
-  const [infoContact , setInfoContact] = useState([]);
+  const [nameIC, setNameIC] = useState();
+  const [phoneIC, setPhoneIC] = useState();
+  const [emailIC, setEmailIC] = useState();
+  const [cccdIC, setCccdIC] = useState();
+  const [typeIC, setTypeIC] = useState();
+  const [userId, setUserId] = useState();
+  const [infoContact, setInfoContact] = useState([]);
 
   const dispatch = useDispatch();
- 
+
   useEffect(() => {
     setUserId(user?.id);
-}, [user?.id]);
+  }, [user?.id]);
 
-console.log(userId)
-useEffect(() => {
-  const fetchInfoContact = async () => {
-    try {
-      const response = await UserService.getInfoContactByUserId(userId);
-      console.log(response); // Kiểm tra phản hồi từ API
-      setInfoContact(response); // Cập nhật state với dữ liệu từ API
-    } catch (error) {
-      console.error("Failed to fetch InfoContact:", error.message);
+  console.log(userId)
+  useEffect(() => {
+    const fetchInfoContact = async () => {
+      try {
+        const response = await UserService.getInfoContactByUserId(userId);
+        console.log(response); // Kiểm tra phản hồi từ API
+        setInfoContact(response); // Cập nhật state với dữ liệu từ API
+      } catch (error) {
+        console.error("Failed to fetch InfoContact:", error.message);
+      }
+    };
+
+    if (userId) {
+      fetchInfoContact(); // Chỉ gọi API khi userId đã có
     }
-  };
+  }, [userId]); // Gọi lại khi userId thay đổi
 
-  if (userId) {
-    fetchInfoContact(); // Chỉ gọi API khi userId đã có
-  }
-}, [userId]); // Gọi lại khi userId thay đổi
-
-useEffect(() => {
-  console.log("InfoContact:", infoContact); // Theo dõi sự thay đổi của infoContact
-}, [infoContact]);
+  useEffect(() => {
+    console.log("InfoContact:", infoContact); // Theo dõi sự thay đổi của infoContact
+  }, [infoContact]);
 
   const mutation = useMutationHooks((data) => {
     const { id, access_token, ...rests } = data;
@@ -197,6 +197,20 @@ useEffect(() => {
     });
   };
 
+  const handleSaveInfoContact = (updatedContact) => {
+    console.log("Thông tin liên hệ cần cập nhật:", updatedContact);
+
+    // Cập nhật tạm thời vào state (nếu cần hiển thị trên UI)
+    const updatedInfoContacts = infoContact.map((contact) =>
+      contact._id === updatedContact._id ? updatedContact : contact
+    );
+    setInfoContact(updatedInfoContacts);
+
+    console.log("Danh sách thông tin liên hệ sau khi cập nhật:", updatedInfoContacts);
+  };
+
+
+
   const renderTabContent = () => {
     switch (activeTab) {
       case "overview":
@@ -236,7 +250,10 @@ useEffect(() => {
         );
       case "info-contact":
         return (
-          <InfoContact />
+          <InfoContact
+            userContacts={infoContact}
+            onSave={handleSaveInfoContact}
+          />
         );
       default:
         return null;
