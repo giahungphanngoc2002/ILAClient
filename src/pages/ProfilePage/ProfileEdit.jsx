@@ -13,6 +13,8 @@ const ProfileEdit = ({
   setAddress,
   age,
   setAge,
+  cccd,
+  setCccd,
   isLoading,
 }) => {
   useEffect(() => {
@@ -21,6 +23,7 @@ const ProfileEdit = ({
       setPhone(user.phone || "");
       setAddress(user.address || "");
       setAge(user.age || "");
+      setCccd(user.cccd || "")
     }
   }, [user, setName, setPhone, setAddress, setAge]);
   const formattedAge = age ? age.split("T")[0] : "";
@@ -30,7 +33,7 @@ const ProfileEdit = ({
       <h5 className="text-2xl font-semibold mb-6 text-center">Edit Profile</h5>
       <div className="space-y-6 max-w-lg mx-auto">
         <div className="flex flex-col items-start space-y-2">
-          <label className="w-full font-medium">Name</label>
+          <label className="w-full font-medium">Họ và tên</label>
           <input
             className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={name}
@@ -38,15 +41,7 @@ const ProfileEdit = ({
           />
         </div>
         <div className="flex flex-col items-start space-y-2">
-          <label className="w-full font-medium">Email</label>
-          <input
-            className="w-full p-2 border border-gray-300 rounded bg-gray-100 cursor-not-allowed"
-            value={email}
-            disabled
-          />
-        </div>
-        <div className="flex flex-col items-start space-y-2">
-          <label className="w-full font-medium">Phone</label>
+          <label className="w-full font-medium">Số điện thoại</label>
           <input
             className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={phone}
@@ -54,7 +49,7 @@ const ProfileEdit = ({
           />
         </div>
         <div className="flex flex-col items-start space-y-2">
-          <label className="w-full font-medium">Address</label>
+          <label className="w-full font-medium">Địa chỉ</label>
           <input
             className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={address}
@@ -62,7 +57,7 @@ const ProfileEdit = ({
           />
         </div>
         <div className="flex flex-col items-start space-y-2">
-          <label className="w-full font-medium">Age</label>
+          <label className="w-full font-medium">Ngày sinh</label>
           <input
             className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={formattedAge}
@@ -70,15 +65,14 @@ const ProfileEdit = ({
             onChange={(e) => setAge(e.target.value)}
           />
         </div>
-        {/* <div className="col-span-1 mb-3">
-                          <h6>Age</h6>
-                          <input
-                            type="date"
-                            value={formattedAge}
-                            onChange={handleOnchangeAge}
-                            className="w-full p-2 border rounded"
-                          />
-                        </div> */}
+        <div className="flex flex-col items-start space-y-2">
+          <label className="w-full font-medium">Căn cước công dân</label>
+          <input
+            className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={cccd}
+            onChange={(e) => setCccd(e.target.value)}
+          />
+        </div>
         <div className="flex justify-center">
           <button
             className="flex items-center space-x-2 px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"

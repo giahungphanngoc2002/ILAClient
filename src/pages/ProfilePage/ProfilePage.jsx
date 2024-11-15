@@ -12,6 +12,7 @@ import { BiUpload, BiTrash } from "react-icons/bi";
 import ProfileOverview from "./ProfileOverview";
 import ProfileEdit from "./ProfileEdit";
 import ChangePassword from "../ChangePassWord/ChangePassWord";
+import InfoContact from "./InfoContact";
 
 const ProfilePage = () => {
   const user = useSelector((state) => state.user);
@@ -21,6 +22,7 @@ const ProfilePage = () => {
   const [address, setAddress] = useState("");
   const [age, setAge] = useState("");
   const [avatar, setAvatar] = useState("123456");
+  const [cccd, setCccd] = useState("")
   const [oldPassword, setOldPassword] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -29,6 +31,12 @@ const ProfilePage = () => {
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
   const [passwordError, setPasswordError] = useState("");
   const [activeTab, setActiveTab] = useState("edit-profile");
+  const [nameIC , setNameIC] = useState();
+  const [phoneIC , setPhoneIC] = useState();
+  const [emailIC , setEmailIC] = useState();
+  const [cccdIC , setCccdIC] = useState();
+  const [typeIC , setTypeIC] = useState();
+  const [infoContact , setInfoContact] = useState([]);
 
   const dispatch = useDispatch();
   const mutation = useMutationHooks((data) => {
@@ -94,13 +102,6 @@ const ProfilePage = () => {
     }
   }, [user]);
 
-  console.log(avatar)
-
-  const handleOnchangeEmail = (e) => setEmail(e.target.value);
-  const handleOnchangeName = (e) => setName(e.target.value);
-  const handleOnchangePhone = (e) => setPhone(e.target.value);
-  const handleOnchangeAddress = (e) => setAddress(e.target.value);
-  const handleOnchangeAge = (e) => setAge(e.target.value);
 
   const handleOnchangeAvatar = (e) => {
     const file = e.target.files[0];
@@ -137,6 +138,7 @@ const ProfilePage = () => {
       phone,
       address,
       age,
+      cccd,
       avatar,
       access_token: user?.access_token,
     });
@@ -187,6 +189,8 @@ const ProfilePage = () => {
             setAddress={setAddress}
             age={age}
             setAge={setAge}
+            cccd={cccd}
+            setCccd={setCccd}
             isLoading={isLoading}
           />
         );
@@ -202,6 +206,10 @@ const ProfilePage = () => {
             confirmNewPassword={confirmNewPassword}
             setConfirmNewPassword={setConfirmNewPassword}
           />
+        );
+      case "info-contact":
+        return (
+          <InfoContact />
         );
       default:
         return null;
@@ -248,7 +256,7 @@ const ProfilePage = () => {
                   onClick={() => setActiveTab("overview")}
                 >
                   <MdOutlineRemoveRedEye size={20} />
-                  <span>Overview</span>
+                  <span>Tổng quan</span>
                 </button>
               </li>
               <li>
@@ -260,7 +268,7 @@ const ProfilePage = () => {
                   onClick={() => setActiveTab("edit-profile")}
                 >
                   <TbPhotoEdit size={20} />
-                  <span>Edit Profile</span>
+                  <span>Chỉnh sửa thông tin</span>
                 </button>
               </li>
               <li>
@@ -272,7 +280,19 @@ const ProfilePage = () => {
                   onClick={() => setActiveTab("change-password")}
                 >
                   <TbArrowsExchange size={20} />
-                  <span>Change Password</span>
+                  <span>Thay đổi mật khẩu</span>
+                </button>
+              </li>
+              <li>
+                <button
+                  className={`flex items-center space-x-2 ${activeTab === "info-contact"
+                    ? "border-b-2 border-blue-500 text-blue-500"
+                    : "text-gray-500 hover:text-blue-500"
+                    } py-2 px-4 focus:outline-none transition-colors duration-300`}
+                  onClick={() => setActiveTab("info-contact")}
+                >
+                  <TbArrowsExchange size={20} />
+                  <span>Thông tin liên hệ</span>
                 </button>
               </li>
             </ul>

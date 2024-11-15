@@ -6,16 +6,17 @@ const initialState = {
   phone: "",
   address: "",
   age: "",
+  cccd: "",
   avatar: "",
   id: "",
   access_token: "",
   password: "",
-  
-  updatedAt:" ",
-  createdAt:" ",
-  
+
+  updatedAt: " ",
+  createdAt: " ",
+
   isAuthenticated: false,
-  role:" ",
+  role: " ",
 };
 
 export const userSlice = createSlice({
@@ -33,11 +34,11 @@ export const userSlice = createSlice({
         avatar = "",
         access_token = "",
         password = "",
-        
-        createdAt="",
-        updatedAt="",
-        role=" ",
-        
+        cccd = "",
+        createdAt = "",
+        updatedAt = "",
+        role = " ",
+
       } = action.payload;
       state.name = name;
       state.email = email;
@@ -45,10 +46,10 @@ export const userSlice = createSlice({
       state.address = address;
       state.age = age;
       state.id = _id;
-      state.role=role;
+      state.role = role;
       state.avatar = avatar;
       state.password = password;
-      
+      state.cccd = cccd;
       state.updatedAt = updatedAt;
       state.createdAt = createdAt;
       state.access_token = access_token;
@@ -63,8 +64,8 @@ export const userSlice = createSlice({
       state.id = "";
       state.avatar = "";
       state.access_token = "";
-      state.role="";
-      
+      state.role = "";
+      state.cccd = "";
       state.isAuthenticated = false; // Reset authentication
     },
   },
