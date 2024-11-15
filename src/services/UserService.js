@@ -88,19 +88,29 @@ export const getAllTopUser = async() =>{
   return res.data
 }
 
-export const getcountUsers = async() =>{
-  const res =await axios.get (`http://localhost:3001/api/user/count`)
-  return res.data
-}
 
-export const updateUserCount = async (userId, newCount) => {
-  try {
-    const res = await axios.put(`http://localhost:3001/api/user/updateCount/${userId}`, {
-      count: newCount,
-    });
+
+
+
+export const createContact = async (userId, contactData) => {
+    const res = await axios.post(`http://localhost:3001/api/user/createContact/${userId}`, contactData);
+   
     return res.data;
-  } catch (error) {
-    
-    throw error.response ? error.response.data : new Error(error.message);
-  }
+  
+};
+
+export const updateContact = async (contactId, updatedData) => {
+ 
+    const res = await axios.put(`http://localhost:3001/api/user/updateContact/${contactId}`, updatedData);
+   
+    return res.data;
+  
+};
+
+export const getInfoContactByUserId = async (userId) => {
+  
+    const res = await axios.get(`http://localhost:3001/api/user/getdetailsInfocontact/${userId}`);
+   
+    return res.data;
+ 
 };
