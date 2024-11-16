@@ -126,4 +126,23 @@ export const getDetailApplicationAbsentByIdClass = async (classId) => {
     const res = await axios.get(`http://localhost:3001/api/class/classes/${classId}/applicationabsent`);
     return res.data; 
 };
+
+export const createConduct = async (classId, conductData) => {  
+      const res = await axios.post(`http://localhost:3001/api/class/classes/${classId}/createConDuct`, conductData);
+      return res.data; 
+    
+  };
+
+  export const getAllConductSemester = async (classId, semester) => {
+    
+      const res = await axios.get(`http://localhost:3001/api/class/getAllConduct/${classId}/${semester}`);
+      return res.data; 
+   
+  };
+
+  export const updateConduct = async (classId, conductId, semester, updateData) => {
+      const res = await axios.put(`http://localhost:3001/api/class/updateConduct/${classId}/${conductId}/${semester}`, updateData);
+      return res.data; 
+   
+  };
    

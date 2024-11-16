@@ -321,7 +321,7 @@ export const routes = [
     isShowSideBar: false,
   },
   {
-    path: "/manage/conductEvaluation",
+    path: "/manage/conductEvaluation/:idClass",
     page: () => (
       <ProtectedRoute>
         <ConductEvaluation />

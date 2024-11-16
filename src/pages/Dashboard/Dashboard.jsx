@@ -191,8 +191,8 @@ const Dashboard = () => {
         navigate('/manage/scoreTableStudent')
     }
 
-    const handleGoToConductEvaluation = () => {
-        navigate('/manage/conductEvaluation')
+    const handleGoToConductEvaluation = (idClass) => {
+        navigate(`/manage/conductEvaluation/${idClass}`)
     }
 
     const handleGoToViewScoreInClassTHR = () => {
@@ -324,7 +324,7 @@ const Dashboard = () => {
                                         </div>
                                         <p className="font-semibold">Gửi thông báo</p>
                                     </div>
-                                    <div onClick={handleGoToConductEvaluation} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
+                                    <div onClick={() => handleGoToConductEvaluation(classHR._id)} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
                                         <div className="bg-red-400 p-4 rounded-full mb-2">
                                             <FaClipboardQuestion size={32} className="text-white" />
                                         </div>

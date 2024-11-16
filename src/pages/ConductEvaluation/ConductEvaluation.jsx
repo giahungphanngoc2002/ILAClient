@@ -4,30 +4,22 @@ import { FaSearch } from "react-icons/fa";
 import * as ClassService from "../../services/ClassService";
 import { useParams } from "react-router-dom";
 
-const rows = [
-  { id: 1, name: "Nguyễn Văn A" },
-  { id: 2, name: "Trần Thị B" },
-  { id: 3, name: "Lê Văn C" },
-  { id: 4, name: "Phạm Thị D" },
-  { id: 5, name: "Hoàng Văn E" },
-  { id: 6, name: "Đỗ Thị F" },
-  { id: 7, name: "Ngô Văn G" },
-  { id: 8, name: "Bùi Thị H" },
-  { id: 9, name: "Vũ Văn I" },
-  { id: 10, name: "Đặng Thị J" },
-];
+
 
 function ConductEvaluation() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedSemester, setSelectedSemester] = useState("semester1");
-  const [classDetail, setClassDetail] = useState(null);
+  const [conducts, setConducts] = useState(null);
   const { idClass } = useParams();
+  const [selectedSemester, setSelectedSemester] = useState("1"); // Mặc định Kỳ 1
+  const [students, setStudents] = useState([]);
+  const [loading, setLoading] = useState(true); // Trạng thái loading
+
 
   useEffect(() => {
     const fetchClassDetails = async () => {
       try {
         const response = await ClassService.getDetailClass(idClass);
-        setClassDetail(response?.data);
+        setStudents(response?.data?.studentID);
       } catch (error) {
         console.error("Lỗi khi lấy chi tiết lớp:", error);
       }
@@ -37,8 +29,24 @@ function ConductEvaluation() {
       fetchClassDetails();
     }
   }, [idClass]);
+  console.log(students)
 
-  const filteredRows = rows.filter((row) =>
+  useEffect(() => {
+    const fetchConducts = async () => {
+      try {
+        const response = await ClassService.getAllConductSemester(idClass, selectedSemester);
+        setConducts(response); 
+      } catch (error) {
+        console.error("Lỗi khi lấy danh sách đánh giá:", error);
+      }
+    };
+  
+    fetchConducts();
+  }, [idClass, selectedSemester]);
+  console.log(conducts)
+
+
+  const filteredRows = students.filter((row) =>
     row.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -50,9 +58,46 @@ function ConductEvaluation() {
     setSearchTerm(event.target.value);
   };
 
-  const handleSubmitConductEvaluation = () => {
-    console.log("Selected Semester:", selectedSemester);
+  const handleSubmitConductEvaluation = async () => {
+    try {
+      if (conducts.length === 0) {
+        // Nếu chưa có ConDuct, khởi tạo mới
+        const conductData = students.map((student) => {
+          const conductSelect = document.querySelector(`#conduct-${student._id}`);
+          return {
+            typeConduct: conductSelect ? conductSelect.value : "tốt", // Giá trị hạnh kiểm mặc định là "tốt"
+            semester: Number(selectedSemester), // Kỳ học (1 hoặc 2)
+            studentId: student._id, // ID của học sinh
+          };
+        });
+  
+        console.log("Conduct Data to Submit:", conductData);
+        const response = await ClassService.createConduct(idClass, conductData);
+  
+        if (response) {
+          alert("Khởi tạo đánh giá thành công!");
+        }
+      } else {
+        // Nếu đã có ConDuct, cập nhật từng mục
+        conducts.forEach(async (conduct) => {
+          const conductSelect = document.querySelector(`#conduct-${conduct.studentId._id}`);
+          const updatedTypeConduct = conductSelect ? conductSelect.value : conduct.typeConduct;
+  
+          const updateData = { typeConduct: updatedTypeConduct };
+          await ClassService.updateConduct(idClass, conduct._id, selectedSemester, updateData);
+        });
+  
+        alert("Cập nhật đánh giá thành công!");
+      }
+    } catch (error) {
+      console.error("Lỗi khi đánh giá hoặc cập nhật hạnh kiểm:", error);
+      alert("Có lỗi xảy ra khi đánh giá hoặc cập nhật hạnh kiểm!");
+    }
   };
+  
+  
+  
+
 
   const handleSemesterChange = (semester) => {
     setSelectedSemester(semester);
@@ -63,7 +108,7 @@ function ConductEvaluation() {
       <Breadcrumb
         title="Đánh giá hạnh kiểm"
         buttonText="Hoàn thành đánh giá"
-        onSubmit={handleSubmitConductEvaluation}
+        onButtonClick={handleSubmitConductEvaluation}
         onBack={onBack}
       />
 
@@ -72,7 +117,7 @@ function ConductEvaluation() {
       <div className="bg-white mt-4 rounded-lg shadow-lg overflow-x-auto" style={{ maxWidth: "100%" }}>
         <div className="pt-3 pb-1 flex justify-between items-center px-4">
           {/* Search Input */}
-          <div style={{width:"30%"}} className="flex items-center border border-gray-300 rounded-lg p-2 bg-gray-50">
+          <div style={{ width: "30%" }} className="flex items-center border border-gray-300 rounded-lg p-2 bg-gray-50">
             <FaSearch className="text-gray-400 mr-3" />
             <input
               type="text"
@@ -85,16 +130,16 @@ function ConductEvaluation() {
           {/* Semester Selection Buttons */}
           <div className="flex gap-2">
             <button
-              className={`px-4 py-2 rounded-lg font-semibold ${selectedSemester === "semester1" ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700"
+              className={`px-4 py-2 rounded-lg font-semibold ${selectedSemester === "1" ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700"
                 }`}
-              onClick={() => handleSemesterChange("semester1")}
+              onClick={() => handleSemesterChange("1")}
             >
               Kỳ 1
             </button>
             <button
-              className={`px-4 py-2 rounded-lg font-semibold ${selectedSemester === "semester2" ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700"
+              className={`px-4 py-2 rounded-lg font-semibold ${selectedSemester === "2" ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700"
                 }`}
-              onClick={() => handleSemesterChange("semester2")}
+              onClick={() => handleSemesterChange("2")}
             >
               Kỳ 2
             </button>
@@ -159,16 +204,20 @@ function ConductEvaluation() {
             </thead>
             <tbody>
               {filteredRows.map((row) => (
-                <tr key={row.id} className="hover:bg-gray-100 even:bg-gray-50">
-                  <td style={{ padding: "12px", border: "1px solid #ddd", textAlign: "center" }}>{row.id}</td>
+                <tr key={row._id} className="hover:bg-gray-100 even:bg-gray-50">
+                  <td style={{ padding: "12px", border: "1px solid #ddd", textAlign: "center" }}>{row._id}</td>
                   <td style={{ padding: "12px", border: "1px solid #ddd" }}>{row.name}</td>
                   <td style={{ padding: "12px", border: "1px solid #ddd", textAlign: "center" }}>
-                    <select className="border border-blue-700 rounded-md p-1 focus:ring-2 focus:ring-blue-700 focus:border-blue-700">
-                      <option value="tốt">Tốt</option>
-                      <option value="khá">Khá</option>
-                      <option value="trung bình">Trung bình</option>
-                      <option value="kém">Kém</option>
-                    </select>
+                  <select
+                    id={`conduct-${row._id}`} // Đảm bảo mỗi dropdown có ID duy nhất
+                    className="border border-blue-700 rounded-md p-1 focus:ring-2 focus:ring-blue-700 focus:border-blue-700"
+                    defaultValue="tốt" // Giá trị mặc định
+                  >
+                    <option value="tốt">Tốt</option>
+                    <option value="khá">Khá</option>
+                    <option value="trung bình">Trung bình</option>
+                    <option value="kém">Kém</option>
+                  </select>
                   </td>
                 </tr>
               ))}
