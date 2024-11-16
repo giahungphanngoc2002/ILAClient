@@ -44,12 +44,12 @@ const filteredAbsenceRequests = absenceRequests.filter(request => {
     const requestYear = parseInt(request.year); // Lấy năm từ request
     const requestSlot = request.slot;
 
-    console.log("Request Year:", requestYear);
-    console.log("Request Week:", requestWeek);
-    console.log("Expected Year:", year);
-    console.log("Expected Week:", week);
-    console.log("Expected DayOfWeek:", dayOfWeek);
-    console.log("Expected Slot Number:", targetSlot?.slotNumber);
+    // console.log("Request Year:", requestYear);
+    // console.log("Request Week:", requestWeek);
+    // console.log("Expected Year:", year);
+    // console.log("Expected Week:", week);
+    // console.log("Expected DayOfWeek:", dayOfWeek);
+    // console.log("Expected Slot Number:", targetSlot?.slotNumber);
 
     // So sánh năm, tuần, và slot để xác nhận yêu cầu nghỉ học
     return (

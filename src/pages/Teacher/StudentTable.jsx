@@ -3,6 +3,7 @@ import Toggle from '../../components/Toggle/Toggle';
 import { Modal, Button, Dropdown } from 'react-bootstrap';
 import { FaArrowLeft } from 'react-icons/fa';
 import * as ClassService from "../../services/ClassService";
+import * as SubjectService from "../../services/SubjectService";
 import * as ScoreSbujectService from "../../services/ScoreSbujectService";
 import * as ScheduleService from "../../services/ScheduleService";
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -33,11 +34,67 @@ const StudentTable = () => {
   const { year, week } = location.state || {};
   const [dayOfWeek, setDayOfWeek] = useState(null);
   const [targetSlot, setTargetSlot] = useState(null);
+  const [detailClass, setDetailClass] = useState();
+  const [idSubjectOfSJCD, setIdSubjectOfSJCD] = useState();
+  const [detailSubject, setDetailSubject] = useState();
+
+  console.log("idSubject", idSubject)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const classData = await ClassService.getDetailClass(idClass);
+        if (classData && classData.data) {
+          setDetailClass(classData.data);
+        } else {
+          setError('Class data not found.');
+        }
+      } catch (error) {
+        console.error('Error fetching students:', error);
+        setError('Error fetching students. Please try again later.');
+      }
+    };
+
+    fetchData();
+  }, [idClass]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const subjectData = await SubjectService.getDetailSubject(idSubject);
+        console.log(subjectData)
+        if (subjectData) {
+          setDetailSubject(subjectData);
+          setIdSubjectOfSJCD(subjectData.baseSubject)
+        } else {
+          setError('Class data not found.');
+        }
+      } catch (error) {
+        console.error('Error fetching students:', error);
+        setError('Error fetching students. Please try again later.');
+      }
+    };
+
+    fetchData();
+  }, [idSubject]);
+
+  console.log("123123", detailSubject)
+
+
+
+  const isSubjectInChuyenDe = (idSubject, data) => {
+    if (!data) {
+      return false;
+    }
+
+    return data.some(subject => subject._id === idSubject);
+  };
+
+  console.log(isSubjectInChuyenDe(idSubject, detailClass?.subjectGroup.SubjectsChuyendeId));
 
   useEffect(() => {
     if (year && week) {
       console.log('Year:', year, 'Week:', week);
-      // Sử dụng `year` và `week` theo yêu cầu của bạn
     }
   }, [year, week]);
 
@@ -68,16 +125,18 @@ const StudentTable = () => {
     fetchData();
   }, [idClass]);
 
+  console.log(studentScores)
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         // Lấy dữ liệu về lịch học (schedules)
         const schedulesData = await ScheduleService.getDetailScheduleById(idSchedule);
 
-        console.log("schedule",schedulesData)
+        console.log("schedule", schedulesData)
         setDayOfWeek(schedulesData.data.dayOfWeek);
-        
-      
+
+
         // Tìm slot dựa vào slotId
         const targetSlot = schedulesData?.data?.slots?.find(slot => slot._id === idSlot);
         setTargetSlot(targetSlot);
@@ -94,9 +153,9 @@ const StudentTable = () => {
           } else {
             // Duyệt qua danh sách students và cập nhật trạng thái dựa vào danh sách absentStudents
             const updatedStudents = studentsData.data.map(student => {
-              console.log(absentStudents)
+
               const absentInfo = absentStudents.find(absentStudent => absentStudent.studentId === student._id);
-              console.log(absentInfo)
+
               return {
                 ...student,
                 status: !absentInfo, // Đặt `status` là false nếu học sinh có mặt trong `absentStudents`
@@ -190,14 +249,19 @@ const StudentTable = () => {
 
   const openModal = async (student) => {
     try {
+      // Kiểm tra xem môn học có phải là Chuyên đề không
+      const subjectToUse = isSubjectInChuyenDe(idSubject, detailClass?.subjectGroup.SubjectsChuyendeId)
+        ? idSubjectOfSJCD // Nếu là Chuyên đề thì dùng idSubjectOfSJCD
+        : idSubject; // Nếu không thì dùng idSubject mặc định
+
       // Fetch scores for semester 1
-      const scoresDataSemester1 = await ScoreSbujectService.getAllScoresBySubject(idSubject, idClass, 1, student._id);
+      const scoresDataSemester1 = await ScoreSbujectService.getAllScoresBySubject(subjectToUse, idClass, 1, student._id);
       const semester1 = processScores(scoresDataSemester1, 1);
 
       // Try to fetch scores for semester 2, but handle any potential errors for semester 2 independently
       let semester2 = { categorizedScores: { diemThuongXuyen: [], diemGiuaKi: [], diemCuoiKi: '' }, scoreId: null };
       try {
-        const scoresDataSemester2 = await ScoreSbujectService.getAllScoresBySubject(idSubject, idClass, 2, student._id);
+        const scoresDataSemester2 = await ScoreSbujectService.getAllScoresBySubject(subjectToUse, idClass, 2, student._id);
         semester2 = processScores(scoresDataSemester2, 2);
       } catch (error) {
         console.warn('Error fetching scores for semester 2:', error);
@@ -244,6 +308,7 @@ const StudentTable = () => {
       setShowModal(true);
     }
   };
+
 
   const closeModal = () => {
     setShowModal(false);
@@ -429,7 +494,7 @@ const StudentTable = () => {
         </div>
         <div className="w-1/4 h-full flex flex-col overflow-auto mr-4">
           <AbsenceRequestList idClass={idClass} year={year} week={week} dayOfWeek={dayOfWeek}
-        targetSlot={targetSlot} />
+            targetSlot={targetSlot} />
         </div>
       </div>
       {showModal && studentScores && (
