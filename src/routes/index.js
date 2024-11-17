@@ -35,6 +35,7 @@ import ProfileStudentInClass from "../pages/ProfileStudentInClass/ProfileStudent
 import THRSendNoti from "../pages/THRSendNotification/THRSendNoti";
 import ScoreTableStudent from "../pages/ScoreTableStudent/ScoreTableStudent";
 import ConductEvaluation from "../pages/ConductEvaluation/ConductEvaluation";
+import ManageClass from "../pages/ManageClass/ManageClass";
 export const routes = [
   {
     path: "/",
@@ -325,6 +326,16 @@ export const routes = [
     page: () => (
       <ProtectedRoute>
         <ConductEvaluation />
+      </ProtectedRoute>
+    ),
+    isShowHeader: false,
+    isShowSideBar: false,
+  },
+  {
+    path: "/manage/manageClass",
+    page: () => (
+      <ProtectedRoute>
+        <ManageClass />
       </ProtectedRoute>
     ),
     isShowHeader: false,

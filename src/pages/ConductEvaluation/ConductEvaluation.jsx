@@ -35,18 +35,26 @@ function ConductEvaluation() {
     const fetchConducts = async () => {
       try {
         const response = await ClassService.getAllConductSemester(idClass, selectedSemester);
-        setConducts(response); 
+        setConducts(response);
       } catch (error) {
         console.error("Lỗi khi lấy danh sách đánh giá:", error);
       }
     };
-  
+
     fetchConducts();
   }, [idClass, selectedSemester]);
   console.log(conducts)
 
 
-  const filteredRows = students.filter((row) =>
+  const mergedData = students.map((student) => {
+    const conduct = conducts?.find((cond) => cond.studentId?._id === student._id);
+    return {
+      ...student,
+      typeConduct: conduct ? conduct.typeConduct : "Chưa đánh giá", // Gắn "Chưa đánh giá" nếu không có trong conducts
+    };
+  });
+
+  const filteredRows = mergedData.filter((row) =>
     row.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -70,10 +78,10 @@ function ConductEvaluation() {
             studentId: student._id, // ID của học sinh
           };
         });
-  
+
         console.log("Conduct Data to Submit:", conductData);
         const response = await ClassService.createConduct(idClass, conductData);
-  
+
         if (response) {
           alert("Khởi tạo đánh giá thành công!");
         }
@@ -82,11 +90,11 @@ function ConductEvaluation() {
         conducts.forEach(async (conduct) => {
           const conductSelect = document.querySelector(`#conduct-${conduct.studentId._id}`);
           const updatedTypeConduct = conductSelect ? conductSelect.value : conduct.typeConduct;
-  
+
           const updateData = { typeConduct: updatedTypeConduct };
           await ClassService.updateConduct(idClass, conduct._id, selectedSemester, updateData);
         });
-  
+
         alert("Cập nhật đánh giá thành công!");
       }
     } catch (error) {
@@ -94,9 +102,9 @@ function ConductEvaluation() {
       alert("Có lỗi xảy ra khi đánh giá hoặc cập nhật hạnh kiểm!");
     }
   };
-  
-  
-  
+
+
+
 
 
   const handleSemesterChange = (semester) => {
@@ -203,21 +211,24 @@ function ConductEvaluation() {
               </tr>
             </thead>
             <tbody>
-              {filteredRows.map((row) => (
+              {filteredRows.map((row, index) => (
                 <tr key={row._id} className="hover:bg-gray-100 even:bg-gray-50">
-                  <td style={{ padding: "12px", border: "1px solid #ddd", textAlign: "center" }}>{row._id}</td>
+                  {/* Sử dụng index + 1 để hiển thị số thứ tự */}
+                  <td style={{ padding: "12px", border: "1px solid #ddd", textAlign: "center" }}>
+                    {index + 1}
+                  </td>
                   <td style={{ padding: "12px", border: "1px solid #ddd" }}>{row.name}</td>
                   <td style={{ padding: "12px", border: "1px solid #ddd", textAlign: "center" }}>
-                  <select
-                    id={`conduct-${row._id}`} // Đảm bảo mỗi dropdown có ID duy nhất
-                    className="border border-blue-700 rounded-md p-1 focus:ring-2 focus:ring-blue-700 focus:border-blue-700"
-                    defaultValue="tốt" // Giá trị mặc định
-                  >
-                    <option value="tốt">Tốt</option>
-                    <option value="khá">Khá</option>
-                    <option value="trung bình">Trung bình</option>
-                    <option value="kém">Kém</option>
-                  </select>
+                    <select
+                      id={`conduct-${row._id}`} // Đảm bảo mỗi dropdown có ID duy nhất
+                      className="border border-blue-700 rounded-md p-1 focus:ring-2 focus:ring-blue-700 focus:border-blue-700"
+                      defaultValue={row.typeConduct} // Sử dụng giá trị từ mergedData
+                    >
+                      <option value="tốt">Tốt</option>
+                      <option value="khá">Khá</option>
+                      <option value="trung bình">Trung bình</option>
+                      <option value="kém">Kém</option>
+                    </select>
                   </td>
                 </tr>
               ))}
@@ -230,6 +241,8 @@ function ConductEvaluation() {
                   </tr>
                 ))}
             </tbody>
+
+
           </table>
         </div>
       </div>

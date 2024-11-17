@@ -199,6 +199,18 @@ const Dashboard = () => {
 
     }
 
+    const handleGoToCreateCalendar = () => {
+        navigate(`/manage/manageSchedule`)
+    }
+
+    const handleGoToCreateExamSchedule = () => {
+        navigate(`/manage/examSchedule`)
+    }
+
+    const handleGoToClassDivision = () => {
+        navigate(`/manage/classDivision`)
+    }
+
     console.log(classHR && classHR.teacherHR !== null && classHR.teacherHR === user.id)
 
     return (
@@ -404,6 +416,42 @@ const Dashboard = () => {
                                 <p className="font-semibold">Xem lịch thi</p>
                             </div>
 
+                        </div>
+                    </div>
+                </div>
+            )}
+            {user.role === "Admin" && (
+                <div>
+                    <div className="flex flex-col bg-white p-6 rounded-lg shadow-md w-full mt-8">
+                        <h2 className="text-xl font-bold mb-6">Tác vụ</h2>
+                        <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
+                            <div onClick={handleGoToCreateCalendar} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
+                                <div className="bg-teal-400 p-4 rounded-full mb-2">
+                                    <CalendarClock size={32} className="text-white" />
+                                </div>
+                                <p className="font-semibold">Tạo thời khoá biểu</p>
+                            </div>
+
+                            <div onClick={handleGoToCreateExamSchedule} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
+                                <div className="bg-orange-400 p-4 rounded-full mb-2">
+                                    <BiMailSend size={32} className="text-white" />
+                                </div>
+                                <p className="font-semibold">Tạo lịch thi</p>
+                            </div>
+
+                            {/* Other Cards */}
+                            <div onClick={handleGoToClassDivision} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
+                                <div className="bg-green-400 p-4 rounded-full mb-2">
+                                    <GrScorecard size={32} className="text-white" />
+                                </div>
+                                <p className="font-semibold">Chia lớp</p>
+                            </div>
+                            <div onClick={handleGoToScoreTableStudent} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
+                                <div className="bg-green-400 p-4 rounded-full mb-2">
+                                    <AiOutlineTrophy size={32} className="text-white" />
+                                </div>
+                                <p className="font-semibold">Quản lí lớp học</p>
+                            </div>
                         </div>
                     </div>
                 </div>
