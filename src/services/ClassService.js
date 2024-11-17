@@ -146,3 +146,7 @@ export const createConduct = async (classId, conductData) => {
    
   };
    
+  export const getConductByStudentIdAndSemester = async(studentId, semester ) => {
+    const res = await axios.get(`http://localhost:3001/api/class/conduct/${studentId}/${semester}`);
+    return res.data; 
+}
