@@ -211,6 +211,10 @@ const Dashboard = () => {
         navigate(`/manage/classDivision`)
     }
 
+    const handleGoToClassManage = () => {
+        navigate(`/manage/manageClass`)
+    }
+
     console.log(classHR && classHR.teacherHR !== null && classHR.teacherHR === user.id)
 
     return (
@@ -330,7 +334,7 @@ const Dashboard = () => {
                                         <p className="font-semibold">Thông tin học sinh</p>
                                     </div>
 
-                                    <div onClick={() =>handleGoToSendNotification(classHR._id)} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
+                                    <div onClick={() => handleGoToSendNotification(classHR._id)} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
                                         <div className="bg-red-400 p-4 rounded-full mb-2">
                                             <FaClipboardQuestion size={32} className="text-white" />
                                         </div>
@@ -446,7 +450,7 @@ const Dashboard = () => {
                                 </div>
                                 <p className="font-semibold">Chia lớp</p>
                             </div>
-                            <div onClick={handleGoToScoreTableStudent} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
+                            <div onClick={handleGoToClassManage} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
                                 <div className="bg-green-400 p-4 rounded-full mb-2">
                                     <AiOutlineTrophy size={32} className="text-white" />
                                 </div>

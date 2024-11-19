@@ -76,7 +76,7 @@ export const routes = [
     path: "manage/gradeTable/:idSubject/:idClass/:semester",
     page: () => (
       <ProtectedRoute>
-<GradeTable />
+        <GradeTable />
       </ProtectedRoute>
     ),
     isShowHeader: false,
@@ -234,7 +234,7 @@ export const routes = [
     path: "/manage/report/formReport",
     page: () => (
       <ProtectedRoute>
-<FormReport />
+        <FormReport />
       </ProtectedRoute>
     ),
     isShowHeader: false,
@@ -382,14 +382,14 @@ export const routes = [
     isShowSideBar: true,
   },
   {
-    path: "/student/selfLearning/quiz",
+    path: "/student/selfLearning/quiz/:idSubject",
     page: () => (
       <ProtectedRoute>
         <Quiz />
       </ProtectedRoute>
     ),
     isShowHeader: false,
-    isShowSideBar: true,
+    isShowSideBar: false,
   },
   {
     path: "/student/attendaceStudent",

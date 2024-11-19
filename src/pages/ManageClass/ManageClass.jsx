@@ -7,84 +7,105 @@ import {
     Modal,
     Form,
     Layout,
-    Typography,
     Row,
     Col,
     Space,
 } from "antd";
 import { EditOutlined, DeleteOutlined, PlusOutlined } from "@ant-design/icons";
+import * as ClassService from "../../services/ClassService";
+import * as BlockService from "../../services/BlockService";
 import Breadcrumb from "../../components/Breadcrumb/Breadcrumb";
-import "./style.css"; // Đường dẫn tới file CSS
+
 
 const { Search } = Input;
 const { Option } = Select;
 const { Content } = Layout;
 
 const App = () => {
-    const [classes, setClasses] = useState([
-        {
-            class: "10A1",
-            students: Array.from({ length: 20 }, (_, i) => ({
-                _id: i + 1,
-                name: `Nguyễn Văn ${String.fromCharCode(65 + i)}`,
-            })),
-        },
-        {
-            class: "10A2",
-            students: Array.from({ length: 20 }, (_, i) => ({
-                _id: i + 21,
-                name: `Trần Thị ${String.fromCharCode(65 + i)}`,
-            })),
-        },
-    ]);
-
+    const [classes, setClasses] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [filterClass, setFilterClass] = useState("");
     const [formData, setFormData] = useState({ _id: null, name: "", class: "" });
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [pageSize, setPageSize] = useState(10); // Số dòng hiển thị mỗi trang
+    const [tableScrollHeight, setTableScrollHeight] = useState(300); // Chiều cao mặc định
 
     useEffect(() => {
-        const updatePageSize = () => {
-            // Tính toán số dòng hiển thị dựa trên chiều cao màn hình
-            const availableHeight = window.innerHeight - 300; // Giảm chiều cao cố định (Header, Breadcrumb, Footer)
-            const rowHeight = 50; // Chiều cao trung bình mỗi dòng
-            const calculatedPageSize = Math.floor(availableHeight / rowHeight);
-            setPageSize(calculatedPageSize > 0 ? calculatedPageSize : 1); // Tối thiểu 1 dòng
+        const fetchSchedule = async () => {
+            try {
+                const data = await ClassService.getAllClass(); // Thay thế bằng API thực tế
+                if (data && data.data && Array.isArray(data.data)) {
+                    setClasses(data.data); // Gán dữ liệu nếu hợp lệ
+                } else {
+                    console.error("Invalid data format:", data);
+                }
+            } catch (error) {
+                console.error("Error fetching schedule data:", error);
+            }
         };
 
-        updatePageSize();
-        window.addEventListener("resize", updatePageSize);
-
-        return () => {
-            window.removeEventListener("resize", updatePageSize);
-        };
+        fetchSchedule();
     }, []);
 
-    const filteredStudents = classes
-        .filter((cls) => (filterClass ? cls.class === filterClass : true))
-        .flatMap((cls) =>
-            cls.students
-                .filter((student) =>
-                    student.name.toLowerCase().includes(searchTerm.toLowerCase())
-                )
-                .map((student) => ({ ...student, class: cls.class }))
-        );
+    useEffect(() => {
+        const fetchSchedule = async () => {
+            try {
+                const data = await BlockService.getAllBlocks(); // Thay thế bằng API thực tế
+                // if (data && data.data && Array.isArray(data.data)) {
+                //     setClasses(data.data); // Gán dữ liệu nếu hợp lệ
+                // } else {
+                //     console.error("Invalid data format:", data);
+                // }
+
+                console.log(data)
+            } catch (error) {
+                console.error("Error fetching schedule data:", error);
+            }
+        };
+
+        fetchSchedule();
+    }, []);
+
+    useEffect(() => {
+        const calculateTableHeight = () => {
+            const screenHeight = window.innerHeight; // Lấy chiều cao màn hình
+            const reservedHeight = 350; // Chiều cao dành cho các thành phần khác (header, footer, padding)
+            const newHeight = screenHeight - reservedHeight;
+            setTableScrollHeight(newHeight > 300 ? newHeight : 300); // Đảm bảo chiều cao tối thiểu
+        };
+
+        calculateTableHeight(); // Gọi khi component được mount
+        window.addEventListener("resize", calculateTableHeight); // Lắng nghe sự kiện thay đổi kích thước
+
+        return () => window.removeEventListener("resize", calculateTableHeight); // Xóa sự kiện khi component unmount
+    }, []);
+
+    // Lọc và chuẩn hóa dữ liệu học sinh từ JSON
+    const filteredStudents = classes.flatMap((cls) =>
+        cls.studentID.map((student) => ({
+            name: student.name, // Tên học sinh
+            class: cls.nameClass, // Lớp học
+            _id: student._id, // ID của học sinh
+        }))
+    ).filter((student) =>
+        student.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+        (!filterClass || student.class === filterClass)
+    );
 
     const handleAddOrEdit = () => {
         const { _id, name, class: className } = formData;
 
         setClasses((prev) => {
             const updatedClasses = [...prev];
-            const classIndex = updatedClasses.findIndex((cls) => cls.class === className);
+            const classIndex = updatedClasses.findIndex((cls) => cls.nameClass === className);
 
             if (_id) {
-                updatedClasses[classIndex].students = updatedClasses[classIndex].students.map(
-                    (student) => (student._id === _id ? { _id, name } : student)
+                updatedClasses[classIndex].studentID = updatedClasses[classIndex].studentID.map(
+                    (student) => (student._id === _id ? { ...student, name } : student)
                 );
             } else {
-                updatedClasses[classIndex].students.push({
-                    _id: Date.now(),
+                updatedClasses[classIndex].studentID.push({
+                    _id: Date.now().toString(),
                     name,
                 });
             }
@@ -104,8 +125,8 @@ const App = () => {
     const handleDelete = (_id, className) => {
         setClasses((prev) =>
             prev.map((cls) =>
-                cls.class === className
-                    ? { ...cls, students: cls.students.filter((student) => student._id !== _id) }
+                cls.nameClass === className
+                    ? { ...cls, studentID: cls.studentID.filter((student) => student._id !== _id) }
                     : cls
             )
         );
@@ -159,7 +180,6 @@ const App = () => {
                     background: "#fff",
                     padding: "20px",
                     overflow: "auto",
-                    height: "calc(100vh - 64px - 40px)",
                 }}
             >
                 <Row gutter={[16, 16]} style={{ marginBottom: "20px" }}>
@@ -178,8 +198,8 @@ const App = () => {
                             allowClear
                         >
                             {classes.map((cls) => (
-                                <Option key={cls.class} value={cls.class}>
-                                    {cls.class}
+                                <Option key={cls.nameClass} value={cls.nameClass}>
+                                    {cls.nameClass}
                                 </Option>
                             ))}
                         </Select>
@@ -199,8 +219,15 @@ const App = () => {
                     dataSource={filteredStudents}
                     columns={columns}
                     rowKey="_id"
-                    pagination={{ pageSize }}
+                    pagination={{
+                        pageSize,
+                        position: ["bottomCenter"], // Giữ phân trang ở dưới cùng
+                    }}
                     bordered
+                    scroll={{
+                        x: "max-content",
+                        y: tableScrollHeight, // Đặt chiều cao cuộn
+                    }}
                     style={{ width: "100%", borderRadius: "8px" }}
                 />
             </Content>
@@ -228,8 +255,8 @@ const App = () => {
                             style={{ width: "100%" }}
                         >
                             {classes.map((cls) => (
-                                <Option key={cls.class} value={cls.class}>
-                                    {cls.class}
+                                <Option key={cls.nameClass} value={cls.nameClass}>
+                                    {cls.nameClass}
                                 </Option>
                             ))}
                         </Select>
