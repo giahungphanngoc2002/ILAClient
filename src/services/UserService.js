@@ -7,12 +7,12 @@ const API_URL = "http://localhost:3001/api/user";
 export const axiosJWT = axios.create();
 
 export const loginUser = async (data) => {
-  const res = await axios.post(`${API_URL}/signin`, data);
+  const res = await axios.post(`https://ila-server-3.onrender.com/api/user/signin`, data);
   return res.data;
 };
 
 export const signupUser = async (data) => {
-  const res = await axios.post(`${API_URL}/signup`, data);
+  const res = await axios.post(`https://ila-server-3.onrender.com/api/user/signup`, data);
   return res.data;
 };
 
@@ -78,18 +78,18 @@ export const resetPassword = async (resetToken, newPassword) => {
   return res.data;
 };
 
-export const getAllUser = async() =>{
-  const res =await axios.get (`http://localhost:3001/api/user/getAllUser`)
+export const getAllUser = async () => {
+  const res = await axios.get(`http://localhost:3001/api/user/getAllUser`)
   return res.data
 }
 
-export const getAllTopUser = async() =>{
-  const res =await axios.get (`http://localhost:3001/api/user/top`)
+export const getAllTopUser = async () => {
+  const res = await axios.get(`http://localhost:3001/api/user/top`)
   return res.data
 }
 
-export const getcountUsers = async() =>{
-  const res =await axios.get (`http://localhost:3001/api/user/count`)
+export const getcountUsers = async () => {
+  const res = await axios.get(`http://localhost:3001/api/user/count`)
   return res.data
 }
 
@@ -100,7 +100,7 @@ export const updateUserCount = async (userId, newCount) => {
     });
     return res.data;
   } catch (error) {
-    
+
     throw error.response ? error.response.data : new Error(error.message);
   }
 };
