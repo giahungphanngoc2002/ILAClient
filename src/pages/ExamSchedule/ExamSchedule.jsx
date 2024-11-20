@@ -1,37 +1,124 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
-
+import * as BlockService from "../../services/BlockService";
+import * as SubjectService from "../../services/SubjectService";
+import * as ExamScheduleService from "../../services/ExamScheduleService";
+import { toast } from "react-toastify";
 const localizer = momentLocalizer(moment);
 
 const ExamScheduler = () => {
-    const [selectedClass, setSelectedClass] = useState('');
+    
+    const [selectedBlock, setSelectedBlock] = useState('');
     const [selectedSubject, setSelectedSubject] = useState('');
     const [date, setDate] = useState('');
-    const [time, setTime] = useState('');
+    const [timeStart, setTimeStart] = useState('');
+    const [timeEnd, setTimeEnd] = useState('');
     const [events, setEvents] = useState([]);
+    const [blocks, setBlocks] = useState([]);
+    const [subjects, setSubjects] = useState([]);
 
-    const addExam = () => {
-        if (selectedClass && selectedSubject && date && time) {
-            const start = new Date(`${date}T${time}`);
+
+    useEffect(() => {
+        const fetchBlocks = async () => {
+            try {
+                const blocksData = await BlockService.getAllBlocks();
+                setBlocks(blocksData);
+            } catch (error) {
+                console.error("Error fetching blocks:", error);
+            }
+        };
+        fetchBlocks();
+    }, []);    
+    
+
+    useEffect(() => {
+        const fetchSubjects = async () => {
+            try {
+                const subjectsData = await SubjectService.getAllSubjects();
+                setSubjects(subjectsData?.data);
+            } catch (error) {
+                console.error("Error fetching blocks:", error);
+            }
+        };
+        fetchSubjects();
+    }, []);
+    console.log("su",subjects)
+
+    useEffect(() => {
+        const fetchExamSchedules = async () => {
+            try {
+                const examSchedules = await ExamScheduleService.getAllExamSchedules();
+                        console.log(examSchedules)
+                // Chuyển đổi dữ liệu từ API sang định dạng của react-big-calendar
+                const mappedEvents = examSchedules?.data?.map((schedule) => ({
+                    title: `${schedule.blockId.nameBlock} - ${schedule.subjectId.nameSubject}`,
+                start: new Date(`${schedule.day}T${schedule.timeStart}`),
+                end: new Date(`${schedule.day}T${schedule.timeEnd}`),
+                }));
+    
+                setEvents(mappedEvents);
+            } catch (error) {
+                console.error("Error fetching exam schedules:", error);
+                toast.error("Không thể tải dữ liệu lịch thi.");
+            }
+        };
+    
+        fetchExamSchedules();
+    }, []);
+   
+    
+    const addExam = async () => {
+        if (selectedBlock && selectedSubject && date && timeStart) {
+            const start = new Date(`${date}T${timeStart}`);
             const end = new Date(start.getTime() + 60 * 60 * 1000); // Giả sử mỗi kỳ thi kéo dài 1 giờ
-
+    
+            const blockName = blocks.find(block => block._id === selectedBlock)?.nameBlock || 'Unknown Block';
+            const subjectName = subjects.find(subject => subject._id === selectedSubject)?.nameSubject || 'Unknown Subject';
+            
+            console.log(blockName)
+            console.log(subjectName)
             const newEvent = {
-                title: `${selectedClass} - ${selectedSubject}`,
-                start: start,
-                end: end,
+                blockId: selectedBlock,
+                subjectId: selectedSubject,
+                day: date,
+                timeStart: timeStart,
+                timeEnd: timeEnd,
             };
-
-            setEvents([...events, newEvent]);
-            setSelectedClass('');
-            setSelectedSubject('');
-            setDate('');
-            setTime('');
+    
+            try {
+                // Gửi request tạo lịch thi
+                const response = await ExamScheduleService.createExamSchedule(newEvent);
+    
+                // Thêm sự kiện vào lịch sau khi tạo thành công
+                setEvents([
+                    ...events,
+                    {
+                        title: `${blockName} - ${subjectName}`,
+                        start : start,
+                        end :end,
+                    },
+                ]);
+    
+                // Reset các trường
+                setSelectedBlock('');
+                setSelectedSubject('');
+                setDate('');
+                setTimeStart('');
+                setTimeEnd('');
+    
+                toast.success("Lịch thi đã được thêm thành công!");
+            } catch (error) {
+                console.error("Error adding exam schedule:", error);
+                toast.error("Có lỗi xảy ra khi thêm lịch thi.");
+            }
         } else {
-            alert('Vui lòng điền đầy đủ thông tin!');
+            alert("Vui lòng điền đầy đủ thông tin!");
         }
     };
+    console.log("Events list:", events);
+
 
     return (
         <div className=" bg-gray-100 flex flex-col lg:flex-row overflow-hidden px-4">
@@ -42,14 +129,16 @@ const ExamScheduler = () => {
                     <div>
                         <label className="block text-lg font-medium mb-2">Chọn Khối</label>
                         <select
-                            value={selectedClass}
-                            onChange={(e) => setSelectedClass(e.target.value)}
+                            value={selectedBlock}
+                            onChange={(e) => setSelectedBlock(e.target.value)}
                             className="w-full p-2 border rounded"
                         >
                             <option value="">Chọn khối lớp</option>
-                            <option value="10">Khối 10</option>
-                            <option value="11">Khối 11</option>
-                            <option value="12">Khối 12</option>
+                            {blocks.map((block) => (
+                                <option key={block._id} value={block._id}>
+                                    {block.nameBlock} 
+                                </option>
+                            ))}
                         </select>
                     </div>
 
@@ -61,10 +150,11 @@ const ExamScheduler = () => {
                             className="w-full p-2 border rounded"
                         >
                             <option value="">Chọn môn thi</option>
-                            <option value="Toán">Toán</option>
-                            <option value="Lý">Lý</option>
-                            <option value="Hóa">Hóa</option>
-                            <option value="Văn">Văn</option>
+                            {subjects.map((subject) => (
+                            <option key={subject._id} value={subject._id}>
+                                {subject.nameSubject} 
+                            </option>
+                        ))}
                         </select>
                     </div>
 
@@ -79,9 +169,16 @@ const ExamScheduler = () => {
                             />
                             <input
                                 type="time"
-                                value={time}
-                                onChange={(e) => setTime(e.target.value)}
+                                value={timeStart}
+                                onChange={(e) => setTimeStart(e.target.value)}
                                 className="p-2 border rounded w-full"
+                            />
+                            <input
+                                type="time"
+                                value={timeEnd}
+                                onChange={(e) => setTimeEnd(e.target.value)}
+                                className="p-2 border rounded w-full"
+                                placeholder="Thời gian kết thúc"
                             />
                         </div>
                     </div>

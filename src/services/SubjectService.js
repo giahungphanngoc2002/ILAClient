@@ -39,4 +39,9 @@ export const getDetailSubject = async (subjectId) => {
   return response.data;
 };
 
+export const getAllSubjects = async () => {
+  const res = await axios.get(`http://localhost:3001/api/subject/getAllSubjects`)
+  return res.data
+}
+
 

@@ -74,6 +74,15 @@ export const deleteStudentIDToClass = async (classId, studentId) => {
     });
     return res.data;
 };
+export const transferStudent = async (studentId, fromClassId, toClassId) => {
+   
+        const res = await axios.post("http://localhost:3001/api/class/transferstudent", {
+            studentId,
+            fromClassId,
+            toClassId,
+        });
+        return res.data; // Trả về dữ liệu từ API    
+};
 
 export const getStudentInClass = async (classId, classData) => {
     const res = await axios.get(`http://localhost:3001/api/class/class/${classId}/students`, classData);
