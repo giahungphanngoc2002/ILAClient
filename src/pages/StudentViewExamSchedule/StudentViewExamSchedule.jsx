@@ -19,6 +19,7 @@ const ExamSchedule = () => {
 
   const [classSubject, setClassSubject] = useState(null);
   const [blockClassUser, setBlockClassUser] = useState();
+  const [loading, setLoading] = useState(false);
 
   const findUserClass = (allClasses, userId) => {
     if (!Array.isArray(allClasses)) {
@@ -70,22 +71,27 @@ const ExamSchedule = () => {
   }, [user.id]);
 
   useEffect(() => {
-    const fetchClasses = async () => {
-      try {
-        const allExamSchedule = await ExamScheduleService.getAllExamScheduleByBlock(blockClassUser?._id);
-        console.log(allExamSchedule)
-        // if (allExamSchedule) {
-        //   setExamSchedule(userClass.subjectGroup.SubjectsId);
-        // } else {
-        //   console.error("Không tìm thấy classSubject phù hợp!");
-        // }
-      } catch (error) {
-        console.error('Error fetching classes:', error);
-      }
+    const fetchExamSchedules = async () => {
+        if (!blockClassUser?._id) return; // Nếu không có _id thì không gọi API
+        setLoading(true);
+
+        try {
+            const data = await ExamScheduleService.getAllExamScheduleByBlock(blockClassUser._id);
+            setExamSchedule(data || []); // Đảm bảo state không undefined
+        } catch (err) {
+            console.error(err); // Log lỗi nếu có
+        } finally {
+            setLoading(false);
+        }
     };
 
-    fetchClasses();
-  }, [blockClassUser?._id]);
+    fetchExamSchedules();
+}, [blockClassUser?._id]);
+
+console.log("123",examSchedule);
+
+
+console.log(examSchedule)
 
   console.log(classSubject)
   console.log(blockClassUser?._id)
