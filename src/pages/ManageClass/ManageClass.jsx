@@ -325,43 +325,55 @@ const App = () => {
 
             {/* Modal Thêm Học Sinh */}
             <Modal
-                title="Thêm Học Sinh"
-                visible={isAddModalOpen}
-                onCancel={() => setIsAddModalOpen(false)}
-                onOk={handleAddStudent}
-                confirmLoading={isLoading}
-            >
-                <Form layout="vertical">
-                    <Form.Item label="Tên Học Sinh" required>
+    title="Thêm Học Sinh"
+    visible={isAddModalOpen}
+    onCancel={() => setIsAddModalOpen(false)}
+    onOk={handleAddStudent}
+    confirmLoading={isLoading}
+>
+    <Form layout="vertical">
+        <Form.Item label="Tên Học Sinh" required>
                         <Select
-                            placeholder="Chọn học sinh"
-                            value={formData.name}
-                            onChange={(value) => setFormData({ ...formData, name: value })}
-                            style={{ width: "100%" }}
-                        >
-                            {studentU.map((student) => (
-                                <Option key={student.email} value={student.email}>
-                                    {student.name} - {student.email}
-                                </Option>
-                            ))}
-                        </Select>
-                    </Form.Item>
-                    <Form.Item label="Lớp" required>
-                        <Select
-                            placeholder="Chọn lớp"
-                            value={formData.class}
-                            onChange={(value) => setFormData({ ...formData, class: value })}
-                            style={{ width: "100%" }}
-                        >
-                            {classes.map((cls) => (
-                                <Option key={cls.nameClass} value={cls.nameClass}>
-                                    {cls.nameClass}
-                                </Option>
-                            ))}
-                        </Select>
-                    </Form.Item>
-                </Form>
-            </Modal>
+                    showSearch
+                    placeholder="Chọn học sinh"
+                    value={formData.name}
+                    onChange={(value) => setFormData({ ...formData, name: value })}
+                    style={{ width: "100%" }}
+                    filterOption={(input, option) =>
+                        option?.label?.toLowerCase().includes(input.toLowerCase())
+                    }
+                >
+                    {studentU
+                        .sort((a, b) => (a.name || "").localeCompare(b.name || ""))
+                        .map((student) => (
+                            <Select.Option
+                                key={student.email}
+                                value={student.email}
+                                label={`${student.name} - ${student.email}`} // Cung cấp `label` để dùng trong `filterOption`
+                            >
+                                {student.name} - {student.email}
+                            </Select.Option>
+                        ))}
+                </Select>
+
+                        </Form.Item>
+                        <Form.Item label="Lớp" required>
+                            <Select
+                                placeholder="Chọn lớp"
+                                value={formData.class}
+                                onChange={(value) => setFormData({ ...formData, class: value })}
+                                style={{ width: "100%" }}
+                            >
+                                {classes.map((cls) => (
+                                    <Select.Option key={cls.nameClass} value={cls.nameClass}>
+                                        {cls.nameClass}
+                                    </Select.Option>
+                                ))}
+                            </Select>
+                        </Form.Item>
+                    </Form>
+                </Modal>
+
 
             {/* Modal Sửa Học Sinh */}
             <Modal
