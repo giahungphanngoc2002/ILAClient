@@ -8,16 +8,18 @@ const SummaryStudent = ({ studentId, selectedSemester }) => {
     const [conduct, setConduct] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [conduct1, setConduct1] = useState();
+    const [conduct2, setConduct2] = useState();
 
     useEffect(() => {
         const fetchConduct = async () => {
-            if (!studentId || !selectedSemester) return;
+            if (!studentId) return;
 
             setLoading(true);
             setError(null);
             try {
-                const data = await ClassService.getConductByStudentIdAndSemester(studentId, selectedSemester);
-                setConduct(data);
+                const data = await ClassService.getConductByStudentIdAndSemester(studentId, 1);
+                setConduct1(data);
             } catch (err) {
                 setError('Không thể tải dữ liệu hạnh kiểm');
             } finally {
@@ -26,7 +28,57 @@ const SummaryStudent = ({ studentId, selectedSemester }) => {
         };
 
         fetchConduct();
-    }, [studentId, selectedSemester]);
+    }, [studentId]);
+
+    useEffect(() => {
+        const fetchConduct = async () => {
+            if (!studentId) return;
+
+            setLoading(true);
+            setError(null);
+            try {
+                const data = await ClassService.getConductByStudentIdAndSemester(studentId, 2);
+                setConduct2(data);
+            } catch (err) {
+                setError('Không thể tải dữ liệu hạnh kiểm');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchConduct();
+    }, [studentId]);
+
+    
+
+    function tinhHanhKiem(hk1, hk2) {
+        // Quy định mức hạnh kiểm theo thứ tự ưu tiên
+        const mucHanhKiem = ["Yếu", "Trung bình", "Khá", "Tốt"];
+
+        // Lấy chỉ số của hạnh kiểm học kỳ 1 và 2
+        const indexHK1 = mucHanhKiem.indexOf(hk1);
+        const indexHK2 = mucHanhKiem.indexOf(hk2);
+
+        // Kiểm tra nếu có hạnh kiểm Yếu
+        if (hk1 === "Yếu" || hk2 === "Yếu") {
+            return "Yếu"; // Ưu tiên mức thấp nhất nếu có "Yếu"
+        }
+
+        // Nếu cả hai kỳ giống nhau
+        if (indexHK1 === indexHK2) {
+            return hk1;
+        }
+
+        // Nếu khác nhau, ưu tiên kỳ 2
+        if (indexHK1 > indexHK2) {
+            // Kỳ 1 cao hơn kỳ 2 -> hạ xuống mức của kỳ 2
+            return hk2;
+        } else {
+            // Kỳ 1 thấp hơn kỳ 2 -> nâng lên mức giữa kỳ 1 và kỳ 2
+            return mucHanhKiem[indexHK1 + 1];
+        }
+    }
+
 
     const data = [
         {
@@ -52,9 +104,11 @@ const SummaryStudent = ({ studentId, selectedSemester }) => {
         {
             icon: <RiStarFill className="w-6 h-6 text-orange-500" />,
             title: "Hạnh kiểm",
-            score: conduct?.typeConduct || "Đang tải...",
+            score: tinhHanhKiem(conduct1?.typeConduct, conduct2?.typeConduct) || "Đang tải...",
             details: [
-                { label: `Học kỳ ${selectedSemester}`, value: conduct?.typeConduct || "Đang tải..." }
+                { label: `Học kỳ 1`, value: conduct1?.typeConduct || "Đang tải..." },
+                { label: `Học kỳ 2`, value: conduct2?.typeConduct || "Đang tải..." }
+
             ],
             bgColor: "bg-orange-500"
         },
@@ -66,7 +120,6 @@ const SummaryStudent = ({ studentId, selectedSemester }) => {
                 <HiClipboardList className="text-blue-600 w-6 h-6 mr-2" />
                 <span className="text-xl font-bold text-blue-600">TỔNG KẾT</span>
             </div>
-            {loading && <p className="text-blue-500">Đang tải dữ liệu...</p>}
             {error && <p className="text-red-500">{error}</p>}
             <div className="flex flex-col md:flex-row gap-4 w-full items-center justify-between">
                 {data.map((item, index) => (

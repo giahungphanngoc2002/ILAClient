@@ -36,6 +36,7 @@ import THRSendNoti from "../pages/THRSendNotification/THRSendNoti";
 import ScoreTableStudent from "../pages/ScoreTableStudent/ScoreTableStudent";
 import ConductEvaluation from "../pages/ConductEvaluation/ConductEvaluation";
 import ManageClass from "../pages/ManageClass/ManageClass";
+import StudentViewExamSchedule from "../pages/StudentViewExamSchedule/StudentViewExamSchedule";
 export const routes = [
   {
     path: "/",
@@ -396,6 +397,16 @@ export const routes = [
     page: () => (
       <ProtectedRoute>
         <AttendanceStudent />
+      </ProtectedRoute>
+    ),
+    isShowHeader: false,
+    isShowSideBar: false,
+  },
+  {
+    path: "/manage/student/viewExamSchedule",
+    page: () => (
+      <ProtectedRoute>
+        <StudentViewExamSchedule />
       </ProtectedRoute>
     ),
     isShowHeader: false,

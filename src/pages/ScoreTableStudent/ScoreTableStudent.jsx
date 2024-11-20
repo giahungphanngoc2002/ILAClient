@@ -4,6 +4,7 @@ import SummaryStudent from '../../components/SummaryStudent/SummaryStudent';
 import SummaryAttendanceAndAward from '../../components/SummaryAttendaceAndAward/SummaryAttendanceAndAward';
 import { HiClipboardList } from 'react-icons/hi';
 import * as ScoreSbujectService from "../../services/ScoreSbujectService";
+import * as ClassService from "../../services/ClassService";
 import { useSelector } from 'react-redux';
 
 const ScoreTableStudent = () => {
@@ -13,64 +14,160 @@ const ScoreTableStudent = () => {
     const [loading, setLoading] = useState(false); // Trạng thái tải dữ liệu
     const [error, setError] = useState(null); // Trạng thái lỗi
     const [studentId, setStudentId] = useState(user?.id);
+    const [classes, setClasses] = useState([]);
+    const [classSubject, setClassSubject] = useState(null);
 
     useEffect(() => {
         setStudentId(user?.id);
     }, [user]);
 
+    // Hàm riêng để tìm class chứa user.id
+    const findUserClass = (allClasses, userId) => {
+        if (!Array.isArray(allClasses)) {
+            console.error('All classes is not a valid array:', allClasses);
+            return null;
+        }
+
+        const foundClass = allClasses.find((classItem) => {
+            return (
+                Array.isArray(classItem.studentID) &&
+                classItem.studentID.some((student) =>
+                    typeof student === 'string'
+                        ? student === userId
+                        : student._id === userId
+                )
+            );
+        });
+
+        if (!foundClass) {
+            console.warn('No class found for user:', userId);
+        }
+
+        return foundClass;
+    };
+
+    // Hàm chính để fetch classes và tìm class
+    useEffect(() => {
+        const fetchClasses = async () => {
+            try {
+                const allClasses = await ClassService.getAllClass();
+                console.log('All Classes:', allClasses);
+
+                setClasses(allClasses?.data || []);
+
+                const userClass = findUserClass(allClasses?.data || [], user.id);
+                if (userClass && userClass.subjectGroup?.SubjectsId) {
+                    setClassSubject(userClass.subjectGroup.SubjectsId);
+                } else {
+                    console.error("Không tìm thấy classSubject phù hợp!");
+                }
+            } catch (error) {
+                console.error('Error fetching classes:', error);
+            }
+        };
+
+        fetchClasses();
+    }, [user.id]);
+
     // Hàm gọi API và định dạng lại dữ liệu
     const fetchScores = async (semester) => {
+        if (!classSubject || !Array.isArray(classSubject)) {
+            console.error("classSubject chưa được khởi tạo hoặc không hợp lệ:", classSubject);
+            setError('Dữ liệu môn học chưa sẵn sàng. Vui lòng thử lại!');
+            return;
+        }
+
         setLoading(true);
         setError(null);
 
         try {
+            // Lấy dữ liệu điểm từ API
             const rawData = await ScoreSbujectService.getAllScoreByStudentIdAndSemester(studentId, semester);
+            console.log("Raw Data:", rawData);
 
-            // Định dạng lại dữ liệu
-            const formattedData = rawData.map(item => {
-                const subjectName = item.subjectId.nameSubject;
-                const regularScores = item.scores.filter(score => score.type === "thuongXuyen").map(score => score.score);
-                const midtermScores = item.scores.filter(score => score.type === "giuaKi").map(score => score.score);
-                const finalScores = item.scores.filter(score => score.type === "cuoiKi").map(score => score.score);
+            // Kiểm tra nếu rawData không có dữ liệu
+            if (!rawData || rawData.length === 0) {
+                console.warn(`Không có dữ liệu điểm trả về cho kỳ ${semester}`);
+                // Thiết lập dữ liệu điểm rỗng cho tất cả các môn học
+                setGrades(prev => ({
+                    ...prev,
+                    [semester]: classSubject.map(subject => ({
+                        subject: subject.nameSubject,
+                        regular: [],
+                        midterm: [],
+                        final: [],
+                    })),
+                }));
+                return;
+            }
 
-                return {
-                    subject: subjectName,
-                    regular: regularScores,
-                    midterm: midtermScores,
-                    final: finalScores,
-                };
+            // Gộp dữ liệu từ classSubject và rawData
+            const formattedData = classSubject.map(subject => {
+                const subjectData = rawData.find(item => item.subjectId.nameSubject === subject.nameSubject);
+
+                if (subjectData) {
+                    const regularScores = subjectData.scores
+                        .filter(score => score.type === "thuongXuyen")
+                        .map(score => score.score);
+                    const midtermScores = subjectData.scores
+                        .filter(score => score.type === "giuaKi")
+                        .map(score => score.score);
+                    const finalScores = subjectData.scores
+                        .filter(score => score.type === "cuoiKi")
+                        .map(score => score.score);
+
+                    return {
+                        subject: subject.nameSubject,
+                        regular: regularScores,
+                        midterm: midtermScores,
+                        final: finalScores,
+                    };
+                } else {
+                    // Nếu không tìm thấy dữ liệu cho môn học này
+                    return {
+                        subject: subject.nameSubject,
+                        regular: [],
+                        midterm: [],
+                        final: [],
+                    };
+                }
             });
 
+            // Cập nhật dữ liệu điểm vào state
             setGrades(prev => ({
                 ...prev,
-                [semester]: formattedData, // Lưu theo kỳ
+                [semester]: formattedData,
             }));
         } catch (err) {
+            console.error("Error fetching scores:", err.message || err);
             setError('Không thể tải dữ liệu điểm. Vui lòng thử lại!');
         } finally {
             setLoading(false);
         }
     };
 
-    // Gọi fetchScores khi `selectedSemester` hoặc `studentId` thay đổi
+
     useEffect(() => {
-        if (!grades[selectedSemester]) {
+        if (classSubject && Array.isArray(classSubject) && !grades[selectedSemester]) {
             fetchScores(selectedSemester);
         }
-    }, [selectedSemester, studentId]);
+    }, [selectedSemester, studentId, classSubject]);
 
     const handleSemesterChange = (semester) => {
         setSelectedSemester(semester);
     };
 
-    // Hàm tính điểm trung bình
     const calculateAverage = (scores) => {
-        return (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(2);
+        return scores.length > 0
+            ? (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(2)
+            : "N/A";
     };
 
     const onBack = () => {
-        // Handle back button logic
+        window.history.back();
     };
+
+    console.log(grades)
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen p-6">
@@ -83,12 +180,11 @@ const ScoreTableStudent = () => {
             <div className="pt-8"></div>
 
             <div className='w-4/5'>
-            <SummaryStudent studentId={studentId} selectedSemester={selectedSemester} />
+                <SummaryStudent studentId={studentId} selectedSemester={selectedSemester} />
 
                 <SummaryAttendanceAndAward />
             </div>
 
-            {/* Chọn kỳ học */}
             <div className="flex gap-2 mb-6">
                 <button
                     className={`px-4 py-2 rounded-lg font-semibold ${selectedSemester === "1" ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700"}`}
@@ -104,17 +200,13 @@ const ScoreTableStudent = () => {
                 </button>
             </div>
 
-            {/* Bảng điểm */}
             <div className="w-4/5 rounded-xl overflow-hidden p-6">
                 <div className="flex items-center mb-6">
                     <HiClipboardList className="text-blue-600 w-6 h-6 mr-2" />
                     <span className="text-xl font-bold text-blue-600">Bảng điểm</span>
                 </div>
 
-                {/* Hiển thị trạng thái tải */}
                 {loading && <p className="text-blue-500">Đang tải dữ liệu...</p>}
-
-                {/* Hiển thị lỗi */}
                 {error && <p className="text-red-500">{error}</p>}
 
                 {!loading && !error && grades[selectedSemester] && (
@@ -132,7 +224,7 @@ const ScoreTableStudent = () => {
                             {grades[selectedSemester]?.map((grade, index) => (
                                 <tr key={index} className="hover:bg-blue-50 text-gray-700 text-lg">
                                     <td className="px-4 py-4 border border-gray-200">
-                                    {grade.subject.replace("Chuyên Đề", "").trim()}
+                                        {grade.subject}
                                     </td>
                                     <td className="px-4 py-4 border border-gray-200 text-center">
                                         <div className="grid grid-cols-3 gap-1">

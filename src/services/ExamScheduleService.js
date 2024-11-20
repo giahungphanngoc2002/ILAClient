@@ -12,8 +12,8 @@ export const getAllExamSchedules = async () => {
 }
 
 export const getAllExamScheduleByBlock = async (blockId) => {
-    const res = await axios.delete(`http://localhost:3001/api/exam/getAllExamScheduleByBlock`, {
-        data: { blockId }
+    const res = await axios.get(`http://localhost:3001/api/exam/getAllExamScheduleByBlock`, {
+        params: { blockId }
     });
     return res.data;
 };

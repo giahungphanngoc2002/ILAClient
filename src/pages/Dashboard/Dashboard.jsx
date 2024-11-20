@@ -215,6 +215,10 @@ const Dashboard = () => {
         navigate(`/manage/manageClass`)
     }
 
+    const handleGoToViewExamSchedule = () => {
+        navigate(`/manage/student/viewExamSchedule`)
+    }
+
     console.log(classHR && classHR.teacherHR !== null && classHR.teacherHR === user.id)
 
     return (
@@ -413,7 +417,7 @@ const Dashboard = () => {
                                 </div>
                                 <p className="font-semibold">Xem điểm</p>
                             </div>
-                            <div onClick={handleGoToScoreTableStudent} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
+                            <div onClick={handleGoToViewExamSchedule} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
                                 <div className="bg-green-400 p-4 rounded-full mb-2">
                                     <AiOutlineTrophy size={32} className="text-white" />
                                 </div>
