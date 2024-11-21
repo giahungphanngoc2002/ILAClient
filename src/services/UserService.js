@@ -1,5 +1,3 @@
-
-
 import axios from "axios";
 
 const API_URL = "http://localhost:3001/api/user";
@@ -7,12 +5,12 @@ const API_URL = "http://localhost:3001/api/user";
 export const axiosJWT = axios.create();
 
 export const loginUser = async (data) => {
-  const res = await axios.post(`https://ila-server-3.onrender.com/api/user/signin`, data);
+  const res = await axios.post(`${API_URL}/signin`, data);
   return res.data;
 };
 
 export const signupUser = async (data) => {
-  const res = await axios.post(`https://ila-server-3.onrender.com/api/user/signup`, data);
+  const res = await axios.post(`${API_URL}/signup`, data);
   return res.data;
 };
 
@@ -37,13 +35,23 @@ export const refreshToken = async () => {
   return res.data;
 };
 
-export const updateUser = async (id, data, access_token) => {
-  const res = await axios.put(`${API_URL}/updateUser/${id}`, data, {
-    headers: {
-      token: `Bearer ${access_token}`,
-    },
-  });
-  return res.data;
+export const updateUser = async (id, formData, access_token) => {
+  try {
+    const res = await axios.put(
+      `${API_URL}/updateUser/${id}`,
+      formData, // Chỉ gửi `formData`
+      {
+        headers: {
+          "Content-Type": "multipart/form-data", // Đảm bảo backend nhận dạng file
+          token: `Bearer ${access_token}`, // Token để xác thực
+        },
+      }
+    );
+    return res.data;
+  } catch (error) {
+    console.error("Error in updateUser:", error.response || error.message);
+    throw error;
+  }
 };
 
 export const updatePassword = async (id, data, access_token) => {
@@ -88,19 +96,28 @@ export const getAllTopUser = async () => {
   return res.data
 }
 
-export const getcountUsers = async () => {
-  const res = await axios.get(`http://localhost:3001/api/user/count`)
-  return res.data
-}
 
-export const updateUserCount = async (userId, newCount) => {
-  try {
-    const res = await axios.put(`http://localhost:3001/api/user/updateCount/${userId}`, {
-      count: newCount,
-    });
-    return res.data;
-  } catch (error) {
 
-    throw error.response ? error.response.data : new Error(error.message);
-  }
+
+
+export const createContact = async (userId, contactData) => {
+  const res = await axios.post(`http://localhost:3001/api/user/createContact/${userId}`, contactData);
+
+  return res.data;
+
+};
+
+export const updateContact = async (contactId, updatedData) => {
+
+  const res = await axios.put(`http://localhost:3001/api/user/updateContact/${contactId}`, updatedData);
+
+  return res.data;
+
+};
+
+export const getInfoContactByUserId = async (userId) => {
+  const res = await axios.get(`http://localhost:3001/api/user/getdetailsInfocontact/${userId}`);
+
+  return res.data;
+
 };
