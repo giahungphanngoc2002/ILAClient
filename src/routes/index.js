@@ -37,6 +37,7 @@ import ScoreTableStudent from "../pages/ScoreTableStudent/ScoreTableStudent";
 import ConductEvaluation from "../pages/ConductEvaluation/ConductEvaluation";
 import ManageClass from "../pages/ManageClass/ManageClass";
 import StudentViewExamSchedule from "../pages/StudentViewExamSchedule/StudentViewExamSchedule";
+import AutoCreateAccount from "../pages/AutoCreateAccount/AutoCreateAccount";
 export const routes = [
   {
     path: "/",
@@ -337,6 +338,16 @@ export const routes = [
     page: () => (
       <ProtectedRoute>
         <ManageClass />
+      </ProtectedRoute>
+    ),
+    isShowHeader: false,
+    isShowSideBar: false,
+  },
+  {
+    path: "/manage/autoCreateAccount",
+    page: () => (
+      <ProtectedRoute>
+        <AutoCreateAccount />
       </ProtectedRoute>
     ),
     isShowHeader: false,
