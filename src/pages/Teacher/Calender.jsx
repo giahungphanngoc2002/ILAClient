@@ -182,6 +182,7 @@ const Calendar = ({ onClassClick }) => {
                 </div>
                 {slotTimes.map((slot, i) => {
                   const classData = getScheduleForDay(day, i);
+                
                   return (
                     <div
                       key={i}

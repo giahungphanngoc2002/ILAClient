@@ -34,28 +34,29 @@ const AbsenceRequestList = ({ idClass, year, week, dayOfWeek, targetSlot }) => {
             fetchAbsenceRequests();
         }
     }, [idClass]);
+    console.log(absenceRequests)
 
     // Hàm để tính số tuần của một ngày nhất định
 
 // Lọc các yêu cầu nghỉ học khớp với các điều kiện về ngày, tuần, và tiết
 // Lọc các yêu cầu nghỉ học khớp với các điều kiện về năm, tuần, và tiết
 const filteredAbsenceRequests = absenceRequests.filter(request => {
-    const requestWeek = parseInt(request.week); // Lấy tuần từ request
-    const requestYear = parseInt(request.year); // Lấy năm từ request
-    const requestSlot = request.slot;
+    const requestWeek = parseInt(request?.week); // Lấy tuần từ request
+    const requestYear = parseInt(request?.year); // Lấy năm từ request
+    const requestSlot = request?.slot;
 
-    console.log("Request Year:", requestYear);
-    console.log("Request Week:", requestWeek);
-    console.log("Expected Year:", year);
-    console.log("Expected Week:", week);
-    console.log("Expected DayOfWeek:", dayOfWeek);
-    console.log("Expected Slot Number:", targetSlot?.slotNumber);
+    // console.log("Request Year:", requestYear);
+    // console.log("Request Week:", requestWeek);
+    // console.log("Expected Year:", year);
+    // console.log("Expected Week:", week);
+    // console.log("Expected DayOfWeek:", dayOfWeek);
+    // console.log("Expected Slot Number:", targetSlot?.slotNumber);
 
     // So sánh năm, tuần, và slot để xác nhận yêu cầu nghỉ học
     return (
         requestYear === parseInt(year) && // So sánh năm
         requestWeek === parseInt(week) && // So sánh tuần
-        requestSlot.includes(targetSlot.slotNumber) // So sánh slot
+        requestSlot.includes(targetSlot?.slotNumber) // So sánh slot
     );
 });
 

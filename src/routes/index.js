@@ -35,6 +35,9 @@ import ProfileStudentInClass from "../pages/ProfileStudentInClass/ProfileStudent
 import THRSendNoti from "../pages/THRSendNotification/THRSendNoti";
 import ScoreTableStudent from "../pages/ScoreTableStudent/ScoreTableStudent";
 import ConductEvaluation from "../pages/ConductEvaluation/ConductEvaluation";
+import ManageClass from "../pages/ManageClass/ManageClass";
+import StudentViewExamSchedule from "../pages/StudentViewExamSchedule/StudentViewExamSchedule";
+import AutoCreateAccount from "../pages/AutoCreateAccount/AutoCreateAccount";
 export const routes = [
   {
     path: "/",
@@ -75,7 +78,7 @@ export const routes = [
     path: "manage/gradeTable/:idSubject/:idClass/:semester",
     page: () => (
       <ProtectedRoute>
-<GradeTable />
+        <GradeTable />
       </ProtectedRoute>
     ),
     isShowHeader: false,
@@ -233,7 +236,7 @@ export const routes = [
     path: "/manage/report/formReport",
     page: () => (
       <ProtectedRoute>
-<FormReport />
+        <FormReport />
       </ProtectedRoute>
     ),
     isShowHeader: false,
@@ -321,10 +324,30 @@ export const routes = [
     isShowSideBar: false,
   },
   {
-    path: "/manage/conductEvaluation",
+    path: "/manage/conductEvaluation/:idClass",
     page: () => (
       <ProtectedRoute>
         <ConductEvaluation />
+      </ProtectedRoute>
+    ),
+    isShowHeader: false,
+    isShowSideBar: false,
+  },
+  {
+    path: "/manage/manageClass",
+    page: () => (
+      <ProtectedRoute>
+        <ManageClass />
+      </ProtectedRoute>
+    ),
+    isShowHeader: false,
+    isShowSideBar: false,
+  },
+  {
+    path: "/manage/autoCreateAccount",
+    page: () => (
+      <ProtectedRoute>
+        <AutoCreateAccount />
       </ProtectedRoute>
     ),
     isShowHeader: false,
@@ -371,20 +394,30 @@ export const routes = [
     isShowSideBar: true,
   },
   {
-    path: "/student/selfLearning/quiz",
+    path: "/student/selfLearning/quiz/:idSubject",
     page: () => (
       <ProtectedRoute>
         <Quiz />
       </ProtectedRoute>
     ),
     isShowHeader: false,
-    isShowSideBar: true,
+    isShowSideBar: false,
   },
   {
     path: "/student/attendaceStudent",
     page: () => (
       <ProtectedRoute>
         <AttendanceStudent />
+      </ProtectedRoute>
+    ),
+    isShowHeader: false,
+    isShowSideBar: false,
+  },
+  {
+    path: "/manage/student/viewExamSchedule",
+    page: () => (
+      <ProtectedRoute>
+        <StudentViewExamSchedule />
       </ProtectedRoute>
     ),
     isShowHeader: false,

@@ -20,3 +20,8 @@ export const updateScore = async (scoreId, updatedData) => {
       return res.data;
     
  };
+
+ export const getAllScoreByStudentIdAndSemester = async(studentId, semester ) => {
+    const res = await axios.get(`http://localhost:3001/api/score/scores/${studentId}/${semester}`);
+    return res.data; 
+}

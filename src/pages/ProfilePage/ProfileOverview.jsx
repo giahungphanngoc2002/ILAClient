@@ -12,26 +12,26 @@ const ProfileOverview = ({ user }) => {
         exceptional value to our clients and stakeholders.
       </p>
 
-      <h5 className="text-xl font-semibold mb-4 ">Profile Details</h5>
+      <h5 className="text-xl font-semibold mb-4 ">Thông tin người dùng</h5>
       <div className="grid grid-cols-2 gap-4">
         <div className="text-gray-600 border-b py-2 font-semibold font-mono">
-          Full Name:
+          Họ và tên:
         </div>
         <div className="border-b py-2">{user.name}</div>
         <div className="text-gray-600 border-b py-2 font-semibold font-mono">
-          Email:
+          Căng Cước Công Dân:
         </div>
-        <div className="border-b py-2">{user.email}</div>
+        <div className="border-b py-2">{user.cccd}</div>
         <div className="text-gray-600 border-b py-2 font-semibold font-mono">
-          Phone:
+          Số điện thoại:
         </div>
         <div className="border-b py-2">{user.phone}</div>
         <div className="text-gray-600 border-b py-2 font-semibold font-mono ">
-          Address:
+          Địa chỉ:
         </div>
         <div className="border-b py-2">{user.address}</div>
         <div className="text-gray-600 border-b py-2 font-semibold font-mono">
-          Age:
+          Ngày sinh:
         </div>
         <div className="border-b py-2">{new Date(user.age).toLocaleDateString()}</div>
         

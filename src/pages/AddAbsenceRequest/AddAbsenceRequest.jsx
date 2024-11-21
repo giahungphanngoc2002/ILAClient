@@ -128,7 +128,6 @@ function AddAbsenceRequest() {
         window.history.back();
     };
 
-    console.log(dateRange);
 
     function getDatesBetween(startDate, endDate) {
         let dates = [];
@@ -144,7 +143,6 @@ function AddAbsenceRequest() {
 
     let result = getDatesBetween(dateRange[0], dateRange[1]);
 
-    console.log(result);
 
     function getDateInfo(dateRange) {
         return dateRange.map(date => {
@@ -155,8 +153,6 @@ function AddAbsenceRequest() {
             return { day: dayOfWeek, week: weekOfYear, year: year };
         });
     }
-
-    console.log(getDateInfo(result));
 
     return (
         <div>

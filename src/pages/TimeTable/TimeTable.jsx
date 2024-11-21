@@ -40,6 +40,7 @@ const TimeTable = ({  }) => {
             fetchSchedule();
         }
     }, [studentId]);
+    console.log("123123",scheduleData)
 
     useEffect(() => {
         const today = new Date();
@@ -203,7 +204,7 @@ const TimeTable = ({  }) => {
                                                     onClick={() => goToInfoSlot(classData.scheduleId, classData._id , slotTimes[i])}
                                                 >
                                                     <div className="text-xs text-gray-700 w-full h-full flex flex-col items-center justify-center">
-                                                        <div className="font-bold text-blue-800">{classData.subjectId.nameSubject}</div>
+                                                        <div className="font-bold text-blue-800">{classData?.subjectId?.nameSubject || classData?.subjectChuyendeId?.nameSubject}</div>
                                                         <div>{classData.classId.nameClass}</div>
                                                         <div className={`text-${classData.isCompleted ? 'green' : (classData.isMissed ? 'red' : 'yellow')}-600`}>
                                                             {classData.isCompleted ? 'Hoàn thành' : (classData.isMissed ? 'Bỏ lỡ' : 'Sắp đến')}

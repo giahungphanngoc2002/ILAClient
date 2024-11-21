@@ -3,6 +3,7 @@ import * as XLSX from "xlsx";
 import { FaFileExcel, FaSearch, FaArrowLeft } from 'react-icons/fa';
 import { useParams } from "react-router-dom";
 import * as ScoreSubjectService from "../../services/ScoreSbujectService";
+import * as ClassService from "../../services/ClassService";
 
 const GradeTable = () => {
     const [students, setStudents] = useState([]);
@@ -10,17 +11,35 @@ const GradeTable = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [filterScore, setFilterScore] = useState("");
     const [semesterFilter, setSemesterFilter] = useState(1); // Thêm state cho bộ lọc kỳ
+    const [studentInClass, setStudentInClass] = useState([]);
+    const [loading, setLoading] = useState();
+
+
+    useEffect(() => {
+        const fetchClassDetails = async () => {
+            try {
+                setLoading(true); // Bắt đầu tải
+                const response = await ClassService.getDetailClass(idClass);
+                setStudentInClass(response?.data?.studentID);
+            } catch (error) {
+                console.error("Lỗi khi lấy chi tiết lớp:", error);
+            } finally {
+                setLoading(false); // Kết thúc tải
+            }
+        };
+
+        if (idClass) {
+            fetchClassDetails();
+        }
+    }, [idClass]);
+
 
     useEffect(() => {
         const fetchScores = async () => {
             try {
                 const scoresData = await ScoreSubjectService.getAllScoresBySubjectSemester(idSubject, idClass, semesterFilter);
-                console.log(scoresData);
-
-                const formattedStudents = scoresData.map((detail) => {
-                    // Filter scores by the selected semester
+                const studentsWithScores = scoresData.map((detail) => {
                     const filteredScores = detail.scores.filter(score => score.semester === parseInt(semesterFilter));
-                    console.log(filteredScores)
                     const scores = { diemThuongXuyen: [], diemGiuaKi: [], diemCuoiKi: [] };
                     filteredScores.forEach((score) => {
                         switch (score.type) {
@@ -39,6 +58,7 @@ const GradeTable = () => {
                     });
 
                     return {
+                        id: detail.studentId._id,
                         name: detail.studentId.name,
                         email: detail.studentId.email,
                         nameClass: detail.classId.nameClass,
@@ -47,14 +67,31 @@ const GradeTable = () => {
                     };
                 });
 
-                setStudents(formattedStudents);
+                // Gộp danh sách học sinh chưa có điểm
+                const completeStudentList = studentInClass.map((student) => {
+                    const existingStudent = studentsWithScores.find(s => s.id === student._id);
+                    if (existingStudent) {
+                        return existingStudent; // Nếu đã có điểm, sử dụng dữ liệu từ `studentsWithScores`
+                    }
+                    return {
+                        id: student._id,
+                        name: student.name,
+                        email: student.email,
+                        diemThuongXuyen: [],
+                        diemGiuaKi: [],
+                        diemCuoiKi: []
+                    }; // Nếu chưa có điểm, khởi tạo với các giá trị trống
+                });
+
+                setStudents(completeStudentList);
             } catch (error) {
                 console.error("Error fetching scores:", error);
             }
         };
 
         fetchScores();
-    }, [idClass, idSubject, semesterFilter]);
+    }, [idClass, idSubject, semesterFilter, studentInClass]);
+
 
 
     const calculateAverage = (grades) =>
@@ -100,6 +137,8 @@ const GradeTable = () => {
     const nameClass = students.length > 0 ? students[0].nameClass : "";
     const nameSubject = students.length > 0 ? students[0].nameSubject : "";
 
+
+    console.log(students)
     return (
         <div className="container mx-auto p-6 min-h-screen">
             <h1 className="text-2xl font-bold mb-6 text-center">Bảng Điểm Môn {nameSubject} Lớp {nameClass}</h1>

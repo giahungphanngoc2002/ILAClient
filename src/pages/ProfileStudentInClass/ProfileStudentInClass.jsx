@@ -25,15 +25,34 @@ function ProfileStudentInClass() {
     }
   }, [idClass]);
 
+  // console.log(classDetail)
+
+
   // Lọc dữ liệu theo tab và searchTerm
-  const filteredRows = classDetail?.studentID?.filter(student => {
+  const filteredRows = classDetail?.studentID?.flatMap(student => {
     if (activeTab === "Học sinh") {
-      return student.name?.toLowerCase().includes(searchTerm.toLowerCase());
-    } else if (activeTab === "Phụ huynh" && student.infoContactId) {
-      return student.infoContactId.name?.toLowerCase().includes(searchTerm.toLowerCase());
+      // Lọc danh sách học sinh
+      return student.name?.toLowerCase().includes(searchTerm.toLowerCase()) ? [student] : [];
+    } else if (activeTab === "Phụ huynh" && student.infoContactId?.length) {
+      console.log("da vao")
+      // Lọc danh sách phụ huynh từ infoContact
+      return student.infoContactId
+        .filter(contact =>
+          contact.name?.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+        .map(contact => ({
+          ...contact,
+          relatedStudentName: student.name, // Lưu tên học sinh liên quan
+        }));
     }
-    return false;
+    return [];
   }) || [];
+
+
+  console.log(filteredRows)
+
+
+
 
   const onBack = () => {
     window.history.back();
@@ -91,61 +110,62 @@ function ProfileStudentInClass() {
           <table className="min-w-full bg-white" style={{ borderCollapse: 'separate', width: '100%', minWidth: '800px' }}>
             <thead>
               <tr>
-                <th style={{ position: 'sticky', top: 0, zIndex: 10, width: "2%", padding: '8px', border: '1px solid #ddd', textAlign: 'center', backgroundColor: '#f8f9fa' }}>
+                <th style={{ position: 'sticky', top: 0, zIndex: 10, padding: '8px', border: '1px solid #ddd', textAlign: 'center', backgroundColor: '#f8f9fa' }}>
                   ID
                 </th>
+                <th style={{ position: 'sticky', top: 0, zIndex: 10,padding: '8px', border: '1px solid #ddd', backgroundColor: '#f8f9fa' }}>
+                  Tên
+                </th>
+                <th style={{ position: 'sticky', top: 0, zIndex: 10, padding: '8px', border: '1px solid #ddd', backgroundColor: '#f8f9fa' }}>
+                  CCCD
+                </th>
+                <th style={{ position: 'sticky', top: 0, zIndex: 10, padding: '8px', border: '1px solid #ddd', backgroundColor: '#f8f9fa' }}>
+                  Số điện thoại
+                </th>
+                <th style={{ position: 'sticky', top: 0, zIndex: 10, padding: '8px', border: '1px solid #ddd', backgroundColor: '#f8f9fa' }}>
+                  Địa chỉ
+                </th>
                 {activeTab === "Phụ huynh" && (
-                  <th style={{ position: 'sticky', top: 0, zIndex: 10, width: "20%", padding: '8px', border: '1px solid #ddd', backgroundColor: '#f8f9fa' }}>
+                  <th style={{ position: 'sticky', top: 0, zIndex: 10, padding: '8px', border: '1px solid #ddd', backgroundColor: '#f8f9fa' }}>
                     Tên Học Sinh
                   </th>
                 )}
-                <th style={{ position: 'sticky', top: 0, zIndex: 10, width: "28%", padding: '8px', border: '1px solid #ddd', backgroundColor: '#f8f9fa' }}>
-                  Tên
-                </th>
-                <th style={{ position: 'sticky', top: 0, zIndex: 10, width: "15%", padding: '8px', border: '1px solid #ddd', backgroundColor: '#f8f9fa' }}>
-                  CCCD
-                </th>
-                <th style={{ position: 'sticky', top: 0, zIndex: 10, width: "15%", padding: '8px', border: '1px solid #ddd', backgroundColor: '#f8f9fa' }}>
-                  Số điện thoại
-                </th>
-                <th style={{ position: 'sticky', top: 0, zIndex: 10, width: "40%", padding: '8px', border: '1px solid #ddd', backgroundColor: '#f8f9fa' }}>
-                  Địa chỉ
-                </th>
               </tr>
             </thead>
             <tbody>
-              {filteredRows.map((student, index) => (
-                <tr key={student._id || index} className="hover:bg-gray-200 odd:bg-gray-100">
+              {filteredRows.map((item, index) => (
+                <tr key={item._id || index} className="hover:bg-gray-200 odd:bg-gray-100">
                   <td style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'center' }}>{index + 1}</td>
+                  <td style={{ padding: '8px', border: '1px solid #ddd' }}>
+                    {activeTab === "Học sinh" ? item.name : item.name}
+                  </td>
+                  <td style={{ padding: '8px', border: '1px solid #ddd' }}>
+                    {activeTab === "Học sinh" ? item.cccd : item.cccd}
+                  </td>
+                  <td style={{ padding: '8px', border: '1px solid #ddd' }}>
+                    {activeTab === "Học sinh" ? item.phone : item.phone}
+                  </td>
+                  <td style={{ padding: '8px', border: '1px solid #ddd' }}>
+                    {activeTab === "Học sinh" ? item.address : item.address}
+                  </td>
                   {activeTab === "Phụ huynh" && (
-                    <td style={{ padding: '8px', border: '1px solid #ddd' }}>{student.name}</td>
+                    <td style={{ padding: '8px', border: '1px solid #ddd' }}>{item.relatedStudentName}</td>
                   )}
-                  <td style={{ padding: '8px', border: '1px solid #ddd' }}>
-                    {activeTab === "Học sinh" ? student.name : student.infoContactId?.name}
-                  </td>
-                  <td style={{ padding: '8px', border: '1px solid #ddd' }}>
-                    {activeTab === "Học sinh" ? student.cccd : student.infoContactId?.cccd}
-                  </td>
-                  <td style={{ padding: '8px', border: '1px solid #ddd' }}>
-                    {activeTab === "Học sinh" ? student.phone : student.infoContactId?.phone}
-                  </td>
-                  <td style={{ padding: '8px', border: '1px solid #ddd' }}>
-                    {activeTab === "Học sinh" ? student.address : student.infoContactId?.address}
-                  </td>
                 </tr>
               ))}
               {filteredRows.length < 10 &&
                 Array.from({ length: 10 - filteredRows.length }).map((_, index) => (
                   <tr key={`empty-${index}`} className="bg-white">
                     <td className="py-3 px-4 border text-gray-700 text-center">&nbsp;</td>
+                    <td className="py-3 px-4 border text-gray-700">&nbsp;</td>
+                    <td className="py-3 px-4 border text-gray-700">&nbsp;</td>
+                    <td className="py-3 px-4 border text-gray-700">&nbsp;</td>
+                    <td className="py-3 px-4 border text-gray-700">&nbsp;</td>
                     {activeTab === "Phụ huynh" && <td className="py-3 px-4 border text-gray-700">&nbsp;</td>}
-                    <td className="py-3 px-4 border text-gray-700">&nbsp;</td>
-                    <td className="py-3 px-4 border text-gray-700">&nbsp;</td>
-                    <td className="py-3 px-4 border text-gray-700">&nbsp;</td>
-                    <td className="py-3 px-4 border text-gray-700">&nbsp;</td>
                   </tr>
                 ))}
             </tbody>
+
           </table>
         </div>
       </div>

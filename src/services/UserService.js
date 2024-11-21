@@ -1,3 +1,5 @@
+
+
 import axios from "axios";
 
 const API_URL = "http://localhost:3001/api/user";
@@ -116,6 +118,7 @@ export const updateContact = async (contactId, updatedData) => {
 };
 
 export const getInfoContactByUserId = async (userId) => {
+
   const res = await axios.get(`http://localhost:3001/api/user/getdetailsInfocontact/${userId}`);
 
   return res.data;

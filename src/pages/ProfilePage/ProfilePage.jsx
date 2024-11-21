@@ -12,15 +12,17 @@ import { BiUpload, BiTrash } from "react-icons/bi";
 import ProfileOverview from "./ProfileOverview";
 import ProfileEdit from "./ProfileEdit";
 import ChangePassword from "../ChangePassWord/ChangePassWord";
+import InfoContact from "./InfoContact";
 
 const ProfilePage = () => {
   const user = useSelector((state) => state.user);
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [age, setAge] = useState("");
   const [avatar, setAvatar] = useState("123456");
+  const [cccd, setCccd] = useState("")
   const [oldPassword, setOldPassword] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -29,8 +31,44 @@ const ProfilePage = () => {
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
   const [passwordError, setPasswordError] = useState("");
   const [activeTab, setActiveTab] = useState("edit-profile");
+  const [nameIC, setNameIC] = useState();
+  const [phoneIC, setPhoneIC] = useState();
+  const [emailIC, setEmailIC] = useState();
+  const [cccdIC, setCccdIC] = useState();
+  const [typeIC, setTypeIC] = useState();
+  const [userId, setUserId] = useState();
+  const [infoContact, setInfoContact] = useState([]);
+  const [isLoadingInfoContact, setIsLoadingInfoContact] = useState(false); 
 
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    setUserId(user?.id);
+  }, [user?.id]);
+
+  console.log(userId)
+  useEffect(() => {
+    const fetchInfoContact = async () => {
+      try {
+       
+        const response = await UserService.getInfoContactByUserId(userId);
+        console.log(response); // Kiểm tra phản hồi từ API
+        setInfoContact(response); // Cập nhật state với dữ liệu từ API
+      } catch (error) {
+        console.error("Failed to fetch InfoContact:", error.message);
+      }
+    };
+
+    if (userId) {
+      fetchInfoContact(); // Chỉ gọi API khi userId đã có
+    }
+  }, [userId]); // Gọi lại khi userId thay đổi
+
+  useEffect(() => {
+    console.log("InfoContact:", infoContact); // Theo dõi sự thay đổi của infoContact
+  }, [infoContact]);
+  
+
   const mutation = useMutationHooks((data) => {
     const { id, access_token, ...rests } = data;
     return UserService.updateUser(id, rests, access_token);
@@ -84,7 +122,7 @@ const ProfilePage = () => {
 
   useEffect(() => {
     if (user) {
-      setEmail(user.email || "");
+      setUsername(user.username || "");
       setName(user.name || "");
       setPhone(user.phone || "");
       setAddress(user.address || "");
@@ -94,50 +132,43 @@ const ProfilePage = () => {
     }
   }, [user]);
 
-  console.log(avatar)
 
-  const handleOnchangeEmail = (e) => setEmail(e.target.value);
-  const handleOnchangeName = (e) => setName(e.target.value);
-  const handleOnchangePhone = (e) => setPhone(e.target.value);
-  const handleOnchangeAddress = (e) => setAddress(e.target.value);
-  const handleOnchangeAge = (e) => setAge(e.target.value);
-
-  const handleOnchangeAvatar = (e) => {
+  const handleOnchangeAvatar = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setAvatar(reader.result);
-        handleUpdateAvatar(reader.result);
-      };
-      reader.readAsDataURL(file);
+      setAvatar(URL.createObjectURL(file));
+      await handleUpdateAvatar(file);
     }
   };
 
-  const handleUpdateAvatar = (avatar) => {
-    setIsLoading(true);
-    mutation.mutate({
-      id: user?.id,
-      email,
-      name,
-      phone,
-      address,
-      age,
-      avatar,
-      access_token: user?.access_token,
-    });
+  const handleUpdateAvatar = async (file) => {
+    const formData = new FormData();
+    formData.append("avatar", file);
+
+    try {
+      const response = await UserService.updateUser(user?.id, formData, user?.access_token);
+      if (response.status === "OK") {
+        toast.success("Avatar updated successfully!");
+        setAvatar(response.data.avatar);
+      }
+    } catch (error) {
+      toast.error("Failed to update avatar.");
+    }
   };
 
   const handleUpdate = () => {
     setIsLoading(true);
+    const updateData = {};
+
+    if (name !== user.name) updateData.name = name;
+    if (username !== user.username) updateData.username = username;
+    if (phone !== user.phone) updateData.phone = phone;
+    if (address !== user.address) updateData.address = address;
+    if (age !== user.age) updateData.age = age;
+
     mutation.mutate({
       id: user?.id,
-      email,
-      name,
-      phone,
-      address,
-      age,
-      avatar,
+      ...updateData,
       access_token: user?.access_token,
     });
   };
@@ -168,6 +199,29 @@ const ProfilePage = () => {
     });
   };
 
+  const handleSaveInfoContact = async (updatedContact) => {
+    setIsLoadingInfoContact(true); // Bật trạng thái loading
+    try {
+        console.log("Thông tin liên hệ cần cập nhật:", updatedContact);
+
+        // Cập nhật tạm thời vào state (nếu cần hiển thị trên UI)
+        const updatedInfoContacts = infoContact.map((contact) =>
+            contact._id === updatedContact._id ? updatedContact : contact
+        );
+        setInfoContact(updatedInfoContacts);
+
+        console.log("Danh sách thông tin liên hệ sau khi cập nhật:", updatedInfoContacts);
+    } catch (error) {
+        console.error("Error updating contact:", error);
+    } finally {
+        setIsLoadingInfoContact(false); // Tắt trạng thái loading
+    }
+};
+
+
+
+
+
   const renderTabContent = () => {
     switch (activeTab) {
       case "overview":
@@ -179,14 +233,16 @@ const ProfilePage = () => {
             onSave={handleUpdate}
             name={name}
             setName={setName}
-            email={email}
-            setEmail={setEmail}
+            email={username}
+            setEmail={setUsername}
             phone={phone}
             setPhone={setPhone}
             address={address}
             setAddress={setAddress}
             age={age}
             setAge={setAge}
+            cccd={cccd}
+            setCccd={setCccd}
             isLoading={isLoading}
           />
         );
@@ -201,6 +257,16 @@ const ProfilePage = () => {
             setNewPassword={setNewPassword}
             confirmNewPassword={confirmNewPassword}
             setConfirmNewPassword={setConfirmNewPassword}
+          />
+        );
+      case "info-contact":
+        return (
+          <InfoContact
+            userContacts={infoContact}
+            userId={userId}
+            isLoading={isLoadingInfoContact} // Trạng thái loading
+          setIsLoading={setIsLoadingInfoContact} // Hàm cập nhật trạng thái// Truyền trạng thái isLoading
+            onSave={handleSaveInfoContact}
           />
         );
       default:
@@ -248,7 +314,7 @@ const ProfilePage = () => {
                   onClick={() => setActiveTab("overview")}
                 >
                   <MdOutlineRemoveRedEye size={20} />
-                  <span>Overview</span>
+                  <span>Tổng quan</span>
                 </button>
               </li>
               <li>
@@ -260,7 +326,7 @@ const ProfilePage = () => {
                   onClick={() => setActiveTab("edit-profile")}
                 >
                   <TbPhotoEdit size={20} />
-                  <span>Edit Profile</span>
+                  <span>Chỉnh sửa thông tin</span>
                 </button>
               </li>
               <li>
@@ -272,7 +338,19 @@ const ProfilePage = () => {
                   onClick={() => setActiveTab("change-password")}
                 >
                   <TbArrowsExchange size={20} />
-                  <span>Change Password</span>
+                  <span>Thay đổi mật khẩu</span>
+                </button>
+              </li>
+              <li>
+                <button
+                  className={`flex items-center space-x-2 ${activeTab === "info-contact"
+                    ? "border-b-2 border-blue-500 text-blue-500"
+                    : "text-gray-500 hover:text-blue-500"
+                    } py-2 px-4 focus:outline-none transition-colors duration-300`}
+                  onClick={() => setActiveTab("info-contact")}
+                >
+                  <TbArrowsExchange size={20} />
+                  <span>Thông tin liên hệ</span>
                 </button>
               </li>
             </ul>

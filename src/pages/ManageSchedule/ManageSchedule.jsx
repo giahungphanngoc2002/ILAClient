@@ -56,6 +56,8 @@ const ManageSchedule = () => {
         fetchClassDetail();
     }, [selectedClass]);
 
+    console.log(classDetail)
+
     const getYearAndWeekFromValue = (weekValue) => {
         const [year, week] = weekValue.split('-W');
         return { year, week };
@@ -128,7 +130,7 @@ const ManageSchedule = () => {
                                 return {
                                     slotNumber: parseInt(slot.slot.replace('Tiết ', '')),
                                     subjectId: slotData.subjectId,
-                                    subjectChuyendeId: slotData.subjectChuyendeId,
+
                                     classId: selectedClass,
                                     attendanceStatus: {
                                         createdAt: new Date().toISOString(),
@@ -258,11 +260,11 @@ const ManageSchedule = () => {
                                                 ))}
                                                 {classDetail?.subjectGroup?.SubjectsChuyendeId.map((subject, index) => (
                                                     <option
-                                                        key={index}
-                                                        value={JSON.stringify({ subjectId: subject?.SubjectsId?._id, subjectChuyendeId: subject._id })}
-                                                    >
-                                                        {subject?.nameSubject} - {subject?.teacherId?.name}
-                                                    </option>
+                                                    key={index}
+                                                    value={JSON.stringify({ subjectId: subject._id, subjectChuyendeId: subject?.subjectChuyendeId?._id })}
+                                                >
+                                                    {subject?.nameSubject} - {subject?.teacherId?.name}
+                                                </option>
                                                 ))}
                                             </select>
                                         </td>

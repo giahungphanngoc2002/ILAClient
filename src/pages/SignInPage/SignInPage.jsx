@@ -20,7 +20,7 @@ export default function SignInPage() {
   const mutation = useMutationHooks((data) => UserService.loginUser(data));
   const { data, isSuccess, isError, error } = mutation;
 
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [visible, setVisible] = useState(false);
   const [activeLink, setActiveLink] = useState(location.pathname);
@@ -68,8 +68,8 @@ export default function SignInPage() {
     }
   };
 
-  const handleOnChangeEmail = (e) => {
-    setEmail(e.target.value);
+  const handleOnChangeUsername = (e) => {
+    setUsername(e.target.value);
   };
 
   const handleOnChangePassword = (e) => {
@@ -83,7 +83,7 @@ export default function SignInPage() {
   const handleSignin = (e) => {
     e.preventDefault();
     mutation.mutate({
-      email,
+      username,
       password,
     });
   };
@@ -134,10 +134,10 @@ export default function SignInPage() {
             <input
               className="w-full px-4 py-2 border rounded bg-gray-100 focus:outline-none"
               type="text"
-              name="email"
-              value={email}
-              onChange={handleOnChangeEmail}
-              placeholder="Địa chỉ Email"
+              name="username"
+              value={username}
+              onChange={handleOnChangeUsername}
+              placeholder="username"
               required
             />
             <div className="relative">

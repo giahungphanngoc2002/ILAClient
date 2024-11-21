@@ -2,20 +2,21 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   name: "",
-  email: "",
+  username: "",
   phone: "",
   address: "",
   age: "",
+  cccd: "",
   avatar: "",
   id: "",
   access_token: "",
   password: "",
-  
-  updatedAt:" ",
-  createdAt:" ",
-  
+
+  updatedAt: " ",
+  createdAt: " ",
+
   isAuthenticated: false,
-  role:" ",
+  role: " ",
 };
 
 export const userSlice = createSlice({
@@ -25,7 +26,7 @@ export const userSlice = createSlice({
     updateUser: (state, action) => {
       const {
         name = "",
-        email = "",
+        username = "",
         phone = "",
         _id = "",
         address = "",
@@ -33,22 +34,22 @@ export const userSlice = createSlice({
         avatar = "",
         access_token = "",
         password = "",
-        
-        createdAt="",
-        updatedAt="",
-        role=" ",
-        
+        cccd = "",
+        createdAt = "",
+        updatedAt = "",
+        role = " ",
+
       } = action.payload;
       state.name = name;
-      state.email = email;
+      state.username = username;
       state.phone = phone;
       state.address = address;
       state.age = age;
       state.id = _id;
-      state.role=role;
+      state.role = role;
       state.avatar = avatar;
       state.password = password;
-      
+      state.cccd = cccd;
       state.updatedAt = updatedAt;
       state.createdAt = createdAt;
       state.access_token = access_token;
@@ -56,15 +57,15 @@ export const userSlice = createSlice({
     },
     resetUser: (state) => {
       state.name = "";
-      state.email = "";
+      state.username = "";
       state.phone = "";
       state.address = "";
       state.age = "";
       state.id = "";
       state.avatar = "";
       state.access_token = "";
-      state.role="";
-      
+      state.role = "";
+      state.cccd = "";
       state.isAuthenticated = false; // Reset authentication
     },
   },

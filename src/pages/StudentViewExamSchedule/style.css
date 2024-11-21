@@ -1,0 +1,6 @@
+.custom-table .ant-table-thead > tr > th {
+    background-color: rgb(59, 130, 246) !important;
+    color: white !important;
+    text-align: center;
+  }
+  

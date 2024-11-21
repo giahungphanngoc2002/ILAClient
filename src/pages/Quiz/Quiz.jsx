@@ -9,8 +9,9 @@ import {
 import { useNavigate, useLocation, useParams } from "react-router-dom";
 import { useSaveSelected } from "../../redux/QuizState";
 // import { useQuery } from "@tanstack/react-query";
-// import * as ClassService from "../../services/ClassService";
+import * as SubjectService from "../../services/SubjectService";
 import Direction from "../../components/Direction/Direction";
+import Breadcrumb from "../../components/Breadcrumb/Breadcrumb";
 
 export const QuizzContext = createContext();
 
@@ -21,26 +22,36 @@ const Quiz = () => {
     const [progress, setProgress] = useState("0%");
     const [learning, setLearning] = useState("learning");
     const [checkedQuestions, setCheckedQuestions] = useState(0);
-    const { id } = useParams();
+    const { idSubject } = useParams();
+    const [dataQuestion, setDataQuestion] = useState();
+    const [errorr, setErrorr] = useState();
 
-    // Comment lại phần lấy dữ liệu từ API
-    // const GetDetailsClass = (id) => async () => {
-    //     const res = await ClassService.getDetailClass(id);
-    //     return res;
-    // };
 
-    // const {
-    //     data: detailClassByID,
-    //     isLoading,
-    //     isError,
-    // } = useQuery({
-    //     queryKey: ["detailClassByID", id],
-    //     queryFn: GetDetailsClass(id),
-    // });
 
     const dispatch = useDispatch();
     const { currentQuestion, selectedAnswer, score, showResult, data, error } =
         useSelector((state) => state.quiz);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const subjectData = await SubjectService.getDetailSubject(idSubject);
+                console.log(subjectData)
+                if (subjectData) {
+                    setDataQuestion(subjectData.questions);
+                } else {
+                    setErrorr('Class data not found.');
+                }
+            } catch (errorr) {
+                console.error('Error fetching students:', errorr);
+                setErrorr('Error fetching students. Please try again later.');
+            }
+        };
+
+        fetchData();
+    }, [idSubject]);
+
+    console.log(dataQuestion)
 
     useEffect(() => {
         const savedData = location.state?.saveSelected;
@@ -50,28 +61,12 @@ const Quiz = () => {
     }, [location.state, setSaveSelected]);
 
     // Sử dụng dataset cứng thay vì gọi API
+
     useEffect(() => {
-        const hardcodedData = {
-            questions: [
-                {
-                    question: "What is the capital of France?",
-                    answers: ["Berlin", "Madrid", "Paris", "Lisbon"],
-                    correctAnswer: "Paris",
-                },
-                {
-                    question: "Who wrote 'To Kill a Mockingbird'?",
-                    answers: ["Harper Lee", "J.K. Rowling", "Ernest Hemingway", "Mark Twain"],
-                    correctAnswer: "Harper Lee",
-                },
-                {
-                    question: "What is the largest planet in our solar system?",
-                    answers: ["Earth", "Mars", "Jupiter", "Saturn"],
-                    correctAnswer: "Jupiter",
-                },
-            ],
-        };
-        dispatch(setData(hardcodedData.questions));
-    }, [dispatch]);
+        if (dataQuestion) {
+            dispatch(setData(dataQuestion)); // Đổ dữ liệu từ dataQuestion vào Redux store
+        }
+    }, [dataQuestion, dispatch]);
 
     useEffect(() => {
         if (data) {
@@ -245,7 +240,7 @@ const Quiz = () => {
 
         // Navigate to review page
         const data = saveSelected;
-        navigate(`/review/${learning}/${id}`, { state: { data } });
+        // navigate(`/review/${learning}/${id}`, { state: { data } });
     };
 
     if (!data) return null;
@@ -271,90 +266,103 @@ const Quiz = () => {
 
 
     console.log("so cau hoi", checkedQuestions)
+
+    const onBack = () => {
+        window.history.back();
+    }
     return (
-        <div className="container mx-auto p-4 bg-gray-50 rounded-lg shadow-lg mt-10">
-            <div className="mt-2">
-                <h5 className="text-2xl text-gray-900 font-bold mb-12">
-                    Q.{currentQuestion + 1} {currentQuizQuestion.question}
-                </h5>
-                <div className="text-gray-700 text-lg mb-4">
-                    Hãy chọn một đáp án đúng nhất:
-                </div>
-            </div>
-            <div className="flex flex-wrap -mx-2 mb-6">
-                {currentQuizQuestion.answers.map((answer, index) => {
-                    const isCorrectAnswer =
-                        saveSelected.some(
-                            (selected) =>
-                                selected[`Question${currentQuestion + 1}`] ===
-                                data[currentQuestion].correctAnswer
-                        ) && selectedAnswer === answer;
-                    const isSelected = selectedAnswer === answer;
-
-                    return (
-                        <div key={index} className="w-full sm:w-1/2 px-2 mb-4">
-                            <li
-                                className={`p-4 rounded-lg border list-none text-xl cursor-pointer flex items-center transition-colors duration-200 ${isCorrectAnswer
-                                    ? "bg-green-100 border-green-500"
-                                    : isSelected
-                                        ? "bg-red-100 border-red-500"
-                                        : "bg-blue-100 border-gray-300 hover:bg-blue-50"
-                                    }`}
-                                onClick={() => handleAnswerSelect(answer)}
-                            >
-                                <input
-                                    type="radio"
-                                    name="answer"
-                                    value={answer}
-                                    checked={isSelected}
-                                    onChange={() => handleAnswerSelect(answer)}
-                                    className="mr-2"
-                                />
-                                <span className="flex-1">{answer}</span>
-                                {isCorrectAnswer && (
-                                    <span className="text-green-500 text-xl ml-2">&#10004;</span>
-                                )}
-                                {isSelected && !isCorrectAnswer && (
-                                    <span className="text-red-500 text-xl ml-2">&#10006;</span>
-                                )}
-                            </li>
+        <div className="h-screen flex items-center justify-center bg-gray-50">
+            <Breadcrumb
+                title="Tự học"
+                onBack={onBack}
+                displayButton={false} />
+            <div className="container w-1/2 mx-auto p-4 bg-white rounded-lg shadow-lg">
+                <div>
+                    <div className="mt-2">
+                        <h5 className="text-2xl text-gray-900 font-bold mb-12">
+                            Q.{currentQuestion + 1} {currentQuizQuestion.question}
+                        </h5>
+                        <div className="text-gray-700 text-lg mb-4">
+                            Hãy chọn một đáp án đúng nhất:
                         </div>
-                    );
-                })}
-            </div>
-            <div className="relative mb-6 flex items-center justify-between">
-                {/* Nút trái hiển thị số 0 */}
-                <div className="flex items-center justify-center w-10 h-10 border border-blue-400 rounded-full">
-                    <span className="text-black">{checkedQuestions}</span>
-                </div>
+                    </div>
+                    <div className="flex flex-wrap -mx-2 mb-6">
+                        {currentQuizQuestion.options.map((answer, index) => {
+                            const isCorrectAnswer =
+                                saveSelected.some(
+                                    (selected) =>
+                                        selected[`Question${currentQuestion + 1}`] ===
+                                        data[currentQuestion].correctAnswer
+                                ) && selectedAnswer === answer;
+                            const isSelected = selectedAnswer === answer;
 
-                {/* Thanh progress */}
-                <div className="flex-1 mx-4">
-                    <div className="relative w-full h-2 bg-blue-100 rounded-full overflow-hidden">
-                        <div
-                            className="absolute top-0 left-0 h-full bg-gradient-to-r from-blue-400 to-blue-600 rounded-full"
-                            style={{ width: progress }}
-                        ></div>
+                            return (
+                                <div key={index} className="w-full sm:w-1/2 px-2 mb-4">
+                                    <li
+                                        className={`p-4 rounded-lg border list-none text-xl cursor-pointer flex items-center transition-colors duration-200 ${isCorrectAnswer
+                                            ? "bg-green-100 border-green-500"
+                                            : isSelected
+                                                ? "bg-red-100 border-red-500"
+                                                : "bg-blue-100 border-gray-300 hover:bg-blue-50"
+                                            }`}
+                                        onClick={() => handleAnswerSelect(answer)}
+                                    >
+                                        <input
+                                            type="radio"
+                                            name="answer"
+                                            value={answer}
+                                            checked={isSelected}
+                                            onChange={() => handleAnswerSelect(answer)}
+                                            className="mr-2"
+                                        />
+                                        <span className="flex-1">{answer}</span>
+                                        {isCorrectAnswer && (
+                                            <span className="text-green-500 text-xl ml-2">&#10004;</span>
+                                        )}
+                                        {isSelected && !isCorrectAnswer && (
+                                            <span className="text-red-500 text-xl ml-2">&#10006;</span>
+                                        )}
+                                    </li>
+                                </div>
+                            );
+                        })}
+                    </div>
+                    <div className="relative mb-6 flex items-center justify-between">
+                        {/* Nút trái hiển thị số 0 */}
+                        <div className="flex items-center justify-center w-10 h-10 border border-blue-400 rounded-full">
+                            <span className="text-black">{checkedQuestions}</span>
+                        </div>
+
+                        {/* Thanh progress */}
+                        <div className="flex-1 mx-4">
+                            <div className="relative w-full h-2 bg-blue-100 rounded-full overflow-hidden">
+                                <div
+                                    className="absolute top-0 left-0 h-full bg-gradient-to-r from-blue-400 to-blue-600 rounded-full"
+                                    style={{ width: progress }}
+                                ></div>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center justify-center w-10 h-10 border border-blue-400 rounded-full">
+                            <span className="text-black">{data?.length}</span>
+                        </div>
+                    </div>
+
+                    <div className="mt-6">
+                        <Direction
+                            handleFirstQuestion={handleFirstQuestion}
+                            handlePrevQuestion={handlePrevQuestion}
+                            handleLastQuestion={handleLastQuestion}
+                            handleNextQuestion={handleNextQuestion}
+                            data={data}
+                            currentQuestion={currentQuestion}
+                        />
                     </div>
                 </div>
-
-                <div className="flex items-center justify-center w-10 h-10 border border-blue-400 rounded-full">
-                    <span className="text-black">{data?.length}</span>
-                </div>
-            </div>
-
-            <div className="mt-6">
-                <Direction
-                    handleFirstQuestion={handleFirstQuestion}
-                    handlePrevQuestion={handlePrevQuestion}
-                    handleLastQuestion={handleLastQuestion}
-                    handleNextQuestion={handleNextQuestion}
-                    data={data}
-                    currentQuestion={currentQuestion}
-                />
             </div>
         </div>
     );
+
 
 
 };
