@@ -19,9 +19,9 @@ const ProfileOverview = ({ user }) => {
         </div>
         <div className="border-b py-2">{user.name}</div>
         <div className="text-gray-600 border-b py-2 font-semibold font-mono">
-          Email:
+          Căng Cước Công Dân:
         </div>
-        <div className="border-b py-2">{user.email}</div>
+        <div className="border-b py-2">{user.cccd}</div>
         <div className="text-gray-600 border-b py-2 font-semibold font-mono">
           Số điện thoại:
         </div>

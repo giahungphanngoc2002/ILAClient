@@ -37,13 +37,23 @@ export const refreshToken = async () => {
   return res.data;
 };
 
-export const updateUser = async (id, data, access_token) => {
-  const res = await axios.put(`${API_URL}/updateUser/${id}`, data, {
-    headers: {
-      token: `Bearer ${access_token}`,
-    },
-  });
-  return res.data;
+export const updateUser = async (id, formData, access_token) => {
+  try {
+    const res = await axios.put(
+      `${API_URL}/updateUser/${id}`,
+      formData, // Chỉ gửi `formData`
+      {
+        headers: {
+          "Content-Type": "multipart/form-data", // Đảm bảo backend nhận dạng file
+          token: `Bearer ${access_token}`, // Token để xác thực
+        },
+      }
+    );
+    return res.data;
+  } catch (error) {
+    console.error("Error in updateUser:", error.response || error.message);
+    throw error;
+  }
 };
 
 export const updatePassword = async (id, data, access_token) => {

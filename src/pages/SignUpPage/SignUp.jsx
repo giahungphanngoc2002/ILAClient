@@ -8,7 +8,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFacebookF, faGoogle, faGithub } from "@fortawesome/free-brands-svg-icons";
 
 export default function SignUp() {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [visible, setVisible] = useState(false);
@@ -19,7 +19,7 @@ export default function SignUp() {
   const { data, isSuccess, isError, error } = mutation;
 
   // Handle input changes
-  const handleOnChangeEmail = (e) => setEmail(e.target.value);
+  const handleOnChangeUsername = (e) => setUsername(e.target.value);
   const handleOnChangePassword = (e) => setPassword(e.target.value);
   const handleOnChangeConfirmPassword = (e) => setConfirmPassword(e.target.value);
 
@@ -30,12 +30,12 @@ export default function SignUp() {
       toast.error("Mật khẩu và mật khẩu xác nhận không khớp.");
       return;
     }
-    if (!email.trim() || !password.trim() || !confirmPassword.trim()) {
+    if (!username.trim() || !password.trim() || !confirmPassword.trim()) {
       toast.error("Vui lòng điền đầy đủ thông tin");
       return;
     }
     mutation.mutate({
-      email: email.trim(),
+      username: username.trim(),
       password: password.trim(),
       confirmPassword: confirmPassword.trim(),
     });
@@ -98,10 +98,10 @@ export default function SignUp() {
             <input
               className="w-full px-4 py-2 border rounded bg-gray-100 focus:outline-none"
               type="text"
-              name="email"
-              value={email}
-              onChange={handleOnChangeEmail}
-              placeholder="Địa chỉ Email"
+              name="username"
+              value={username}
+              onChange={handleOnChangeUsername}
+              placeholder="username"
             />
             <div className="relative">
               <input
