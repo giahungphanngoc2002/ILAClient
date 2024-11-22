@@ -2,7 +2,10 @@
 
 import axios from "axios";
 
-const API_URL = "http://localhost:3001/api/user";
+const API_URL =
+  process.env.NODE_ENV === "production"
+    ? "https://ila-server-2-3bw0.onrender.com/api/user"
+    : "http://localhost:3001/api/user";
 
 export const axiosJWT = axios.create();
 
