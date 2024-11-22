@@ -128,6 +128,7 @@ const ProfilePage = () => {
       setAddress(user.address || "");
       setAge(user.age || "");
       setAvatar(user.avatar || "");
+      setCccd(user.cccd || "");
       setOldPassword(user.password || "");
     }
   }, [user]);
