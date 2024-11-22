@@ -2,7 +2,7 @@ import { ChevronLast, ChevronFirst } from "lucide-react";
 import { createContext } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { FiMoreHorizontal } from "react-icons/fi";
+import { FiMoreVertical } from "react-icons/fi";
 
 // Create and export SidebarContext
 export const SidebarContext = createContext();
@@ -49,7 +49,7 @@ export default function Sidebar({ children, expanded, setExpanded }) {
           <div className={`overflow-hidden transition-all ${expanded ? "w-full ml-3" : "w-0"}`}>
             <div className="leading-4 flex items-center">
               <h4 className="font-semibold truncate">{user.name}</h4>
-              {/* <FiMoreHorizontal className="ml-2 cursor-pointer" /> */}
+              <FiMoreVertical className="ml-2 cursor-pointer" />
             </div>
           </div>
         </div>
