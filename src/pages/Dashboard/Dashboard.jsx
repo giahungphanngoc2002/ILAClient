@@ -8,6 +8,9 @@ import { useNavigate } from 'react-router-dom';
 import { BiMailSend } from "react-icons/bi";
 import { CalendarClock } from 'lucide-react';
 import { AiOutlineTrophy } from "react-icons/ai";
+import { AiOutlineSchedule } from "react-icons/ai";
+import { SiGoogleclassroom } from "react-icons/si";
+import { FaUserPlus } from "react-icons/fa6";
 
 const Dashboard = () => {
     const user = useSelector((state) => state.user);
@@ -217,6 +220,11 @@ const Dashboard = () => {
 
     const handleGoToViewExamSchedule = () => {
         navigate(`/manage/student/viewExamSchedule`)
+    }
+
+    const handleGoToAutoCreateAccount = () => {
+        navigate(`/manage/autoCreateAccount`)
+
     }
 
     console.log(classHR && classHR.teacherHR !== null && classHR.teacherHR === user.id)
@@ -431,7 +439,7 @@ const Dashboard = () => {
             {user.role === "Admin" && (
                 <div>
                     <div className="flex flex-col bg-white p-6 rounded-lg shadow-md w-full mt-8">
-                        <h2 className="text-xl font-bold mb-6">Tác vụ</h2>
+                        <h2 className="text-xl font-bold mb-6">Quản lý kế hoạch học tập</h2>
                         <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
                             <div onClick={handleGoToCreateCalendar} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
                                 <div className="bg-teal-400 p-4 rounded-full mb-2">
@@ -442,11 +450,15 @@ const Dashboard = () => {
 
                             <div onClick={handleGoToCreateExamSchedule} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
                                 <div className="bg-orange-400 p-4 rounded-full mb-2">
-                                    <BiMailSend size={32} className="text-white" />
+                                    <AiOutlineSchedule size={32} className="text-white" />
                                 </div>
                                 <p className="font-semibold">Tạo lịch thi</p>
                             </div>
-
+                        </div>
+                    </div>
+                    <div className="flex flex-col bg-white p-6 rounded-lg shadow-md w-full mt-8">
+                        <h2 className="text-xl font-bold mb-6">Quản lý</h2>
+                        <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
                             {/* Other Cards */}
                             <div onClick={handleGoToClassDivision} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
                                 <div className="bg-green-400 p-4 rounded-full mb-2">
@@ -455,10 +467,16 @@ const Dashboard = () => {
                                 <p className="font-semibold">Chia lớp</p>
                             </div>
                             <div onClick={handleGoToClassManage} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
-                                <div className="bg-green-400 p-4 rounded-full mb-2">
-                                    <AiOutlineTrophy size={32} className="text-white" />
+                                <div className="bg-purple-400 p-4 rounded-full mb-2">
+                                    <SiGoogleclassroom size={32} className="text-white" />
                                 </div>
-                                <p className="font-semibold">Quản lí lớp học</p>
+                                <p className="font-semibold">Quản lý lớp học</p>
+                            </div>
+                            <div onClick={handleGoToAutoCreateAccount} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
+                                <div className="bg-red-400 p-4 rounded-full mb-2">
+                                    <FaUserPlus size={32} className="text-white" />
+                                </div>
+                                <p className="font-semibold">Tạo tài khoản học sinh</p>
                             </div>
                         </div>
                     </div>

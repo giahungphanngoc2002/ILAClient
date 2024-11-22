@@ -46,9 +46,6 @@ const DefaultSidebar = () => {
 
     const sidebarItems = [
         { icon: <MdOutlineMessage size={20} />, text: "Tin nhắn", path: '/manage/message', role: "Teacher" },
-        { icon: <CalendarClock size={20} />, text: "Thời khoá biểu", path: '/manage/manageSchedule', role: "Admin" },
-        { icon: <Bell size={20} />, text: "Chia lớp", path: '/manage/classDivision', role: "Admin" },
-        { icon: <Bell size={20} />, text: "Tạo lịch thi", path: '/manage/examSchedule', role: "Admin" },
         { icon: <MdOutlineMessage size={20} />, text: "Tin nhắn", path: '/student/message', role: "User" },
     ];
 
@@ -85,6 +82,12 @@ const DefaultSidebar = () => {
                     active={activeItem === 'Trang chủ'}
                     onClick={goToHome}
                 />
+                <SidebarItem
+                        icon={<Bell size={20} />}
+                        text="Thông báo"
+                        active={activeItem === 'Thông báo'}
+                        onClick={goToNotification} // Đã định nghĩa
+                    />
 
                 {filteredItems().map((item) => (
                     <SidebarItem
@@ -101,12 +104,6 @@ const DefaultSidebar = () => {
 
                 {/* Phần này nằm dưới cùng */}
                 <div className="mt-auto">
-                    <SidebarItem
-                        icon={<Bell size={20} />}
-                        text="Thông báo"
-                        active={activeItem === 'Thông báo'}
-                        onClick={goToNotification} // Đã định nghĩa
-                    />
                     <SidebarItem
                         icon={<User size={20} />}
                         text="Thông tin cá nhân"

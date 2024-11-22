@@ -13,6 +13,7 @@ export default function SignUp() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [visible, setVisible] = useState(false);
   const navigate = useNavigate();
+  
 
   // Mutation hook to handle sign-up requests
   const mutation = useMutationHooks((data) => UserService.signupUser(data));

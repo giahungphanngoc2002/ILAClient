@@ -1,7 +1,22 @@
 import React, { useEffect, useState } from "react";
 import * as XLSX from "xlsx";
 import * as UserService from "../../services/UserService";
-
+import {
+  Table,
+  Button,
+  Input,
+  Select,
+  Modal,
+  Form,
+  Layout,
+  Row,
+  Col,
+} from "antd";
+import { PlusOutlined } from "@ant-design/icons";
+import Breadcrumb from "../../components/Breadcrumb/Breadcrumb";
+import { Content } from "antd/es/layout/layout";
+import { useMutationHooks } from "../../hooks/useMutationHook";
+import { toast } from "react-toastify";
 
 // Hàm loại bỏ dấu tiếng Việt
 const removeVietnameseTones = (str) => {
@@ -14,35 +29,46 @@ const removeVietnameseTones = (str) => {
 
 const AutoCreateAccount = () => {
   const [accounts, setAccounts] = useState([]);
-  const [fileName, setFileName] = useState("");
-  const [allAccount, setAllAccount] = useState();
+  const [allAccount, setAllAccount] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [tableScrollHeight, setTableScrollHeight] = useState(300);
+  const [pageSize, setPageSize] = useState(10);
+  const [form] = Form.useForm();
 
   useEffect(() => {
     const fetchStudent = async () => {
       try {
         const data = await UserService.getAllUser();
-
-  
-        // Tính toán userList ngay sau khi dữ liệu được lấy
         const fetchedUserList = data.data.map((account) => account.username);
-        setAllAccount(fetchedUserList); // Lưu vào state nếu bạn cần
+        setAllAccount(fetchedUserList);
       } catch (error) {
         console.error("Error fetching student data:", error);
       }
     };
-  
+
     fetchStudent();
   }, []);
 
-  console.log(allAccount);
+  useEffect(() => {
+    const calculateTableHeight = () => {
+      const screenHeight = window.innerHeight; // Lấy chiều cao màn hình
+      const reservedHeight = 350; // Chiều cao dành cho các thành phần khác (header, footer, padding)
+      const newHeight = screenHeight - reservedHeight;
+      setTableScrollHeight(newHeight > 300 ? newHeight : 300); // Đảm bảo chiều cao tối thiểu
+    };
 
-  const handleFileUpload = (e) => {
-    const file = e.target.files[0];
+    calculateTableHeight(); // Gọi khi component được mount
+    window.addEventListener("resize", calculateTableHeight); // Lắng nghe sự kiện thay đổi kích thước
+
+    return () => window.removeEventListener("resize", calculateTableHeight); // Xóa sự kiện khi component unmount
+  }, []);
+
+  const handleFileUpload = (event) => {
+    const file = event.target.files[0];
     if (file) {
-      setFileName(file.name);
       const reader = new FileReader();
-      reader.onload = (event) => {
-        const data = new Uint8Array(event.target.result);
+      reader.onload = (e) => {
+        const data = new Uint8Array(e.target.result);
         const workbook = XLSX.read(data, { type: "array" });
         const sheetName = workbook.SheetNames[0];
         const sheet = workbook.Sheets[sheetName];
@@ -55,11 +81,11 @@ const AutoCreateAccount = () => {
 
   const generateAccounts = (data) => {
     const usernames = new Set();
-    const existingUsernames = new Set(allAccount); // Chuyển userList thành Set để kiểm tra nhanh hơn
-  
+    const existingUsernames = new Set(allAccount);
+
     const generatedAccounts = data.map((row) => {
-      const fullName = row["Họ và tên"]; // Cột tên trong file Excel
-      const birthDate = row["Ngày Sinh"]; // Cột ngày sinh trong file Excel
+      const fullName = row["Họ và tên"];
+      const birthDate = row["Ngày Sinh"];
       const nameParts = fullName.split(" ");
       const lastName = removeVietnameseTones(nameParts[nameParts.length - 1]).toLowerCase();
       const initials = nameParts
@@ -69,72 +95,197 @@ const AutoCreateAccount = () => {
       let baseUsername = `${lastName}${initials}`;
       let username = baseUsername;
       let counter = 1;
-  
-      // Kiểm tra trong cả usernames và existingUsernames
+
       while (usernames.has(username) || existingUsernames.has(username)) {
         username = `${baseUsername}${counter}`;
         counter++;
       }
-  
-      usernames.add(username); // Thêm username mới vào tập usernames
-  
-      // Xử lý ngày sinh làm mật khẩu (loại bỏ dấu '-')
+
+      usernames.add(username);
+
       const password = birthDate ? birthDate.replace(/-/g, "") : "123456";
-  
+
       return {
         fullName,
         username,
-        password, // Mật khẩu được đặt theo ngày sinh
+        password,
       };
     });
-  
+
     setAccounts(generatedAccounts);
   };
-  
+
+  const handleManualAdd = () => {
+    form.validateFields().then((values) => {
+      const newAccount = {
+        fullName: values.fullName,
+        username: values.username,
+        password: values.password || "123456",
+        role:values.role,
+      };
+      console.log(newAccount)
+      // message.success("Tài khoản được thêm thành công!");
+    });
+  };
+
+  const columns = [
+    {
+      title: "Họ và tên",
+      dataIndex: "fullName",
+      key: "fullName",
+    },
+    {
+      title: "Tài khoản",
+      dataIndex: "username",
+      key: "username",
+    },
+    {
+      title: "Mật khẩu",
+      dataIndex: "password",
+      key: "password",
+    },
+  ];
+
+  const onBack = () => {
+    window.history.back();
+  };
+
+  const mutation = useMutationHooks(
+    (data) => UserService.signupUser(data)
+  );
+
+  const handleAutoCreateAccount = async () => {
+    console.log(accounts);
+
+    try {
+      // Sử dụng Promise.all để thực hiện tất cả các mutation song song
+      await Promise.all(
+        accounts.map((account) =>
+          mutation.mutateAsync({
+            username: account.username,
+            password: account.password,
+            confirmPassword: account.password,
+          })
+        )
+      );
+
+      // Khi tất cả các tài khoản được tạo xong, hiển thị toast thành công
+      toast.success('Tất cả tài khoản đã được tạo thành công!');
+      console.log('Tất cả tài khoản đã được tạo thành công!');
+    } catch (error) {
+      // Xử lý lỗi khi bất kỳ tài khoản nào thất bại
+      toast.error(`Đã xảy ra lỗi: ${error.message}`);
+      console.error('Đã xảy ra lỗi:', error.message);
+    }
+  };
+
+
 
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center py-10">
-      <h1 className="text-2xl font-bold mb-5">Tạo Tài Khoản Tự Động</h1>
-
-      {/* Input File */}
-      <input
-        type="file"
-        accept=".xlsx, .xls"
-        className="mb-5 px-4 py-2 border rounded-lg shadow-sm"
-        onChange={handleFileUpload}
+    <Layout style={{ height: "100vh" }}>
+      <Breadcrumb
+        title="Tạo tài khoản tự động"
+        onBack={onBack}
+        buttonText="Hoàn thành"
+        onButtonClick={handleAutoCreateAccount}
       />
 
-      {/* Hiển thị danh sách tài khoản */}
-      <div className="w-full max-w-4xl bg-white shadow-md rounded-lg p-5">
-        <h2 className="text-lg font-bold mb-3">Danh sách tài khoản</h2>
-        {accounts.length > 0 ? (
-          <table className="w-full table-auto border-collapse border border-gray-200">
-            <thead>
-              <tr className="bg-gray-200">
-                <th className="border border-gray-300 px-4 py-2">STT</th>
-                <th className="border border-gray-300 px-4 py-2">Họ và tên</th>
-                <th className="border border-gray-300 px-4 py-2">Tài khoản</th>
-                <th className="border border-gray-300 px-4 py-2">Mật khẩu</th>
-              </tr>
-            </thead>
-            <tbody>
-              {accounts.map((account, index) => (
-                <tr key={index} className="text-center">
-                  <td className="border border-gray-300 px-4 py-2">{index + 1}</td>
-                  <td className="border border-gray-300 px-4 py-2">{account.fullName}</td>
-                  <td className="border border-gray-300 px-4 py-2">{account.username}</td>
-                  <td className="border border-gray-300 px-4 py-2">{account.password}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : (
-          <p className="text-gray-500">Chưa có tài khoản nào được tạo.</p>
-        )}
-      </div>
-    </div>
+      <div className="pt-16"></div>
+      <Content
+        style={{
+          margin: "20px",
+          background: "#fff",
+          padding: "20px",
+          overflow: "auto",
+        }}
+      >
+        <Row gutter={[16, 16]} style={{ marginBottom: "20px" }}>
+          <Col xs={24} sm={12} md={8}>
+            <input
+              type="file"
+              accept=".xlsx, .xls"
+              onChange={handleFileUpload}
+              style={{
+                padding: "10px",
+                border: "1px solid #d9d9d9",
+                borderRadius: "8px",
+                width: "100%",
+              }}
+            />
+          </Col>
+
+          <Col xs={24} sm={12} md={4}>
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => setIsModalOpen(true)}
+
+              style={{ width: "100%", height: "100%", fontSize: "16px" }}
+            >
+              Tạo tài khoản
+            </Button>
+          </Col>
+        </Row>
+        <Table
+          dataSource={accounts}
+          columns={columns}
+          rowKey={(record, index) => index}
+          pagination={{
+            pageSize,
+            position: ["bottomCenter"], // Giữ phân trang ở dưới cùng
+          }}
+          bordered
+          scroll={{
+            x: "max-content",
+            y: tableScrollHeight, // Đặt chiều cao cuộn
+          }}
+          style={{ width: "100%", borderRadius: "8px" }}
+        />
+      </Content>
+      <Modal
+        open={isModalOpen}
+        onCancel={() => setIsModalOpen(false)}
+        onOk={handleManualAdd}
+        okText="Thêm"
+        cancelText="Hủy"
+      >
+        <Form form={form} layout="vertical">
+          <Form.Item
+            name="fullName"
+            label="Họ và tên"
+            rules={[{ required: true, message: "Vui lòng nhập họ và tên!" }]}
+          >
+            <Input placeholder="Nhập họ và tên" />
+          </Form.Item>
+          <Form.Item
+            name="username"
+            label="Tài khoản"
+            rules={[{ required: true, message: "Vui lòng nhập tài khoản!" }]}
+          >
+            <Input placeholder="Nhập tài khoản" />
+          </Form.Item>
+          <Form.Item name="password" label="Mật khẩu">
+            <Input.Password placeholder="Nhập mật khẩu (mặc định: 123456)" />
+          </Form.Item>
+          <Form.Item
+            name="role"
+            label="Vai trò"
+            rules={[{ required: true, message: "Vui lòng chọn vai trò!" }]}
+          >
+            <Select placeholder="Chọn vai trò">
+              <Select.Option value="User">Giáo viên</Select.Option>
+              <Select.Option value="Teacher">Học sinh</Select.Option>
+            </Select>
+          </Form.Item>
+        </Form>
+      </Modal>
+
+
+    </Layout>
   );
+
+
 };
 
 export default AutoCreateAccount;

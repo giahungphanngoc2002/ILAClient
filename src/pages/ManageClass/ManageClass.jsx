@@ -108,11 +108,11 @@ const App = () => {
                     prev.map((cls) =>
                         cls.nameClass === currentClass.nameClass
                             ? {
-                                  ...cls,
-                                  studentID: cls.studentID.map((student) =>
-                                      student._id === _id ? { ...student, name } : student
-                                  ),
-                              }
+                                ...cls,
+                                studentID: cls.studentID.map((student) =>
+                                    student._id === _id ? { ...student, name } : student
+                                ),
+                            }
                             : cls
                     )
                 );
@@ -260,9 +260,13 @@ const App = () => {
         },
     ];
 
+    const onBack = () => {
+        window.history.back();
+    }
+
     return (
         <Layout style={{ height: "100vh" }}>
-            <Breadcrumb title="Quản lí học sinh trong lớp" onBack={() => { }} displayButton={false} />
+            <Breadcrumb title="Quản lí học sinh trong lớp" onBack={onBack} displayButton={false} />
 
             <div className="pt-16"></div>
             <Content
@@ -325,54 +329,54 @@ const App = () => {
 
             {/* Modal Thêm Học Sinh */}
             <Modal
-    title="Thêm Học Sinh"
-    visible={isAddModalOpen}
-    onCancel={() => setIsAddModalOpen(false)}
-    onOk={handleAddStudent}
-    confirmLoading={isLoading}
->
-    <Form layout="vertical">
-        <Form.Item label="Tên Học Sinh" required>
+                title="Thêm Học Sinh"
+                visible={isAddModalOpen}
+                onCancel={() => setIsAddModalOpen(false)}
+                onOk={handleAddStudent}
+                confirmLoading={isLoading}
+            >
+                <Form layout="vertical">
+                    <Form.Item label="Tên Học Sinh" required>
                         <Select
-                    showSearch
-                    placeholder="Chọn học sinh"
-                    value={formData.name}
-                    onChange={(value) => setFormData({ ...formData, name: value })}
-                    style={{ width: "100%" }}
-                    filterOption={(input, option) =>
-                        option?.label?.toLowerCase().includes(input.toLowerCase())
-                    }
-                >
-                    {studentU
-                        .sort((a, b) => (a.name || "").localeCompare(b.name || ""))
-                        .map((student) => (
-                            <Select.Option
-                                key={student.email}
-                                value={student.email}
-                                label={`${student.name} - ${student.email}`} // Cung cấp `label` để dùng trong `filterOption`
-                            >
-                                {student.name} - {student.email}
-                            </Select.Option>
-                        ))}
-                </Select>
-
-                        </Form.Item>
-                        <Form.Item label="Lớp" required>
-                            <Select
-                                placeholder="Chọn lớp"
-                                value={formData.class}
-                                onChange={(value) => setFormData({ ...formData, class: value })}
-                                style={{ width: "100%" }}
-                            >
-                                {classes.map((cls) => (
-                                    <Select.Option key={cls.nameClass} value={cls.nameClass}>
-                                        {cls.nameClass}
+                            showSearch
+                            placeholder="Chọn học sinh"
+                            value={formData.name}
+                            onChange={(value) => setFormData({ ...formData, name: value })}
+                            style={{ width: "100%" }}
+                            filterOption={(input, option) =>
+                                option?.label?.toLowerCase().includes(input.toLowerCase())
+                            }
+                        >
+                            {studentU
+                                .sort((a, b) => (a.name || "").localeCompare(b.name || ""))
+                                .map((student) => (
+                                    <Select.Option
+                                        key={student.email}
+                                        value={student.email}
+                                        label={`${student.name} - ${student.email}`} // Cung cấp `label` để dùng trong `filterOption`
+                                    >
+                                        {student.name} - {student.email}
                                     </Select.Option>
                                 ))}
-                            </Select>
-                        </Form.Item>
-                    </Form>
-                </Modal>
+                        </Select>
+
+                    </Form.Item>
+                    <Form.Item label="Lớp" required>
+                        <Select
+                            placeholder="Chọn lớp"
+                            value={formData.class}
+                            onChange={(value) => setFormData({ ...formData, class: value })}
+                            style={{ width: "100%" }}
+                        >
+                            {classes.map((cls) => (
+                                <Select.Option key={cls.nameClass} value={cls.nameClass}>
+                                    {cls.nameClass}
+                                </Select.Option>
+                            ))}
+                        </Select>
+                    </Form.Item>
+                </Form>
+            </Modal>
 
 
             {/* Modal Sửa Học Sinh */}

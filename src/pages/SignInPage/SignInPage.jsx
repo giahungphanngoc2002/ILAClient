@@ -137,7 +137,7 @@ export default function SignInPage() {
               name="username"
               value={username}
               onChange={handleOnChangeUsername}
-              placeholder="username"
+              placeholder="Tài khoản"
               required
             />
             <div className="relative">
