@@ -165,7 +165,7 @@ const ProfilePage = () => {
     if (phone !== user.phone) updateData.phone = phone;
     if (address !== user.address) updateData.address = address;
     if (age !== user.age) updateData.age = age;
-
+    if (cccd !== user.cccd) updateData.cccd = cccd;
     mutation.mutate({
       id: user?.id,
       ...updateData,
