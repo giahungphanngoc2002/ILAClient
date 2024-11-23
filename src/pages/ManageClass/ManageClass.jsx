@@ -21,7 +21,7 @@ const { Search } = Input;
 const { Option } = Select;
 const { Content } = Layout;
 
-const App = () => {
+const ManageClass = () => {
     const [classes, setClasses] = useState([]);
     const [studentU, setStudentU] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
@@ -382,7 +382,7 @@ const App = () => {
             {/* Modal Sửa Học Sinh */}
             <Modal
                 title="Cập Nhật Học Sinh"
-                visible={isEditModalOpen}
+                open={isEditModalOpen}
                 onCancel={() => setIsEditModalOpen(false)}
                 onOk={handleEditStudent}
                 confirmLoading={isLoading}
@@ -417,4 +417,4 @@ const App = () => {
     );
 };
 
-export default App;
+export default ManageClass;

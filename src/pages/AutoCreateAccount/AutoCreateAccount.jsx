@@ -121,7 +121,7 @@ const AutoCreateAccount = () => {
         fullName: values.fullName,
         username: values.username,
         password: values.password || "123456",
-        role:values.role,
+        role: values.role,
       };
       console.log(newAccount)
       // message.success("Tài khoản được thêm thành công!");
@@ -165,6 +165,7 @@ const AutoCreateAccount = () => {
             username: account.username,
             password: account.password,
             confirmPassword: account.password,
+            name: account.fullName,
           })
         )
       );

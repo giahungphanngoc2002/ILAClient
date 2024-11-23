@@ -38,6 +38,7 @@ import ConductEvaluation from "../pages/ConductEvaluation/ConductEvaluation";
 import ManageClass from "../pages/ManageClass/ManageClass";
 import StudentViewExamSchedule from "../pages/StudentViewExamSchedule/StudentViewExamSchedule";
 import AutoCreateAccount from "../pages/AutoCreateAccount/AutoCreateAccount";
+import ManageAccount from "../pages/ManageAccount/ManageAccount";
 export const routes = [
   {
     path: "/",
@@ -231,6 +232,16 @@ export const routes = [
     ),
     isShowHeader: false,
     isShowSideBar: true,
+  },
+  {
+    path: "/manage/manageAccount",
+    page: () => (
+      <ProtectedRoute>
+        <ManageAccount />
+      </ProtectedRoute>
+    ),
+    isShowHeader: false,
+    isShowSideBar: false,
   },
   {
     path: "/manage/report/formReport",

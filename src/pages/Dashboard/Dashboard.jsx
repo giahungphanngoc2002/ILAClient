@@ -11,6 +11,7 @@ import { AiOutlineTrophy } from "react-icons/ai";
 import { AiOutlineSchedule } from "react-icons/ai";
 import { SiGoogleclassroom } from "react-icons/si";
 import { FaUserPlus } from "react-icons/fa6";
+import { MdAccountCircle } from "react-icons/md";
 
 const Dashboard = () => {
     const user = useSelector((state) => state.user);
@@ -224,7 +225,10 @@ const Dashboard = () => {
 
     const handleGoToAutoCreateAccount = () => {
         navigate(`/manage/autoCreateAccount`)
+    }
 
+    const handleGoToManageAccount = () => {
+        navigate(`/manage/manageAccount`)
     }
 
     console.log(classHR && classHR.teacherHR !== null && classHR.teacherHR === user.id)
@@ -477,6 +481,12 @@ const Dashboard = () => {
                                     <FaUserPlus size={32} className="text-white" />
                                 </div>
                                 <p className="font-semibold">Tạo tài khoản học sinh</p>
+                            </div>
+                            <div onClick={handleGoToManageAccount} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
+                                <div className="bg-yellow-500 p-4 rounded-full mb-2">
+                                    <MdAccountCircle size={32} className="text-white" />
+                                </div>
+                                <p className="font-semibold">Quản lý tài khoản</p>
                             </div>
                         </div>
                     </div>

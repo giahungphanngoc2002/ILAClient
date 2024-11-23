@@ -1,5 +1,3 @@
-
-
 import axios from "axios";
 
 const API_URL =
@@ -9,6 +7,7 @@ const API_URL =
 
 export const axiosJWT = axios.create();
 
+// API liên quan đến tài khoản và người dùng
 export const loginUser = async (data) => {
   const res = await axios.post(`${API_URL}/signin`, data);
   return res.data;
@@ -42,16 +41,12 @@ export const refreshToken = async () => {
 
 export const updateUser = async (id, formData, access_token) => {
   try {
-    const res = await axios.put(
-      `${API_URL}/updateUser/${id}`,
-      formData, // Chỉ gửi `formData`
-      {
-        headers: {
-          "Content-Type": "multipart/form-data", // Đảm bảo backend nhận dạng file
-          token: `Bearer ${access_token}`, // Token để xác thực
-        },
-      }
-    );
+    const res = await axios.put(`${API_URL}/updateUser/${id}`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        token: `Bearer ${access_token}`,
+      },
+    });
     return res.data;
   } catch (error) {
     console.error("Error in updateUser:", error.response || error.message);
@@ -91,39 +86,34 @@ export const resetPassword = async (resetToken, newPassword) => {
   return res.data;
 };
 
+// API liên quan đến danh sách tài khoản
+export const getAllAccount = async () => {
+  const res = await axios.get(`${API_URL}/getAllAccount`);
+  return res.data;
+};
+
 export const getAllUser = async () => {
-  const res = await axios.get(`http://localhost:3001/api/user/getAllUser`)
-  return res.data
-}
+  const res = await axios.get(`${API_URL}/getAllUser`);
+  return res.data;
+};
 
 export const getAllTopUser = async () => {
-  const res = await axios.get(`http://localhost:3001/api/user/top`)
-  return res.data
-}
-
-
-
-
-
-export const createContact = async (userId, contactData) => {
-  const res = await axios.post(`http://localhost:3001/api/user/createContact/${userId}`, contactData);
-
+  const res = await axios.get(`${API_URL}/top`);
   return res.data;
+};
 
+// API liên quan đến thông tin liên lạc
+export const createContact = async (userId, contactData) => {
+  const res = await axios.post(`${API_URL}/createContact/${userId}`, contactData);
+  return res.data;
 };
 
 export const updateContact = async (contactId, updatedData) => {
-
-  const res = await axios.put(`http://localhost:3001/api/user/updateContact/${contactId}`, updatedData);
-
+  const res = await axios.put(`${API_URL}/updateContact/${contactId}`, updatedData);
   return res.data;
-
 };
 
 export const getInfoContactByUserId = async (userId) => {
-
-  const res = await axios.get(`http://localhost:3001/api/user/getdetailsInfocontact/${userId}`);
-
+  const res = await axios.get(`${API_URL}/getdetailsInfocontact/${userId}`);
   return res.data;
-
 };

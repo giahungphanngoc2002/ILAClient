@@ -1,51 +1,65 @@
-import axios from "axios"
+import axios from "axios";
 
+
+
+const SCHEDULE_API_URL =
+    process.env.NODE_ENV === "production"
+        ? "https://ila-server-2-3bw0.onrender.com/api/schedule"
+        : "http://localhost:3001/api/schedule";
+
+// Lấy tất cả lịch học
 export const getAllSchedule = async () => {
-    const res = await axios.get(`http://localhost:3001/api/schedule/getAllSchedule`)
-    return res.data
-}
+    const res = await axios.get(`${SCHEDULE_API_URL}/getAllSchedule`);
+    return res.data;
+};
 
+// Lấy tất cả lịch học theo ID giáo viên
 export const getAllScheduleByTeacherId = async (teacherId) => {
-    const res = await axios.get(`http://localhost:3001/api/schedule/teacher/${teacherId}/schedules`);
+    const res = await axios.get(`${SCHEDULE_API_URL}/teacher/${teacherId}/schedules`);
     return res.data;
 };
 
+// Lấy tất cả lịch học theo ID sinh viên
 export const getAllScheduleByStudentId = async (studentId) => {
-    const res = await axios.get(`http://localhost:3001/api/schedule/student/${studentId}/schedules`);
+    const res = await axios.get(`${SCHEDULE_API_URL}/student/${studentId}/schedules`);
     return res.data;
 };
 
+// Lấy danh sách sinh viên vắng mặt theo lớp, lịch học, và slot
 export const getAllAbsentStudentId = async (classId, scheduleId, slotId) => {
-    const res = await axios.get(`http://localhost:3001/api/schedule/${classId}/${scheduleId}/${slotId}`);
+    const res = await axios.get(`${SCHEDULE_API_URL}/${classId}/${scheduleId}/${slotId}`);
     return res.data;
 };
 
+// Lấy chi tiết lịch học theo ID lịch học
 export const getDetailScheduleById = async (scheduleId) => {
-    const res = await axios.get(`http://localhost:3001/api/schedule/detailSchedule/${scheduleId}`);
+    const res = await axios.get(`${SCHEDULE_API_URL}/detailSchedule/${scheduleId}`);
     return res.data;
 };
 
-export const getDetailSlotById = async (scheduleId,slotId) => {
-    const res = await axios.get(`http://localhost:3001/api/schedule/schedule/${scheduleId}/slot/${slotId}`);
+// Lấy chi tiết slot theo ID lịch học và ID slot
+export const getDetailSlotById = async (scheduleId, slotId) => {
+    const res = await axios.get(`${SCHEDULE_API_URL}/schedule/${scheduleId}/slot/${slotId}`);
     return res.data;
 };
 
+// Tạo danh sách sinh viên vắng mặt
 export const createAbsentstudentId = async (scheduleId, classId, slotId) => {
-    const res = await axios.post(`http://localhost:3001/api/schedule/createAbsent/${scheduleId}/${classId}/${slotId}`);
+    const res = await axios.post(`${SCHEDULE_API_URL}/createAbsent/${scheduleId}/${classId}/${slotId}`);
     return res.data;
 };
 
+// Cập nhật danh sách sinh viên vắng mặt
 export const updateAbsentstudentId = async (scheduleId, classId, slotId, newAbsentStudents) => {
-    const res = await axios.put(`http://localhost:3001/api/schedule/updateAbsent/${scheduleId}/${classId}/${slotId}`, {
-        newAbsentStudents
-    });
-    return res.data;
-};
-
-export const createScheduleByClassId = async (classId, scheduleData) => {
-    const res = await axios.post(`http://localhost:3001/api/schedule/${classId}/schedules`,
-        scheduleData
+    const res = await axios.put(
+        `${SCHEDULE_API_URL}/updateAbsent/${scheduleId}/${classId}/${slotId}`,
+        { newAbsentStudents }
     );
     return res.data;
 };
 
+// Tạo lịch học theo ID lớp học
+export const createScheduleByClassId = async (classId, scheduleData) => {
+    const res = await axios.post(`${SCHEDULE_API_URL}/${classId}/schedules`, scheduleData);
+    return res.data;
+};

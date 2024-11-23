@@ -1,9 +1,16 @@
 import axios from "axios";
 
+
+
+const SUBJECT_API_URL =
+  process.env.NODE_ENV === "production"
+    ? "https://ila-server-2-3bw0.onrender.com/api/subject"
+    : "http://localhost:3001/api/subject";
+
 // Tạo câu hỏi
 export const createQuestion = async (classId, subjectId, questionData) => {
   const res = await axios.post(
-    `http://localhost:3001/api/subject/classes/${classId}/subjects/${subjectId}/questions`,
+    `${SUBJECT_API_URL}/classes/${classId}/subjects/${subjectId}/questions`,
     questionData
   );
   return res.data;
@@ -12,7 +19,7 @@ export const createQuestion = async (classId, subjectId, questionData) => {
 // Lấy tất cả câu hỏi cho một classId và subjectId cụ thể
 export const getQuestions = async (classId, subjectId) => {
   const res = await axios.get(
-    `http://localhost:3001/api/subject/classes/${classId}/subjects/${subjectId}/questions`
+    `${SUBJECT_API_URL}/classes/${classId}/subjects/${subjectId}/questions`
   );
   return res.data;
 };
@@ -20,7 +27,7 @@ export const getQuestions = async (classId, subjectId) => {
 // Cập nhật câu hỏi theo questionId
 export const updateQuestionById = async (classId, subjectId, questionId, questionData) => {
   const res = await axios.put(
-    `http://localhost:3001/api/subject/classes/${classId}/subjects/${subjectId}/questions/${questionId}`,
+    `${SUBJECT_API_URL}/classes/${classId}/subjects/${subjectId}/questions/${questionId}`,
     questionData
   );
   return res.data;
@@ -29,19 +36,19 @@ export const updateQuestionById = async (classId, subjectId, questionId, questio
 // Xóa câu hỏi theo questionId
 export const deleteQuestionById = async (classId, subjectId, questionId) => {
   const res = await axios.delete(
-    `http://localhost:3001/api/subject/classes/${classId}/subjects/${subjectId}/questions/${questionId}`
+    `${SUBJECT_API_URL}/classes/${classId}/subjects/${subjectId}/questions/${questionId}`
   );
   return res.data;
 };
 
+// Lấy chi tiết môn học
 export const getDetailSubject = async (subjectId) => {
-  const response = await axios.get(`http://localhost:3001/api/subject/detailSubject/${subjectId}`);
+  const response = await axios.get(`${SUBJECT_API_URL}/detailSubject/${subjectId}`);
   return response.data;
 };
 
+// Lấy tất cả môn học
 export const getAllSubjects = async () => {
-  const res = await axios.get(`http://localhost:3001/api/subject/getAllSubjects`)
-  return res.data
-}
-
-
+  const res = await axios.get(`${SUBJECT_API_URL}/getAllSubjects`);
+  return res.data;
+};
