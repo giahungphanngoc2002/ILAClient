@@ -47,7 +47,7 @@ const THRSendNoti = () => {
   // Filter for recipientsTab1 (students)
   const recipientsTab1 = classData?.studentID?.map(student => ({
     id: student._id,
-    name: student.email.split('@')[0],
+    name: student.username.split('@')[0],
     phone: student.phone || 'N/A',
     class: classData.nameClass
   })) || [];

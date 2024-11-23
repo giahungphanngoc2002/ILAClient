@@ -48,7 +48,7 @@ const NotificationToStudent = () => {
     const recipientsTab1 = classData.flatMap((classItem) =>
         classItem.studentID.map(student => ({
             id: student._id,
-            name: student.email.split('@')[0], // Derive "name" from email if needed
+            name: student.username, // Derive "name" from email if needed
             phone: student.phone || 'N/A', // Default phone if not available
             class: classItem.nameClass
         }))
@@ -57,7 +57,7 @@ const NotificationToStudent = () => {
     // Filter for recipientsTab2 (teachers)
     const recipientsTab2 = classData.map((classItem) => ({
         id: classItem.teacherHR._id,
-        name: classItem.teacherHR.email.split('@')[0], // Derive "name" from email if needed
+        name: classItem.teacherHR.username, // Derive "name" from email if needed
         phone: classItem.teacherHR.phone || 'N/A', // Default phone if not available
         class: classItem.nameClass
     }));

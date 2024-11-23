@@ -19,6 +19,10 @@ const ProfileOverview = ({ user }) => {
         </div>
         <div className="border-b py-2">{user.name}</div>
         <div className="text-gray-600 border-b py-2 font-semibold font-mono">
+          Email:
+        </div>
+        <div className="border-b py-2">{user.email}</div>
+        <div className="text-gray-600 border-b py-2 font-semibold font-mono">
           Căng Cước Công Dân:
         </div>
         <div className="border-b py-2">{user.cccd}</div>
@@ -34,7 +38,7 @@ const ProfileOverview = ({ user }) => {
           Ngày sinh:
         </div>
         <div className="border-b py-2">{new Date(user.age).toLocaleDateString()}</div>
-        
+
       </div>
     </div>
   );

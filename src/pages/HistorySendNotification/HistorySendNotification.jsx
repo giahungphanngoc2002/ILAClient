@@ -26,7 +26,7 @@ function HistorySendNotification() {
     }, []);
 
     useEffect(() => {
-       
+
         const fetchNotificationDetail = async () => {
             if (selectedEmailId) {
                 try {
@@ -62,10 +62,17 @@ function HistorySendNotification() {
     };
 
     return (
-        <div className="flex h-screen bg-white m-6 rounded-lg">
+        <div className="flex h-screen p-6">
             {/* Danh sách email */}
-            <div className="w-1/3 border-r p-4 overflow-y-auto h-full">
-                <div>
+            <div className="bg-white w-1/3 border-r px-4 pb-4 overflow-y-auto h-full"
+                style={{ borderTopLeftRadius: "16px", borderBottomLeftRadius: "16px" }}
+            >
+                <div
+                    className="sticky top-0 bg-white z-10 pt-4"
+                    style={{
+                        paddingBottom: "8px",
+                    }}
+                >
                     <div className="flex justify-between mb-2">
                         <h2 className="text-xl font-semibold">Lịch sử gửi thông báo</h2>
                         <button onClick={goToCreateNotification} className="bg-blue-500 p-3 rounded"><GoPlus className="text-white" size={20} /></button>
@@ -121,7 +128,9 @@ function HistorySendNotification() {
             </div>
 
             {/* Chi tiết email */}
-            <div className="w-2/3 p-4 overflow-y-auto h-full">
+            <div className="bg-white w-2/3 p-4 overflow-y-auto h-full"
+                style={{ borderTopRightRadius: "16px", borderBottomRightRadius: "16px" }}
+            >
                 <div className="border-b">
                     <h2 className="text-xl font-semibold mb-4">Chi tiết thông báo</h2>
                 </div>

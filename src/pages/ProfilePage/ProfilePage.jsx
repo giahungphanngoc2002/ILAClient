@@ -17,6 +17,7 @@ import InfoContact from "./InfoContact";
 const ProfilePage = () => {
   const user = useSelector((state) => state.user);
   const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
@@ -38,7 +39,7 @@ const ProfilePage = () => {
   const [typeIC, setTypeIC] = useState();
   const [userId, setUserId] = useState();
   const [infoContact, setInfoContact] = useState([]);
-  const [isLoadingInfoContact, setIsLoadingInfoContact] = useState(false); 
+  const [isLoadingInfoContact, setIsLoadingInfoContact] = useState(false);
 
   const dispatch = useDispatch();
 
@@ -50,7 +51,7 @@ const ProfilePage = () => {
   useEffect(() => {
     const fetchInfoContact = async () => {
       try {
-       
+
         const response = await UserService.getInfoContactByUserId(userId);
         console.log(response); // Kiểm tra phản hồi từ API
         setInfoContact(response); // Cập nhật state với dữ liệu từ API
@@ -67,7 +68,7 @@ const ProfilePage = () => {
   useEffect(() => {
     console.log("InfoContact:", infoContact); // Theo dõi sự thay đổi của infoContact
   }, [infoContact]);
-  
+
 
   const mutation = useMutationHooks((data) => {
     const { id, access_token, ...rests } = data;
@@ -123,6 +124,7 @@ const ProfilePage = () => {
   useEffect(() => {
     if (user) {
       setUsername(user.username || "");
+      setEmail(user.email || "");
       setName(user.name || "");
       setPhone(user.phone || "");
       setAddress(user.address || "");
@@ -163,6 +165,7 @@ const ProfilePage = () => {
 
     if (name !== user.name) updateData.name = name;
     if (username !== user.username) updateData.username = username;
+    if (email !== user.email) updateData.email = email;
     if (phone !== user.phone) updateData.phone = phone;
     if (address !== user.address) updateData.address = address;
     if (age !== user.age) updateData.age = age;
@@ -203,21 +206,21 @@ const ProfilePage = () => {
   const handleSaveInfoContact = async (updatedContact) => {
     setIsLoadingInfoContact(true); // Bật trạng thái loading
     try {
-        console.log("Thông tin liên hệ cần cập nhật:", updatedContact);
+      console.log("Thông tin liên hệ cần cập nhật:", updatedContact);
 
-        // Cập nhật tạm thời vào state (nếu cần hiển thị trên UI)
-        const updatedInfoContacts = infoContact.map((contact) =>
-            contact._id === updatedContact._id ? updatedContact : contact
-        );
-        setInfoContact(updatedInfoContacts);
+      // Cập nhật tạm thời vào state (nếu cần hiển thị trên UI)
+      const updatedInfoContacts = infoContact.map((contact) =>
+        contact._id === updatedContact._id ? updatedContact : contact
+      );
+      setInfoContact(updatedInfoContacts);
 
-        console.log("Danh sách thông tin liên hệ sau khi cập nhật:", updatedInfoContacts);
+      console.log("Danh sách thông tin liên hệ sau khi cập nhật:", updatedInfoContacts);
     } catch (error) {
-        console.error("Error updating contact:", error);
+      console.error("Error updating contact:", error);
     } finally {
-        setIsLoadingInfoContact(false); // Tắt trạng thái loading
+      setIsLoadingInfoContact(false); // Tắt trạng thái loading
     }
-};
+  };
 
 
 
@@ -234,8 +237,8 @@ const ProfilePage = () => {
             onSave={handleUpdate}
             name={name}
             setName={setName}
-            email={username}
-            setEmail={setUsername}
+            username={username}
+            setUsername={setUsername}
             phone={phone}
             setPhone={setPhone}
             address={address}
@@ -244,6 +247,8 @@ const ProfilePage = () => {
             setAge={setAge}
             cccd={cccd}
             setCccd={setCccd}
+            email={email}
+            setEmail={setEmail}
             isLoading={isLoading}
           />
         );
@@ -266,7 +271,7 @@ const ProfilePage = () => {
             userContacts={infoContact}
             userId={userId}
             isLoading={isLoadingInfoContact} // Trạng thái loading
-          setIsLoading={setIsLoadingInfoContact} // Hàm cập nhật trạng thái// Truyền trạng thái isLoading
+            setIsLoading={setIsLoadingInfoContact} // Hàm cập nhật trạng thái// Truyền trạng thái isLoading
             onSave={handleSaveInfoContact}
           />
         );

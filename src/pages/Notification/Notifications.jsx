@@ -10,6 +10,7 @@ const Notifications = () => {
     const user = useSelector((state) => state.user);
     const [receiverId, setReceiverId] = useState(user?.id);
 
+    console.log(user?.id)
     useEffect(() => {
         setReceiverId(user?.id);
     }, [user]);
@@ -21,6 +22,7 @@ const Notifications = () => {
             try {
                 const response = await NotificationService.getNotificationsForReceiver(receiverId);
                 setNotifications(response.data); // Lấy mảng thông báo từ `response.data`
+                console.log("response", response)
             } catch (err) {
                 setError("Failed to load notifications");
             } finally {

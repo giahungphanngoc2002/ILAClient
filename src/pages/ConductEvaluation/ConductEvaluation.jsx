@@ -58,7 +58,7 @@ function ConductEvaluation() {
   const mergedData = students.map((student) => {
     const conduct = conducts?.find(
       (cond) =>
-        cond.studentId?._id === student._id && cond.semester === Number(selectedSemester) // Kiểm tra kỳ học
+        cond.studentId?._id === student?._id && cond?.semester === Number(selectedSemester) // Kiểm tra kỳ học
     );
     return {
       ...student,

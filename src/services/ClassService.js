@@ -77,8 +77,8 @@ export const addTest = async (classId, testData) => {
 };
 
 // API liên quan đến sinh viên
-export const addStudentIDToClass = async (classId, email) => {
-    const res = await axios.post(`${CLASS_API_URL}/class/${classId}/studentID`, { email });
+export const addStudentIDToClass = async (classId, username) => {
+    const res = await axios.post(`${CLASS_API_URL}/class/${classId}/studentID`, { username });
     return res.data;
 };
 
@@ -173,3 +173,4 @@ export const getConductByStudentIdAndSemester = async (studentId, semester) => {
     const res = await axios.get(`${CLASS_API_URL}/conduct/${studentId}/${semester}`);
     return res.data;
 };
+

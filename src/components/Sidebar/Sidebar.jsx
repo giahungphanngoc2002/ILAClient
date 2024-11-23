@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { ChevronLast, ChevronFirst } from "lucide-react";
 import { createContext } from "react";
 import { useSelector } from "react-redux";
@@ -10,7 +11,12 @@ export const SidebarContext = createContext();
 export default function Sidebar({ children, expanded, setExpanded }) {
   const user = useSelector((state) => state.user);
   const navigate = useNavigate();
-  console.log(user.avatar === "")
+  const [isPopupVisible, setPopupVisible] = useState(false);
+
+  const handleLogout = () => {
+    console.log("Logging out...");
+    // Thêm logic đăng xuất tại đây
+  };
 
   return (
     <aside
@@ -40,21 +46,23 @@ export default function Sidebar({ children, expanded, setExpanded }) {
           <ul className="flex-1 px-3 overflow-y-auto">{children}</ul>
         </SidebarContext.Provider>
 
-        <div className="border-t flex p-3">
+        <div className="border-t flex p-3 relative">
           <img
             src={user.avatar === "" ? "/images/sbcf-default-avatar.webp" : user.avatar}
             alt="User Avatar"
             className="w-10 h-10 rounded-md"
           />
           <div className={`overflow-hidden transition-all ${expanded ? "w-full ml-3" : "w-0"}`}>
-            <div className="leading-4 flex items-center">
-              <h4 className="font-semibold truncate">{user.name}</h4>
-              <FiMoreVertical className="ml-2 cursor-pointer" />
+            <div className="leading-4 flex items-center justify-between">
+              <h4 className="font-semibold truncate m-0">{user.name}</h4>
+              <FiMoreVertical
+                className="ml-2 cursor-pointer"
+                onClick={() => setPopupVisible(!isPopupVisible)}
+              />
             </div>
           </div>
         </div>
       </nav>
     </aside>
-
   );
 }

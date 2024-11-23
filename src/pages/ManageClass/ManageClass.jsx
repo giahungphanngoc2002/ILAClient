@@ -21,7 +21,7 @@ const { Search } = Input;
 const { Option } = Select;
 const { Content } = Layout;
 
-const ManageClass = () => {
+const App = () => {
     const [classes, setClasses] = useState([]);
     const [studentU, setStudentU] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
@@ -63,6 +63,7 @@ const ManageClass = () => {
 
         fetchStudent();
     }, []);
+    console.log(studentU)
 
     useEffect(() => {
         const calculateTableHeight = () => {
@@ -80,7 +81,7 @@ const ManageClass = () => {
 
     const filteredStudents = classes.flatMap((cls) =>
         cls.studentID.map((student) => ({
-            name: student.name,
+name: student.name,
             class: cls.nameClass,
             _id: student._id,
         }))
@@ -159,8 +160,7 @@ const ManageClass = () => {
 
     const handleAddStudent = async () => {
         const { name, class: className } = formData;
-
-        if (!name || !className) {
+if (!name || !className) {
             toast.error("Vui lòng chọn tên học sinh và lớp!");
             return;
         }
@@ -251,7 +251,7 @@ const ManageClass = () => {
                     <Button
                         type="danger"
                         icon={<DeleteOutlined />}
-                        onClick={() => handleDelete(record._id, record.class)}
+onClick={() => handleDelete(record._id, record.class)}
                     >
                         Xóa
                     </Button>
@@ -331,58 +331,58 @@ const ManageClass = () => {
             <Modal
                 title="Thêm Học Sinh"
                 visible={isAddModalOpen}
-                onCancel={() => setIsAddModalOpen(false)}
+onCancel={() => setIsAddModalOpen(false)}
                 onOk={handleAddStudent}
                 confirmLoading={isLoading}
             >
-                <Form layout="vertical">
-                    <Form.Item label="Tên Học Sinh" required>
-                        <Select
-                            showSearch
-                            placeholder="Chọn học sinh"
-                            value={formData.name}
-                            onChange={(value) => setFormData({ ...formData, name: value })}
-                            style={{ width: "100%" }}
-                            filterOption={(input, option) =>
-                                option?.label?.toLowerCase().includes(input.toLowerCase())
-                            }
-                        >
-                            {studentU
-                                .sort((a, b) => (a.name || "").localeCompare(b.name || ""))
-                                .map((student) => (
-                                    <Select.Option
-                                        key={student.email}
-                                        value={student.email}
-                                        label={`${student.name} - ${student.email}`} // Cung cấp `label` để dùng trong `filterOption`
-                                    >
-                                        {student.name} - {student.email}
-                                    </Select.Option>
-                                ))}
-                        </Select>
-
-                    </Form.Item>
-                    <Form.Item label="Lớp" required>
-                        <Select
-                            placeholder="Chọn lớp"
-                            value={formData.class}
-                            onChange={(value) => setFormData({ ...formData, class: value })}
-                            style={{ width: "100%" }}
-                        >
-                            {classes.map((cls) => (
-                                <Select.Option key={cls.nameClass} value={cls.nameClass}>
-                                    {cls.nameClass}
+               <Form layout="vertical">
+                <Form.Item label="Tên Học Sinh" required>
+                    <Select
+                        mode="multiple" // Cho phép chọn nhiều
+                        showSearch
+                        placeholder="Chọn học sinh"
+                        value={formData.name} // `formData.name` cần là một mảng
+                        onChange={(value) => setFormData({ ...formData, name: value })}
+                        style={{ width: "100%" }}
+                        filterOption={(input, option) =>
+                            option?.label?.toLowerCase().includes(input.toLowerCase())
+                        }
+                    >
+                        {studentU
+                            .sort((a, b) => (a.name || "").localeCompare(b.name || ""))
+                            .map((student) => (
+                                <Select.Option
+                                    key={student.username}
+                                    value={student.username}
+                                    label={`${student.name} - ${student.username}`} // Cung cấp `label` để dùng trong `filterOption`
+                                >
+                                    {student.name} - {student.username}
                                 </Select.Option>
                             ))}
-                        </Select>
-                    </Form.Item>
-                </Form>
+                    </Select>
+                </Form.Item>
+                <Form.Item label="Lớp" required>
+                    <Select
+                        placeholder="Chọn lớp"
+                        value={formData.class}
+                        onChange={(value) => setFormData({ ...formData, class: value })}
+                        style={{ width: "100%" }}
+                    >
+                        {classes.map((cls) => (
+                            <Select.Option key={cls.nameClass} value={cls.nameClass}>
+                                {cls.nameClass}
+                            </Select.Option>
+                        ))}
+                    </Select>
+                </Form.Item>
+            </Form>
             </Modal>
 
 
             {/* Modal Sửa Học Sinh */}
             <Modal
                 title="Cập Nhật Học Sinh"
-                open={isEditModalOpen}
+                visible={isEditModalOpen}
                 onCancel={() => setIsEditModalOpen(false)}
                 onOk={handleEditStudent}
                 confirmLoading={isLoading}
@@ -396,7 +396,7 @@ const ManageClass = () => {
                             }
                         />
                     </Form.Item>
-                    <Form.Item label="Lớp" required>
+<Form.Item label="Lớp" required>
                         <Select
                             value={formData.class}
                             onChange={(value) =>
@@ -417,4 +417,4 @@ const ManageClass = () => {
     );
 };
 
-export default ManageClass;
+export default App;

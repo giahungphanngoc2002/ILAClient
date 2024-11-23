@@ -15,17 +15,19 @@ const ProfileEdit = ({
   setAge,
   cccd,
   setCccd,
+  setEmail,
   isLoading,
 }) => {
   useEffect(() => {
     if (user) {
+      setEmail(user.email || "")
       setName(user.name || "");
       setPhone(user.phone || "");
       setAddress(user.address || "");
       setAge(user.age || "");
       setCccd(user.cccd || "")
     }
-  }, [user, setName, setPhone, setAddress, setAge]);
+  }, [user, setName, setPhone, setAddress, setAge, setEmail]);
   const formattedAge = age ? age.split("T")[0] : "";
 
   return (
@@ -38,6 +40,14 @@ const ProfileEdit = ({
             className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={name}
             onChange={(e) => setName(e.target.value)}
+          />
+        </div>
+        <div className="flex flex-col items-start space-y-2">
+          <label className="w-full font-medium">Email</label>
+          <input
+            className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
           />
         </div>
         <div className="flex flex-col items-start space-y-2">
