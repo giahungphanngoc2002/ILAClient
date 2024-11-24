@@ -122,9 +122,29 @@ const ProfilePage = () => {
   };
 
   useEffect(() => {
+    if (isSuccess) {
+      if (data?.status === "OK") {
+        toast.success("User information updated successfully!");
+        handleGetDetailsUser(user?.id, user?.access_token);
+        setIsLoading(false);
+      } else if (data?.status === "ERR") {
+        // Hiển thị lỗi từ backend (message trong response)
+        toast.error(data?.message || "Failed to update user information");
+        setIsLoading(false);
+      }
+    } else if (isError && data?.message) {
+      // Hiển thị lỗi nếu xảy ra lỗi không mong đợi
+      toast.error(data?.message || "An unknown error occurred");
+      setIsLoading(false);
+    }
+  }, [isSuccess, isError, data]);
+
+
+
+  useEffect(() => {
     if (user) {
       setUsername(user.username || "");
-      setEmail(user.email || "");
+      setEmail(user.email || ""); // Chỉ hiển thị email đã xác thực
       setName(user.name || "");
       setPhone(user.phone || "");
       setAddress(user.address || "");
@@ -170,11 +190,17 @@ const ProfilePage = () => {
     if (address !== user.address) updateData.address = address;
     if (age !== user.age) updateData.age = age;
     if (cccd !== user.cccd) updateData.cccd = cccd;
+
     mutation.mutate({
       id: user?.id,
       ...updateData,
       access_token: user?.access_token,
     });
+
+    // Xử lý lỗi sau khi mutation thất bại
+    if (isError && data?.status === "ERR") {
+      toast.error(data?.message || "Update failed");
+    }
   };
 
   const handleUpdatePassword = async (currentPassword, newPassword) => {

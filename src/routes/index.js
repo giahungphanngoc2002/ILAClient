@@ -39,6 +39,7 @@ import ManageClass from "../pages/ManageClass/ManageClass";
 import StudentViewExamSchedule from "../pages/StudentViewExamSchedule/StudentViewExamSchedule";
 import AutoCreateAccount from "../pages/AutoCreateAccount/AutoCreateAccount";
 import ManageAccount from "../pages/ManageAccount/ManageAccount";
+import ActivationPage from "../pages/ActivationPage/ActivationPage";
 export const routes = [
   {
     path: "/",
@@ -54,6 +55,12 @@ export const routes = [
   {
     path: "/signup",
     page: SignUp,
+    isShowHeader: false,
+  },
+
+  {
+    path: "/activation",
+    page: ActivationPage,
     isShowHeader: false,
   },
   {

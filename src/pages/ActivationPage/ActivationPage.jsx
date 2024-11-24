@@ -31,7 +31,7 @@ const ActivationPage = () => {
           <AiOutlineCheckCircle className="mx-auto mb-4 text-green-500 text-4xl" />
         )}
         <p className="text-lg font-semibold">
-          {error ? "Your token is expired!" : "Your account has been created successfully"}
+          {error ? "Your token is expired!" : "Your email has been created successfully"}
         </p>
       </div>
     </div>
