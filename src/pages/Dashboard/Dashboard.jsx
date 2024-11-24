@@ -12,6 +12,8 @@ import { AiOutlineSchedule } from "react-icons/ai";
 import { SiGoogleclassroom } from "react-icons/si";
 import { FaUserPlus } from "react-icons/fa6";
 import { MdAccountCircle } from "react-icons/md";
+import { FaClipboardUser } from "react-icons/fa6";
+import { TbSquareLetterA } from "react-icons/tb";
 
 const Dashboard = () => {
     const user = useSelector((state) => state.user);
@@ -59,7 +61,6 @@ const Dashboard = () => {
     }, [user?.role, teacherId]);
 
 
-
     useEffect(() => {
         if (!teacherId) return;
         const fetchDetailClassByTeacherHR = async () => {
@@ -90,21 +91,6 @@ const Dashboard = () => {
     const handleClassClick = (classId) => {
         setSelectedClass(classId); // Cập nhật lớp được chọn
     };
-
-    // const handleCardClick = () => {
-    //     if (!selectedClass) return;
-
-    //     const selectedClassData = classes.find((classItem) => classItem._id === selectedClass);
-
-    //     if (selectedClassData) {
-    //         // Lọc danh sách môn học mà giáo viên đang dạy trong lớp
-    //         const teacherSubjects = selectedClassData.subjectGroup.filter(
-    //             (subject) => subject.teacherId === user.id
-    //         );
-    //         setSubjects(teacherSubjects);
-    //         setIsModalOpen(true); // Mở modal
-    //     }
-    // };
 
     const handleCardClick = (cardType) => {
         if (!selectedClass) return;  // Kiểm tra xem lớp đã được chọn chưa
@@ -153,7 +139,6 @@ const Dashboard = () => {
     const handleGoToManageAbsentRequest = (idClass) => {
         navigate(`/manage/addAbsenceRequest/${idClass}`)
     }
-
 
     const handleGoToProfileStudentInClass = (idClass) => {
         navigate(`/manage/profileStudentInClass/${idClass}`)
@@ -248,13 +233,13 @@ const Dashboard = () => {
             {/* Full-width Flex Container */}
             <div className="flex flex-col md:flex-row md:space-x-8 w-full">
                 {/* Welcome Banner */}
-                <div className="flex-1 bg-blue-500 text-white rounded-lg p-6 flex flex-col md:flex-row md:justify-between md:items-center">
+                <div className="flex-1 bg-blue-500 text-white rounded-lg p-6 flex flex-col md:flex-row md:justify-around md:items-center">
                     <div className="text-center md:text-left">
                         <h2 className="text-2xl font-bold mb-2">Chào mừng tới Trường THPT Ông Ích Khiêm!</h2>
                         <p className="text-lg">Trang liên lạc và truyền thông nhà trường</p>
                     </div>
                     <div className="mt-4 md:mt-0 flex justify-center md:justify-end">
-                        <img src="path/to/student-image.png" alt="Students" className="w-32 h-32" />
+                        <img src="images/student.png" alt="Students" className="w-48 h-48" />
                     </div>
                 </div>
 
@@ -295,7 +280,7 @@ const Dashboard = () => {
 
                             {/* Other Cards */}
                             <div onClick={() => handleCardClick("grade")} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
-                                <div className="bg-green-400 p-4 rounded-full mb-2">
+                                <div className="bg-sky-400 p-4 rounded-full mb-2">
                                     <GrScorecard size={32} className="text-white" />
                                 </div>
                                 <p className="font-semibold">Bảng điểm</p>
@@ -322,8 +307,8 @@ const Dashboard = () => {
                                 <h2 className="text-xl font-bold mb-6">Quản lý lớp học</h2>
                                 <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
                                     <div onClick={() => handleGoToManageAbsentRequest(classHR._id)} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
-                                        <div className="bg-orange-400 p-4 rounded-full mb-2">
-                                            <GrScorecard size={32} className="text-white" />
+                                        <div className="bg-yellow-500 p-4 rounded-full mb-2">
+                                            <TbSquareLetterA size={32} className="text-white" />
                                         </div>
                                         <p className="font-semibold">Quản lí đơn nghỉ học</p>
                                     </div>
@@ -337,20 +322,20 @@ const Dashboard = () => {
                                     </div>
 
                                     <div onClick={() => handleGoToProfileStudentInClass(classHR._id)} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
-                                        <div className="bg-teal-400 p-4 rounded-full mb-2">
-                                            <FaBook size={32} className="text-white" />
+                                        <div className="bg-pink-400 p-4 rounded-full mb-2">
+                                            <FaClipboardUser size={32} className="text-white" />
                                         </div>
                                         <p className="font-semibold">Thông tin học sinh</p>
                                     </div>
 
                                     <div onClick={() => handleGoToSendNotification(classHR._id)} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
-                                        <div className="bg-red-400 p-4 rounded-full mb-2">
-                                            <FaClipboardQuestion size={32} className="text-white" />
+                                        <div className="bg-rose-500 p-4 rounded-full mb-2">
+                                            <BiMailSend size={32} className="text-white" />
                                         </div>
                                         <p className="font-semibold">Gửi thông báo</p>
                                     </div>
                                     <div onClick={() => handleGoToConductEvaluation(classHR._id)} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
-                                        <div className="bg-red-400 p-4 rounded-full mb-2">
+                                        <div className="bg-blue-400 p-4 rounded-full mb-2">
                                             <FaClipboardQuestion size={32} className="text-white" />
                                         </div>
                                         <p className="font-semibold">Hạnh kiểm</p>
@@ -363,14 +348,14 @@ const Dashboard = () => {
                         <h2 className="text-xl font-bold mb-6">Tác vụ</h2>
                         <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
                             <div onClick={handleGoToCalendar} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
-                                <div className="bg-teal-400 p-4 rounded-full mb-2">
+                                <div className="bg-violet-400 p-4 rounded-full mb-2">
                                     <CalendarClock size={32} className="text-white" />
                                 </div>
                                 <p className="font-semibold">Lịch làm việc</p>
                             </div>
 
                             <div onClick={handleGoToSendNoti} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
-                                <div className="bg-orange-400 p-4 rounded-full mb-2">
+                                <div className="bg-lime-500 p-4 rounded-full mb-2">
                                     <BiMailSend size={32} className="text-white" />
                                 </div>
                                 <p className="font-semibold">Gửi thông báo</p>
@@ -448,6 +433,13 @@ const Dashboard = () => {
                                 </div>
                                 <p className="font-semibold">Tạo lịch thi</p>
                             </div>
+
+                            <div onClick={handleGoToSendNoti} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
+                                <div className="bg-emerald-400 p-4 rounded-full mb-2">
+                                    <BiMailSend size={32} className="text-white" />
+                                </div>
+                                <p className="font-semibold">Gửi thông báo</p>
+                            </div>
                         </div>
                     </div>
                     <div className="flex flex-col bg-white p-6 rounded-lg shadow-md w-full mt-8">
@@ -516,3 +508,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+

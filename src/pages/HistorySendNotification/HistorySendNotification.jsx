@@ -3,6 +3,7 @@ import { FaChevronDown } from "react-icons/fa";
 import { GoPlus } from "react-icons/go";
 import { useNavigate } from "react-router-dom";
 import * as NotificationService from "../../services/NotificationService";
+import { useSelector } from "react-redux";
 
 function HistorySendNotification() {
     const [selectedEmailId, setSelectedEmailId] = useState(null);
@@ -10,6 +11,7 @@ function HistorySendNotification() {
     const [searchTerm, setSearchTerm] = useState("");
     const navigate = useNavigate();
     const [emails, setEmails] = useState([]);
+    const user = useSelector((state) => state.user);
 
     useEffect(() => {
         // Hàm gọi API và cập nhật state
@@ -58,7 +60,11 @@ function HistorySendNotification() {
     );
 
     const goToCreateNotification = () => {
-        navigate('/manage/notificationToStudent');
+        if (user.role === "Teacher") {
+            navigate('/manage/notificationToStudent');
+        } else if (user.role === "Admin") {
+            navigate('/manage/notificationToSchool');
+        }
     };
 
     return (

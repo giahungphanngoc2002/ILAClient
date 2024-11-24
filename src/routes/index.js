@@ -332,6 +332,16 @@ export const routes = [
     isShowSideBar: false,
   },
   {
+    path: "/manage/notificationToSchool",
+    page: () => (
+      <ProtectedRoute>
+        <NotificationToStudent />
+      </ProtectedRoute>
+    ),
+    isShowHeader: false,
+    isShowSideBar: false,
+  },
+  {
     path: "/manage/thrNotification/:idClass",
     page: () => (
       <ProtectedRoute>
