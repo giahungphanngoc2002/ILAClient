@@ -38,7 +38,7 @@ const AutoCreateAccount = () => {
   useEffect(() => {
     const fetchStudent = async () => {
       try {
-        const data = await UserService.getAllUser();
+        const data = await UserService.getAllAccount();
         const fetchedUserList = data.data.map((account) => account.username);
         setAllAccount(fetchedUserList);
       } catch (error) {
@@ -115,18 +115,31 @@ const AutoCreateAccount = () => {
     setAccounts(generatedAccounts);
   };
 
-  const handleManualAdd = () => {
-    form.validateFields().then((values) => {
-      const newAccount = {
-        fullName: values.fullName,
+  const mutation1 = useMutationHooks(
+    (data) => UserService.createUserbyRole(data)
+  );
+
+  const handleManualAdd = async () => {
+    try {
+      const values = await form.validateFields();
+      await mutation1.mutateAsync({
+        name: values.fullName,
         username: values.username,
         password: values.password || "123456",
+        confirmPassword: values.password || "123456",
         role: values.role,
-      };
-      console.log(newAccount)
-      // message.success("Tài khoản được thêm thành công!");
-    });
+      });
+
+      toast.success("Tài khoản được thêm thành công!");
+    } catch (error) {
+      if (error instanceof Error) {
+        toast.error(`Đã xảy ra lỗi: ${error.message}`);
+      } else {
+        toast.error("Đã xảy ra lỗi khi thêm tài khoản. Vui lòng thử lại.");
+      }
+    }
   };
+
 
   const columns = [
     {
@@ -153,6 +166,8 @@ const AutoCreateAccount = () => {
   const mutation = useMutationHooks(
     (data) => UserService.signupUser(data)
   );
+
+
 
   const handleAutoCreateAccount = async () => {
     console.log(accounts);
@@ -181,7 +196,7 @@ const AutoCreateAccount = () => {
   };
 
 
-
+  console.log(allAccount)
 
   return (
     <Layout style={{ height: "100vh" }}>
@@ -262,10 +277,23 @@ const AutoCreateAccount = () => {
           <Form.Item
             name="username"
             label="Tài khoản"
-            rules={[{ required: true, message: "Vui lòng nhập tài khoản!" }]}
+            rules={[
+              { required: true, message: "Vui lòng nhập tài khoản!" },
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  if (!value || !allAccount.includes(value)) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject(
+                    new Error("Tài khoản đã tồn tại, vui lòng nhập tài khoản khác!")
+                  );
+                },
+              }),
+            ]}
           >
             <Input placeholder="Nhập tài khoản" />
           </Form.Item>
+
           <Form.Item name="password" label="Mật khẩu">
             <Input.Password placeholder="Nhập mật khẩu (mặc định: 123456)" />
           </Form.Item>
@@ -275,8 +303,8 @@ const AutoCreateAccount = () => {
             rules={[{ required: true, message: "Vui lòng chọn vai trò!" }]}
           >
             <Select placeholder="Chọn vai trò">
-              <Select.Option value="User">Giáo viên</Select.Option>
-              <Select.Option value="Teacher">Học sinh</Select.Option>
+              <Select.Option value="Teacher">Giáo viên</Select.Option>
+              <Select.Option value="User">Học sinh</Select.Option>
             </Select>
           </Form.Item>
         </Form>

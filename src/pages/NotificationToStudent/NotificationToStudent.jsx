@@ -46,20 +46,20 @@ const NotificationToStudent = () => {
 
     // Filter for recipientsTab1 (students)
     const recipientsTab1 = classData.flatMap((classItem) =>
-        classItem.studentID.map(student => ({
-            id: student._id,
-            name: student.username, // Derive "name" from email if needed
-            phone: student.phone || 'N/A', // Default phone if not available
-            class: classItem.nameClass
+        classItem?.studentID.map(student => ({
+            id: student?._id,
+            name: student?.username, // Derive "name" from email if needed
+            phone: student?.phone || 'N/A', // Default phone if not available
+            class: classItem?.nameClass
         }))
     );
 
     // Filter for recipientsTab2 (teachers)
     const recipientsTab2 = classData.map((classItem) => ({
-        id: classItem.teacherHR._id,
-        name: classItem.teacherHR.username, // Derive "name" from email if needed
-        phone: classItem.teacherHR.phone || 'N/A', // Default phone if not available
-        class: classItem.nameClass
+        id: classItem?.teacherHR?._id,
+        name: classItem?.teacherHR?.username, // Derive "name" from email if needed
+        phone: classItem?.teacherHR?.phone || 'N/A', // Default phone if not available
+        class: classItem?.nameClass
     }));
 
     // Extract classes
@@ -101,13 +101,13 @@ const NotificationToStudent = () => {
     const filteredRecipients =
         selectedTab === 'tab1'
             ? recipientsTab1.filter((recipient) => {
-                const matchesName = recipient.name.toLowerCase().includes(nameFilter.toLowerCase());
+                const matchesName = recipient?.name?.toLowerCase().includes(nameFilter?.toLowerCase());
                 const matchesClass = classFilter === '' || recipient.class === classFilter;
                 return matchesName && matchesClass;
             })
             : recipientsTab2.filter((recipient) => {
-                const matchesName = recipient.name.toLowerCase().includes(nameFilter.toLowerCase());
-                const matchesClass = classFilter === '' || recipient.class === classFilter;
+                const matchesName = recipient?.name?.toLowerCase().includes(nameFilter?.toLowerCase());
+                const matchesClass = classFilter === '' || recipient?.class === classFilter;
                 return matchesName && matchesClass;
             });
 

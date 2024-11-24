@@ -27,13 +27,13 @@ const QuestionManager = () => {
     const [textLevel, setTextLevel] = useState("");
     const [textChapter, setTextChapTer] = useState("");
     const [textLession, setTextLession] = useState("");
-    const [isLoading, setIsLoading] = useState(false); 
+    const [isLoading, setIsLoading] = useState(false);
 
-    
 
-    
 
-    
+
+
+
     const fetchQuestions = async () => {
         setIsLoading(true);
         try {
@@ -63,12 +63,12 @@ const QuestionManager = () => {
             fetchQuestions(); // Tải lại danh sách câu hỏi sau khi cập nhật thành công
             // Reset loading state on success
             setShowUpdateModal(false);
-           
+
         },
         onError: (error) => {
             toast.error("Error updating question.");
             setIsLoading(false); // Reset loading state on error
-           
+
         },
     });
 
@@ -81,15 +81,15 @@ const QuestionManager = () => {
             toast.success("Question deleted successfully");
             setIsLoading(false); // Reset loading state on success
             fetchQuestions(); // T
-           
+
         },
         onError: (error) => {
             toast.error("Error deleting question.");
             setIsLoading(false); // Reset loading state on error
-           
+
         },
     });
-    
+
 
     useEffect(() => {
         let filtered = questionsData;
@@ -111,7 +111,7 @@ const QuestionManager = () => {
         setFilteredQuestions(filtered);
     }, [selectedChapter, selectedLesson, searchTerm, questionsData]);
 
-    
+
 
     const resetFilters = () => {
         window.history.back();
@@ -128,7 +128,7 @@ const QuestionManager = () => {
         setQuestion(question);
         setShowUpdateModal(true);
     };
-    
+
 
     const handleCloseUpdateModal = () => {
         setQuestion(null);
@@ -187,7 +187,7 @@ const QuestionManager = () => {
     const handleEditChapter = () => {
         setToggleEditChapter(!toggleEditChapter);
     };
-   
+
     const handleUpdateQuestion = () => {
         const updatedQuestion = {
             question: textQuestion,
@@ -195,9 +195,9 @@ const QuestionManager = () => {
             options: question.options,
             level: question.level,
             lession: question.lession,
-            chapter:question.chapter
+            chapter: question.chapter
         };
-    
+
         updateMutation.mutate({
             classId: idClass,
             subjectId: idSubject,
@@ -262,7 +262,7 @@ const QuestionManager = () => {
 
     return (
         <div className="p-6 bg-gray-100 min-h-screen">
-             {isLoading && <p>Loading...</p>}
+            {isLoading && <p>Loading...</p>}
             <h1 className="text-2xl font-bold mb-6 text-center">Quản lý câu hỏi</h1>
 
             {/* Bộ lọc theo Chương, Bài và Tìm kiếm */}
@@ -276,10 +276,10 @@ const QuestionManager = () => {
                     >
                         <option value="All">All Chapters</option>
                         {uniqueChapters.map((chapter) => (
-                        <option key={chapter} value={chapter}>
-                            {chapter}
-                        </option>
-                    ))}
+                            <option key={chapter} value={chapter}>
+                                {chapter}
+                            </option>
+                        ))}
                     </select>
                 </div>
 
@@ -292,11 +292,11 @@ const QuestionManager = () => {
                     >
                         <option value="All">All Lessions</option>
                         {uniqueLessions.map((lession) => (
-                        <option key={lession} value={lession}>
-                            Lesson {lession}
-                        </option>
-                    ))}
-                        
+                            <option key={lession} value={lession}>
+                                Lesson {lession}
+                            </option>
+                        ))}
+
                     </select>
                 </div>
 
@@ -312,7 +312,7 @@ const QuestionManager = () => {
                 </div>
 
                 <div className="flex">
-                <button
+                    <button
                         className="bg-blue-500 text-white py-2 px-4 rounded-md mt-8 flex items-center justify-center"
                         onClick={goToCreateQuestionByAI}
                     >

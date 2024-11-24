@@ -37,16 +37,13 @@ const Dashboard = () => {
             setIsLoading(true);
             try {
                 const response = await ClassService.getAllSubjectClassesByTeacherId(teacherId);
-
                 console.log('Full API response data:', response);
-
                 if (response && response.data && response.data.classes) {
                     setClasses(response.data.classes);
                 } else {
                     console.error('Unexpected API response structure', response);
                     setClasses([]);
                 }
-
                 setIsError(false);
             } catch (error) {
                 setIsError(true);
@@ -56,16 +53,15 @@ const Dashboard = () => {
             }
         };
 
-        if (teacherId) {
+        if (user?.role === "Teacher" && teacherId) {
             fetchSubject();
         }
-    }, [teacherId]);
+    }, [user?.role, teacherId]);
 
-    console.log(classes);
+
 
     useEffect(() => {
         if (!teacherId) return;
-
         const fetchDetailClassByTeacherHR = async () => {
             setIsLoading(true);
             try {
@@ -231,7 +227,7 @@ const Dashboard = () => {
         navigate(`/manage/manageAccount`)
     }
 
-    console.log(classHR && classHR.teacherHR !== null && classHR.teacherHR === user.id)
+    // console.log(classHR && classHR.teacherHR !== null && classHR.teacherHR === user.id)
 
     return (
         <div className="flex flex-col p-6 bg-gray-100 min-h-screen">
@@ -320,9 +316,6 @@ const Dashboard = () => {
                             </div>
                         </div>
                     </div>
-
-
-
                     {classHR && classHR.teacherHR !== null && classHR.teacherHR === user.id && (
                         <div>
                             <div className="flex flex-col bg-white p-6 rounded-lg shadow-md w-full mt-8">
@@ -366,9 +359,6 @@ const Dashboard = () => {
                             </div>
                         </div>
                     )}
-
-
-
                     <div className="flex flex-col bg-white p-6 rounded-lg shadow-md w-full mt-8">
                         <h2 className="text-xl font-bold mb-6">Tác vụ</h2>
                         <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">

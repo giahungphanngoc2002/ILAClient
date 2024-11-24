@@ -43,7 +43,7 @@ export default function SearchQuestionByAI() {
 
   useEffect(() => {
     const wordCount = countWords(question);
-    if (wordCount < 150) {
+    if (wordCount < 1) {
       setButtonColor("gray");
       setShowWarning(true); // Nếu ít hơn 400 từ, hiển thị cảnh báo
     } else {
@@ -52,47 +52,43 @@ export default function SearchQuestionByAI() {
     }
   }, [question]);
 
-  const { idClass ,idSubject } = useParams();
-
-  // const handleGetDetailsClass = async (id) => {
-  //   const classDetails = await ClassService.getDetailClass(id);
-  //   return classDetails;
-  // };
+  const { idClass, idSubject } = useParams();
 
   const handleUpdate = async () => {
     try {
-      // Kiểm tra nếu có câu hỏi để thêm
       if (questions.length === 0) {
         message.error("No questions available to add.");
         return;
       }
-      
-      setLoading(true); // Hiển thị trạng thái loading
-  
-      // Thực hiện gửi dữ liệu đến API, truyền classId, subjectId và questions
+
+      setLoading(true);
+
       const response = await SubjectService.createQuestion(idClass, idSubject, questions);
-  
-      // Kiểm tra kết quả từ server
-      if (response.status === 201) {
-        toast.success("Questions added successfully!");
-        setQuestions([]); // Reset danh sách câu hỏi sau khi thêm thành công
+
+      console.log(response); // Kiểm tra nội dung phản hồi
+
+      if (response.message === "Question created successfully" && response.subject) {
+        message.success("Questions added successfully!");
+        setQuestions([]);
       } else {
-        message.error("Failed to add questions. Please try again.");
+        message.error(`Failed to add questions. ${response.message || "Please try again."}`);
       }
     } catch (error) {
       console.error("Error adding questions:", error);
       message.error("An error occurred while adding questions.");
     } finally {
-      setLoading(false); // Tắt trạng thái loading
+      setLoading(false);
     }
   };
-  
+
+
+
 
   async function generateAnswer() {
     setLoading(true);
     setError("");
     const addText = `
-      xin 10 câu hỏi trắc nghiệm về đoạn văn này theo format dưới đây
+      theo format dưới đây
       [
   {
     "question": "Điền câu hỏi vào đây",
@@ -103,7 +99,7 @@ export default function SearchQuestionByAI() {
       "Điền các kết quả để chọn vào đây"
     ],
     "correctAnswer": "Điền đáp án vào đây",
-    "level": 1,
+    "level": [1,2,3],
     "chapter": "Tên chương học",
     "lession": "Tên bài học"
   },
@@ -116,7 +112,7 @@ export default function SearchQuestionByAI() {
       "Điền các kết quả để chọn vào đây"
     ],
     "correctAnswer": "Điền đáp án vào đây",
-    "level": 1,
+    "level": [1,2,3],
     "chapter": "Tên chương học",
     "lession": "Tên bài học"
   },
@@ -129,13 +125,13 @@ export default function SearchQuestionByAI() {
       "Điền các kết quả để chọn vào đây"
     ],
     "correctAnswer": "Điền đáp án vào đây",
-    "level": 1,
+    "level": [1,2,3],
     "chapter": "Tên chương học",
     "lession": "Tên bài học"
   }
 ]
       `;
-    const addText2 = `chỉnh lại cho chuẩn json`;
+    const addText2 = `chỉnh lại cho chuẩn json sau`;
 
     try {
       const response = await axios({
@@ -160,7 +156,7 @@ export default function SearchQuestionByAI() {
                 {
                   text:
                     response["data"]["candidates"][0]["content"]["parts"][0][
-                      "text"
+                    "text"
                     ] + addText2,
                 },
               ],
@@ -227,7 +223,7 @@ export default function SearchQuestionByAI() {
   }
 
   return (
-    <div className="home-page-teacher p-6 text-center">
+    <div className="p-6 text-center h-screen bg-white">
       <h1 className="text-3xl font-bold mb-6 text-gray-800">Chat AI</h1>
       <textarea
         className="question-input w-full h-40 p-3 mb-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:border-blue-500"
@@ -291,17 +287,17 @@ export default function SearchQuestionByAI() {
                   Correct answer: {questionn?.correctAnswer}
                 </p>
                 <p className="border-2 rounded-lg bg-green-200 p-3 text-left border-green-500">
-                level: {questionn?.level}
+                  level: {questionn?.level}
                 </p>
                 <p className="border-2 rounded-lg bg-green-200 p-3 text-left border-green-500">
-                chapter: {questionn?.chapter}
+                  chapter: {questionn?.chapter}
                 </p>
 
                 <p className="border-2 rounded-lg bg-green-200 p-3 text-left border-green-500">
-                lession: {questionn?.lession}
+                  lession: {questionn?.lession}
                 </p>
               </div>
-              
+
               <div className="text-right">
                 <button
                   className="btn btn-danger bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition duration-200"
