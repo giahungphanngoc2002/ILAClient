@@ -27,7 +27,8 @@ const Calendar = ({ onClassClick }) => {
         setScheduleData(data?.data || []);
         setIsError(false);
       } catch (error) {
-        setIsError(true);
+        setScheduleData([]); // Gán dữ liệu trống khi lỗi xảy ra
+
         console.error('Error fetching schedule data:', error);
       } finally {
         setIsLoading(false);
@@ -39,7 +40,7 @@ const Calendar = ({ onClassClick }) => {
     }
   }, [teacherId]);
 
-  console.log("123123",scheduleData)
+  console.log("123123", scheduleData)
 
   useEffect(() => {
     const today = new Date();
@@ -182,7 +183,7 @@ const Calendar = ({ onClassClick }) => {
                 </div>
                 {slotTimes.map((slot, i) => {
                   const classData = getScheduleForDay(day, i);
-                
+
                   return (
                     <div
                       key={i}
@@ -190,14 +191,14 @@ const Calendar = ({ onClassClick }) => {
                     >
                       {classData ? (
                         <button
-                        onClick={() => goToClass(classData.classId._id,
-                           classData.scheduleId, classData._id, classData.subjectId?._id || 
-                           classData.subjectChuyendeId?._id, // Truyền `day` vào goToClass
-                            )}
+                          onClick={() => goToClass(classData.classId._id,
+                            classData.scheduleId, classData._id, classData.subjectId?._id ||
+                          classData.subjectChuyendeId?._id, // Truyền `day` vào goToClass
+                          )}
                         >
                           <div className="text-xs text-gray-700 w-full h-full flex flex-col items-center justify-center">
-                          <div className="font-bold text-blue-800">{classData?.subjectId?.nameSubject || classData?.subjectChuyendeId?.nameSubject}</div>
-                            
+                            <div className="font-bold text-blue-800">{classData?.subjectId?.nameSubject || classData?.subjectChuyendeId?.nameSubject}</div>
+
                             <div>{classData.classId.nameClass}</div>
                             <div className={`text-${classData.isCompleted ? 'green' : (classData.isMissed ? 'red' : 'yellow')}-600`}>
                               {classData.isCompleted ? 'Hoàn thành' : (classData.isMissed ? 'Bỏ lỡ' : 'Sắp đến')}

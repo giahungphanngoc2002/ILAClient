@@ -117,3 +117,8 @@ export const getInfoContactByUserId = async (userId) => {
   const res = await axios.get(`${API_URL}/getdetailsInfocontact/${userId}`);
   return res.data;
 };
+
+export const createUserbyRole = async (data) => {
+  const res = await axios.post(`${API_URL}/signupAccount`, data);
+  return res.data;
+};

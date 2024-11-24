@@ -286,11 +286,15 @@ const ProfilePage = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="flex flex-col items-center">
             <div className="relative">
+
+
               <img
-                src={avatar}
+                src={user.avatar === "" ? "/images/sbcf-default-avatar.webp" : user.avatar}
                 alt="avatar"
                 className="w-32 h-32 rounded-full object-cover mb-4"
               />
+
+
               <input
                 type="file"
                 className="hidden"
