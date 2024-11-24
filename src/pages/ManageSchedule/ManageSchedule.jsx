@@ -85,11 +85,8 @@ const ManageSchedule = () => {
 
     const handleSelectSlot = (classId, day, slot, subjectData) => {
         const { subjectId, subjectChuyendeId } = JSON.parse(subjectData);
-        if (!subjectId && !subjectChuyendeId) {
-            setError("You need to select a subject for each time slot.");
-            return;
-        }
-        setError("");
+
+        // Cập nhật trạng thái trong state
         setSchedule((prev) => ({
             ...prev,
             [classId]: {
@@ -104,6 +101,7 @@ const ManageSchedule = () => {
             },
         }));
     };
+
 
     const isEndWeekGreaterThanStartWeek = (startYearWeek, endYearWeek) => {
         const startYear = parseInt(startYearWeek.year, 10);
@@ -302,47 +300,51 @@ const ManageSchedule = () => {
                                         return (
                                             <td key={dayIndex} className="border px-4 py-2">
                                                 {currentSchedule ? (
-                                                    // Nếu có dữ liệu, hiển thị thông tin
-                                                    // <div className="text-green-600">
-                                                    //     <p>{currentSchedule.subjectId?.nameSubject || "Không xác định"}</p>
-                                                    //     <p>Giáo viên: {currentSchedule.teacherId || "N/A"}</p>
-                                                    // </div>
                                                     <div>
-                                                    <select
-                                                        name="currentScheduleSelect"
-                                                        id="currentScheduleSelect"
-                                                        className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                                                        value={JSON.stringify({
-                                                            subjectId: currentSchedule.subjectId._id,
-                                                            subjectChuyendeId: currentSchedule.subjectId.subjectChuyendeId?._id,
-                                                        })}
-                                                        onChange={(e) => handleSelectSlot(selectedClass, day, slot.slot, e.target.value)}
-                                                    >
-                                                        {/* <option value="">Chọn môn</option> */}
-                                                        {classDetail?.subjectGroup?.SubjectsId.map((subject, index) => (
-                                                            <option
-                                                                key={index}
-                                                                value={JSON.stringify({
-                                                                    subjectId: subject._id,
-                                                                    subjectChuyendeId: subject?.subjectChuyendeId?._id,
-                                                                })}
-                                                            >
-                                                                {subject?.nameSubject} - {subject?.teacherId?.name}
-                                                            </option>
-                                                        ))}
-                                                        {classDetail?.subjectGroup?.SubjectsChuyendeId.map((subject, index) => (
-                                                            <option
-                                                                key={index}
-                                                                value={JSON.stringify({
-                                                                    subjectId: subject._id,
-                                                                    subjectChuyendeId: subject?.subjectChuyendeId?._id,
-                                                                })}
-                                                            >
-                                                                {subject?.nameSubject} - {subject?.teacherId?.name}
-                                                            </option>
-                                                        ))}
-                                                    </select>
-                                                </div>
+                                                        <select
+                                                            name="currentScheduleSelect"
+                                                            id="currentScheduleSelect"
+                                                            className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                                            value={
+                                                                schedule[selectedClass]?.[day]?.[slot.slot]
+                                                                    ? JSON.stringify(schedule[selectedClass][day][slot.slot])
+                                                                    : currentSchedule?.subjectId
+                                                                        ? JSON.stringify({
+                                                                            subjectId: currentSchedule.subjectId._id,
+                                                                            subjectChuyendeId: currentSchedule.subjectId.subjectChuyendeId?._id,
+                                                                        })
+                                                                        : ""
+                                                            }
+                                                            onChange={(e) =>
+                                                                handleSelectSlot(selectedClass, day, slot.slot, e.target.value)
+                                                            }
+                                                        >
+                                                            {classDetail?.subjectGroup?.SubjectsId.map((subject, index) => (
+                                                                <option
+                                                                    key={index}
+                                                                    value={JSON.stringify({
+                                                                        subjectId: subject._id,
+                                                                        subjectChuyendeId: subject?.subjectChuyendeId?._id,
+                                                                    })}
+                                                                >
+                                                                    {subject?.nameSubject} - {subject?.teacherId?.name}
+                                                                </option>
+                                                            ))}
+                                                            {classDetail?.subjectGroup?.SubjectsChuyendeId.map((subject, index) => (
+                                                                <option
+                                                                    key={index}
+                                                                    value={JSON.stringify({
+                                                                        subjectId: subject._id,
+                                                                        subjectChuyendeId: subject?.subjectChuyendeId?._id,
+                                                                    })}
+                                                                >
+                                                                    {subject?.nameSubject} - {subject?.teacherId?.name}
+                                                                </option>
+                                                            ))}
+                                                        </select>
+
+
+                                                    </div>
                                                 ) : (
                                                     <select
                                                         className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -355,10 +357,6 @@ const ManageSchedule = () => {
                                                                 : ""
                                                         }
                                                     >
-                                                        {/* {console.log(schedule[selectedClass]?.[day]?.[slot.slot]
-                                                            ? JSON.stringify(schedule[selectedClass]?.[day]?.[slot.slot])
-                                                            : "")}
-                                                        {console.log("Dropdown value for slot:", slot.slot, "Day:", day, "Value:", schedule[selectedClass]?.[day]?.[slot.slot])} */}
                                                         <option value="">Chọn môn</option>
                                                         {classDetail?.subjectGroup?.SubjectsId.map((subject, index) => (
                                                             <option
