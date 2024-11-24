@@ -63,3 +63,13 @@ export const createScheduleByClassId = async (classId, scheduleData) => {
     const res = await axios.post(`${SCHEDULE_API_URL}/${classId}/schedules`, scheduleData);
     return res.data;
 };
+
+export const updateScheduleByClassId = async (classId, timeTableId, scheduleData) => {
+    
+        const res = await axios.put(
+            `${SCHEDULE_API_URL}/${classId}/timetable/${timeTableId}`,
+            scheduleData
+        );
+        return res.data;
+    
+};

@@ -114,6 +114,7 @@ const ManageSchedule = () => {
     const handleSaveSchedule = async () => {
         if (!selectedClass) {
             setError("Please select a class before saving the schedule.");
+            toast.error("Please select a class before saving the schedule.");
             return;
         }
         if (!isEndWeekGreaterThanStartWeek(startYearWeek, endYearWeek)) {
@@ -123,42 +124,115 @@ const ManageSchedule = () => {
         try {
             const startWeekNumber = parseInt(startYearWeek.week, 10);
             const endWeekNumber = parseInt(endYearWeek.week, 10);
+    
             for (let currentWeek = startWeekNumber; currentWeek <= endWeekNumber; currentWeek++) {
+                console.log("Processing week:", currentWeek);
+    
+                let timetableId =
+                    classDetail?.timeTable?.find((schedule) => schedule.week === `${currentWeek}`)?._id || null;
+    
+                console.log("Timetable ID for week", currentWeek, ":", timetableId);
+    
+                // Chuẩn bị dữ liệu `scheduleData`
                 const scheduleData = {
                     yearNumber: startYearWeek.year,
                     weekNumber: currentWeek,
-                    days: daysOfWeek.map((day) => ({
-                        dayOfWeek: day,
-                        slots: timeSlots
-                            .filter((slot) => schedule[selectedClass]?.[day]?.[slot.slot])
-                            .map((slot) => {
-                                const slotData = schedule[selectedClass]?.[day]?.[slot.slot];
-                                return {
-                                    slotNumber: parseInt(slot.slot.replace('Tiết ', '')),
-                                    subjectId: slotData.subjectId,
-                                    classId: selectedClass,
-                                    attendanceStatus: {
-                                        createdAt: new Date().toISOString(),
-                                        status: false,
-                                    },
-                                    absentStudentId: [],
-                                };
-                            }),
-                    })).filter((day) => day.slots.length > 0),
+                    days: daysOfWeek
+                        .map((day) => {
+                            const newSlots = timeSlots
+                                .filter((slot) => schedule[selectedClass]?.[day]?.[slot.slot])
+                                .map((slot) => {
+                                    const slotData = schedule[selectedClass]?.[day]?.[slot.slot];
+                                    return {
+                                        slotNumber: parseInt(slot.slot.replace("Tiết ", "")),
+                                        subjectId: slotData?.subjectId || null,
+                                        classId: selectedClass,
+                                        attendanceStatus: {
+                                            createdAt: new Date().toISOString(),
+                                            status: false,
+                                        },
+                                        absentStudentId: [],
+                                    };
+                                });
+    
+                            if (newSlots.length > 0) {
+                                // Hợp nhất slots mới và slots cũ, ghi đè dựa trên `slotNumber`
+                                let updatedSlots = [];
+                                const existingDay = classDetail?.timeTable?.find(
+                                    (daySchedule) => daySchedule.dayOfWeek === day
+                                );
+    
+                                if (existingDay) {
+                                    updatedSlots = existingDay.slots.filter(
+                                        (existingSlot) =>
+                                            !newSlots.some((newSlot) => newSlot.slotNumber === existingSlot.slotNumber)
+                                    );
+                                }
+    
+                                updatedSlots = [...updatedSlots, ...newSlots];
+    
+                                return { dayOfWeek: day, slots: updatedSlots };
+                            }
+    
+                            return null;
+                        })
+                        .filter((day) => day !== null), // Bỏ qua các ngày không có slots
                 };
+    
+                console.log("Schedule Data for week", currentWeek, ":", scheduleData);
+    
                 if (!scheduleData.days || scheduleData.days.length === 0) {
                     setError("Schedule is empty, please select at least one subject per time slot.");
+                    toast.error("Schedule is empty, please select at least one subject per time slot.");
                     return;
                 }
-                await ScheduleService.createScheduleByClassId(selectedClass, scheduleData);
+    
+                if (timetableId) {
+                    try {
+                        console.log("Updating schedule for timetable ID:", timetableId);
+                        await ScheduleService.updateScheduleByClassId(selectedClass, timetableId, scheduleData);
+                        toast.success(`Updated schedule for week ${currentWeek}`);
+                        console.log(selectedClass, timetableId, scheduleData)
+                    } catch (updateError) {
+                        console.error("Error updating schedule for week", currentWeek, ":", updateError);
+                        toast.error(`Error updating schedule for week ${currentWeek}`);
+                    }
+                } else {
+                    try {
+                        console.log("Creating new schedule for week:", currentWeek);
+                        const response = await ScheduleService.createScheduleByClassId(selectedClass, scheduleData);
+    
+                        if (response?.data?.newTimeTable) {
+                            timetableId = response.data.newTimeTable._id;
+                            console.log("Created new timetable ID:", timetableId);
+    
+                            setClassDetail((prev) => ({
+                                ...prev,
+                                timeTable: [...(prev?.timeTable || []), response.data.newTimeTable],
+                            }));
+                        }
+                        toast.success(`Created schedule for week ${currentWeek}`);
+                    } catch (createError) {
+                        console.error("Error creating schedule for week", currentWeek, ":", createError);
+                        toast.error(`Error creating schedule for week ${currentWeek}`);
+                    }
+                }
             }
+    
             setError("");
-            toast.success("Schedule saved successfully for all weeks!");
+            toast.success("Schedule processed successfully for all weeks!");
         } catch (error) {
-            console.error("Error saving schedule:", error);
-            setError("An error occurred while saving the schedule.");
+            console.error("Error saving/updating schedule:", error);
+            setError("An error occurred while processing the schedule.");
+            toast.error("An error occurred while processing the schedule.");
         }
     };
+    
+    
+    
+    
+    
+    
 
     console.log(classDetail?.timeTable)
 

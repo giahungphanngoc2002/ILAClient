@@ -50,12 +50,14 @@ const ExamScheduler = () => {
         const fetchExamSchedules = async () => {
             try {
                 const examSchedules = await ExamScheduleService.getAllExamSchedules();
-                        console.log(examSchedules)
+                console.log(examSchedules);
+    
                 // Chuyển đổi dữ liệu từ API sang định dạng của react-big-calendar
                 const mappedEvents = examSchedules?.data?.map((schedule) => ({
+                    id: schedule._id, // Đảm bảo id chứa giá trị schedule._id
                     title: `${schedule.blockId.nameBlock} - ${schedule.subjectId.nameSubject}`,
-                start: new Date(`${schedule.day}T${schedule.timeStart}`),
-                end: new Date(`${schedule.day}T${schedule.timeEnd}`),
+                    start: new Date(`${schedule.day}T${schedule.timeStart}`),
+                    end: new Date(`${schedule.day}T${schedule.timeEnd}`),
                 }));
     
                 setEvents(mappedEvents);
@@ -67,6 +69,7 @@ const ExamScheduler = () => {
     
         fetchExamSchedules();
     }, []);
+    console.log("123123",events)
    
     
     const addExam = async () => {
@@ -119,6 +122,28 @@ const ExamScheduler = () => {
     };
     console.log("Events list:", events);
 
+    const deleteExam = async (event) => {
+        console.log("Selected event to delete:", event); // Hiển thị toàn bộ sự kiện
+        console.log("Event ID:", event.id); // Kiểm tra giá trị ID của sự kiện
+    
+        const confirmDelete = window.confirm(`Bạn có chắc chắn muốn xóa lịch thi: "${event.title}"?`);
+        if (!confirmDelete) return;
+    
+        try {
+            console.log("Sending delete request for ID:", event.id); // Gửi yêu cầu xóa với ID
+            await ExamScheduleService.deleteExamSchedule(event.id);
+    
+            console.log("Filtering events to remove ID:", event.id); // Loại bỏ sự kiện trên UI
+            setEvents(events.filter((e) => e.id !== event.id));
+    
+            toast.success("Lịch thi đã được xóa thành công!");
+        } catch (error) {
+            console.error("Error deleting exam schedule:", error); // Hiển thị lỗi nếu có
+            toast.error("Có lỗi xảy ra khi xóa lịch thi.");
+        }
+    };
+    
+    
 
     return (
         <div className=" bg-gray-100 flex flex-col lg:flex-row overflow-hidden px-4">
@@ -199,6 +224,7 @@ const ExamScheduler = () => {
                     style={{ height: '100%' }}
                     views={['month', 'week', 'day']}
                     defaultView="month"
+                    onSelectEvent={deleteExam} // Xử lý khi nhấp vào sự kiện
                 />
             </div>
         </div>
