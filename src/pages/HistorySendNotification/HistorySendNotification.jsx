@@ -17,15 +17,16 @@ function HistorySendNotification() {
         // Hàm gọi API và cập nhật state
         const fetchNotifications = async () => {
             try {
-                const data = await NotificationService.getAllNotifications();
-                setEmails(data.data); // Giả sử API trả về dữ liệu trong `data`
+                const data = await NotificationService.getAllNotificationsBySenderId(user?.id);
+                setEmails(data.notifications); // Giả sử API trả về dữ liệu trong `data`
             } catch (error) {
                 console.error("Failed to fetch notifications:", error);
             }
         };
 
         fetchNotifications();
-    }, []);
+    }, [user?.id]);
+    console.log(emails)
 
     useEffect(() => {
 
@@ -43,12 +44,12 @@ function HistorySendNotification() {
         fetchNotificationDetail();
     }, [selectedEmailId]);
 
-    const filteredEmails = emails.filter((email) =>
-        email.title.toLowerCase().includes(searchTerm.toLowerCase())
+    const filteredEmails = emails?.filter((email) =>
+        email?.title.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     // Group emails by date in the format 'yyyy-mm-dd' and sort dates in descending order
-    const groupedEmails = filteredEmails.reduce((acc, email) => {
+    const groupedEmails = filteredEmails?.reduce((acc, email) => {
         const day = new Date(email.createdAt).toISOString().split('T')[0];
         if (!acc[day]) acc[day] = [];
         acc[day].push(email);

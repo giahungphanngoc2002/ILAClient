@@ -30,3 +30,8 @@ export const getDetailNotificationById = async (id) => {
     const res = await axios.get(`${NOTIFICATION_API_URL}/detailsNotification/${id}`);
     return res.data;
 };
+
+export const getAllNotificationsBySenderId = async (senderId) => {
+    const res = await axios.get(`${NOTIFICATION_API_URL}/notificationsSender/${senderId}`);
+    return res.data;
+};
