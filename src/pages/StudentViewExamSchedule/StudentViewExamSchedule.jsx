@@ -35,6 +35,8 @@ const StudentViewExamSchedule = () => {
       );
     });
 
+    console.log(foundClass)
+
     if (!foundClass) {
       console.warn("No class found for user:", userId);
     }

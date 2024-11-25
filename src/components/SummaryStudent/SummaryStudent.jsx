@@ -21,7 +21,8 @@ const SummaryStudent = ({ studentId, selectedSemester }) => {
                 const data = await ClassService.getConductByStudentIdAndSemester(studentId, 1);
                 setConduct1(data);
             } catch (err) {
-                setError('Không thể tải dữ liệu hạnh kiểm');
+                // setError('Không thể tải dữ liệu hạnh kiểm');
+
             } finally {
                 setLoading(false);
             }
@@ -40,7 +41,7 @@ const SummaryStudent = ({ studentId, selectedSemester }) => {
                 const data = await ClassService.getConductByStudentIdAndSemester(studentId, 2);
                 setConduct2(data);
             } catch (err) {
-                setError('Không thể tải dữ liệu hạnh kiểm');
+                // setError('Không thể tải dữ liệu hạnh kiểm');
             } finally {
                 setLoading(false);
             }

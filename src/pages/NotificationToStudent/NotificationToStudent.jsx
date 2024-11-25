@@ -23,6 +23,7 @@ const NotificationToStudent = () => {
     const user = useSelector((state) => state.user);
     const [senderId, setSenderId] = useState(user?.id);
 
+
     useEffect(() => {
         setSenderId(user?.id);
     }, [user]);
@@ -44,8 +45,26 @@ const NotificationToStudent = () => {
         fetchClasses();
     }, []);
 
+    console.log(classData)
+
+    const teachingClasses = classData.filter((classItem) => {
+        const subjectsChuyendeMatch = classItem.subjectGroup?.SubjectsChuyendeId?.some(
+            (subject) => subject.teacherId === user.id
+        );
+
+        const subjectsMatch = classItem.subjectGroup?.SubjectsId?.some(
+            (subject) => subject.teacherId === user.id
+        );
+
+        // Kiểm tra nếu giáo viên dạy trong bất kỳ phần nào
+        return subjectsChuyendeMatch || subjectsMatch;
+    });
+
+    // Xuất danh sách các lớp
+    console.log(teachingClasses);
+
     // Filter for recipientsTab1 (students)
-    const recipientsTab1 = classData.flatMap((classItem) =>
+    const recipientsTab1 = teachingClasses.flatMap((classItem) =>
         classItem?.studentID.map(student => ({
             id: student?._id,
             name: student?.username, // Derive "name" from email if needed
@@ -55,7 +74,7 @@ const NotificationToStudent = () => {
     );
 
     // Filter for recipientsTab2 (teachers)
-    const recipientsTab2 = classData.map((classItem) => ({
+    const recipientsTab2 = teachingClasses.map((classItem) => ({
         id: classItem?.teacherHR?._id,
         name: classItem?.teacherHR?.username, // Derive "name" from email if needed
         phone: classItem?.teacherHR?.phone || 'N/A', // Default phone if not available
@@ -63,7 +82,7 @@ const NotificationToStudent = () => {
     }));
 
     // Extract classes
-    const classes = classData.map((classItem) => classItem.nameClass);
+    const classes = teachingClasses.map((classItem) => classItem.nameClass);
 
     const handleRecipientToggle = (id) => {
         setSelectedRecipients((prev) =>

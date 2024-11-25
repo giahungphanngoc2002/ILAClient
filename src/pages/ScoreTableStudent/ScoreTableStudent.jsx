@@ -140,7 +140,15 @@ const ScoreTableStudent = () => {
             }));
         } catch (err) {
             console.error("Error fetching scores:", err.message || err);
-            setError('Không thể tải dữ liệu điểm. Vui lòng thử lại!');
+            setGrades(prev => ({
+                ...prev,
+                [semester]: classSubject?.map(subject => ({
+                    subject: subject.nameSubject,
+                    regular: [],
+                    midterm: [],
+                    final: [],
+                })) || [],
+            }));
         } finally {
             setLoading(false);
         }

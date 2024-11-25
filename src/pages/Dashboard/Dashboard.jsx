@@ -239,7 +239,7 @@ const Dashboard = () => {
                         <p className="text-lg">Trang liên lạc và truyền thông nhà trường</p>
                     </div>
                     <div className="mt-4 md:mt-0 flex justify-center md:justify-end">
-                        <img src="images/student.png" alt="Students" className="w-48 h-48" />
+                        <img src="/images/dashboard.png" alt="student" className="w-48 h-48" />
                     </div>
                 </div>
 
