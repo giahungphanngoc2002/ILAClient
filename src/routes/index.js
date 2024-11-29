@@ -26,6 +26,7 @@ import Report from "../pages/Report/Report";
 import FormReport from "../pages/FormReport/FormReport";
 import InfoSlot from "../pages/InfoSlot/InfoSlot";
 import NotificationToStudent from "../pages/NotificationToStudent/NotificationToStudent";
+import NotificationToSchool from "../pages/NotificationToSchool/NotificationToSchool";
 import HistorySendNotification from "../pages/HistorySendNotification/HistorySendNotification";
 import ExamSchedule from "../pages/ExamSchedule/ExamSchedule";
 import Message from "../pages/Message/Message";
@@ -335,7 +336,7 @@ export const routes = [
     path: "/manage/notificationToSchool",
     page: () => (
       <ProtectedRoute>
-        <NotificationToStudent />
+        <NotificationToSchool/>
       </ProtectedRoute>
     ),
     isShowHeader: false,

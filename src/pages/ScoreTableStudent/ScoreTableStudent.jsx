@@ -16,6 +16,8 @@ const ScoreTableStudent = () => {
     const [studentId, setStudentId] = useState(user?.id);
     const [classes, setClasses] = useState([]);
     const [classSubject, setClassSubject] = useState(null);
+    const [selectedYear, setSelectedYear] = useState("2024-2025"); // Năm học
+    const [years, setYears] = useState([]); // Khởi tạo years là mảng rỗng thay 
 
     useEffect(() => {
         setStudentId(user?.id);
@@ -46,6 +48,31 @@ const ScoreTableStudent = () => {
         return foundClass;
     };
 
+    const getSchoolYears = (yearRange, block) => {
+        const [startYear, endYear] = yearRange.split('-').map(Number);
+    
+        let result = [];
+    
+        // Đảm bảo "2024-2025" luôn có trong danh sách
+        if (startYear === 2024 && endYear === 2025) {
+            result.push("2024-2025");
+        }
+    
+        // Kiểm tra và tính toán năm học cho lớp 10, 11, 12
+        if (block === 10) {
+            result.push(`${startYear + 1}-${endYear + 1}`);
+            result.push(`${startYear + 2}-${endYear + 2}`);
+        } else if (block === 11) {
+            result.push(`${startYear - 1}-${endYear - 1}`);
+            result.push(`${startYear + 1}-${endYear + 1}`);
+        } else if (block === 12) {
+            result.push(`${startYear - 1}-${endYear - 1}`);
+            result.push(`${startYear + 2}-${endYear + 2}`);
+        }
+    
+        return result;
+    }
+
     // Hàm chính để fetch classes và tìm class
     useEffect(() => {
         const fetchClasses = async () => {
@@ -54,6 +81,26 @@ const ScoreTableStudent = () => {
                 console.log('All Classes:', allClasses);
 
                 setClasses(allClasses?.data || []);
+
+                const calculatedSchoolYears = allClasses?.data.map(classItem => {
+                    console.log('Processing classItem:', classItem);
+                    console.log('classItem.year:', classItem?.year);  // Kiểm tra year
+                    console.log('classItem.blockID.nameBlock:', classItem?.blockID?.nameBlock);  // Kiểm tra block
+                    
+                    const block = parseInt(classItem?.blockID?.nameBlock, 10);  // Chuyển thành số nguyên
+                    const years = getSchoolYears(classItem?.year, block);
+                    console.log('Returned years:', years);  // Kiểm tra giá trị trả về từ getSchoolYears
+                    
+                    return years.length > 0 ? years : null;  // Trả về null nếu mảng trống
+                }).filter(year => year !== null).flat();
+                    
+                console.log('Calculated School Years:', calculatedSchoolYears); 
+                setYears([...new Set(calculatedSchoolYears)]); // Kiểm tra kết quả cuối cùng
+    
+                // Set giá trị mặc định cho selectedYear nếu có "2024-2025"
+                if (calculatedSchoolYears.includes("2024-2025") && !selectedYear) {
+                    setSelectedYear("2024-2025");
+                }
 
                 const userClass = findUserClass(allClasses?.data || [], user.id);
                 if (userClass && userClass.subjectGroup?.SubjectsId) {
@@ -68,27 +115,27 @@ const ScoreTableStudent = () => {
 
         fetchClasses();
     }, [user.id]);
+    console.log(classSubject)
 
     // Hàm gọi API và định dạng lại dữ liệu
-    const fetchScores = async (semester) => {
+    const fetchScores = async (semester, year) => {
         if (!classSubject || !Array.isArray(classSubject)) {
             console.error("classSubject chưa được khởi tạo hoặc không hợp lệ:", classSubject);
             setError('Dữ liệu môn học chưa sẵn sàng. Vui lòng thử lại!');
             return;
         }
-
+    
         setLoading(true);
         setError(null);
-
+    
         try {
             // Lấy dữ liệu điểm từ API
-            const rawData = await ScoreSbujectService.getAllScoreByStudentIdAndSemester(studentId, semester);
+            const rawData = await ScoreSbujectService.getAllScoreByStudentIdSemesterAndClass(studentId, semester, year);
             console.log("Raw Data:", rawData);
-
+    
             // Kiểm tra nếu rawData không có dữ liệu
-            if (!rawData || rawData.length === 0) {
+            if (!rawData || rawData.data.length === 0) {
                 console.warn(`Không có dữ liệu điểm trả về cho kỳ ${semester}`);
-                // Thiết lập dữ liệu điểm rỗng cho tất cả các môn học
                 setGrades(prev => ({
                     ...prev,
                     [semester]: classSubject.map(subject => ({
@@ -100,22 +147,18 @@ const ScoreTableStudent = () => {
                 }));
                 return;
             }
-
+    
             // Gộp dữ liệu từ classSubject và rawData
             const formattedData = classSubject.map(subject => {
-                const subjectData = rawData.find(item => item.subjectId.nameSubject === subject.nameSubject);
-
+                // Tìm điểm của môn học này từ rawData
+                const subjectData = rawData.data.find(item => item.subjectId.nameSubject === subject.nameSubject);
+    
                 if (subjectData) {
-                    const regularScores = subjectData.scores
-                        .filter(score => score.type === "thuongXuyen")
-                        .map(score => score.score);
-                    const midtermScores = subjectData.scores
-                        .filter(score => score.type === "giuaKi")
-                        .map(score => score.score);
-                    const finalScores = subjectData.scores
-                        .filter(score => score.type === "cuoiKi")
-                        .map(score => score.score);
-
+                    // Lọc điểm theo loại (thuongXuyen, giuaKi, cuoiKi)
+                    const regularScores = subjectData.scores.filter(score => score.type === "thuongXuyen").map(score => score.score);
+                    const midtermScores = subjectData.scores.filter(score => score.type === "giuaKi").map(score => score.score);
+                    const finalScores = subjectData.scores.filter(score => score.type === "cuoiKi").map(score => score.score);
+    
                     return {
                         subject: subject.nameSubject,
                         regular: regularScores,
@@ -123,7 +166,6 @@ const ScoreTableStudent = () => {
                         final: finalScores,
                     };
                 } else {
-                    // Nếu không tìm thấy dữ liệu cho môn học này
                     return {
                         subject: subject.nameSubject,
                         regular: [],
@@ -132,8 +174,9 @@ const ScoreTableStudent = () => {
                     };
                 }
             });
-
-            // Cập nhật dữ liệu điểm vào state
+    
+            console.log("Formatted Data:", formattedData);
+    
             setGrades(prev => ({
                 ...prev,
                 [semester]: formattedData,
@@ -142,34 +185,67 @@ const ScoreTableStudent = () => {
             console.error("Error fetching scores:", err.message || err);
             setGrades(prev => ({
                 ...prev,
-                [semester]: classSubject?.map(subject => ({
+                [semester]: classSubject.map(subject => ({
                     subject: subject.nameSubject,
                     regular: [],
                     midterm: [],
                     final: [],
-                })) || [],
+                })),
             }));
         } finally {
             setLoading(false);
         }
     };
-
+    
 
     useEffect(() => {
-        if (classSubject && Array.isArray(classSubject) && !grades[selectedSemester]) {
-            fetchScores(selectedSemester);
+        if (classSubject && Array.isArray(classSubject) && selectedYear && selectedSemester) {
+            fetchScores(selectedSemester, selectedYear); // Gọi API với semester và year
         }
-    }, [selectedSemester, studentId, classSubject]);
+    }, [selectedSemester, selectedYear, studentId, classSubject]);
 
     const handleSemesterChange = (semester) => {
         setSelectedSemester(semester);
     };
 
+    // const calculateAverage = (regularScores, midtermScores, finalScores) => {
+    //     // Kiểm tra nếu mảng rỗng hoặc không hợp lệ
+    //     if (!Array.isArray(regularScores) || !Array.isArray(midtermScores) || !Array.isArray(finalScores)) {
+    //         console.error("Một trong các mảng không hợp lệ!");
+    //         return "N/A";
+    //     }
+    
+    //     // Lọc ra những điểm hợp lệ (không phải null hoặc undefined)
+    //     const totalScores = [
+    //         ...regularScores.filter(score => score != null).map(score => score * 1),  // Điểm Thường Xuyên hệ số 1
+    //         ...midtermScores.filter(score => score != null).map(score => score * 2),  // Điểm Giữa Kỳ hệ số 2
+    //         ...finalScores.filter(score => score != null).map(score => score * 3),    // Điểm Cuối Kỳ hệ số 3
+    //     ];
+    
+    //     // Tính tổng điểm có hệ số
+    //     const sumScores = totalScores.reduce((acc, score) => acc + score, 0);
+    
+    //     // Tổng hệ số là 1 + 2 + 3 = 6
+    //     const totalWeights = regularScores.length + midtermScores.length * 2 + finalScores.length * 3;
+    
+    //     // Tránh chia cho 0 nếu không có điểm hợp lệ
+    //     if (totalWeights === 0) {
+    //         return "N/A";
+    //     }
+    
+    //     // Chia cho tổng hệ số (6)
+    //     const average = sumScores / totalWeights;  // Chia cho tổng hệ số đúng
+    //     return average > 0 ? average.toFixed(2) : "N/A";
+    // };
+    
+    
+    
     const calculateAverage = (scores) => {
         return scores.length > 0
             ? (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(2)
             : "N/A";
     };
+    
 
     const onBack = () => {
         window.history.back();
@@ -206,6 +282,25 @@ const ScoreTableStudent = () => {
                 >
                     Kỳ 2
                 </button>
+            </div>
+
+            <div className="mb-6">
+                <select
+                    value={selectedYear}
+                    onChange={(e) => setSelectedYear(e.target.value)}  // Cập nhật state khi người dùng chọn năm học
+                    className="px-4 py-2 rounded-lg border border-gray-300"
+                >
+                    <option value="">Chọn Năm Học</option>
+                    {years.length > 0 ? (
+                        years.map((year, idx) => (
+                            <option key={idx} value={year}>
+                                {year}
+                            </option>
+                        ))
+                    ) : (
+                        <option value="">Không có năm học nào</option>
+                    )}
+                </select>
             </div>
 
             <div className="w-4/5 rounded-xl overflow-hidden p-6">

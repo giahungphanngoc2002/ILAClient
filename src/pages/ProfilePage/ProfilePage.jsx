@@ -69,7 +69,6 @@ const ProfilePage = () => {
     console.log("InfoContact:", infoContact); // Theo dõi sự thay đổi của infoContact
   }, [infoContact]);
 
-
   const mutation = useMutationHooks((data) => {
     const { id, access_token, ...rests } = data;
     return UserService.updateUser(id, rests, access_token);
@@ -93,7 +92,6 @@ const ProfilePage = () => {
 
   useEffect(() => {
     if (isSuccess && data?.status !== "ERROR") {
-      toast.success("User information updated successfully!");
       handleGetDetailsUser(user?.id, user?.access_token);
       setIsLoading(false);
     } else if (isError || data?.status === "ERROR") {
@@ -124,7 +122,6 @@ const ProfilePage = () => {
   useEffect(() => {
     if (isSuccess) {
       if (data?.status === "OK") {
-        toast.success("User information updated successfully!");
         handleGetDetailsUser(user?.id, user?.access_token);
         setIsLoading(false);
       } else if (data?.status === "ERR") {
@@ -140,7 +137,6 @@ const ProfilePage = () => {
   }, [isSuccess, isError, data]);
 
 
-
   useEffect(() => {
     if (user) {
       setUsername(user.username || "");
@@ -154,7 +150,6 @@ const ProfilePage = () => {
       setOldPassword(user.password || "");
     }
   }, [user]);
-
 
   const handleOnchangeAvatar = async (e) => {
     const file = e.target.files[0];
@@ -196,7 +191,7 @@ const ProfilePage = () => {
       ...updateData,
       access_token: user?.access_token,
     });
-
+    toast.success(" updated successfully!");
     // Xử lý lỗi sau khi mutation thất bại
     if (isError && data?.status === "ERR") {
       toast.error(data?.message || "Update failed");
@@ -247,7 +242,6 @@ const ProfilePage = () => {
       setIsLoadingInfoContact(false); // Tắt trạng thái loading
     }
   };
-
 
 
 
@@ -313,13 +307,11 @@ const ProfilePage = () => {
           <div className="flex flex-col items-center">
             <div className="relative">
 
-
               <img
                 src={user.avatar === "" ? "/images/sbcf-default-avatar.webp" : user.avatar}
                 alt="avatar"
                 className="w-32 h-32 rounded-full object-cover mb-4"
               />
-
 
               <input
                 type="file"

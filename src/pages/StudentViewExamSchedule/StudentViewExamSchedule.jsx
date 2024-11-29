@@ -35,8 +35,6 @@ const StudentViewExamSchedule = () => {
       );
     });
 
-    console.log(foundClass)
-
     if (!foundClass) {
       console.warn("No class found for user:", userId);
     }
@@ -100,42 +98,41 @@ const StudentViewExamSchedule = () => {
 
     fetchExamSchedules();
   }, [blockClassUser?._id]);
+  console.log(examSchedule)
 
   // Kết hợp `classSubject` và `examSchedule`
   useEffect(() => {
     if (!classSubject.length) return;
-
-    const combinedSchedule = classSubject.map((subject) => {
-      const exam = examSchedule.find(
-        (examItem) => examItem.subjectId?._id === subject._id
-      );
-
-      if (exam) {
-        return {
-          subject: subject.nameSubject || "N/A",
-          date: exam.day || "Chưa rõ",
-          startTime: exam.timeStart || "Chưa rõ",
-          endTime: exam.timeEnd || "Chưa rõ",
-          duration: calculateDuration(exam.timeStart, exam.timeEnd),
-        };
-      }
-
-      return {
-        subject: subject.nameSubject || "N/A",
-        date: "Chưa rõ",
-        startTime: "Chưa rõ",
-        endTime: "Chưa rõ",
-        duration: "Không rõ",
-      };
-    });
-
+  
+    const combinedSchedule = classSubject
+      .map((subject) => {
+        const exam = examSchedule.find(
+          (examItem) => examItem.subjectId?._id === subject._id
+        );
+  
+        // Chỉ thêm vào lịch thi nếu có dữ liệu về thời gian thi
+        if (exam && exam.day && exam.timeStart && exam.timeEnd) {
+          return {
+            subject: subject.nameSubject || "N/A",
+            date: exam.day || "Chưa rõ",
+            startTime: exam.timeStart || "Chưa rõ",
+            endTime: exam.timeEnd || "Chưa rõ",
+            duration: calculateDuration(exam.timeStart, exam.timeEnd),
+          };
+        }
+  
+        // Không trả về gì nếu không có lịch thi hợp lệ
+        return null;
+      })
+      .filter(Boolean);  // Loại bỏ các giá trị null (những môn không có lịch thi)
+  
     // Filter theo `searchTerm`
     const searched = combinedSchedule.filter(
       (exam) =>
         exam.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
         exam.date.includes(searchTerm)
     );
-
+  
     setFilteredSchedule(searched);
   }, [classSubject, examSchedule, searchTerm]);
 

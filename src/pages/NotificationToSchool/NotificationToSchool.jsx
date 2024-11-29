@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import Breadcrumb from '../../components/Breadcrumb/Breadcrumb';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
@@ -6,6 +6,9 @@ import { useNavigate } from 'react-router-dom';
 import * as ClassService from "../../services/ClassService";
 import * as NotificationService from "../../services/NotificationService";
 import { useSelector } from 'react-redux';
+import { toast } from "react-toastify";
+
+
 
 const NotificationToSchool = () => {
     const [title, setTitle] = useState('');
@@ -27,7 +30,6 @@ const NotificationToSchool = () => {
         setSenderId(user?.id);
     }, [user]);
 
-    console.log(senderId)
     useEffect(() => {
         const fetchClasses = async () => {
             try {
@@ -44,33 +46,47 @@ const NotificationToSchool = () => {
         fetchClasses();
     }, []);
 
-    // Filter for recipientsTab1 (students)
+    console.log("classData",classData)
+
+    // Prepare recipients data based on classData
     const recipientsTab1 = classData.flatMap((classItem) =>
         classItem?.studentID.map(student => ({
             id: student?._id,
-            name: student?.username, // Derive "name" from email if needed
-            phone: student?.phone || 'N/A', // Default phone if not available
+            name: student?.username,
+            phone: student?.phone || 'N/A',
             class: classItem?.nameClass
         }))
     );
 
-    // Filter for recipientsTab2 (teachers)
     const recipientsTab2 = classData.map((classItem) => ({
         id: classItem?.teacherHR?._id,
-        name: classItem?.teacherHR?.username, // Derive "name" from email if needed
-        phone: classItem?.teacherHR?.phone || 'N/A', // Default phone if not available
+        name: classItem?.teacherHR?.username,
+        phone: classItem?.teacherHR?.phone || 'N/A',
         class: classItem?.nameClass
     }));
 
-    // Extract classes
     const classes = classData.map((classItem) => classItem.nameClass);
 
+    // Filter function (to be used in both tabs)
+    const filterRecipients = useCallback((recipients) => {
+        return recipients.filter((recipient) => {
+            const matchesName = recipient?.name?.toLowerCase().includes(nameFilter?.toLowerCase());
+            const matchesClass = classFilter === '' || recipient.class === classFilter;
+            return matchesName && matchesClass;
+        });
+    }, [nameFilter, classFilter]);
+
+    const filteredRecipientsTab1 = filterRecipients(recipientsTab1);
+    const filteredRecipientsTab2 = filterRecipients(recipientsTab2);
+
+    // Toggle recipient selection
     const handleRecipientToggle = (id) => {
         setSelectedRecipients((prev) =>
             prev.includes(id) ? prev.filter((r) => r !== id) : [...prev, id]
         );
     };
 
+    // Handle file change
     const handleFileChange = (e) => {
         setFile(e.target.files[0]);
     };
@@ -79,73 +95,58 @@ const NotificationToSchool = () => {
         const notificationData = {
             title,
             content: content.replace(/^<p>|<\/p>$/g, ''),
-            senderId, // Set senderId from the user data
-            receiverId: selectedRecipients, // Assuming selectedRecipients is an array of recipient IDs
+            senderId,
+            receiverId: selectedRecipients,
         };
-        console.log(senderId)
-        console.log(selectedRecipients)
 
         try {
             const response = await NotificationService.createNotification(notificationData);
             console.log('Notification created successfully:', response);
-
-            // Navigate to history or show success message
+            toast.success('Notification created successfully');
             navigate('/manage/historySendNotification');
         } catch (error) {
+            toast.error('Error creating notification'); // Thêm dòng này để thông báo lỗi
             console.error("Error creating notification:", error);
-            // Optionally, display an error message to the user
         }
     };
 
-    // Filter recipients based on name and class filters for each tab
-    const filteredRecipients =
-        selectedTab === 'tab1'
-            ? recipientsTab1.filter((recipient) => {
-                const matchesName = recipient?.name?.toLowerCase().includes(nameFilter?.toLowerCase());
-                const matchesClass = classFilter === '' || recipient.class === classFilter;
-                return matchesName && matchesClass;
-            })
-            : recipientsTab2.filter((recipient) => {
-                const matchesName = recipient?.name?.toLowerCase().includes(nameFilter?.toLowerCase());
-                const matchesClass = classFilter === '' || recipient?.class === classFilter;
-                return matchesName && matchesClass;
-            });
-
-    // Update handleSelectAllToggle to only select filtered students
+    // Handle "Select All" for the current tab (recalculate the selection for each tab)
     const handleSelectAllToggle = () => {
         if (selectAll) {
-            setSelectedRecipients([]);
+            setSelectedRecipients([]); // Clear all selections
         } else {
-            const selectedIds = filteredRecipients.map((recipient) => recipient.id);
-            setSelectedRecipients(selectedIds);
+            const selectedIds = (selectedTab === 'tab1' ? filteredRecipientsTab1 : filteredRecipientsTab2).map((recipient) => recipient.id);
+            setSelectedRecipients(selectedIds); // Select all filtered recipients
         }
-        setSelectAll(!selectAll);
+        setSelectAll(!selectAll); // Toggle "Select All" state
     };
 
     // Count selected recipients for each tab
-    const selectedRecipientsTab1 = selectedRecipients.filter((id) =>
-        recipientsTab1.some((recipient) => recipient.id === id)
-    ).length;
-    const selectedRecipientsTab2 = selectedRecipients.filter((id) =>
-        recipientsTab2.some((recipient) => recipient.id === id)
+    const selectedRecipientsTab1Count = selectedRecipients.filter((id) =>
+        filteredRecipientsTab1.some((recipient) => recipient.id === id)
     ).length;
 
+    const selectedRecipientsTab2Count = selectedRecipients.filter((id) =>
+        filteredRecipientsTab2.some((recipient) => recipient.id === id)
+    ).length;
+
+    // Update filter or tab change
+    useEffect(() => {
+        setSelectAll(false); // Reset "Select All" when filters change
+    }, [nameFilter, classFilter, selectedTab]);
 
     const onBack = () => {
-        navigate('/manage/historySendNotification')
-    }
-
-    console.log(content)
+        navigate('/manage/historySendNotification');
+    };
 
     return (
         <div>
-            <Breadcrumb title="Gửi thông báo đa phương tiện"
+            <Breadcrumb
+                title="Gửi thông báo đa phương tiện"
                 buttonText="Gửi thông báo"
                 onButtonClick={handleSubmit}
                 onBack={onBack}
             />
-
-            <div style={{ height: '60px' }}></div>
 
             <div className="px-8 bg-gray-100 mt-8 pb-14">
                 <div className="flex gap-4 h-[calc(100vh-150px)]">
@@ -199,18 +200,20 @@ const NotificationToSchool = () => {
                                 </select>
                             </div>
                         </div>
+
+                        {/* Tabs */}
                         <div className="flex mb-4 border-b">
                             <button
                                 className={`px-4 py-2 font-semibold ${selectedTab === 'tab1' ? 'border-b-2 border-blue-500 text-blue-500' : 'text-gray-500'}`}
                                 onClick={() => setSelectedTab('tab1')}
                             >
-                                Học sinh - Số người nhận: {selectedRecipientsTab1 || 0}
+                                Học sinh - Số người nhận: {selectedRecipientsTab1Count || 0}
                             </button>
                             <button
                                 className={`px-4 py-2 font-semibold ${selectedTab === 'tab2' ? 'border-b-2 border-blue-500 text-blue-500' : 'text-gray-500'}`}
                                 onClick={() => setSelectedTab('tab2')}
                             >
-                                Giáo viên chủ nhiệm - Số người nhận: {selectedRecipientsTab2 || 0}
+                                Giáo viên chủ nhiệm - Số người nhận: {selectedRecipientsTab2Count || 0}
                             </button>
                         </div>
 
@@ -232,7 +235,7 @@ const NotificationToSchool = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {filteredRecipients.map((recipient, index) => (
+                                {(selectedTab === 'tab1' ? filteredRecipientsTab1 : filteredRecipientsTab2).map((recipient, index) => (
                                     <tr key={recipient.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-100'}>
                                         <td className="py-2 px-4 border">{index + 1}</td>
                                         <td className="py-2 px-4 border">{recipient.name}</td>
