@@ -3,6 +3,8 @@ import * as BlockService from "../../services/BlockService";
 import * as ClassService from "../../services/ClassService";
 import * as ScheduleService from "../../services/ScheduleService";
 import { toast } from "react-toastify";
+import Breadcrumb from "../../components/Breadcrumb/Breadcrumb";
+import { useNavigate } from "react-router-dom";
 
 const timeSlots = [
     { slot: "Tiết 1" },
@@ -27,17 +29,21 @@ const ManageSchedule = () => {
     const [blocks, setBlocks] = useState([]);
     const [classDetail, setClassDetail] = useState(null);
     const [startWeek, setStartWeek] = useState(null);
-    const [endWeek, setEndWeek] = useState(null);
     const [startYearWeek, setStartYearWeek] = useState({ year: "", week: "" });
-    const [endYearWeek, setEndYearWeek] = useState({ year: "", week: "" });
+    const [isLoading, setIsLoading] = useState(false);
+    const navigate = useNavigate();
+
 
     useEffect(() => {
         const fetchBlocks = async () => {
+            setIsLoading(true); // Bắt đầu loading
             try {
                 const blocksData = await BlockService.getAllBlocks();
                 setBlocks(blocksData);
             } catch (error) {
                 console.error("Error fetching blocks:", error);
+            } finally {
+                setIsLoading(false); // Kết thúc loading
             }
         };
         fetchBlocks();
@@ -46,11 +52,14 @@ const ManageSchedule = () => {
     useEffect(() => {
         const fetchClassDetail = async () => {
             if (!selectedClass) return;
+            setIsLoading(true);
             try {
                 const classData = await ClassService.getDetailClass(selectedClass);
                 setClassDetail(classData?.data);
             } catch (error) {
                 console.error("Error fetching class details:", error);
+            } finally {
+                setIsLoading(false); // Kết thúc loading
             }
         };
         fetchClassDetail();
@@ -67,12 +76,6 @@ const ManageSchedule = () => {
         setStartYearWeek(getYearAndWeekFromValue(startWeekValue));
     };
 
-    const handleEndWeekChange = (e) => {
-        const endWeekValue = e.target.value;
-        setEndWeek(endWeekValue);
-        setEndYearWeek(getYearAndWeekFromValue(endWeekValue));
-    };
-
     const handleWeekChange = (direction) => {
         const currentWeek = getYearAndWeekFromValue(startWeek);
         const newWeekNumber = parseInt(currentWeek.week) + direction;
@@ -85,8 +88,6 @@ const ManageSchedule = () => {
 
     const handleSelectSlot = (classId, day, slot, subjectData) => {
         const { subjectId, subjectChuyendeId } = JSON.parse(subjectData);
-
-        // Cập nhật trạng thái trong state
         setSchedule((prev) => ({
             ...prev,
             [classId]: {
@@ -102,150 +103,113 @@ const ManageSchedule = () => {
         }));
     };
 
-
-    const isEndWeekGreaterThanStartWeek = (startYearWeek, endYearWeek) => {
-        const startYear = parseInt(startYearWeek.year, 10);
-        const endYear = parseInt(endYearWeek.year, 10);
-        const startWeek = parseInt(startYearWeek.week, 10);
-        const endWeek = parseInt(endYearWeek.week, 10);
-        return endYear > startYear || (endYear === startYear && endWeek >= startWeek);
-    };
-
     const handleSaveSchedule = async () => {
-        if (!selectedClass) {
-            setError("Please select a class before saving the schedule.");
-            toast.error("Please select a class before saving the schedule.");
-            return;
-        }
-        if (!isEndWeekGreaterThanStartWeek(startYearWeek, endYearWeek)) {
-            toast.error("Tuần kết thúc nhỏ hơn tuần bắt đầu!!");
-            return;
-        }
+        setIsLoading(true);
         try {
             const startWeekNumber = parseInt(startYearWeek.week, 10);
-            const endWeekNumber = parseInt(endYearWeek.week, 10);
-    
-            for (let currentWeek = startWeekNumber; currentWeek <= endWeekNumber; currentWeek++) {
-                console.log("Processing week:", currentWeek);
-    
-                let timetableId =
-                    classDetail?.timeTable?.find((schedule) => schedule.week === `${currentWeek}`)?._id || null;
-    
-                console.log("Timetable ID for week", currentWeek, ":", timetableId);
-    
-                // Chuẩn bị dữ liệu `scheduleData`
-                const scheduleData = {
-                    yearNumber: startYearWeek.year,
-                    weekNumber: currentWeek,
-                    days: daysOfWeek
-                        .map((day) => {
-                            const newSlots = timeSlots
-                                .filter((slot) => schedule[selectedClass]?.[day]?.[slot.slot])
-                                .map((slot) => {
-                                    const slotData = schedule[selectedClass]?.[day]?.[slot.slot];
-                                    return {
-                                        slotNumber: parseInt(slot.slot.replace("Tiết ", "")),
-                                        subjectId: slotData?.subjectId || null,
-                                        classId: selectedClass,
-                                        attendanceStatus: {
-                                            createdAt: new Date().toISOString(),
-                                            status: false,
-                                        },
-                                        absentStudentId: [],
-                                    };
-                                });
-    
-                            if (newSlots.length > 0) {
-                                // Hợp nhất slots mới và slots cũ, ghi đè dựa trên `slotNumber`
-                                let updatedSlots = [];
-                                const existingDay = classDetail?.timeTable?.find(
-                                    (daySchedule) => daySchedule.dayOfWeek === day
+            let timetableId = classDetail?.timeTable?.find((schedule) => schedule.week === `${startWeekNumber}`)?._id || null;
+            const scheduleData = {
+                yearNumber: startYearWeek.year,
+                weekNumber: startWeekNumber,
+                days: daysOfWeek
+                    .map((day) => {
+                        const newSlots = timeSlots
+                            .filter((slot) => schedule[selectedClass]?.[day]?.[slot.slot])
+                            .map((slot) => {
+                                const slotData = schedule[selectedClass]?.[day]?.[slot.slot];
+                                return {
+                                    slotNumber: parseInt(slot.slot.replace("Tiết ", "")),
+                                    subjectId: slotData?.subjectId || null,
+                                    classId: selectedClass,
+                                    attendanceStatus: {
+                                        createdAt: new Date().toISOString(),
+                                        status: false,
+                                    },
+                                    absentStudentId: [],
+                                };
+                            });
+
+                        if (newSlots.length > 0) {
+                            let updatedSlots = [];
+                            const existingDay = classDetail?.timeTable?.find(
+                                (daySchedule) => daySchedule.dayOfWeek === day
+                            );
+
+                            if (existingDay) {
+                                updatedSlots = existingDay.slots.filter(
+                                    (existingSlot) =>
+                                        !newSlots.some((newSlot) => newSlot.slotNumber === existingSlot.slotNumber)
                                 );
-    
-                                if (existingDay) {
-                                    updatedSlots = existingDay.slots.filter(
-                                        (existingSlot) =>
-                                            !newSlots.some((newSlot) => newSlot.slotNumber === existingSlot.slotNumber)
-                                    );
-                                }
-    
-                                updatedSlots = [...updatedSlots, ...newSlots];
-    
-                                return { dayOfWeek: day, slots: updatedSlots };
                             }
-    
-                            return null;
-                        })
-                        .filter((day) => day !== null), // Bỏ qua các ngày không có slots
-                };
-    
-                console.log("Schedule Data for week", currentWeek, ":", scheduleData);
-    
-                if (!scheduleData.days || scheduleData.days.length === 0) {
-                    setError("Schedule is empty, please select at least one subject per time slot.");
-                    toast.error("Schedule is empty, please select at least one subject per time slot.");
-                    return;
-                }
-    
-                if (timetableId) {
-                    try {
-                        console.log("Updating schedule for timetable ID:", timetableId);
-                        await ScheduleService.updateScheduleByClassId(selectedClass, timetableId, scheduleData);
-                        toast.success(`Updated schedule for week ${currentWeek}`);
-                        console.log(selectedClass, timetableId, scheduleData)
-                    } catch (updateError) {
-                        console.error("Error updating schedule for week", currentWeek, ":", updateError);
-                        toast.error(`Error updating schedule for week ${currentWeek}`);
-                    }
-                } else {
-                    try {
-                        console.log("Creating new schedule for week:", currentWeek);
-                        const response = await ScheduleService.createScheduleByClassId(selectedClass, scheduleData);
-    
-                        if (response?.data?.newTimeTable) {
-                            timetableId = response.data.newTimeTable._id;
-                            console.log("Created new timetable ID:", timetableId);
-    
-                            setClassDetail((prev) => ({
-                                ...prev,
-                                timeTable: [...(prev?.timeTable || []), response.data.newTimeTable],
-                            }));
+                            updatedSlots = [...updatedSlots, ...newSlots];
+                            return { dayOfWeek: day, slots: updatedSlots };
                         }
-                        toast.success(`Created schedule for week ${currentWeek}`);
-                    } catch (createError) {
-                        console.error("Error creating schedule for week", currentWeek, ":", createError);
-                        toast.error(`Error creating schedule for week ${currentWeek}`);
+                        return null;
+                    })
+                    .filter((day) => day !== null),
+            };
+            if (!scheduleData.days || scheduleData.days.length === 0) {
+                setError("Schedule is empty, please select at least one subject per time slot.");
+                toast.error("Chưa có sự thay đổi!.");
+                return;
+            }
+
+            if (timetableId) {
+                try {
+                    await ScheduleService.updateScheduleByClassId(selectedClass, timetableId, scheduleData);
+                    // Cập nhật lại classDetail sau khi cập nhật thời khóa biểu
+                    const updatedClassData = await ClassService.getDetailClass(selectedClass);
+                    setClassDetail(updatedClassData?.data);
+                    setSchedule("") // Clear schedule state if update is successful
+                    toast.success(`Thay đổi thành công tuần ${startWeekNumber}`);
+                } catch (updateError) {
+                    toast.error(`Error updating schedule for week ${startWeekNumber}`);
+                }
+            } else {
+                try {
+                    const response = await ScheduleService.createScheduleByClassId(selectedClass, scheduleData);
+                    if (response?.data?.newTimeTable) {
+                        timetableId = response.data.newTimeTable._id;
+                        setClassDetail((prev) => ({
+                            ...prev,
+                            timeTable: [...(prev?.timeTable || []), response.data.newTimeTable],
+                        }));
                     }
+                    toast.success(`Created schedule for week ${startWeekNumber}`);
+                } catch (createError) {
+                    toast.error(`Error creating schedule for week ${startWeekNumber}`);
                 }
             }
-    
             setError("");
-            toast.success("Schedule processed successfully for all weeks!");
         } catch (error) {
             console.error("Error saving/updating schedule:", error);
             setError("An error occurred while processing the schedule.");
             toast.error("An error occurred while processing the schedule.");
+        } finally {
+            setIsLoading(false); // Kết thúc loading
         }
     };
-    
-    
-    
-    
-    
-    
-
-    console.log(classDetail?.timeTable)
-
-    console.log(startYearWeek.week)
 
     const listTimetableByWeek = (listTimetable, week) => {
         return listTimetable.filter(schedule => schedule.week === week);
     };
 
-    console.log(listTimetableByWeek(classDetail?.timeTable || [], startYearWeek.week));
+    const onBack = () => {
+        window.history.back();
+    }
+
+    const goToCreateSchedule = (idClass) => {
+        navigate(`/manage/manageSchedule/createCalender/${idClass}`)
+    }
+
+    console.log(classDetail?.timeTable)
+
 
     return (
-        <div className="container mx-auto p-6 bg-gray-100 rounded-lg shadow-md">
+        <div className="h-screen p-6 bg-gray-100 rounded-lg">
+            <Breadcrumb title="Quản lí thời khoá biểu" onBack={onBack} buttonText="Tạo mới" onButtonClick={() => goToCreateSchedule(classDetail?._id)} />
+            <div className="pt-12"></div>
+            {isLoading && <div className="absolute top-0 left-0 w-full h-full bg-gray-500 bg-opacity-50 flex justify-center items-center z-10"><span className="text-white text-xl">Đang tải...</span></div>}
             <div className="flex space-x-4 mb-6">
                 <div className="w-1/2">
                     <label className="font-semibold text-lg">Chọn khối:</label>
@@ -285,10 +249,7 @@ const ManageSchedule = () => {
             </div>
             {selectedClass && (
                 <div className="bg-white p-6 rounded-lg shadow-lg">
-                    {/* <h2 className="font-bold text-2xl mb-4 text-indigo-700">
-                        {blocks.find((block) => block._id === selectedBlock)?.classIds.find((cls) => cls._id === selectedClass)?.nameClass}
-                    </h2> */}
-                    <div className="mb-4 flex items-center space-x-4">
+                    <div className="mb-4 flex items-center justify-center space-x-4">
                         <button
                             onClick={() => handleWeekChange(-1)}
                             className="bg-gray-300 hover:bg-gray-400 text-gray-700 font-semibold py-1 px-2 rounded"
@@ -318,39 +279,13 @@ const ManageSchedule = () => {
                             Tuần sau
                         </button>
                     </div>
-                    <div className="flex">
-                        <div className="mb-4 w-1/2 pr-2">
-                            <label className="block text-lg font-semibold">Thời gian bắt đầu:</label>
-                            <input
-                                type="week"
-                                className="border p-2 rounded w-full mt-1 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                                value={startWeek || ""}
-                                onChange={handleStartWeekChange}
-                            />
-                            {startYearWeek.year && startYearWeek.week && (
-                                <p>Năm: {startYearWeek.year}, Tuần: {startYearWeek.week}</p>
-                            )}
-                        </div>
-                        <div className="mb-4 w-1/2 pl-2">
-                            <label className="block text-lg font-semibold">Thời gian kết thúc:</label>
-                            <input
-                                type="week"
-                                className="border p-2 rounded w-full mt-1 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                                value={endWeek || ""}
-                                onChange={handleEndWeekChange}
-                            />
-                            {endYearWeek.year && endYearWeek.week && (
-                                <p>Năm: {endYearWeek.year}, Tuần: {endYearWeek.week}</p>
-                            )}
-                        </div>
-                    </div>
 
                     <table className="table-auto w-full text-left border-collapse">
                         <thead>
                             <tr className="bg-indigo-100">
                                 <th className="border px-4 py-2 text-indigo-700">Tiết học</th>
                                 {daysOfWeek.map((day, idx) => (
-                                    <th key={idx} className="border px-4 py-2 text-indigo-700">{day}</th>
+                                    <th key={idx} className="border px-4 py-2 text-indigo-700" style={{ width: "15%" }}>{day}</th>
                                 ))}
                             </tr>
                         </thead>
@@ -359,18 +294,12 @@ const ManageSchedule = () => {
                                 <tr key={slotIndex} className="hover:bg-indigo-50 transition duration-200">
                                     <td className="border px-4 py-2">{slot.slot}</td>
                                     {daysOfWeek.map((day, dayIndex) => {
-                                        // Lọc danh sách ngày trong tuần
                                         const timetableByWeek = listTimetableByWeek(classDetail?.timeTable || [], startYearWeek.week) || [];
                                         const allDays = timetableByWeek.flatMap(schedule => schedule.scheduleIds || []);
-                                        // Tìm dữ liệu ngày
                                         const currentDay = allDays.find(d => d.dayOfWeek === day) || { slots: [] };
-                                        // Tìm slot hiện tại
                                         const currentSchedule = currentDay.slots.find(
                                             s => s.slotNumber === parseInt(slot.slot.replace('Tiết ', ''))
                                         );
-
-                                        // const cleanSchedule = currentSchedule.filter(item => item !== undefined);
-                                        console.log(currentSchedule);
                                         return (
                                             <td key={dayIndex} className="border px-4 py-2">
                                                 {currentSchedule ? (
@@ -461,16 +390,13 @@ const ManageSchedule = () => {
                 </div>
             )}
             {selectedClass && (
-                <div className="mt-6 text-center">
+                <div className="mt-6 text-center bg-gray-100">
                     <button
                         onClick={handleSaveSchedule}
                         className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded shadow-lg transition duration-200"
                     >
-                        Save Schedule
+                        Hoàn thành thay đổi
                     </button>
-                    {Object.keys(schedule).length > 0 && (
-                        <p className="mt-4 text-green-600">Schedule saved successfully!</p>
-                    )}
                 </div>
             )}
         </div>

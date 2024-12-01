@@ -41,6 +41,7 @@ import StudentViewExamSchedule from "../pages/StudentViewExamSchedule/StudentVie
 import AutoCreateAccount from "../pages/AutoCreateAccount/AutoCreateAccount";
 import ManageAccount from "../pages/ManageAccount/ManageAccount";
 import ActivationPage from "../pages/ActivationPage/ActivationPage";
+import CreateCalender from "../pages/CreateCalender/CreateCalender";
 export const routes = [
   {
     path: "/",
@@ -289,7 +290,17 @@ export const routes = [
       </ProtectedRoute>
     ),
     isShowHeader: false,
-    isShowSideBar: true,
+    isShowSideBar: false,
+  },
+  {
+    path: "/manage/manageSchedule/createCalender/:idClass",
+    page: () => (
+      <ProtectedRoute>
+        <CreateCalender />
+      </ProtectedRoute>
+    ),
+    isShowHeader: false,
+    isShowSideBar: false,
   },
   {
     path: "/manage/examSchedule",
@@ -336,7 +347,7 @@ export const routes = [
     path: "/manage/notificationToSchool",
     page: () => (
       <ProtectedRoute>
-        <NotificationToSchool/>
+        <NotificationToSchool />
       </ProtectedRoute>
     ),
     isShowHeader: false,
