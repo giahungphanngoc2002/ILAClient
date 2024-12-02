@@ -42,6 +42,7 @@ import AutoCreateAccount from "../pages/AutoCreateAccount/AutoCreateAccount";
 import ManageAccount from "../pages/ManageAccount/ManageAccount";
 import ActivationPage from "../pages/ActivationPage/ActivationPage";
 import CreateCalender from "../pages/CreateCalender/CreateCalender";
+import EvaluateManage from "../pages/EvaluateManage/EvaluateManage";
 export const routes = [
   {
     path: "/",
@@ -463,6 +464,18 @@ export const routes = [
     isShowHeader: false,
     isShowSideBar: false,
   },
+  {
+    path: "/manage/evaluateManage/:idClass/:idSubject",
+    page: () => (
+      <ProtectedRoute>
+        <EvaluateManage />
+      </ProtectedRoute>
+    ),
+    isShowHeader: false,
+    isShowSideBar: false,
+  },
+
+
   {
     path: "*",
     page: NotFoundPage,

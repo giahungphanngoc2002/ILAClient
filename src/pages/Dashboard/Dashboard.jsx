@@ -14,6 +14,7 @@ import { FaUserPlus } from "react-icons/fa6";
 import { MdAccountCircle } from "react-icons/md";
 import { FaClipboardUser } from "react-icons/fa6";
 import { TbSquareLetterA } from "react-icons/tb";
+import { MdStars } from "react-icons/md";
 
 const Dashboard = () => {
     const user = useSelector((state) => state.user);
@@ -133,6 +134,8 @@ const Dashboard = () => {
         } else if (selectedCard === "question") {
             // Hàm điều hướng hoặc xử lý cho Quản lí câu hỏi
             navigate(`/manage/questionManage/${selectedClass}/${subjectId}`)
+        } else if (selectedCard === "evaluate") {
+            navigate(`/manage/evaluateManage/${selectedClass}/${subjectId}`)
         }
     };
 
@@ -298,6 +301,13 @@ const Dashboard = () => {
                                     <FaClipboardQuestion size={32} className="text-white" />
                                 </div>
                                 <p className="font-semibold">Quản lí câu hỏi</p>
+                            </div>
+
+                            <div onClick={() => handleCardClick("evaluate")} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
+                                <div className="bg-violet-400 p-4 rounded-full mb-2">
+                                    <MdStars size={32} className="text-white" />
+                                </div>
+                                <p className="font-semibold">Đánh giá học sinh</p>
                             </div>
                         </div>
                     </div>
