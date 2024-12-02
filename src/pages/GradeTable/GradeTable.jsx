@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState,useRef  } from "react";
 import * as XLSX from "xlsx";
 import { FaFileExcel, FaSearch, FaArrowLeft } from 'react-icons/fa';
 import { useParams } from "react-router-dom";
 import * as ScoreSubjectService from "../../services/ScoreSbujectService";
 import * as ClassService from "../../services/ClassService";
 import Breadcrumb from "../../components/Breadcrumb/Breadcrumb";
-
+import { toast } from "react-toastify";
 const GradeTable = () => {
     const [students, setStudents] = useState([]);
     const { idClass, idSubject, semester } = useParams();
@@ -56,11 +56,13 @@ const GradeTable = () => {
         const fetchScores = async () => {
             try {
                 const scoresData = await ScoreSubjectService.getAllScoresBySubjectSemester(idSubject, idClass, semesterFilter);
-                const studentsWithScores = scoresData.map((detail) => {
+                console.log("Fetched scores data:", scoresData);  // Debug log để kiểm tra dữ liệu trả về
+    
+                // Tạo đối tượng với key là studentId để dễ dàng tìm kiếm
+                const scoresByStudentId = scoresData.reduce((acc, detail) => {
                     const filteredScores = detail.scores.filter(score => score.semester === parseInt(semesterFilter));
                     const scores = { diemThuongXuyen: [], diemGiuaKi: [], diemCuoiKi: [] };
-
-                    // Gán các điểm vào các mảng
+    
                     filteredScores.forEach((score) => {
                         switch (score.type) {
                             case "thuongXuyen":
@@ -76,42 +78,48 @@ const GradeTable = () => {
                                 break;
                         }
                     });
-
-                    return {
+    
+                    acc[detail.studentId._id] = {
                         id: detail.studentId._id,
                         name: detail.studentId.name,
                         email: detail.studentId.email,
                         nameClass: detail.classId.nameClass,
-                        nameSubject: scoresData.nameSubject,
-                        ...scores,  // Gộp các điểm đã được tính
+                        nameSubject: scoresData.nameSubject, // Hoặc detail.nameSubject nếu đúng
+                        scoreId: detail._id, // hoặc nếu bạn cần lấy từ trường khác
+                        ...scores,
                     };
-                });
-
-                // Gộp danh sách học sinh chưa có điểm
+    
+                    return acc;
+                }, {});
+    
+                // Gộp dữ liệu với danh sách sinh viên chưa có điểm
                 const completeStudentList = studentInClass.map((student) => {
-                    const existingStudent = studentsWithScores.find(s => s.id === student._id);
+                    const existingStudent = scoresByStudentId[student._id];
                     if (existingStudent) {
                         return existingStudent;
                     }
+    
                     return {
                         id: student._id,
                         name: student.name,
                         email: student.email,
-                        diemThuongXuyen: [],  // Khởi tạo mảng điểm
-                        diemGiuaKi: [],  // Khởi tạo mảng điểm
-                        diemCuoiKi: []  // Khởi tạo mảng điểm
+                        diemThuongXuyen: [],
+                        diemGiuaKi: [],
+                        diemCuoiKi: []
                     };
                 });
-
+    
                 setStudents(completeStudentList);
             } catch (error) {
                 console.error("Error fetching scores:", error);
             }
         };
-
-
+    
         fetchScores();
     }, [idClass, idSubject, semesterFilter, studentInClass]);
+    
+
+    console.log("123student",students)
 
     const calculateAverage = (grades) =>
         grades.length > 0
@@ -173,13 +181,13 @@ const GradeTable = () => {
                 calculateAverage(student.diemGiuaKi) * 2 +
                 calculateAverage(student.diemCuoiKi) * 3) / 6
         ).toFixed(1);
-
+    
         const matchName = student?.name?.toLowerCase().includes(searchTerm.toLowerCase());
         const matchScore =
             filterScore === "" ||
             (filterScore === "high" && averageScore >= 8) ||
             (filterScore === "low" && averageScore < 8);
-
+    
         return matchName && matchScore;
     });
 
@@ -187,62 +195,72 @@ const GradeTable = () => {
         window.history.back();
     }
 
+    const studentsRef = useRef(students);
+
+    useEffect(() => {
+        studentsRef.current = students;  // Cập nhật students vào ref mỗi khi students thay đổi
+    }, [students]);
+
+    
     const handleSubmitScore = async () => {
-        // Prepare the scores array for each student
-        const scoresPayload = students.map(student => {
-            // Gather the scores from the student object
-            const thuongXuyenScores = student.diemThuongXuyen.map((score, idx) => ({
-                type: 'thuongXuyen',
-                score: score.toString(),
-                semester: semesterFilter
-            }));
-
-            const giuaKiScore = {
-                type: 'giuaKi',
-                score: student.diemGiuaKi[0]?.toString() || '0',
-                semester: semesterFilter
-            };
-
-            const cuoiKiScore = {
-                type: 'cuoiKi',
-                score: student.diemCuoiKi[0]?.toString() || '0',
-                semester: semesterFilter
-            };
-
-            // Create the payload for each student
-            return {
-                classId: idClass,
-                studentId: student.id,
-                subjectId: idSubject,
-                scores: [...thuongXuyenScores, giuaKiScore, cuoiKiScore]
-            };
-        });
-
-        // Log the scores payload to the console
-        console.log("Scores Payload:", scoresPayload);
-
+        if (loading) return;
+    
+        setLoading(true);
         try {
-            setLoading(true); // Start loading
-            // Send the scores to the backend (use your service here)
-            // const response = await ScoreSubjectService.submitScores(scoresPayload);
-
-            // if (response?.data?.success) {
-            //     // Handle success (e.g., show a success message)
-            //     alert("Điểm đã được lưu thành công!");
-            // } else {
-            //     // Handle error (e.g., show an error message)
-            //     alert("Có lỗi xảy ra khi lưu điểm. Vui lòng thử lại.");
-            // }
+            // Sử dụng studentsRef để đảm bảo lấy giá trị students lúc hiện tại
+            const scoresData = studentsRef.current.map(student => {
+                const scores = [
+                    ...student.diemThuongXuyen.map(score => ({ type: "thuongXuyen", score, semester: semesterFilter })),
+                    ...student.diemGiuaKi.map(score => ({ type: "giuaKi", score, semester: semesterFilter })),
+                    ...student.diemCuoiKi.map(score => ({ type: "cuoiKi", score, semester: semesterFilter }))
+                ];
+    
+                const scoreId = student.scoreId || null;
+    
+                return { studentId: student.id, subjectId: idSubject, classId: idClass, scores, scoreId };
+            });
+    
+            for (const scoreData of scoresData) {
+                if (scoreData.scoreId) {
+                    await ScoreSubjectService.updateScore(scoreData.scoreId, scoreData);
+                    toast.success(`Score updated for student ID: ${scoreData.studentId}`);
+                } else {
+                    await ScoreSubjectService.createScore(scoreData);
+                    toast.success(`Score created for student ID: ${scoreData.studentId}`);
+                }
+            }
         } catch (error) {
-            console.error("Error submitting scores:", error);
-            alert("Có lỗi xảy ra khi lưu điểm. Vui lòng thử lại.");
+            toast.error("An error occurred while submitting scores.");
         } finally {
-            setLoading(false); // Stop loading
+            setLoading(false);
         }
     };
+    
+    
+    
+    
 
-    const handleUploadExcel = () => {
+    const handleUploadExcel = (e) => {
+        const file = e.target.files[0];
+        const reader = new FileReader();
         
+        reader.onload = (event) => {
+            const data = event.target.result;
+            const workbook = XLSX.read(data, { type: 'binary' });
+    
+            // Kiểm tra xem workbook có chứa các sheet không
+            if (workbook.SheetNames.length > 0) {
+                const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                const json = XLSX.utils.sheet_to_json(worksheet);
+                
+                // Parse và upload data to your backend or set state as necessary
+                console.log(json);
+            } else {
+                console.error('No sheets found in the Excel file');
+            }
+        };
+    
+        reader.readAsBinaryString(file);
     }
 
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import Breadcrumb from '../../components/Breadcrumb/Breadcrumb';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
@@ -8,8 +8,6 @@ import * as NotificationService from "../../services/NotificationService";
 import { useSelector } from 'react-redux';
 import { toast } from "react-toastify";
 
-
-
 const NotificationToSchool = () => {
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
@@ -17,8 +15,7 @@ const NotificationToSchool = () => {
     const [file, setFile] = useState(null);
     const [nameFilter, setNameFilter] = useState('');
     const [classFilter, setClassFilter] = useState('');
-    const [selectedTab, setSelectedTab] = useState('tab1'); // Tab state
-    const [selectAll, setSelectAll] = useState(false);
+    const [selectAllClasses, setSelectAllClasses] = useState(false);
     const navigate = useNavigate();
     const [classData, setClassData] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -36,7 +33,7 @@ const NotificationToSchool = () => {
                 const response = await ClassService.getAllClass();
                 setClassData(response.data);
             } catch (error) {
-                console.error("Failed to fetch notifications:", error);
+                console.error("Failed to fetch classes:", error);
                 setError(error);
             } finally {
                 setLoading(false);
@@ -46,55 +43,64 @@ const NotificationToSchool = () => {
         fetchClasses();
     }, []);
 
-    console.log("classData",classData)
-
-    // Prepare recipients data based on classData
-    const recipientsTab1 = classData.flatMap((classItem) =>
-        classItem?.studentID.map(student => ({
+    // Combine student and teacher data by class
+    const combinedRecipients = classData.reduce((acc, classItem) => {
+        const studentRecipients = classItem?.studentID.map(student => ({
             id: student?._id,
             name: student?.username,
             phone: student?.phone || 'N/A',
-            class: classItem?.nameClass
-        }))
-    );
+            class: classItem?.nameClass,
+            type: 'student', // Type is student
+        }));
 
-    const recipientsTab2 = classData.map((classItem) => ({
-        id: classItem?.teacherHR?._id,
-        name: classItem?.teacherHR?.username,
-        phone: classItem?.teacherHR?.phone || 'N/A',
-        class: classItem?.nameClass
-    }));
+        const teacherRecipient = {
+            id: classItem?.teacherHR?._id,
+            name: classItem?.teacherHR?.username,
+            phone: classItem?.teacherHR?.phone || 'N/A',
+            class: classItem?.nameClass,
+            type: 'teacher', // Type is teacher
+        };
+
+        acc[classItem?.nameClass] = [
+            ...(acc[classItem?.nameClass] || []),
+            ...studentRecipients,
+            teacherRecipient
+        ];
+
+        return acc;
+    }, {});
+
+    // Handle selecting/deselecting all recipients in a class
+    const handleClassSelect = (className, select) => {
+        const recipientsForClass = combinedRecipients[className] || [];
+        const recipientIds = recipientsForClass.map(recipient => recipient.id);
+        if (select) {
+            setSelectedRecipients((prev) => [...prev, ...recipientIds]);
+        } else {
+            setSelectedRecipients((prev) =>
+                prev.filter(id => !recipientIds.includes(id))
+            );
+        }
+    };
+
+    // Handle selecting/deselecting all classes
+    const handleSelectAllClasses = () => {
+        if (selectAllClasses) {
+            setSelectedRecipients([]);  // Deselect all
+        } else {
+            const allRecipients = Object.values(combinedRecipients).flat();
+            const allRecipientIds = allRecipients.map((recipient) => recipient.id);
+            setSelectedRecipients(allRecipientIds);  // Select all recipients
+        }
+        setSelectAllClasses(!selectAllClasses); // Toggle "Select All"
+    };
 
     const classes = classData.map((classItem) => classItem.nameClass);
-
-    // Filter function (to be used in both tabs)
-    const filterRecipients = useCallback((recipients) => {
-        return recipients.filter((recipient) => {
-            const matchesName = recipient?.name?.toLowerCase().includes(nameFilter?.toLowerCase());
-            const matchesClass = classFilter === '' || recipient.class === classFilter;
-            return matchesName && matchesClass;
-        });
-    }, [nameFilter, classFilter]);
-
-    const filteredRecipientsTab1 = filterRecipients(recipientsTab1);
-    const filteredRecipientsTab2 = filterRecipients(recipientsTab2);
-
-    // Toggle recipient selection
-    const handleRecipientToggle = (id) => {
-        setSelectedRecipients((prev) =>
-            prev.includes(id) ? prev.filter((r) => r !== id) : [...prev, id]
-        );
-    };
-
-    // Handle file change
-    const handleFileChange = (e) => {
-        setFile(e.target.files[0]);
-    };
 
     const handleSubmit = async () => {
         const notificationData = {
             title,
-            content: content.replace(/^<p>|<\/p>$/g, ''),
+            content: content.replace(/^<p>|<\/p>$/g, ''), // Clean up content
             senderId,
             receiverId: selectedRecipients,
         };
@@ -105,35 +111,10 @@ const NotificationToSchool = () => {
             toast.success('Notification created successfully');
             navigate('/manage/historySendNotification');
         } catch (error) {
-            toast.error('Error creating notification'); // Thêm dòng này để thông báo lỗi
+            toast.error('Error creating notification');
             console.error("Error creating notification:", error);
         }
     };
-
-    // Handle "Select All" for the current tab (recalculate the selection for each tab)
-    const handleSelectAllToggle = () => {
-        if (selectAll) {
-            setSelectedRecipients([]); // Clear all selections
-        } else {
-            const selectedIds = (selectedTab === 'tab1' ? filteredRecipientsTab1 : filteredRecipientsTab2).map((recipient) => recipient.id);
-            setSelectedRecipients(selectedIds); // Select all filtered recipients
-        }
-        setSelectAll(!selectAll); // Toggle "Select All" state
-    };
-
-    // Count selected recipients for each tab
-    const selectedRecipientsTab1Count = selectedRecipients.filter((id) =>
-        filteredRecipientsTab1.some((recipient) => recipient.id === id)
-    ).length;
-
-    const selectedRecipientsTab2Count = selectedRecipients.filter((id) =>
-        filteredRecipientsTab2.some((recipient) => recipient.id === id)
-    ).length;
-
-    // Update filter or tab change
-    useEffect(() => {
-        setSelectAll(false); // Reset "Select All" when filters change
-    }, [nameFilter, classFilter, selectedTab]);
 
     const onBack = () => {
         navigate('/manage/historySendNotification');
@@ -170,88 +151,59 @@ const NotificationToSchool = () => {
                         </div>
 
                         <label className="block font-medium mb-2">Đính kèm tài liệu</label>
-                        <input type="file" onChange={handleFileChange} className="mb-2" />
+                        <input type="file" onChange={(e) => setFile(e.target.files[0])} className="mb-2" />
                         <p className="text-sm text-red-500">Hệ thống chỉ chấp nhận các file Word, Excel, Pdf, PowerPoint, các file ảnh.</p>
                     </div>
 
-                    {/* Right Side: Recipient selection with tabs */}
+                    {/* Right Side: Recipient selection with classes */}
                     <div className="w-1/2 bg-white p-4 rounded-lg shadow overflow-y-auto">
-                        <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-lg font-semibold">Chọn người nhận</h2>
-                            <div className="flex gap-2">
-                                <input
-                                    type="text"
-                                    placeholder="Lọc theo tên"
-                                    value={nameFilter}
-                                    onChange={(e) => setNameFilter(e.target.value)}
-                                    className="px-3 py-2 border border-gray-300 rounded-lg"
-                                />
-                                <select
-                                    value={classFilter}
-                                    onChange={(e) => setClassFilter(e.target.value)}
-                                    className="px-3 py-2 border border-gray-300 rounded-lg"
-                                >
-                                    <option value="">Tất cả lớp</option>
-                                    {classes.map((className) => (
-                                        <option key={className} value={className}>
-                                            {className}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                        </div>
+                        <h2 className="text-lg font-semibold mb-4">Chọn lớp gửi thông báo</h2>
+                        
+                        {/* Checkbox to select/deselect all classes */}
+                        
 
-                        {/* Tabs */}
-                        <div className="flex mb-4 border-b">
-                            <button
-                                className={`px-4 py-2 font-semibold ${selectedTab === 'tab1' ? 'border-b-2 border-blue-500 text-blue-500' : 'text-gray-500'}`}
-                                onClick={() => setSelectedTab('tab1')}
-                            >
-                                Học sinh - Số người nhận: {selectedRecipientsTab1Count || 0}
-                            </button>
-                            <button
-                                className={`px-4 py-2 font-semibold ${selectedTab === 'tab2' ? 'border-b-2 border-blue-500 text-blue-500' : 'text-gray-500'}`}
-                                onClick={() => setSelectedTab('tab2')}
-                            >
-                                Giáo viên chủ nhiệm - Số người nhận: {selectedRecipientsTab2Count || 0}
-                            </button>
-                        </div>
-
-                        {/* Recipient Table */}
-                        <table className="min-w-full bg-white">
-                            <thead>
-                                <tr>
-                                    <th className="py-2 px-4 border">STT</th>
-                                    <th className="py-2 px-4 border">Họ tên</th>
-                                    <th className="py-2 px-4 border">SĐT</th>
-                                    <th className="py-2 px-4 border">Lớp</th>
-                                    <th className="py-2 px-4 border text-center">
+                        {/* Class-wise table */}
+                        <div className="overflow-x-auto">
+                            <table className="min-w-full bg-white">
+                                <thead>
+                                    <tr>
+                                        <th className="py-2 px-4 border">STT</th>
+                                        <th className="py-2 px-4 border">Lớp</th>
+                                        <th className="py-2 px-4 border text-center">
                                         <input
-                                            type="checkbox"
-                                            checked={selectAll}
-                                            onChange={handleSelectAllToggle}
-                                        />
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {(selectedTab === 'tab1' ? filteredRecipientsTab1 : filteredRecipientsTab2).map((recipient, index) => (
-                                    <tr key={recipient.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-100'}>
-                                        <td className="py-2 px-4 border">{index + 1}</td>
-                                        <td className="py-2 px-4 border">{recipient.name}</td>
-                                        <td className="py-2 px-4 border">{recipient.phone}</td>
-                                        <td className="py-2 px-4 border">{recipient.class}</td>
-                                        <td className="py-2 px-4 border text-center">
-                                            <input
-                                                type="checkbox"
-                                                checked={selectedRecipients.includes(recipient.id)}
-                                                onChange={() => handleRecipientToggle(recipient.id)}
-                                            />
-                                        </td>
+                                type="checkbox"
+                                checked={selectAllClasses}
+                                onChange={handleSelectAllClasses}
+                               
+                            />
+                                        </th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    {classes.map((className, index) => {
+                                        const recipientsForClass = combinedRecipients[className] || [];
+                                        const isClassSelected = recipientsForClass.every((recipient) =>
+                                            selectedRecipients.includes(recipient.id)
+                                        );
+
+                                        return (
+                                            <tr key={className} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-100'}>
+                                                <td className="py-2 px-4 border">{index + 1}</td>
+                                                <td className="py-2 px-4 border">{className}</td>
+                                                
+                                                <td className="py-2 px-4 border text-center">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={isClassSelected}
+                                                        onChange={() => handleClassSelect(className, !isClassSelected)}
+                                                    />
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
