@@ -65,8 +65,6 @@ const ManageSchedule = () => {
         fetchClassDetail();
     }, [selectedClass]);
 
-    console.log(schedule)
-
     const getYearAndWeekFromValue = (weekValue) => {
         const [year, week] = weekValue.split('-W');
         return { year, week };
@@ -89,7 +87,7 @@ const ManageSchedule = () => {
     };
 
     const handleSelectSlot = (classId, day, slot, subjectData) => {
-        const { subjectId, subjectChuyendeId, subjectPhuId } = JSON.parse(subjectData);
+        const { subjectId, subjectChuyendeId } = JSON.parse(subjectData);
         setSchedule((prev) => ({
             ...prev,
             [classId]: {
@@ -99,15 +97,11 @@ const ManageSchedule = () => {
                     [slot]: {
                         subjectId,
                         subjectChuyendeId,
-                        subjectPhuId
                     },
                 },
             },
         }));
     };
-
-
-
 
     const handleSaveSchedule = async () => {
         setIsLoading(true);
@@ -123,11 +117,9 @@ const ManageSchedule = () => {
                             .filter((slot) => schedule[selectedClass]?.[day]?.[slot.slot])
                             .map((slot) => {
                                 const slotData = schedule[selectedClass]?.[day]?.[slot.slot];
-
                                 return {
                                     slotNumber: parseInt(slot.slot.replace("Tiết ", "")),
                                     subjectId: slotData?.subjectId || null,
-                                    subjectPhuId: slotData?.subjectPhuId || null,
                                     classId: selectedClass,
                                     attendanceStatus: {
                                         createdAt: new Date().toISOString(),
@@ -135,8 +127,7 @@ const ManageSchedule = () => {
                                     },
                                     absentStudentId: [],
                                 };
-                            })
-                            .filter(Boolean); // Lọc bỏ các phần tử null (nếu không có môn học)
+                            });
 
                         if (newSlots.length > 0) {
                             let updatedSlots = [];
@@ -304,15 +295,11 @@ const ManageSchedule = () => {
                                     <td className="border px-4 py-2">{slot.slot}</td>
                                     {daysOfWeek.map((day, dayIndex) => {
                                         const timetableByWeek = listTimetableByWeek(classDetail?.timeTable || [], startYearWeek.week) || [];
-                                        // console.log("timetableByWeek",timetableByWeek)
                                         const allDays = timetableByWeek.flatMap(schedule => schedule.scheduleIds || []);
                                         const currentDay = allDays.find(d => d.dayOfWeek === day) || { slots: [] };
                                         const currentSchedule = currentDay.slots.find(
                                             s => s.slotNumber === parseInt(slot.slot.replace('Tiết ', ''))
                                         );
-
-                                        console.log(currentSchedule)
-
                                         return (
                                             <td key={dayIndex} className="border px-4 py-2">
                                                 {currentSchedule ? (
@@ -326,9 +313,8 @@ const ManageSchedule = () => {
                                                                     ? JSON.stringify(schedule[selectedClass][day][slot.slot])
                                                                     : currentSchedule?.subjectId
                                                                         ? JSON.stringify({
-                                                                            subjectId: currentSchedule?.subjectId._id,
-                                                                            subjectChuyendeId: currentSchedule?.subjectId?.subjectChuyendeId?._id,
-                                                                            ...(currentSchedule?.subjectId?.subjectPhuId && { subjectPhuId: currentSchedule.subjectId.subjectPhuId._id })
+                                                                            subjectId: currentSchedule.subjectId._id,
+                                                                            subjectChuyendeId: currentSchedule.subjectId.subjectChuyendeId?._id,
                                                                         })
                                                                         : ""
                                                             }
@@ -336,48 +322,31 @@ const ManageSchedule = () => {
                                                                 handleSelectSlot(selectedClass, day, slot.slot, e.target.value)
                                                             }
                                                         >
-                                                            {/* Môn chính */}
                                                             {classDetail?.subjectGroup?.SubjectsId.map((subject, index) => (
                                                                 <option
                                                                     key={index}
                                                                     value={JSON.stringify({
                                                                         subjectId: subject._id,
                                                                         subjectChuyendeId: subject?.subjectChuyendeId?._id,
-                                                                        subjectPhuId: null, // Môn chính không có môn phụ
                                                                     })}
                                                                 >
                                                                     {subject?.nameSubject} - {subject?.teacherId?.name}
                                                                 </option>
                                                             ))}
-
-                                                            {/* Môn chuyên đề */}
                                                             {classDetail?.subjectGroup?.SubjectsChuyendeId.map((subject, index) => (
                                                                 <option
                                                                     key={index}
                                                                     value={JSON.stringify({
                                                                         subjectId: subject._id,
                                                                         subjectChuyendeId: subject?.subjectChuyendeId?._id,
-                                                                        subjectPhuId: null, // Môn chuyên đề không có môn phụ
-                                                                    })}
-                                                                >
-                                                                    {subject?.nameSubject} - {subject?.teacherId?.name}
-                                                                </option>
-                                                            ))}
-
-                                                            {/* Môn phụ */}
-                                                            {classDetail?.subjectGroup?.SubjectsPhuId.map((subject, index) => (
-                                                                <option
-                                                                    key={index}
-                                                                    value={JSON.stringify({
-                                                                        subjectId: null, // Môn phụ không có subjectId
-                                                                        subjectChuyendeId: null,
-                                                                        subjectPhuId: subject._id, // Lưu subjectPhuId cho môn phụ
                                                                     })}
                                                                 >
                                                                     {subject?.nameSubject} - {subject?.teacherId?.name}
                                                                 </option>
                                                             ))}
                                                         </select>
+
+
                                                     </div>
                                                 ) : (
                                                     <select
@@ -392,47 +361,23 @@ const ManageSchedule = () => {
                                                         }
                                                     >
                                                         <option value="">Chọn môn</option>
-                                                        {/* Môn chính */}
                                                         {classDetail?.subjectGroup?.SubjectsId.map((subject, index) => (
                                                             <option
                                                                 key={index}
-                                                                value={JSON.stringify({
-                                                                    subjectId: subject._id,
-                                                                    subjectChuyendeId: subject?.subjectChuyendeId?._id,
-                                                                    subjectPhuId: null, // Nếu không có môn phụ, set null
-                                                                })}
+                                                                value={JSON.stringify({ subjectId: subject._id, subjectChuyendeId: subject?.subjectChuyendeId?._id })}
                                                             >
                                                                 {subject?.nameSubject} - {subject?.teacherId?.name}
                                                             </option>
                                                         ))}
-
-                                                        {/* Môn chuyên đề */}
                                                         {classDetail?.subjectGroup?.SubjectsChuyendeId.map((subject, index) => (
                                                             <option
                                                                 key={index}
-                                                                value={JSON.stringify({
-                                                                    subjectId: subject._id,
-                                                                    subjectChuyendeId: subject?.subjectChuyendeId?._id,
-                                                                    subjectPhuId: null, // Nếu không có môn phụ, set null
-                                                                })}
+                                                                value={JSON.stringify({ subjectId: subject._id, subjectChuyendeId: subject?.subjectChuyendeId?._id })}
                                                             >
                                                                 {subject?.nameSubject} - {subject?.teacherId?.name}
                                                             </option>
                                                         ))}
 
-                                                        {/* Môn phụ */}
-                                                        {classDetail?.subjectGroup?.SubjectsPhuId.map((subject, index) => (
-                                                            <option
-                                                                key={index}
-                                                                value={JSON.stringify({
-                                                                    subjectId: null, // Môn phụ cũng có subjectId
-                                                                    subjectChuyendeId: null,
-                                                                    subjectPhuId: subject._id, // Lưu subjectPhuId cho môn phụ
-                                                                })}
-                                                            >
-                                                                {subject?.nameSubject} - {subject?.teacherId?.name}
-                                                            </option>
-                                                        ))}
                                                     </select>
                                                 )}
                                             </td>
