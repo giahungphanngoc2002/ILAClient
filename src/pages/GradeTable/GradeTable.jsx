@@ -1,4 +1,4 @@
-import React, { useEffect, useState,useRef  } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import * as XLSX from "xlsx";
 import { FaFileExcel, FaSearch, FaArrowLeft } from 'react-icons/fa';
 import { useParams } from "react-router-dom";
@@ -37,7 +37,6 @@ const GradeTable = () => {
         }
     }, [idClass]);
 
-    console.log(classDetail)
 
     useEffect(() => {
         // Kiểm tra nếu classDetail và subjectGroup có sẵn và subjectGroup là một mảng
@@ -49,7 +48,6 @@ const GradeTable = () => {
         }
     }, [classDetail, idSubject]);
 
-    console.log(subject)
 
     // Lấy điểm của học sinh
     useEffect(() => {
@@ -57,12 +55,12 @@ const GradeTable = () => {
             try {
                 const scoresData = await ScoreSubjectService.getAllScoresBySubjectSemester(idSubject, idClass, semesterFilter);
                 console.log("Fetched scores data:", scoresData);  // Debug log để kiểm tra dữ liệu trả về
-    
+
                 // Tạo đối tượng với key là studentId để dễ dàng tìm kiếm
                 const scoresByStudentId = scoresData.reduce((acc, detail) => {
                     const filteredScores = detail.scores.filter(score => score.semester === parseInt(semesterFilter));
                     const scores = { diemThuongXuyen: [], diemGiuaKi: [], diemCuoiKi: [] };
-    
+
                     filteredScores.forEach((score) => {
                         switch (score.type) {
                             case "thuongXuyen":
@@ -78,7 +76,7 @@ const GradeTable = () => {
                                 break;
                         }
                     });
-    
+
                     acc[detail.studentId._id] = {
                         id: detail.studentId._id,
                         name: detail.studentId.name,
@@ -88,17 +86,17 @@ const GradeTable = () => {
                         scoreId: detail._id, // hoặc nếu bạn cần lấy từ trường khác
                         ...scores,
                     };
-    
+
                     return acc;
                 }, {});
-    
+
                 // Gộp dữ liệu với danh sách sinh viên chưa có điểm
                 const completeStudentList = studentInClass.map((student) => {
                     const existingStudent = scoresByStudentId[student._id];
                     if (existingStudent) {
                         return existingStudent;
                     }
-    
+
                     return {
                         id: student._id,
                         name: student.name,
@@ -108,23 +106,39 @@ const GradeTable = () => {
                         diemCuoiKi: []
                     };
                 });
-    
+
                 setStudents(completeStudentList);
             } catch (error) {
                 console.error("Error fetching scores:", error);
             }
         };
-    
+
         fetchScores();
     }, [idClass, idSubject, semesterFilter, studentInClass]);
-    
-
-    console.log("123student",students)
 
     const calculateAverage = (grades) =>
         grades.length > 0
             ? (grades.reduce((sum, grade) => sum + grade, 0) / grades.length).toFixed(1)
             : 0;
+
+    const calculateAverageSubject = (regular = [], midterm = [], final = []) => {
+        // Check if all inputs are arrays
+        if (!Array.isArray(regular) || !Array.isArray(midterm) || !Array.isArray(final)) {
+            throw new Error("All inputs must be arrays.");
+        }
+
+        console.log("regular length", regular.length)
+        console.log("midterm length", midterm.length)
+        console.log("final length", final.length)
+
+        const totalWeight = (regular.length * 1) + (midterm.length * 2) + (final.length * 3);
+        const totalScore =
+            regular.reduce((sum, score) => sum + score, 0) * 1 +
+            midterm.reduce((sum, score) => sum + score, 0) * 2 +
+            final.reduce((sum, score) => sum + score, 0) * 3;
+
+        return (totalScore / totalWeight).toFixed(2);
+    };
 
     const handleDownloadExcel = () => {
         const worksheet = XLSX.utils.json_to_sheet(
@@ -159,13 +173,23 @@ const GradeTable = () => {
                     // Cập nhật điểm tùy theo loại
                     if (type === "diemThuongXuyen" && index !== undefined) {
                         // Nếu là điểm thường xuyên, cập nhật theo index
-                        updatedStudent.diemThuongXuyen[index] = parseFloat(value) || 0;
+                        if (value.trim() === "") {
+                            updatedStudent.diemThuongXuyen[index] = '';
+                        } else {
+                            updatedStudent.diemThuongXuyen[index] = parseFloat(value) || 0;  // Cập nhật điểm thường xuyên
+                        }
                     } else if (type === "diemGiuaKi") {
-                        // Nếu là điểm giữa kỳ, thay thế toàn bộ mảng với 1 phần tử
-                        updatedStudent.diemGiuaKi = [parseFloat(value) || 0];  // Mảng chứa 1 phần tử
+                        if (value.trim() === "") {
+                            updatedStudent.diemGiuaKi = [];  // Xoá hoàn toàn mảng khi không có giá trị
+                        } else {
+                            updatedStudent.diemGiuaKi = [parseFloat(value) || 0];  // Cập nhật điểm giữa kỳ
+                        }
                     } else if (type === "diemCuoiKi") {
-                        // Nếu là điểm cuối kỳ, thay thế toàn bộ mảng với 1 phần tử
-                        updatedStudent.diemCuoiKi = [parseFloat(value) || 0];  // Mảng chứa 1 phần tử
+                        if (value.trim() === "") {
+                            updatedStudent.diemCuoiKi = [];  // Xoá hoàn toàn mảng khi không có giá trị
+                        } else {
+                            updatedStudent.diemCuoiKi = [parseFloat(value) || 0];  // Cập nhật điểm cuối kỳ
+                        }
                     }
 
                     return updatedStudent;
@@ -181,13 +205,13 @@ const GradeTable = () => {
                 calculateAverage(student.diemGiuaKi) * 2 +
                 calculateAverage(student.diemCuoiKi) * 3) / 6
         ).toFixed(1);
-    
+
         const matchName = student?.name?.toLowerCase().includes(searchTerm.toLowerCase());
         const matchScore =
             filterScore === "" ||
             (filterScore === "high" && averageScore >= 8) ||
             (filterScore === "low" && averageScore < 8);
-    
+
         return matchName && matchScore;
     });
 
@@ -201,10 +225,10 @@ const GradeTable = () => {
         studentsRef.current = students;  // Cập nhật students vào ref mỗi khi students thay đổi
     }, [students]);
 
-    
+
     const handleSubmitScore = async () => {
         if (loading) return;
-    
+
         setLoading(true);
         try {
             // Sử dụng studentsRef để đảm bảo lấy giá trị students lúc hiện tại
@@ -214,56 +238,70 @@ const GradeTable = () => {
                     ...student.diemGiuaKi.map(score => ({ type: "giuaKi", score, semester: semesterFilter })),
                     ...student.diemCuoiKi.map(score => ({ type: "cuoiKi", score, semester: semesterFilter }))
                 ];
-    
+
                 const scoreId = student.scoreId || null;
-    
+
                 return { studentId: student.id, subjectId: idSubject, classId: idClass, scores, scoreId };
             });
-    
-            for (const scoreData of scoresData) {
+
+            // Tạo một mảng promises để xử lý tất cả các yêu cầu
+            const scorePromises = scoresData.map(scoreData => {
                 if (scoreData.scoreId) {
-                    await ScoreSubjectService.updateScore(scoreData.scoreId, scoreData);
-                    toast.success(`Score updated for student ID: ${scoreData.studentId}`);
+                    return ScoreSubjectService.updateScore(scoreData.scoreId, scoreData);
                 } else {
-                    await ScoreSubjectService.createScore(scoreData);
-                    toast.success(`Score created for student ID: ${scoreData.studentId}`);
+                    return ScoreSubjectService.createScore(scoreData);
                 }
-            }
+            });
+
+            // Chờ tất cả các promises được thực thi
+            await Promise.all(scorePromises);
+
+            // Hiển thị toast khi tất cả đã hoàn thành
+            toast.success("All scores have been successfully uploaded!");
         } catch (error) {
             toast.error("An error occurred while submitting scores.");
         } finally {
             setLoading(false);
         }
     };
-    
-    
-    
-    
+
 
     const handleUploadExcel = (e) => {
         const file = e.target.files[0];
         const reader = new FileReader();
-        
+
         reader.onload = (event) => {
             const data = event.target.result;
             const workbook = XLSX.read(data, { type: 'binary' });
-    
-            // Kiểm tra xem workbook có chứa các sheet không
+
             if (workbook.SheetNames.length > 0) {
                 const worksheet = workbook.Sheets[workbook.SheetNames[0]];
                 const json = XLSX.utils.sheet_to_json(worksheet);
-                
-                // Parse và upload data to your backend or set state as necessary
-                console.log(json);
+
+                // Đảm bảo rằng các dữ liệu trong Excel có đúng cấu trúc
+                const updatedStudents = students.map(student => {
+                    const studentData = json.find(item => item["Họ Tên"] === student.name);
+
+                    if (studentData) {
+                        return {
+                            ...student,
+                            diemThuongXuyen: studentData["Điểm Thường Xuyên"]?.split(",").map(v => parseFloat(v.trim())) || [],
+                            diemGiuaKi: studentData["Điểm Giữa Kỳ"] ? [parseFloat(studentData["Điểm Giữa Kỳ"])] : [],
+                            diemCuoiKi: studentData["Điểm Cuối Kỳ"] ? [parseFloat(studentData["Điểm Cuối Kỳ"])] : []
+                        };
+                    }
+
+                    return student;
+                });
+
+                setStudents(updatedStudents);  // Cập nhật lại students state
             } else {
                 console.error('No sheets found in the Excel file');
             }
         };
-    
+
         reader.readAsBinaryString(file);
     }
-
-
 
     return (
         <div className="container mx-auto p-6 min-h-screen">
@@ -311,12 +349,19 @@ const GradeTable = () => {
                 </div>
 
                 <div className="flex items-center space-x-2">
-                <button
+                    <button
                         className="px-4 py-2 bg-green-600 text-white rounded-lg shadow-lg flex items-center hover:bg-green-700 transition duration-300"
-                        onClick={handleUploadExcel}
+                        onClick={() => document.getElementById("fileInput").click()}
                     >
                         <FaFileExcel className="mr-2" /> Tải lên Excel
                     </button>
+                    <input
+                        type="file"
+                        id="fileInput"
+                        accept=".xlsx, .xls"
+                        onChange={handleUploadExcel}
+                        style={{ opacity: 0, position: "absolute", zIndex: -1 }}
+                    />
                     <button
                         className="px-4 py-2 bg-green-600 text-white rounded-lg shadow-lg flex items-center hover:bg-green-700 transition duration-300"
                         onClick={handleDownloadExcel}
@@ -357,12 +402,18 @@ const GradeTable = () => {
                                 </td>
                                 <td className="border px-4 py-2">
                                     <div className="grid grid-cols-2 gap-2">
-                                        {[...Array(4)].map((_, idx) => (
+                                        {[...Array(subject.nameSubject === "Toán" ? 4 : 3)].map((_, idx) => (
                                             <input
                                                 key={`thuongXuyen-${idx}`}
                                                 type="number"
                                                 value={student.diemThuongXuyen[idx] || ''}
                                                 onChange={(e) => handleScoreChange('diemThuongXuyen', idx, e.target.value, student.id)}
+                                                onInput={(e) => {
+                                                    let value = e.target.value;
+                                                    // Chỉ cho phép nhập giá trị từ 0 đến 10
+                                                    if (value < 0) e.target.value = 0;
+                                                    if (value > 10) e.target.value = 10;
+                                                }}
                                                 className="w-full border rounded px-2 py-1"
                                             />
                                         ))}
@@ -374,6 +425,12 @@ const GradeTable = () => {
                                         type="number"
                                         value={student.diemGiuaKi || ''}
                                         onChange={(e) => handleScoreChange('diemGiuaKi', null, e.target.value, student.id)}
+                                        onInput={(e) => {
+                                            let value = e.target.value;
+                                            // Chỉ cho phép nhập giá trị từ 0 đến 10
+                                            if (value < 0) e.target.value = 0;
+                                            if (value > 10) e.target.value = 10;
+                                        }}
                                         className="w-full border rounded px-2 py-1"
                                     />
                                 </td>
@@ -382,17 +439,20 @@ const GradeTable = () => {
                                         type="number"
                                         value={student.diemCuoiKi || ''}
                                         onChange={(e) => handleScoreChange('diemCuoiKi', null, e.target.value, student.id)}
+                                        onInput={(e) => {
+                                            let value = e.target.value;
+                                            // Chỉ cho phép nhập giá trị từ 0 đến 10
+                                            if (value < 0) e.target.value = 0;
+                                            if (value > 10) e.target.value = 10;
+                                        }}
                                         className="w-full border rounded px-2 py-1"
+                                        min="0"
+                                        max="10"
                                     />
                                 </td>
 
                                 <td className="border px-4 py-3 font-semibold text-blue-700">
-                                    {(
-                                        (calculateAverage(student.diemThuongXuyen) * 1 +
-                                            calculateAverage(student.diemGiuaKi) * 2 +
-                                            calculateAverage(student.diemCuoiKi) * 3) /
-                                        6
-                                    ).toFixed(1)}
+                                    {calculateAverageSubject(student.diemThuongXuyen, student.diemGiuaKi, student.diemCuoiKi)}
                                 </td>
                             </tr>
                         ))}

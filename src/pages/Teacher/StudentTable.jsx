@@ -38,7 +38,7 @@ const StudentTable = () => {
   const [idSubjectOfSJCD, setIdSubjectOfSJCD] = useState();
   const [detailSubject, setDetailSubject] = useState();
 
-  console.log("idSubject", idSubject)
+  console.log("idSubject", detailSubject)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -320,6 +320,8 @@ const StudentTable = () => {
       const updatedScores = { ...prevSemesterScores[selectedSemester] };
       if (type === 'diemCuoiKi') {
         updatedScores.diemCuoiKi = value;
+      } else if (type === 'diemGiuaKi') {
+        updatedScores.diemGiuaKi = value;
       } else {
         updatedScores[type][index] = value;
       }
@@ -341,10 +343,6 @@ const StudentTable = () => {
         [selectedSemester]: updatedScores,
       };
     });
-  };
-
-  const handleBackSchedule = () => {
-    navigate('/manage/calender');
   };
 
   const mutation = useMutation({
@@ -524,7 +522,7 @@ const StudentTable = () => {
                       <th className="border px-4 py-2 cursor-pointer" style={{ width: '30%' }} onClick={() => handleAddNewInput('diemThuongXuyen')}>
                         Điểm thường xuyên
                       </th>
-                      <th className="border px-4 py-2 cursor-pointer" style={{ width: '30%' }} onClick={() => handleAddNewInput('diemGiuaKi')}>
+                      <th className="border px-4 py-2 cursor-pointer" style={{ width: '15%' }} onClick={() => handleAddNewInput('diemGiuaKi')}>
                         Điểm giữa kì
                       </th>
                       <th className="border px-4 py-2" style={{ width: '15%' }}>Điểm cuối kì</th>
@@ -544,26 +542,20 @@ const StudentTable = () => {
                         </td>
                         <td className="border px-4 py-2">
                           <div className="grid grid-cols-2 gap-2">
-                            {studentScores.scores.diemThuongXuyen?.map((score, index) => (
+                            {[...Array(detailSubject?.name === "Toán" ? 4 : 3)].map((_, index) => (
                               <input
                                 key={index}
                                 type="number"
-                                value={score}
-                                onChange={(e) => handleScoreChange('diemThuongXuyen', index, e.target.value)}
+                                value={studentScores.scores.diemThuongXuyen?.[index] || ""}
+                                onChange={(e) => {
+                                  let value = e.target.value;
+                                  if (value < 0) value = 0;
+                                  if (value > 10) value = 10;
+                                  handleScoreChange('diemThuongXuyen', index, value);
+                                }}
                                 className="w-full border rounded px-2 py-1"
-                              />
-                            ))}
-                          </div>
-                        </td>
-                        <td className="border px-4 py-2">
-                          <div className="grid grid-cols-2 gap-2">
-                            {studentScores.scores.diemGiuaKi?.map((score, index) => (
-                              <input
-                                key={index}
-                                type="number"
-                                value={score}
-                                onChange={(e) => handleScoreChange('diemGiuaKi', index, e.target.value)}
-                                className="w-full border rounded px-2 py-1"
+                                min="0"
+                                max="10"
                               />
                             ))}
                           </div>
@@ -571,8 +563,26 @@ const StudentTable = () => {
                         <td className="border px-4 py-2">
                           <input
                             type="number"
+                            value={studentScores.scores.diemGiuaKi || ''}
+                            onChange={(e) => {
+                              let value = e.target.value;
+                              if (value < 0) value = 0;
+                              if (value > 10) value = 10;
+                              handleScoreChange('diemGiuaKi', null, value);
+                            }}
+                            className="w-full border rounded px-2 py-1"
+                          />
+                        </td>
+                        <td className="border px-4 py-2">
+                          <input
+                            type="number"
                             value={studentScores.scores.diemCuoiKi || ''}
-                            onChange={(e) => handleScoreChange('diemCuoiKi', null, e.target.value)}
+                            onChange={(e) => {
+                              let value = e.target.value;
+                              if (value < 0) value = 0;
+                              if (value > 10) value = 10;
+                              handleScoreChange('diemCuoiKi', null, value);
+                            }}
                             className="w-full border rounded px-2 py-1"
                           />
                         </td>
@@ -595,20 +605,12 @@ const StudentTable = () => {
                                 key={index}
                                 type="number"
                                 value={score}
-                                onChange={(e) => handleScoreChange('diemThuongXuyen', index, e.target.value)}
-                                className="w-full border rounded px-2 py-1"
-                              />
-                            ))}
-                          </div>
-                        </td>
-                        <td className="border px-4 py-2">
-                          <div className="grid grid-cols-2 gap-2">
-                            {studentScores.scores.diemGiuaKi?.map((score, index) => (
-                              <input
-                                key={index}
-                                type="number"
-                                value={score}
-                                onChange={(e) => handleScoreChange('diemGiuaKi', index, e.target.value)}
+                                onChange={(e) => {
+                                  let value = e.target.value;
+                                  if (value < 0) value = 0;
+                                  if (value > 10) value = 10;
+                                  handleScoreChange('diemThuongXuyen', index, value);
+                                }}
                                 className="w-full border rounded px-2 py-1"
                               />
                             ))}
@@ -617,8 +619,26 @@ const StudentTable = () => {
                         <td className="border px-4 py-2">
                           <input
                             type="number"
+                            value={studentScores.scores.diemGiuaKi || ''}
+                            onChange={(e) => {
+                              let value = e.target.value;
+                              if (value < 0) value = 0;
+                              if (value > 10) value = 10;
+                              handleScoreChange('diemGiuaKi', null, value);
+                            }}
+                            className="w-full border rounded px-2 py-1"
+                          />
+                        </td>
+                        <td className="border px-4 py-2">
+                          <input
+                            type="number"
                             value={studentScores.scores.diemCuoiKi || ''}
-                            onChange={(e) => handleScoreChange('diemCuoiKi', null, e.target.value)}
+                            onChange={(e) => {
+                              let value = e.target.value;
+                              if (value < 0) value = 0;
+                              if (value > 10) value = 10;
+                              handleScoreChange('diemCuoiKi', null, value);
+                            }}
                             className="w-full border rounded px-2 py-1"
                           />
                         </td>
