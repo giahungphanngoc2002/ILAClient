@@ -61,8 +61,18 @@ const Dashboard = () => {
         }
     }, [user?.role, teacherId]);
 
-    console.log()
+    useEffect(() => {
+        if (subjects.length === 1) {
+            handleModalClick(subjects[0]._id);
+            closeModal();  // Đóng modal nếu chỉ có 1 môn học
+        }
+    }, [subjects]);  // Chạy lại khi subjects thay đổi
 
+    useEffect(() => {
+        if (classes.length > 0) {
+            setSelectedClass(classes[0]._id);
+        }
+    }, [classes]);
 
     useEffect(() => {
         if (!teacherId) return;

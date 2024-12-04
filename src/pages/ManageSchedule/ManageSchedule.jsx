@@ -410,7 +410,7 @@ const ManageSchedule = () => {
                 </div>
             )}
             {selectedClass && (
-                <div className="mt-6 text-center bg-gray-100">
+                <div className="mt-6 text-center">
                     <button
                         onClick={handleSaveSchedule}
                         className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded shadow-lg transition duration-200"

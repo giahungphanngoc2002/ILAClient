@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 import { FaFileExcel } from 'react-icons/fa';
 import * as XLSX from 'xlsx';
 import { useParams } from "react-router-dom";
+import Breadcrumb from "../../components/Breadcrumb/Breadcrumb";
 
 const timeSlots = [
     { slot: "Tiết 1" },
@@ -315,9 +316,22 @@ const CreateCalender = () => {
         }
     };
 
+    const onBack = () => {
+        window.history.back();
+    }
+
     return (
         <div className="p-6 bg-gray-100 rounded-lg">
-            <div className="bg-white p-6 rounded-lg shadow-lg">
+            <Breadcrumb
+                title="Tạo lịch học theo tuần"
+                buttonText="Lưu lịch"
+                onButtonClick={handleSaveSchedule}
+                onBack={onBack}
+            />
+
+
+
+            <div className="bg-white p-6 rounded-lg shadow-lg mt-16">
                 <div className="flex">
                     <div className="mb-4 w-1/2 pr-2">
                         <label className="block text-lg font-semibold">Thời gian bắt đầu:</label>
@@ -483,14 +497,14 @@ const CreateCalender = () => {
                     </tbody>
                 </table>
             </div>
-            <div className="mt-6 text-center">
+            {/* <div className="mt-6 text-center">
                 <button
                     onClick={handleSaveSchedule}
                     className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded shadow-lg transition duration-200"
                 >
                     Save Schedule
                 </button>
-            </div>
+            </div> */}
 
         </div>
     );

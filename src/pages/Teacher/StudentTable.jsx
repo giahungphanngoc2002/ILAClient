@@ -78,7 +78,7 @@ const StudentTable = () => {
     fetchData();
   }, [idSubject]);
 
-  console.log("123123", detailSubject)
+  // console.log("123123", detailSubject)
 
 
 
@@ -90,7 +90,17 @@ const StudentTable = () => {
     return data.some(subject => subject._id === idSubject);
   };
 
-  console.log(isSubjectInChuyenDe(idSubject, detailClass?.subjectGroup.SubjectsChuyendeId));
+  const isSubjectPhu = (idSubject, data) => {
+    if (!data) {
+      return false;
+    }
+
+    return data.some(subject => subject._id === idSubject);
+  };
+
+  // console.log(isSubjectInChuyenDe(idSubject, detailClass?.subjectGroup.SubjectsChuyendeId));
+
+  console.log(isSubjectPhu(idSubject, detailClass?.subjectGroup.SubjectsPhuId))
 
   useEffect(() => {
     if (year && week) {
@@ -124,8 +134,6 @@ const StudentTable = () => {
     };
     fetchData();
   }, [idClass]);
-
-  console.log(studentScores)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -440,7 +448,8 @@ const StudentTable = () => {
                   <th style={{ width: "20%" }} className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-white uppercase tracking-wider">Ngày sinh</th>
                   <th style={{ width: "20%" }} className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-white uppercase tracking-wider">Điểm danh</th>
                   <th style={{ width: "15%" }} className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-white uppercase tracking-wider">Trạng thái</th>
-                  <th style={{ width: "15%" }} className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-white uppercase tracking-wider">Xem</th>
+                  {!isSubjectPhu(idSubject, detailClass?.subjectGroup.SubjectsPhuId) && <th style={{ width: "15%" }} className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-white uppercase tracking-wider">Xem</th>}
+
                 </tr>
               </thead>
 
@@ -476,14 +485,15 @@ const StudentTable = () => {
                         </select>
                       )}
                     </td>
-
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <GrView
-                        className="cursor-pointer"
-                        onClick={() => openModal(student)}
-                        title="Xem chi tiết"
-                      />
-                    </td>
+                    {!isSubjectPhu(idSubject, detailClass?.subjectGroup.SubjectsPhuId) &&
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <GrView
+                          className="cursor-pointer"
+                          onClick={() => openModal(student)}
+                          title="Xem chi tiết"
+                        />
+                      </td>
+                    }
                   </tr>
                 ))}
               </tbody>
@@ -522,7 +532,7 @@ const StudentTable = () => {
                       <th className="border px-4 py-2 cursor-pointer" style={{ width: '30%' }} onClick={() => handleAddNewInput('diemThuongXuyen')}>
                         Điểm thường xuyên
                       </th>
-                      <th className="border px-4 py-2 cursor-pointer" style={{ width: '15%' }} onClick={() => handleAddNewInput('diemGiuaKi')}>
+                      <th className="border px-4 py-2" style={{ width: '15%' }}>
                         Điểm giữa kì
                       </th>
                       <th className="border px-4 py-2" style={{ width: '15%' }}>Điểm cuối kì</th>

@@ -123,12 +123,6 @@ export default function SignInPage() {
             >
               Đăng nhập
             </span>
-            <span
-              onClick={() => handleLinkClick("/signup")}
-              className={`cursor-pointer ${activeLink === "/signup" ? "text-blue-600" : "text-gray-600"} hover:text-blue-800 transition-colors duration-200`}
-            >
-              Đăng ký
-            </span>
           </div>
           <form onSubmit={handleSignin} className="space-y-4">
             <input
@@ -173,7 +167,7 @@ export default function SignInPage() {
               </Link>
             </div>
           </form>
-          <div className="flex items-center justify-center space-x-4 mt-14">
+          {/* <div className="flex items-center justify-center space-x-4 mt-14">
             <span className="text-gray-500">Hoặc đăng nhập bằng</span>
             <a
               href="#"
@@ -193,7 +187,7 @@ export default function SignInPage() {
             >
               <FontAwesomeIcon icon={faGithub} className="text-lg" />
             </a>
-          </div>
+          </div> */}
         </div>
       </div>
     </section>
