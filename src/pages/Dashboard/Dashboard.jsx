@@ -61,6 +61,8 @@ const Dashboard = () => {
         }
     }, [user?.role, teacherId]);
 
+    console.log()
+
 
     useEffect(() => {
         if (!teacherId) return;
