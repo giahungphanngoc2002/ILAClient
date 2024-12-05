@@ -52,3 +52,23 @@ export const getAllSubjects = async () => {
   const res = await axios.get(`${SUBJECT_API_URL}/getAllSubjects`);
   return res.data;
 };
+
+export const createEvaluate = async (classId, subjectId, evaluateData) => {
+  const res = await axios.post(`${SUBJECT_API_URL}/createEvaluate/${classId}/${subjectId}`, evaluateData);
+  return res.data;
+};
+
+export const updateEvaluate = async (classId, subjectId, evaluateId, semester, evaluateData) => {
+  const res = await axios.put(
+    `${SUBJECT_API_URL}/updateEvaluate/${classId}/${subjectId}/${evaluateId}/${semester}`, 
+    evaluateData
+  );
+  return res.data;
+};
+
+export const getAllEvaluateSemester = async (classId, subjectId, semester) => {
+  const res = await axios.get(
+    `${SUBJECT_API_URL}/getAllEvaluateSemester/${classId}/${subjectId}/${semester}`
+  );
+  return res.data;
+};

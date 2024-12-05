@@ -2,13 +2,14 @@ import React, { useEffect, useState } from "react";
 import Breadcrumb from "../../components/Breadcrumb/Breadcrumb";
 import { FaSearch } from "react-icons/fa";
 import * as ClassService from "../../services/ClassService";
+import * as SubjectService from "../../services/SubjectService";
 import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 
 
 function EvaluateManage() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [conducts, setConducts] = useState(null);
+  const [evaluates, setEvaluates] = useState(null);
   const { idClass, idSubject } = useParams();
   const [selectedSemester, setSelectedSemester] = useState("1"); // Mặc định Kỳ 1
   const [students, setStudents] = useState([]);
@@ -36,12 +37,11 @@ function EvaluateManage() {
   console.log(students)
 
   useEffect(() => {
-    // Định nghĩa hàm bên trong useEffect để sử dụng
-    const fetchConducts = async () => {
+    const fetchEvalutes = async () => {
       try {
         setLoading(true);
-        const response = await ClassService.getAllConductSemester(idClass, selectedSemester);
-        setConducts(response); // Đảm bảo dữ liệu được đặt lại đúng
+        const response = await SubjectService.getAllEvaluateSemester(idClass, idSubject, selectedSemester);
+        setEvaluates(Array.isArray(response.data) ? response.data : []); // Ensure evaluates is an array
       } catch (error) {
         console.error("Lỗi khi lấy danh sách đánh giá:", error);
       } finally {
@@ -50,26 +50,31 @@ function EvaluateManage() {
     };
 
     if (idClass) {
-      fetchConducts();
-    } // Gọi hàm fetchConducts để lấy dữ liệu mới
-  }, [selectedSemester, idClass]);
+      fetchEvalutes();
+    }
+  }, [selectedSemester, idClass, idSubject]);
+
 
 
 
   const mergedData = students.map((student) => {
-    const conduct = conducts?.find(
+    const evaluate = Array.isArray(evaluates) ? evaluates.find(
       (cond) =>
-        cond.studentId?._id === student?._id && cond?.semester === Number(selectedSemester) // Kiểm tra kỳ học
-    );
+        cond.StudentId?._id === student?._id && cond?.semester === Number(selectedSemester)
+    ) : null;
+    console.log("Evaluate for student:", student.name, "Evaluate found:", evaluate);
     return {
       ...student,
-      typeConduct: conduct ? conduct.typeConduct : "Chưa đánh giá", // Gắn giá trị mặc định nếu không có dữ liệu
+      evaluate: evaluate ? evaluate.evaluate : "Chưa đánh giá", // Default value if no evaluation
     };
   });
+  
+
 
   useEffect(() => {
-    console.log("Dữ liệu conducts:", conducts);
-  }, [conducts]);
+    console.log("Dữ liệu evaluates:", evaluates);
+  }, [evaluates]);
+
 
   useEffect(() => {
     console.log("Dữ liệu students:", students);
@@ -93,62 +98,93 @@ function EvaluateManage() {
     setSearchTerm(event.target.value);
   };
 
-  const handleSubmitConductEvaluation = async () => {
+  const handleSubmitEvaluateEvaluation = async () => {
     try {
-      const conductsForSelectedSemester = conducts?.filter(
-        (conduct) => conduct.semester === Number(selectedSemester)
-      );
-
-      if (!conductsForSelectedSemester || conductsForSelectedSemester.length === 0) {
-        // Nếu chưa có đánh giá cho kỳ hiện tại, khởi tạo mới
-        const conductData = students.map((student) => {
-          const conductSelect = document.querySelector(`#conduct-${student._id}`);
+      // Lọc các đánh giá cho kỳ học đã chọn
+      const evaluationsForSelectedSemester = evaluates && evaluates.length
+  ? evaluates.filter((evaluate) => evaluate.semester === Number(selectedSemester))
+  : [];
+  
+      console.log("Evaluations for Selected Semester:", evaluationsForSelectedSemester);
+  
+      if (!evaluationsForSelectedSemester || evaluationsForSelectedSemester.length === 0) {
+        // Nếu chưa có đánh giá cho kỳ học, khởi tạo mới các đánh giá
+        const evaluateData = students.map((student) => {
+          const evaluateSelect = document.querySelector(`#evaluate-${student._id}`);
+         
+          
+          console.log("Student ID:", student._id);
+          console.log("Subject ID:", idSubject);
+          console.log("Class ID:", idClass);
+          console.log("Semester ID:", Number(selectedSemester));
+         
+  
+          // Kiểm tra nếu thiếu trường dữ liệu
+          if (!student._id || !idSubject || !idClass) {
+            console.error(`Thiếu ID học sinh, môn học hoặc lớp học cho học sinh: ${student.name}`);
+            toast.error("Các trường bắt buộc không hợp lệ!");
+            return null; // Tránh gửi dữ liệu không hợp lệ
+          }
+        
           return {
-            typeConduct: conductSelect ? conductSelect.value : "tốt", // Giá trị mặc định là "tốt"
-            semester: Number(selectedSemester), // Kỳ học (1 hoặc 2)
-            studentId: student._id, // ID học sinh
+            evaluate: evaluateSelect ? evaluateSelect.value :"Đạt",
+            semester: Number(selectedSemester), // Kỳ học
+            StudentId: student._id, // ID học sinh
+            subjectId: idSubject,   // ID môn học
+            classId: idClass,       // ID lớp học
           };
-        });
-
-        console.log("Conduct Data to Submit:", conductData);
-        const response = await ClassService.createConduct(idClass, conductData);
-
-        if (response) {
-          toast.success("Khởi tạo đánh giá thành công!");
-          // Cập nhật lại trạng thái sau khi khởi tạo
-          const updatedConducts = await ClassService.getAllConductSemester(
-            idClass,
-            selectedSemester
-          );
-          setConducts(updatedConducts);
+        }).filter(Boolean); // Loại bỏ các giá trị null
+  
+        console.log("Evaluate Data to Submit:", evaluateData);
+  
+        if (evaluateData.length > 0) {
+          const response = await Promise.all(
+            evaluateData.map(data => 
+              SubjectService.createEvaluate(idClass, idSubject, data)));
+          console.log("Response from API:", response);
+  
+          if (response) {
+            toast.success("Khởi tạo đánh giá thành công!");
+            // Refresh lại danh sách đánh giá sau khi khởi tạo
+            const updatedEvaluates = await SubjectService.getAllEvaluateSemester(idClass, idSubject, selectedSemester);
+            setEvaluates(updatedEvaluates);
+          }
         }
       } else {
-        // Nếu đã có đánh giá cho kỳ hiện tại, cập nhật từng mục
-        const updatePromises = conductsForSelectedSemester.map(async (conduct) => {
-          const conductSelect = document.querySelector(
-            `#conduct-${conduct.studentId._id}`
-          );
-          const updatedTypeConduct = conductSelect
-            ? conductSelect.value
-            : conduct.typeConduct;
-
-          const updateData = { typeConduct: updatedTypeConduct };
-          return await ClassService.updateConduct(
+        // Nếu đã có đánh giá, cập nhật từng mục
+        const updatePromises = evaluationsForSelectedSemester.map(async (evaluate) => {
+          const evaluateSelect = document.querySelector(`#evaluate-${evaluate.StudentId._id}`);
+          const updatedEvaluate = evaluateSelect ? evaluateSelect.value : evaluate.evaluate;
+  
+          const updateData = { evaluate: updatedEvaluate };
+  
+          console.log("Updating evaluation for student:", evaluate.StudentId.name, "Updated Value:", updatedEvaluate);
+  
+          // Kiểm tra các giá trị bắt buộc
+          if (!evaluate.StudentId._id || !idSubject || !idClass) {
+            console.error(`Thiếu ID học sinh, môn học hoặc lớp học cho đánh giá của học sinh: ${evaluate.StudentId.name}`);
+            toast.error("Các trường bắt buộc không hợp lệ!");
+            return;
+          }
+  
+          return await SubjectService.updateEvaluate(
             idClass,
-            conduct._id,
+            idSubject,
+            evaluate._id,
             selectedSemester,
             updateData
           );
         });
-
+  
         await Promise.all(updatePromises);
         toast.success("Cập nhật đánh giá thành công!");
       }
     } catch (error) {
-      console.error("Lỗi khi đánh giá hoặc cập nhật hạnh kiểm:", error);
-      toast.error("Có lỗi xảy ra khi đánh giá hoặc cập nhật hạnh kiểm!");
+      console.error("Error when evaluating or updating evaluation:", error);
+      toast.error("Có lỗi xảy ra khi đánh giá hoặc cập nhật đánh giá!");
     }
   };
+
 
 
   const handleSemesterChange = (semester) => {
@@ -161,7 +197,7 @@ function EvaluateManage() {
       <Breadcrumb
         title="Đánh giá học tập"
         buttonText="Hoàn thành đánh giá"
-        onButtonClick={handleSubmitConductEvaluation}
+        onButtonClick={handleSubmitEvaluateEvaluation}
         onBack={onBack}
       />
 
@@ -256,7 +292,7 @@ function EvaluateManage() {
                       fontSize: "0.875rem",
                     }}
                   >
-                    Hạnh kiểm
+                    Đánh Giá
                   </th>
                 </tr>
               </thead>
@@ -267,9 +303,9 @@ function EvaluateManage() {
                     <td style={{ padding: "12px", border: "1px solid #ddd" }}>{row.name}</td>
                     <td style={{ padding: "12px", border: "1px solid #ddd", textAlign: "center" }}>
                       <select
-                        id={`conduct-${row._id}`}
+                        id={`evaluate-${row._id}`}
                         className="border border-blue-700 rounded-md p-1 focus:ring-2 focus:ring-blue-700 focus:border-blue-700"
-                        defaultValue={row.typeConduct}
+                        defaultValue={row.evaluate}
                       >
                         <option value="Đạt">Đạt</option>
                         <option value="Không Đạt">Không Đạt</option>

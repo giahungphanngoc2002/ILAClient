@@ -3,6 +3,7 @@ import * as XLSX from "xlsx";
 import { FaFileExcel, FaSearch, FaArrowLeft } from 'react-icons/fa';
 import { useParams } from "react-router-dom";
 import * as ScoreSubjectService from "../../services/ScoreSbujectService";
+import * as SubjectService from "../../services/SubjectService";
 import * as ClassService from "../../services/ClassService";
 import Breadcrumb from "../../components/Breadcrumb/Breadcrumb";
 import { toast } from "react-toastify";
@@ -15,7 +16,9 @@ const GradeTable = () => {
     const [studentInClass, setStudentInClass] = useState([]);
     const [classDetail, setClassDetail] = useState();
     const [subject, setSubject] = useState()
+    const [subjectPhu, setSubjectPhu] = useState()
     const [loading, setLoading] = useState(false);
+    const [evaluates, setEvaluates] = useState(null);
 
     // Lấy danh sách học sinh trong lớp
     useEffect(() => {
@@ -46,10 +49,36 @@ const GradeTable = () => {
         } else {
             console.error('subjectGroup is not an array or is missing.');
         }
+    
+        // Lấy thêm SubjectsPhuId nếu có
+        if (Array.isArray(classDetail?.subjectGroup?.SubjectsPhuId)) {
+            const foundPhuSubject = classDetail.subjectGroup?.SubjectsPhuId.find(subject => subject._id === idSubject);
+            setSubjectPhu(foundPhuSubject);  // Cập nhật phuSubject vào state
+        } else {
+            console.error('SubjectsPhuId is not an array or is missing.');
+        }
     }, [classDetail, idSubject]);
 
-
+    useEffect(() => {
+        const fetchEvalutes = async () => {
+          try {
+            setLoading(true);
+            const response = await SubjectService.getAllEvaluateSemester(idClass, idSubject, semesterFilter);
+            setEvaluates(Array.isArray(response.data) ? response.data : []); // Ensure evaluates is an array
+          } catch (error) {
+            console.error("Lỗi khi lấy danh sách đánh giá:", error);
+          } finally {
+            setLoading(false); // Kết thúc tải
+          }
+        };
+    
+        if (idClass) {
+          fetchEvalutes();
+        }
+      }, [semesterFilter, idClass, idSubject]);
     // Lấy điểm của học sinh
+
+    console.log(evaluates)
     useEffect(() => {
         const fetchScores = async () => {
             try {
@@ -306,7 +335,7 @@ const GradeTable = () => {
     return (
         <div className="container mx-auto p-6 min-h-screen">
             <Breadcrumb
-                title={`Bảng Điểm Môn ${subject?.nameSubject} Lớp ${classDetail?.nameClass}`}
+                title={`Bảng Điểm Môn ${subjectPhu ? subjectPhu.nameSubject : subject?.nameSubject} Lớp ${classDetail?.nameClass}`}
                 buttonText="Lưu điểm"
                 onButtonClick={handleSubmitScore}
                 onBack={onBack}
