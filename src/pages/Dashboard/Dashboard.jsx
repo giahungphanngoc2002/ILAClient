@@ -15,6 +15,7 @@ import { MdAccountCircle } from "react-icons/md";
 import { FaClipboardUser } from "react-icons/fa6";
 import { TbSquareLetterA } from "react-icons/tb";
 import { MdStars } from "react-icons/md";
+import { toast } from 'react-toastify';
 
 const Dashboard = () => {
     const user = useSelector((state) => state.user);
@@ -28,6 +29,7 @@ const Dashboard = () => {
     const [subjects, setSubjects] = useState([]); // Môn học của giáo viên
     const [selectedCard, setSelectedCard] = useState(null);
     const [classHR, setClassHR] = useState(null);
+    const [teacherSubjects, setTeacherSubjects] = useState();
 
     const navigate = useNavigate();
 
@@ -40,7 +42,7 @@ const Dashboard = () => {
             setIsLoading(true);
             try {
                 const response = await ClassService.getAllSubjectClassesByTeacherId(teacherId);
-                console.log('Full API response data:', response);
+                // console.log('Full API response data:', response);
                 if (response && response.data && response.data.classes) {
                     setClasses(response.data.classes);
                 } else {
@@ -99,23 +101,32 @@ const Dashboard = () => {
         fetchDetailClassByTeacherHR();
     }, [teacherId]);
 
-    console.log(classHR)
+    // console.log(classHR)
 
     const handleClassClick = (classId) => {
         setSelectedClass(classId); // Cập nhật lớp được chọn
     };
 
     const handleCardClick = (cardType) => {
-        if (!selectedClass) return;  // Kiểm tra xem lớp đã được chọn chưa
+        if (!selectedClass) return;
 
-        // Tìm lớp được chọn
         const selectedClassData = classes.find((classItem) => classItem._id === selectedClass);
+        // console.log(selectedClassData)
 
         if (selectedClassData) {
-            // Lọc danh sách môn học mà giáo viên đang dạy trong lớp đó
             const teacherSubjects = selectedClassData.subjectGroup.filter(
-                (subject) => subject.teacherId === user.id
+                (subject) => subject.teacherId === user.id && subject.isSpecialized === false
             );
+
+            setTeacherSubjects(teacherSubjects)
+
+            // console.log(teacherSubjects)
+
+            // const hasScoreableSubject = teacherSubjects.some((subject) => subject.isScore === true);
+            // if (!hasScoreableSubject) {
+            //     alert("Môn học này không ghi điểm!")
+            //     return;
+            // }
 
             setSelectedCard(cardType);    // Lưu loại card đã bấm
             setSubjects(teacherSubjects); // Cập nhật danh sách môn học
@@ -128,26 +139,38 @@ const Dashboard = () => {
         setSubjects([]); // Reset danh sách môn học khi đóng modal
     };
 
-    const goToManageScore = (idSubject) => {
-        console.log(idSubject)
-        navigate(`/manage/gradeTable/${idSubject}/${selectedClass}/1`)
-    }
+    const findClass = classes.find((cls) => cls._id === selectedClass);
+
+    // console.log(findClass)
+
 
     const handleModalClick = (subjectId) => {
+        const subject = findClass?.subjectGroup.find(
+            (subject) => subject._id === subjectId
+        );
+
+        const hasScoreSubject = subject ? subject.isScore === true : false;
+        console.log(hasScoreSubject)
         if (selectedCard === "attendance") {
             navigate(`/attendance/${subjectId}`);
-            // Hàm điều hướng hoặc xử lý cho Quản lí điểm danh
         } else if (selectedCard === "grade") {
-            // Hàm điều hướng hoặc xử lý cho Bảng điểm
-            navigate(`/manage/gradeTable/${subjectId}/${selectedClass}/1`)
+            if (hasScoreSubject) {
+                navigate(`/manage/gradeTable/${subjectId}/${selectedClass}/1`)
+            } else {
+                toast.info("Môn học này không sử dụng điểm số!!")
+                closeModal();
+            }
         } else if (selectedCard === "homework") {
-            // Hàm điều hướng hoặc xử lý cho Giao bài tập, tài liệu
             navigate(`/manage/teachingMaterial/${selectedClass}/${subjectId}`);
         } else if (selectedCard === "question") {
-            // Hàm điều hướng hoặc xử lý cho Quản lí câu hỏi
             navigate(`/manage/questionManage/${selectedClass}/${subjectId}`)
         } else if (selectedCard === "evaluate") {
-            navigate(`/manage/evaluateManage/${selectedClass}/${subjectId}`)
+            if (!hasScoreSubject) {
+                navigate(`/manage/evaluateManage/${selectedClass}/${subjectId}`)
+            } else {
+                toast.info("Môn học này không có đánh giá!!")
+                closeModal();
+            }
         }
     };
 
@@ -499,16 +522,21 @@ const Dashboard = () => {
             {/* Modal */}
             {isModalOpen && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                    <div className="bg-white p-6 rounded-lg shadow-lg w-3/4">
-                        <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Danh sách các môn bạn dạy</h2>
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <div className="bg-gray-100 p-8 rounded-lg shadow-lg w-4/5 md:w-3/4">
+                        <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">Chọn môn học</h2>
+
+                        {/* Tìm kiếm */}
+                        <div className="mb-4">
+                        </div>
+
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                             {subjects.map((subject) => (
                                 <button
                                     onClick={() => handleModalClick(subject._id)}
                                     key={subject._id}
-                                    className="bg-gray-100 p-4 rounded-md shadow-md text-center"
+                                    className="bg-gray-200 p-4 rounded-md shadow-md text-center hover:bg-gray-300 transition duration-200"
                                 >
-                                    <p className="text-gray-700 font-semibold">{subject.nameSubject}</p>
+                                    <p className="text-gray-900 font-semibold">{subject.nameSubject}</p>
                                 </button>
                             ))}
                         </div>
@@ -516,13 +544,14 @@ const Dashboard = () => {
                         <div className="flex justify-center mt-6">
                             <button
                                 onClick={closeModal}
-                                className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition"
+                                className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition duration-200"
                             >
                                 Đóng
                             </button>
                         </div>
                     </div>
                 </div>
+
             )}
 
         </div>

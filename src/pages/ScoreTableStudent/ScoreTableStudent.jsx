@@ -10,14 +10,17 @@ import { useSelector } from 'react-redux';
 const ScoreTableStudent = () => {
     const user = useSelector((state) => state.user);
     const [grades, setGrades] = useState([]);
-    const [selectedSemester, setSelectedSemester] = useState("1"); // Mặc định là Kỳ 1
-    const [loading, setLoading] = useState(false); // Trạng thái tải dữ liệu
-    const [error, setError] = useState(null); // Trạng thái lỗi
+    const [selectedSemester, setSelectedSemester] = useState("1");
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
     const [studentId, setStudentId] = useState(user?.id);
     const [classes, setClasses] = useState([]);
     const [classSubject, setClassSubject] = useState(null);
-    const [selectedYear, setSelectedYear] = useState("2024-2025"); // Năm học
-    const [years, setYears] = useState([]); // Khởi tạo years là mảng rỗng thay 
+    const [classSubjectPhu, setClassSubjectPhu] = useState();
+    const [selectedYear, setSelectedYear] = useState("2024-2025");
+    const [years, setYears] = useState([]);
+    const [subjectEvaluate, setSubjectEvaluate] = useState([]);
+
 
     useEffect(() => {
         setStudentId(user?.id);
@@ -83,19 +86,15 @@ const ScoreTableStudent = () => {
                 setClasses(allClasses?.data || []);
 
                 const calculatedSchoolYears = allClasses?.data.map(classItem => {
-                    console.log('Processing classItem:', classItem);
-                    console.log('classItem.year:', classItem?.year);  // Kiểm tra year
-                    console.log('classItem.blockID.nameBlock:', classItem?.blockID?.nameBlock);  // Kiểm tra block
 
-                    const block = parseInt(classItem?.blockID?.nameBlock, 10);  // Chuyển thành số nguyên
+                    const block = parseInt(classItem?.blockID?.nameBlock, 10);
                     const years = getSchoolYears(classItem?.year, block);
-                    console.log('Returned years:', years);  // Kiểm tra giá trị trả về từ getSchoolYears
 
-                    return years.length > 0 ? years : null;  // Trả về null nếu mảng trống
+                    return years.length > 0 ? years : null;
                 }).filter(year => year !== null).flat();
 
                 console.log('Calculated School Years:', calculatedSchoolYears);
-                setYears([...new Set(calculatedSchoolYears)]); // Kiểm tra kết quả cuối cùng
+                setYears([...new Set(calculatedSchoolYears)]);
 
                 // Set giá trị mặc định cho selectedYear nếu có "2024-2025"
                 if (calculatedSchoolYears.includes("2024-2025") && !selectedYear) {
@@ -108,14 +107,44 @@ const ScoreTableStudent = () => {
                 } else {
                     console.error("Không tìm thấy classSubject phù hợp!");
                 }
+                if (userClass && userClass.subjectGroup?.SubjectsPhuId) {
+                    setClassSubjectPhu(userClass?.subjectGroup?.SubjectsPhuId || []);
+                } else {
+                    console.error("Không tìm thấy classSubject phù hợp!");
+                }
             } catch (error) {
                 console.error('Error fetching classes:', error);
             }
         };
-
         fetchClasses();
     }, [user.id]);
-    console.log(classSubject)
+
+    const filterSubjectEvaluationsByUserId = () => {
+        if (!Array.isArray(classSubjectPhu)) {
+            console.warn('classSubjectPhu is not an array or is undefined');
+            return [];  // Trả về mảng rỗng nếu classSubjectPhu không hợp lệ
+        }
+
+        return classSubjectPhu.map(subject => {
+            const userEvaluate = subject.evaluate.filter(evaluation => evaluation.StudentId === user.id);
+
+            // Nếu có đánh giá của học sinh, trả về môn học và các đánh giá
+            if (userEvaluate.length > 0) {
+                return {
+                    nameSubject: subject.nameSubject,
+                    evaluate: userEvaluate
+                };
+            }
+            return null;
+        }).filter(subject => subject !== null);
+    };
+
+    useEffect(() => {
+        setSubjectEvaluate(filterSubjectEvaluationsByUserId());
+    }, [classSubjectPhu, user.id]);
+
+    console.log(subjectEvaluate)
+
 
     // Hàm gọi API và định dạng lại dữ liệu
     const fetchScores = async (semester, year) => {
@@ -131,7 +160,7 @@ const ScoreTableStudent = () => {
         try {
             // Lấy dữ liệu điểm từ API
             const rawData = await ScoreSbujectService.getAllScoreByStudentIdSemesterAndClass(studentId, semester, year);
-            console.log("Raw Data:", rawData);
+            // console.log("Raw Data:", rawData);
 
             // Kiểm tra nếu rawData không có dữ liệu
             if (!rawData || rawData.data.length === 0) {
@@ -182,7 +211,7 @@ const ScoreTableStudent = () => {
                 [semester]: formattedData,
             }));
         } catch (err) {
-            console.error("Error fetching scores:", err.message || err);
+            // console.error("Error fetching scores:", err.message || err);
             setGrades(prev => ({
                 ...prev,
                 [semester]: classSubject.map(subject => ({
@@ -200,7 +229,7 @@ const ScoreTableStudent = () => {
 
     useEffect(() => {
         if (classSubject && Array.isArray(classSubject) && selectedYear && selectedSemester) {
-            fetchScores(selectedSemester, selectedYear); // Gọi API với semester và year
+            fetchScores(selectedSemester, selectedYear);
         }
     }, [selectedSemester, selectedYear, studentId, classSubject]);
 
@@ -212,17 +241,12 @@ const ScoreTableStudent = () => {
         window.history.back();
     };
 
-    console.log(grades)
 
     const calculateAverageSubject = (regular = [], midterm = [], final = []) => {
         // Check if all inputs are arrays
         if (!Array.isArray(regular) || !Array.isArray(midterm) || !Array.isArray(final)) {
             throw new Error("All inputs must be arrays.");
         }
-
-        console.log("regular length", regular.length)
-        console.log("midterm length", midterm.length)
-        console.log("final length", final.length)
 
         const totalWeight = (regular.length * 1) + (midterm.length * 2) + (final.length * 3);
         const totalScore =
@@ -339,6 +363,45 @@ const ScoreTableStudent = () => {
                                     </td>
                                     <td className="px-4 py-4 border border-gray-200 text-center font-semibold">
                                         {calculateAverageSubject(grade.regular, grade.midterm, grade.final)}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                )}
+            </div>
+
+            <div className="w-4/5 rounded-xl overflow-hidden p-6">
+                <div className="flex items-center mb-6">
+                    <HiClipboardList className="text-blue-600 w-6 h-6 mr-2" />
+                    <span className="text-xl font-bold text-blue-600">Bảng đánh giá</span>
+                </div>
+
+                {loading && <p className="text-blue-500">Đang tải dữ liệu...</p>}
+                {error && <p className="text-red-500">{error}</p>}
+
+                {!loading && !error && grades[selectedSemester] && (
+                    <table className="w-full border-collapse text-left table-fixed bg-white">
+                        <thead>
+                            <tr className="bg-blue-100 text-blue-700 text-lg font-semibold">
+                                <th className="w-1/4 px-4 py-4 border border-blue-200">Môn học</th>
+                                <th className="w-1/4 px-4 py-4 border border-blue-200 text-center">Điểm Thường Xuyên</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {grades[selectedSemester]?.map((grade, index) => (
+                                <tr key={index} className="hover:bg-blue-50 text-gray-700 text-lg">
+                                    <td className="px-4 py-4 border border-gray-200">
+                                        {grade.subject}
+                                    </td>
+                                    <td className="px-4 py-4 border border-gray-200 text-center">
+                                        <div className="grid grid-cols-3 gap-1">
+                                            {grade.final.map((score, idx) => (
+                                                <div key={idx} className="p-1 border border-gray-300 rounded-md">
+                                                    {score}
+                                                </div>
+                                            ))}
+                                        </div>
                                     </td>
                                 </tr>
                             ))}
