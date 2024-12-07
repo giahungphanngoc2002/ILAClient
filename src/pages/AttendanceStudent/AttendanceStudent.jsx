@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Breadcrumb from '../../components/Breadcrumb/Breadcrumb';
 import * as ClassService from "../../services/ClassService";
 import { useSelector } from 'react-redux';
+import * as ScheduleService from "../../services/ScheduleService";
 const daysOfWeek = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
 const periods = ["Tiết 1", "Tiết 2", "Tiết 3", "Tiết 4", "Tiết 5", "Tiết 6", "Tiết 7", "Tiết 8", "Tiết 9", "Tiết 10"];
 const years = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i);
@@ -19,10 +20,30 @@ const AttendanceStudent = () => {
     const currentMonth = new Date().getMonth() + 1;
     const [selectedYear, setSelectedYear] = useState(currentYear);
     const [selectedMonth, setSelectedMonth] = useState(currentMonth);
-    const [classId, setClassId] = useState();
-
+    const [studentId, setStudentId] = useState(user?.id);
+    const [timeTables, setTimeTables] = useState([]);
     const daysInMonth = new Date(selectedYear, selectedMonth, 0).getDate();
+    const [isLoading, setIsLoading] = useState(false);
+    useEffect(() => {
+        setStudentId(user?.id);
+    }, [user]);
 
+
+    useEffect(() => {
+        const fetchTimeTables = async () => {
+            setIsLoading(true);
+            try {
+                const timeTablesData = await ScheduleService.getClassAndTimeTableByStudentId(studentId);
+                setTimeTables(timeTablesData.data);          
+            } catch (error) {
+                console.error("Error fetching time tables:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchTimeTables();
+    }, [studentId]);
+        console.log("time",timeTables)
 
 
     const findUserClasses = (allClasses, userId) => {
@@ -30,7 +51,7 @@ const AttendanceStudent = () => {
             console.error("All classes is not a valid array:", allClasses);
             return [];
         }
-
+    
         const foundClasses = allClasses.filter((classItem) => {
             return (
                 Array.isArray(classItem.studentID) &&
@@ -39,37 +60,35 @@ const AttendanceStudent = () => {
                         ? student === userId
                         : student._id === userId
                 ) &&
-                classItem.year === result // Kiểm tra năm của lớp
+                classItem.year === result  // Kiểm tra năm của lớp
             );
         });
-
+    
         if (foundClasses.length === 0) {
             console.warn("No class found for user:", userId);
         }
-
+    
         return foundClasses;
     };
+    
 
-
-    useEffect(() => {
+      useEffect(() => {
         const fetchClasses = async () => {
-            try {
-                const allClasses = await ClassService.getAllClass();
-                const userClass = findUserClasses(allClasses?.data || [], user.id);
-                console.log(userClass)
-                setClassId(userClass[0]._id)
-            } catch (error) {
-                console.error("Error fetching classes:", error);
-            }
+          try {
+            const allClasses = await ClassService.getAllClass();
+            const userClass = findUserClasses(allClasses?.data || [], user.id);
+            console.log("123",userClass)
+          } catch (error) {
+            console.error("Error fetching classes:", error);
+          }
         };
-
+    
         fetchClasses();
-    }, [user.id]);
+      }, [user.id]);
 
-    console.log(classId)
-
-    const currentYearr = new Date().getFullYear();
-    const result = `${currentYearr}-${currentYearr + 1}`;
+      const currentYearr = new Date().getFullYear();
+      const result = `${currentYearr}-${currentYearr + 1}`;
+      console.log(result);  // Ví dụ: "2024-2025"
 
     const getDayOfWeek = (day) => {
         const date = new Date(selectedYear, selectedMonth - 1, day);

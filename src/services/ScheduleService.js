@@ -73,3 +73,8 @@ export const updateScheduleByClassId = async (classId, timeTableId, scheduleData
         return res.data;
     
 };
+
+export const getClassAndTimeTableByStudentId = async (studentId) => {
+    const res = await axios.get(`${SCHEDULE_API_URL}/getAllTimeTable/${studentId}`);
+    return res.data;
+};
