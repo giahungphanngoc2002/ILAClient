@@ -29,11 +29,6 @@ const QuestionManager = () => {
     const [textLession, setTextLession] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
-
-
-
-
-
     const fetchQuestions = async () => {
         setIsLoading(true);
         try {
@@ -178,13 +173,16 @@ const QuestionManager = () => {
         setTextCA(e.target.value);
     };
 
-    const handleEditLevel = () => {
+    const handleEditLevel = (lv) => {
+        setTextLevel(lv)
         setToggleEditLevel(!toggleEditLevel);
     };
-    const handleEditLession = () => {
+    const handleEditLession = (lession) => {
+        setTextLession(lession)
         setToggleEditLession(!toggleEditLession);
     };
-    const handleEditChapter = () => {
+    const handleEditChapter = (chapter) => {
+        setTextChapTer(chapter)
         setToggleEditChapter(!toggleEditChapter);
     };
 
@@ -226,7 +224,8 @@ const QuestionManager = () => {
         setTextAnswer(e.target.value);
     };
 
-    const handleEditCA = () => {
+    const handleEditCA = (CA) => {
+        setTextCA(CA)
         setToggleEditCA(!toggleEditCA);
     };
 
@@ -404,7 +403,6 @@ const QuestionManager = () => {
                     handleUpdateQuestion={handleUpdateQuestion}
                     toggleEditLevel={toggleEditLevel}
                     handleEditLevel={handleEditLevel}
-
                     textLession={textLession}
                     handleLessionChange={handleLessionChange}
                     toggleEditLession={toggleEditLession}

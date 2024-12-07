@@ -35,6 +35,15 @@ export default function SearchQuestionByAI() {
   const [error, setError] = useState("");
   const [buttonColor, setButtonColor] = useState("gray");
   const [showWarning, setShowWarning] = useState(false);
+  const [editingQuestion, setEditingQuestion] = useState(null); // Câu hỏi đang chỉnh sửa
+  const [updatedQuestion, setUpdatedQuestion] = useState({
+    question: "",
+    options: ["", "", "", ""],
+    correctAnswer: "",
+    level: [1, 2, 3],
+    chapter: "",
+    lession: ""
+  });
   const navigate = useNavigate();
 
   const countWords = (text) => {
@@ -222,6 +231,28 @@ export default function SearchQuestionByAI() {
     }
   }
 
+  const handleUpdateQuestion = (index) => {
+    const questionToEdit = questions[index];
+    setEditingQuestion(index); // Lưu chỉ số câu hỏi đang chỉnh sửa
+    setUpdatedQuestion({
+      question: questionToEdit.question,
+      options: questionToEdit.options,
+      correctAnswer: questionToEdit.correctAnswer,
+      level: questionToEdit.level,
+      chapter: questionToEdit.chapter,
+      lession: questionToEdit.lession
+    });
+  }
+
+  const handleSaveUpdatedQuestion = (index) => {
+    const updatedQuestions = [...questions];
+    updatedQuestions[index] = updatedQuestion; // Cập nhật câu hỏi đã sửa
+
+    setQuestions(updatedQuestions); // Cập nhật danh sách câu hỏi
+    setEditingQuestion(null); // Đóng modal
+    message.success("Question updated successfully!");
+  }
+
   return (
     <div className="p-6 text-center h-screen bg-white">
       <h1 className="text-3xl font-bold mb-6 text-gray-800">Chat AI</h1>
@@ -261,12 +292,12 @@ export default function SearchQuestionByAI() {
       ) : (
         <div className="container mx-auto mt-6">
           {questions.map((questionn, key) => (
-            <div key={key} className="bg-white shadow-lg rounded-lg p-6 mb-6">
+            <div key={key} className="bg-white shadow-lg rounded-lg p-6 mb-6 hover:shadow-2xl transition-shadow duration-300">
               <div className="mb-4">
-                <h2 className="text-xl font-semibold text-left text-gray-800 mb-2">
+                <h2 className="text-2xl font-semibold text-left text-gray-800 mb-4">
                   Question: {questionn?.question}
                 </h2>
-                <div className="flex flex-wrap -mx-2">
+                <div className="flex flex-wrap -mx-2 mb-4">
                   {questionn?.options.map((answer, index) => (
                     <div key={index} className="w-full sm:w-1/2 px-2 mb-4">
                       <li className="p-3 bg-blue-100 rounded-lg border border-blue-300 list-none">
@@ -283,27 +314,36 @@ export default function SearchQuestionByAI() {
                     </div>
                   ))}
                 </div>
-                <p className="border-2 rounded-lg bg-green-200 p-3 text-left border-green-500">
-                  Correct answer: {questionn?.correctAnswer}
-                </p>
-                <p className="border-2 rounded-lg bg-green-200 p-3 text-left border-green-500">
-                  level: {questionn?.level}
-                </p>
-                <p className="border-2 rounded-lg bg-green-200 p-3 text-left border-green-500">
-                  chapter: {questionn?.chapter}
-                </p>
 
-                <p className="border-2 rounded-lg bg-green-200 p-3 text-left border-green-500">
-                  lession: {questionn?.lession}
-                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                  <p className="border-2 rounded-lg bg-green-200 p-3 text-left border-green-500">
+                    Correct answer: {questionn?.correctAnswer}
+                  </p>
+                  <p className="border-2 rounded-lg bg-green-200 p-3 text-left border-green-500">
+                    Level: {questionn?.level}
+                  </p>
+                  <p className="border-2 rounded-lg bg-green-200 p-3 text-left border-green-500">
+                    Chapter: {questionn?.chapter}
+                  </p>
+                  <p className="border-2 rounded-lg bg-green-200 p-3 text-left border-green-500">
+                    Lesson: {questionn?.lession}
+                  </p>
+                </div>
               </div>
 
-              <div className="text-right">
+              <div className="flex justify-end gap-4">
                 <button
                   className="btn btn-danger bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition duration-200"
                   onClick={() => handleDeleteQuestion(key)}
                 >
-                  X
+                  Delete
+                </button>
+                <button
+                  style={{ backgroundColor: "#2563EB" }}
+                  className="btn text-white py-2 px-4 rounded-lg hover:bg-blue-600"
+                  onClick={() => handleUpdateQuestion(key)}
+                >
+                  Update
                 </button>
               </div>
             </div>
@@ -328,6 +368,109 @@ export default function SearchQuestionByAI() {
           fontWeight: "700",
         }}
       ></ButtonComponent>
+
+      {editingQuestion !== null && (
+        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded-lg w-1/3">
+            {/* <h3 className="text-xl font-semibold mb-4">Chỉnh sửa câu hỏi</h3> */}
+            <div className="text-left">
+              <h5>Câu hỏi:</h5>
+              <textarea
+                value={updatedQuestion.question}
+                onChange={(e) => setUpdatedQuestion({ ...updatedQuestion, question: e.target.value })}
+                className="w-full h-20 p-2 mb-4 border border-gray-300 rounded-lg"
+                placeholder="Update the question..."
+              />
+            </div>
+            <div className="text-left">
+              <h5>Các đáp án:</h5>
+
+              {updatedQuestion.options.map((option, index) => (
+                <div key={index} className="mb-2">
+                  <input
+                    type="text"
+                    value={option}
+                    onChange={(e) => {
+                      const updatedOptions = [...updatedQuestion.options];
+                      updatedOptions[index] = e.target.value;
+                      setUpdatedQuestion({ ...updatedQuestion, options: updatedOptions });
+                    }}
+                    className="w-full p-2 mb-2 border border-gray-300 rounded-lg"
+                    placeholder={`Option ${index + 1}`}
+                  />
+                </div>
+              ))}
+            </div>
+            <div className="text-left">
+              <h5>Đáp án đúng:</h5>
+              <select
+                value={updatedQuestion.correctAnswer}
+                onChange={(e) => setUpdatedQuestion({ ...updatedQuestion, correctAnswer: e.target.value })}
+                className="w-full p-2 mb-4 border border-gray-300 rounded-lg"
+              >
+                <option value="" disabled>Chọn đáp án đúng</option>
+                {updatedQuestion.options.map((option, index) => (
+                  <option key={index} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="text-left">
+              <h5>Độ khó:</h5>
+              <select
+                value={updatedQuestion.level}
+                onChange={(e) => setUpdatedQuestion({ ...updatedQuestion, level: parseInt(e.target.value, 10) })}
+                className="w-full p-2 mb-4 border border-gray-300 rounded-lg"
+              >
+                <option value={1}>1</option>
+                <option value={2}>2</option>
+                <option value={3}>3</option>
+              </select>
+            </div>
+
+            <div className="text-left">
+              <h5>Bài học:</h5>
+              <input
+                type="text"
+                value={updatedQuestion.chapter}
+                onChange={(e) => setUpdatedQuestion({ ...updatedQuestion, chapter: e.target.value })}
+                className="w-full p-2 mb-4 border border-gray-300 rounded-lg"
+                placeholder="Chapter"
+              />
+            </div>
+
+            <div className="text-left">
+              <h5>Chương</h5>
+
+
+              <input
+                type="text"
+                value={updatedQuestion.lession}
+                onChange={(e) => setUpdatedQuestion({ ...updatedQuestion, lession: e.target.value })}
+                className="w-full p-2 mb-4 border border-gray-300 rounded-lg"
+                placeholder="Lesson"
+              />
+
+            </div>
+            <div className="flex justify-between">
+              <button
+                className="bg-red-500 text-white px-4 py-2 rounded-lg"
+                onClick={() => setEditingQuestion(null)} // Đóng modal
+              >
+                Cancel
+              </button>
+              <button
+                className="bg-green-500 text-white px-4 py-2 rounded-lg"
+                onClick={() => handleSaveUpdatedQuestion(editingQuestion)} // Lưu câu hỏi
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

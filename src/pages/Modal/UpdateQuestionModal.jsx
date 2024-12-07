@@ -26,8 +26,8 @@ const UpdateQuestionModal = ({
   saveLevel,
   toggleEditLevel,
   handleEditLevel,
-  textLession,handleLessionChange,toggleEditLession,handleEditLession,saveLession,
-  textChapter,handleChapterChange,toggleEditChapter,handleEditChapter,saveChapter
+  textLession, handleLessionChange, toggleEditLession, handleEditLession, saveLession,
+  textChapter, handleChapterChange, toggleEditChapter, handleEditChapter, saveChapter
 }) => {
   return (
     <Modal show={showUpdateModal} onHide={handleCloseUpdateModal}>
@@ -42,7 +42,7 @@ const UpdateQuestionModal = ({
                 htmlFor="question"
                 className="block text-sm font-medium text-gray-700"
               >
-                Question:
+                Câu hỏi:
               </label>
               {toggleEditQuestion ? (
                 <div>
@@ -56,13 +56,13 @@ const UpdateQuestionModal = ({
                     onClick={saveQuestion}
                     className="bg-green-500 text-white px-4 py-2 rounded mt-2 hover:bg-green-600"
                   >
-                    Save
+                    Lưu
                   </button>
                 </div>
               ) : (
                 <div className="flex items-center justify-between mt-1">
                   <p className="m-0 block w-full p-2 border border-gray-300 rounded-md">
-                    
+
                     {question.question}
                   </p>
                   <button
@@ -71,7 +71,7 @@ const UpdateQuestionModal = ({
                     }
                     className="ml-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
                   >
-                    Edit
+                    Sửa
                   </button>
                 </div>
               )}
@@ -81,20 +81,14 @@ const UpdateQuestionModal = ({
                 htmlFor="correctAnswer"
                 className="block text-sm font-medium text-gray-700"
               >
-                Correct Answer:
+                Đáp án đúng:
               </label>
               {toggleEditCA ? (
                 <div>
-                  {/* <input
-                    type="text"
-                    value={textCA}
-                    onChange={handleCorrectAnswerChange}
-                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-                  /> */}
                   <select
                     value={textCA}
                     onChange={handleCorrectAnswerChange}
-              className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
                   >
                     {question.options.map((answer, index) => (
                       <option key={index} value={answer}>
@@ -106,7 +100,7 @@ const UpdateQuestionModal = ({
                     onClick={saveCorrectQuestion}
                     className="bg-green-500 text-white px-4 py-2 rounded mt-2 hover:bg-green-600"
                   >
-                    Save
+                    Lưu
                   </button>
                 </div>
               ) : (
@@ -115,10 +109,10 @@ const UpdateQuestionModal = ({
                     {question.correctAnswer}
                   </p>
                   <button
-                    onClick={() => handleEditCA()}
+                    onClick={() => handleEditCA(question.correctAnswer)}
                     className="ml-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
                   >
-                    Edit
+                    Sửa
                   </button>
                 </div>
               )}
@@ -128,7 +122,7 @@ const UpdateQuestionModal = ({
                 htmlFor="answers"
                 className="block text-sm font-medium text-gray-700"
               >
-                Answers:
+                Câu trả lời:
               </label>
               {question.options.map((answer, index) => (
                 <div
@@ -147,7 +141,7 @@ const UpdateQuestionModal = ({
                         onClick={saveAnswer}
                         className="bg-green-500 text-white px-4 py-2 rounded ml-4 hover:bg-green-600"
                       >
-                        Save
+                        Lưu
                       </button>
                     </>
                   ) : (
@@ -159,7 +153,7 @@ const UpdateQuestionModal = ({
                         onClick={() => handleEditAnswer(index, answer)}
                         className="ml-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
                       >
-                        Edit
+                        Sửa
                       </button>
                     </>
                   )}
@@ -171,21 +165,24 @@ const UpdateQuestionModal = ({
                 htmlFor="correctAnswer"
                 className="block text-sm font-medium text-gray-700"
               >
-                Level:
-                  </label>
+                Độ khó:
+              </label>
               {toggleEditLevel ? (
                 <div>
-                  <input
-                    type="text"
+                  <select
                     value={textLevel}
                     onChange={handleLevelChange}
                     className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-                  />
+                  >
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                  </select>
                   <button
                     onClick={saveLevel}
                     className="bg-green-500 text-white px-4 py-2 rounded mt-2 hover:bg-green-600"
                   >
-                    Save
+                    Lưu
                   </button>
                 </div>
               ) : (
@@ -194,10 +191,10 @@ const UpdateQuestionModal = ({
                     {question.level}
                   </p>
                   <button
-                    onClick={() => handleEditLevel()}
+                    onClick={() => handleEditLevel(question.level)}
                     className="ml-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
                   >
-                    Edit
+                    Sửa
                   </button>
                 </div>
               )}
@@ -208,8 +205,8 @@ const UpdateQuestionModal = ({
                 htmlFor="correctAnswer"
                 className="block text-sm font-medium text-gray-700"
               >
-                Lession:
-                  </label>
+                Bài học:
+              </label>
               {toggleEditLession ? (
                 <div>
                   <input
@@ -222,7 +219,7 @@ const UpdateQuestionModal = ({
                     onClick={saveLession}
                     className="bg-green-500 text-white px-4 py-2 rounded mt-2 hover:bg-green-600"
                   >
-                    Save
+                    Lưu
                   </button>
                 </div>
               ) : (
@@ -231,22 +228,22 @@ const UpdateQuestionModal = ({
                     {question.lession}
                   </p>
                   <button
-                    onClick={() => handleEditLession()}
+                    onClick={() => handleEditLession(question.lession)}
                     className="ml-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
                   >
-                    Edit
+                    Sửa
                   </button>
                 </div>
               )}
             </div>
-            
+
             <div className="mt-4">
               <label
                 htmlFor="correctAnswer"
                 className="block text-sm font-medium text-gray-700"
               >
-                Chapter:
-                  </label>
+                Chương:
+              </label>
               {toggleEditChapter ? (
                 <div>
                   <input
@@ -259,7 +256,7 @@ const UpdateQuestionModal = ({
                     onClick={saveChapter}
                     className="bg-green-500 text-white px-4 py-2 rounded mt-2 hover:bg-green-600"
                   >
-                    Save
+                    Lưu
                   </button>
                 </div>
               ) : (
@@ -268,10 +265,10 @@ const UpdateQuestionModal = ({
                     {question.chapter}
                   </p>
                   <button
-                    onClick={() => handleEditChapter()}
+                    onClick={() => handleEditChapter(question.chapter)}
                     className="ml-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
                   >
-                    Edit
+                    Sửa
                   </button>
                 </div>
               )}

@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Breadcrumb from '../../components/Breadcrumb/Breadcrumb';
-
+import * as ClassService from "../../services/ClassService";
+import { useSelector } from 'react-redux';
 const daysOfWeek = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
 const periods = ["Tiết 1", "Tiết 2", "Tiết 3", "Tiết 4", "Tiết 5", "Tiết 6", "Tiết 7", "Tiết 8", "Tiết 9", "Tiết 10"];
 const years = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i);
@@ -13,12 +14,62 @@ const attendanceData = {
 };
 
 const AttendanceStudent = () => {
+    const user = useSelector((state) => state.user);
     const currentYear = new Date().getFullYear();
     const currentMonth = new Date().getMonth() + 1;
     const [selectedYear, setSelectedYear] = useState(currentYear);
     const [selectedMonth, setSelectedMonth] = useState(currentMonth);
+    const [classId, setClassId] = useState();
 
     const daysInMonth = new Date(selectedYear, selectedMonth, 0).getDate();
+
+
+
+    const findUserClasses = (allClasses, userId) => {
+        if (!Array.isArray(allClasses)) {
+            console.error("All classes is not a valid array:", allClasses);
+            return [];
+        }
+
+        const foundClasses = allClasses.filter((classItem) => {
+            return (
+                Array.isArray(classItem.studentID) &&
+                classItem.studentID.some((student) =>
+                    typeof student === "string"
+                        ? student === userId
+                        : student._id === userId
+                ) &&
+                classItem.year === result // Kiểm tra năm của lớp
+            );
+        });
+
+        if (foundClasses.length === 0) {
+            console.warn("No class found for user:", userId);
+        }
+
+        return foundClasses;
+    };
+
+
+    useEffect(() => {
+        const fetchClasses = async () => {
+            try {
+                const allClasses = await ClassService.getAllClass();
+                const userClass = findUserClasses(allClasses?.data || [], user.id);
+                console.log(userClass)
+                setClassId(userClass[0]._id)
+            } catch (error) {
+                console.error("Error fetching classes:", error);
+            }
+        };
+
+        fetchClasses();
+    }, [user.id]);
+
+    console.log(classId)
+
+    const currentYearr = new Date().getFullYear();
+    const result = `${currentYearr}-${currentYearr + 1}`;
 
     const getDayOfWeek = (day) => {
         const date = new Date(selectedYear, selectedMonth - 1, day);
