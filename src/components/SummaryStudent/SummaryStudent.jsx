@@ -4,12 +4,18 @@ import { RiStarFill } from "react-icons/ri";
 import { HiClipboardList } from 'react-icons/hi';
 import * as ClassService from "../../services/ClassService";
 
-const SummaryStudent = ({ studentId, selectedSemester }) => {
+const SummaryStudent = ({ studentId, selectedSemester, evaluates, averages }) => {
     const [conduct, setConduct] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [conduct1, setConduct1] = useState();
     const [conduct2, setConduct2] = useState();
+    const [hocLuc1, setHocLuc1] = useState();
+    const [hocLuc2, setHocLuc2] = useState();
+    const [dtb1, setDtb1] = useState();
+    const [dtb2, setDtb2] = useState();
+    const [finalHocLuc, setFinalHocLuc] = useState();
+    const [finalDtb, setFinalDtb] = useState();
 
     useEffect(() => {
         const fetchConduct = async () => {
@@ -50,13 +56,94 @@ const SummaryStudent = ({ studentId, selectedSemester }) => {
         fetchConduct();
     }, [studentId]);
 
-    
+
+    const calculateTotalAverage = (semester) => {
+        if (semester.some(item => item.average === "Chưa có")) {
+            return "Chưa có";
+        }
+
+        const average = semester.reduce((sum, item) => sum + parseFloat(item.average), 0) / semester.length;
+
+        return average.toFixed(2);
+    };
+
+    const classify = (semester) => {
+        // Kiểm tra nếu có phần average là "Chưa có"
+        if (semester.some(item => item.average === "Chưa có")) {
+            return "Chưa có";
+        }
+
+        const above8 = semester.filter(item => item.average > 8);
+        const above6_5 = semester.filter(item => item.average > 6.5);
+        const above5 = semester.filter(item => item.average > 5);
+        const above3_5 = semester.filter(item => item.average > 3.5);
+
+        if (above8.length >= 6 && above6_5.length >= 10) {
+            return "Tốt";
+        }
+
+        if (above6_5.length >= 6 && above5.length >= 10) {
+            return "Khá";
+        }
+
+        if (above5.length >= 6 && above3_5.length >= 3.5) {
+            return "Đạt";
+        }
+
+        return "Chưa đạt";
+    };
+
+    useEffect(() => {
+        const semester1 = averages.filter(item => item.semester === "1");
+        const semester2 = averages.filter(item => item.semester === "2");
+
+        const resultSemester1 = classify(semester1);
+        const resultSemester2 = classify(semester2);
+
+        setHocLuc1(resultSemester1);
+        setHocLuc2(resultSemester2);
+
+        setDtb1(calculateTotalAverage(semester1))
+        setDtb2(calculateTotalAverage(semester2))
+
+    }, [averages]);
+
+    const calculateFinalDtb = (dtb1, dtb2) => {
+        if (dtb1 === "Chưa có" || dtb2 === "Chưa có") {
+            return "Chưa có";
+        }
+        return ((parseFloat(dtb1) + 2 * parseFloat(dtb2)) / 3).toFixed(2);
+    };
+
+
+    useEffect(() => {
+        const semester1 = averages.filter(item => item.semester === "1");
+        const semester2 = averages.filter(item => item.semester === "2");
+        const calculateAverage = (semester1, semester2) => {
+            return (parseFloat(semester1) + 2 * parseFloat(semester2)) / 3;
+        };
+
+        const result = semester1.map((item1) => {
+            const item2 = semester2.find(item => item.subject === item1.subject);
+            if (item2) {
+                const average = item2.average === "Chưa có" ? "Chưa có" : calculateAverage(item1.average, item2.average).toFixed(2);
+                return {
+                    subject: item1.subject,
+                    average: average
+                };
+            }
+            return null;
+        }).filter(item => item !== null);
+
+        const resultFinal = classify(result)
+        setFinalHocLuc(resultFinal)
+
+    }, [averages]);
+
 
     function tinhHanhKiem(hk1, hk2) {
-        // Quy định mức hạnh kiểm theo thứ tự ưu tiên
         const mucHanhKiem = ["Yếu", "Trung bình", "Khá", "Tốt"];
 
-        // Lấy chỉ số của hạnh kiểm học kỳ 1 và 2
         const indexHK1 = mucHanhKiem.indexOf(hk1);
         const indexHK2 = mucHanhKiem.indexOf(hk2);
 
@@ -81,24 +168,25 @@ const SummaryStudent = ({ studentId, selectedSemester }) => {
     }
 
 
+
     const data = [
         {
             icon: <FaGraduationCap className="w-6 h-6" />,
             title: "Điểm trung bình",
-            score: "8.5", // Giả sử điểm trung bình từ API khác
+            score: calculateFinalDtb(dtb1, dtb2), // Giả sử điểm trung bình từ API khác
             details: [
-                { label: 'Học kỳ 1', value: '8' },
-                { label: 'Học kỳ 2', value: '8.8' },
+                { label: 'Học kỳ 1', value: dtb1 },
+                { label: 'Học kỳ 2', value: dtb2 },
             ],
             bgColor: "bg-green-500"
         },
         {
             icon: <RiStarFill className="w-6 h-6 text-purple-500" />,
             title: "Học lực",
-            score: "Giỏi", // Giả sử học lực từ API khác
+            score: finalHocLuc, // Giả sử học lực từ API khác
             details: [
-                { label: 'Học kỳ 1', value: 'Giỏi' },
-                { label: 'Học kỳ 2', value: 'Giỏi' },
+                { label: 'Học kỳ 1', value: hocLuc1 },
+                { label: 'Học kỳ 2', value: hocLuc2 },
             ],
             bgColor: "bg-purple-500"
         },
@@ -107,8 +195,8 @@ const SummaryStudent = ({ studentId, selectedSemester }) => {
             title: "Hạnh kiểm",
             score: tinhHanhKiem(conduct1?.typeConduct, conduct2?.typeConduct) || "Đang tải...",
             details: [
-                { label: `Học kỳ 1`, value: conduct1?.typeConduct || "Đang tải..." },
-                { label: `Học kỳ 2`, value: conduct2?.typeConduct || "Đang tải..." }
+                { label: `Học kỳ 1`, value: conduct1?.typeConduct || "Chưa có" },
+                { label: `Học kỳ 2`, value: conduct2?.typeConduct || "Chưa có" }
 
             ],
             bgColor: "bg-orange-500"

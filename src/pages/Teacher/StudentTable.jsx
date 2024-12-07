@@ -38,6 +38,8 @@ const StudentTable = () => {
   const [idSubjectOfSJCD, setIdSubjectOfSJCD] = useState();
   const [detailSubject, setDetailSubject] = useState();
 
+  console.log(detailSubject)
+
   console.log("idSubject", detailSubject)
 
   useEffect(() => {
@@ -552,7 +554,7 @@ const StudentTable = () => {
                         </td>
                         <td className="border px-4 py-2">
                           <div className="grid grid-cols-2 gap-2">
-                            {[...Array(detailSubject?.name === "Toán" ? 4 : 3)].map((_, index) => (
+                            {[...Array(detailSubject?.nameSubject === "Toán" ? 4 : 3)].map((_, index) => (
                               <input
                                 key={index}
                                 type="number"

@@ -143,8 +143,41 @@ const ScoreTableStudent = () => {
         setSubjectEvaluate(filterSubjectEvaluationsByUserId());
     }, [classSubjectPhu, user.id]);
 
-    console.log(subjectEvaluate)
+    // console.log(subjectEvaluate)
 
+    const filterBySemester = () => {
+        if (!subjectEvaluate || !Array.isArray(subjectEvaluate)) {
+            console.warn('subjectEvaluate is not an array or is undefined');
+            return []; // Trả về mảng rỗng nếu dữ liệu không hợp lệ
+        }
+
+        // Lọc các đánh giá theo kỳ học
+        return subjectEvaluate.map(subject => {
+            const filteredEvaluates = subject.evaluate.filter(evaluation => evaluation.semester == selectedSemester);
+
+            if (filteredEvaluates.length > 0) {
+                return {
+                    subject: subject.nameSubject,
+                    evaluations: filteredEvaluates.map(evaluation => ({
+                        evaluate: evaluation.evaluate,
+                        semester: evaluation.semester
+                    }))
+                };
+            } else {
+                // Nếu không có đánh giá cho kỳ học, hiển thị thông báo "Chưa có"
+                return {
+                    subject: subject.nameSubject,
+                    evaluations: [{
+                        evaluate: "Chưa có",
+                        semester: selectedSemester
+                    }]
+                };
+            }
+        });
+    };
+
+
+    // console.log(classSubjectPhu)
 
     // Hàm gọi API và định dạng lại dữ liệu
     const fetchScores = async (semester, year) => {
@@ -160,7 +193,7 @@ const ScoreTableStudent = () => {
         try {
             // Lấy dữ liệu điểm từ API
             const rawData = await ScoreSbujectService.getAllScoreByStudentIdSemesterAndClass(studentId, semester, year);
-            // console.log("Raw Data:", rawData);
+            console.log("Raw Data:", rawData);
 
             // Kiểm tra nếu rawData không có dữ liệu
             if (!rawData || rawData.data.length === 0) {
@@ -228,10 +261,12 @@ const ScoreTableStudent = () => {
 
 
     useEffect(() => {
-        if (classSubject && Array.isArray(classSubject) && selectedYear && selectedSemester) {
-            fetchScores(selectedSemester, selectedYear);
+        if (classSubject && Array.isArray(classSubject) && selectedYear) {
+            // Lấy dữ liệu cho cả 2 kỳ
+            fetchScores('1', selectedYear); // Kỳ 1
+            fetchScores('2', selectedYear); // Kỳ 2
         }
-    }, [selectedSemester, selectedYear, studentId, classSubject]);
+    }, [selectedYear, classSubject]);
 
     const handleSemesterChange = (semester) => {
         setSelectedSemester(semester);
@@ -242,7 +277,12 @@ const ScoreTableStudent = () => {
     };
 
 
-    const calculateAverageSubject = (regular = [], midterm = [], final = []) => {
+    const calculateAverageSubject = (regular = [], midterm = [], final = [], subject) => {
+        // Kiểm tra nếu các mảng có đúng số lượng phần tử
+        if ((subject === "Toán" && regular.length !== 4) || (subject !== "Toán" && regular.length !== 3) || midterm.length !== 1 || final.length !== 1) {
+            return 'Chưa có';  // Hoặc bạn có thể trả về null hoặc một giá trị khác.
+        }
+
         // Check if all inputs are arrays
         if (!Array.isArray(regular) || !Array.isArray(midterm) || !Array.isArray(final)) {
             throw new Error("All inputs must be arrays.");
@@ -257,6 +297,77 @@ const ScoreTableStudent = () => {
         return (totalScore / totalWeight).toFixed(2);
     };
 
+    const getAllSubjectAverages = () => {
+        if (!grades || Object.keys(grades).length === 0) {
+            console.warn('Không có dữ liệu điểm cho bất kỳ kỳ học nào!');
+            return [];
+        }
+
+        const allAverages = [];
+
+        // Duyệt qua từng kỳ trong grades
+        Object.keys(grades).forEach((semester) => {
+            const semesterGrades = grades[semester];
+            if (!semesterGrades || semesterGrades.length === 0) {
+                // console.warn(`Không có dữ liệu điểm cho kỳ ${semester}!`);
+                return;
+            }
+
+            // Tính trung bình cho từng môn học trong kỳ
+            const averagesForSemester = semesterGrades.map((grade) => {
+                const { subject, regular, midterm, final } = grade;
+                const average = calculateAverageSubject(regular, midterm, final, subject);
+
+                return {
+                    semester, // Thêm thông tin kỳ học
+                    subject,
+                    average,
+                };
+            });
+
+            allAverages.push(...averagesForSemester);
+        });
+
+        return allAverages;
+    };
+
+
+    const averages = getAllSubjectAverages();
+    // console.log("Tất cả trung bình môn học:", averages);
+
+    // console.log(grades)
+
+    const getAllEvaluate = () => {
+        if (!subjectEvaluate || !Array.isArray(subjectEvaluate)) {
+            console.warn('subjectEvaluate is not an array or is undefined');
+            return []; // Trả về mảng rỗng nếu subjectEvaluate không hợp lệ
+        }
+
+        // Khởi tạo mảng để lưu trữ các đánh giá
+        const evaluations = [];
+
+        subjectEvaluate.forEach(subject => {
+            // Lọc các đánh giá theo kỳ học và lưu vào mảng evaluations
+            if (subject.evaluate && Array.isArray(subject.evaluate)) {
+                const evaluationsForSubject = subject.evaluate.map(evaluation => ({
+                    semester: evaluation.semester,
+                    evaluate: evaluation.evaluate,
+                    subject: subject.nameSubject, // Chỉ lưu tên môn học, không phải toàn bộ object subject
+                }));
+
+                // Thêm các đánh giá của môn học vào mảng evaluations
+                evaluations.push(...evaluationsForSubject);
+            }
+        });
+
+        return evaluations;
+    };
+
+    const evaluates = getAllEvaluate()
+
+    // console.log(evaluates)
+
+
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen p-6">
@@ -269,7 +380,7 @@ const ScoreTableStudent = () => {
             <div className="pt-8"></div>
 
             <div className='w-4/5'>
-                <SummaryStudent studentId={studentId} selectedSemester={selectedSemester} />
+                <SummaryStudent studentId={studentId} selectedSemester={selectedSemester} evaluates={evaluates} averages={averages} />
 
                 <SummaryAttendanceAndAward />
             </div>
@@ -362,7 +473,7 @@ const ScoreTableStudent = () => {
                                         </div>
                                     </td>
                                     <td className="px-4 py-4 border border-gray-200 text-center font-semibold">
-                                        {calculateAverageSubject(grade.regular, grade.midterm, grade.final)}
+                                        {calculateAverageSubject(grade.regular, grade.midterm, grade.final, grade.subject)}
                                     </td>
                                 </tr>
                             ))}
@@ -380,28 +491,26 @@ const ScoreTableStudent = () => {
                 {loading && <p className="text-blue-500">Đang tải dữ liệu...</p>}
                 {error && <p className="text-red-500">{error}</p>}
 
-                {!loading && !error && grades[selectedSemester] && (
+                {!loading && !error && (
                     <table className="w-full border-collapse text-left table-fixed bg-white">
                         <thead>
                             <tr className="bg-blue-100 text-blue-700 text-lg font-semibold">
                                 <th className="w-1/4 px-4 py-4 border border-blue-200">Môn học</th>
-                                <th className="w-1/4 px-4 py-4 border border-blue-200 text-center">Điểm Thường Xuyên</th>
+                                <th className="w-1/4 px-4 py-4 border border-blue-200 text-center">Đánh giá</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {grades[selectedSemester]?.map((grade, index) => (
+                            {filterBySemester().map((subject, index) => (
                                 <tr key={index} className="hover:bg-blue-50 text-gray-700 text-lg">
                                     <td className="px-4 py-4 border border-gray-200">
-                                        {grade.subject}
+                                        {subject.subject}
                                     </td>
                                     <td className="px-4 py-4 border border-gray-200 text-center">
-                                        <div className="grid grid-cols-3 gap-1">
-                                            {grade.final.map((score, idx) => (
-                                                <div key={idx} className="p-1 border border-gray-300 rounded-md">
-                                                    {score}
-                                                </div>
-                                            ))}
-                                        </div>
+                                        {subject.evaluations.map((evaluation, idx) => (
+                                            <div key={idx} className="p-1 border border-gray-300 rounded-md">
+                                                {evaluation.evaluate}
+                                            </div>
+                                        ))}
                                     </td>
                                 </tr>
                             ))}
@@ -409,6 +518,7 @@ const ScoreTableStudent = () => {
                     </table>
                 )}
             </div>
+
         </div>
     );
 };
