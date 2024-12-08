@@ -179,6 +179,7 @@ const ManageSchedule = () => {
                     toast.success(`Created schedule for week ${startWeekNumber}`);
                 } catch (createError) {
                     toast.error(`Error creating schedule for week ${startWeekNumber}`);
+                    toast.error(`${createError.response?.data?.error || createError.error}`);
                 }
             }
             setError("");

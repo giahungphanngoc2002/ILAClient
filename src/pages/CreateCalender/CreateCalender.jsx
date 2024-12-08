@@ -213,6 +213,7 @@ const CreateCalender = () => {
         return endYear > startYear || (endYear === startYear && endWeek >= startWeek);
     };
 
+
     const handleSaveSchedule = async () => {
         if (!idClass) {
             setError("Please select a class before saving the schedule.");
@@ -302,7 +303,8 @@ const CreateCalender = () => {
                         }
                         toast.success(`Created schedule for week ${currentWeek}`);
                     } catch (createError) {
-                        toast.error(`Error creating schedule for week ${currentWeek}`);
+                         toast.error(`Error creating schedule for week ${currentWeek}: ${createError.response?.data?.message || createError.message}`);
+                         toast.error(`${createError.response?.data?.error || createError.error}`);
                     }
                 }
             }
