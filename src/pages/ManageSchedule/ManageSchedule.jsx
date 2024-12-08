@@ -87,7 +87,7 @@ const ManageSchedule = () => {
     };
 
     const handleSelectSlot = (classId, day, slot, subjectData) => {
-        const { subjectId, subjectChuyendeId ,subjectPhuId } = JSON.parse(subjectData);
+        const { subjectId, subjectChuyendeId, subjectPhuId } = JSON.parse(subjectData);
         setSchedule((prev) => ({
             ...prev,
             [classId]: {
@@ -208,7 +208,7 @@ const ManageSchedule = () => {
 
 
     return (
-        <div className="h-screen p-6 bg-gray-100 rounded-lg">
+        <div className="min-h-screen p-6 bg-gray-100 ">
             <Breadcrumb title="Quản lí thời khoá biểu" onBack={onBack} buttonText="Tạo mới" onButtonClick={() => goToCreateSchedule(classDetail?._id)} />
             <div className="pt-12"></div>
             {isLoading && <div className="absolute top-0 left-0 w-full h-full bg-gray-500 bg-opacity-50 flex justify-center items-center z-10"><span className="text-white text-xl">Đang tải...</span></div>}
@@ -254,11 +254,12 @@ const ManageSchedule = () => {
                     <div className="mb-4 flex items-center justify-center space-x-4">
                         <button
                             onClick={() => handleWeekChange(-1)}
+                            style={{ width: "120px" }}
                             className="bg-gray-300 hover:bg-gray-400 text-gray-700 font-semibold py-1 px-2 rounded"
                         >
                             Tuần trước
                         </button>
-                        <select
+                        {/* <select
                             className="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
                             value={startWeek || ""}
                             onChange={handleStartWeekChange}
@@ -273,9 +274,20 @@ const ManageSchedule = () => {
                                     </option>
                                 );
                             })}
-                        </select>
+                        </select> */}
+
+                        <div className="mb-4 text-center">
+                            <label className="block text-lg font-semibold">-- Chọn tuần --</label>
+                            <input
+                                type="week"
+                                className="border p-2 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                value={startWeek || ""}
+                                onChange={handleStartWeekChange}
+                            />
+                        </div>
                         <button
                             onClick={() => handleWeekChange(1)}
+                            style={{ width: "120px" }}
                             className="bg-gray-300 hover:bg-gray-400 text-gray-700 font-semibold py-1 px-2 rounded"
                         >
                             Tuần sau
@@ -316,7 +328,7 @@ const ManageSchedule = () => {
                                                                     : currentSchedule?.subjectId
                                                                         ? JSON.stringify({
                                                                             subjectId: currentSchedule.subjectId._id,
-                                                                            
+
                                                                         })
                                                                         : ""
                                                             }
@@ -329,7 +341,7 @@ const ManageSchedule = () => {
                                                                     key={index}
                                                                     value={JSON.stringify({
                                                                         subjectId: subject._id,
-                                                                       
+
                                                                     })}
                                                                 >
                                                                     {subject?.nameSubject} - {subject?.teacherId?.name}
@@ -340,7 +352,7 @@ const ManageSchedule = () => {
                                                                     key={index}
                                                                     value={JSON.stringify({
                                                                         subjectId: subject._id,
-                                                                       
+
                                                                     })}
                                                                 >
                                                                     {subject?.nameSubject} - {subject?.teacherId?.name}
@@ -351,7 +363,7 @@ const ManageSchedule = () => {
                                                                     key={index}
                                                                     value={JSON.stringify({
                                                                         subjectId: subject._id,
-                                                                       
+
                                                                     })}
                                                                 >
                                                                     {subject?.nameSubject} - {subject?.teacherId?.name}
@@ -411,7 +423,7 @@ const ManageSchedule = () => {
                 </div>
             )}
             {selectedClass && (
-                <div className="mt-6 text-center">
+                <div className="mt-6 text-center pb-6">
                     <button
                         onClick={handleSaveSchedule}
                         className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded shadow-lg transition duration-200"
