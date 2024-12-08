@@ -5,6 +5,7 @@ import SummaryAttendanceAndAward from '../../components/SummaryAttendaceAndAward
 import { HiClipboardList } from 'react-icons/hi';
 import * as ScoreSbujectService from "../../services/ScoreSbujectService";
 import * as ClassService from "../../services/ClassService";
+import * as ScheduleService from "../../services/ScheduleService";
 import { useSelector } from 'react-redux';
 
 const ScoreTableStudent = () => {
@@ -20,7 +21,111 @@ const ScoreTableStudent = () => {
     const [selectedYear, setSelectedYear] = useState("2024-2025");
     const [years, setYears] = useState([]);
     const [subjectEvaluate, setSubjectEvaluate] = useState([]);
+    const [timeTables, setTimeTables] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [countAbsent, setCountAbsent] = useState();
 
+
+    useEffect(() => {
+        const fetchTimeTables = async () => {
+            setIsLoading(true);
+            try {
+                const timeTablesData = await ScheduleService.getClassAndTimeTableByStudentId(studentId);
+                const data = processTimeTable(timeTablesData.data);
+                setTimeTables(data);
+                const totals = countTotalAbsencesAndExcused(data);
+                setCountAbsent(totals)
+            } catch (error) {
+                console.error("Error fetching time tables:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchTimeTables();
+    }, [studentId]);
+     console.log("Tổng số vắng mặt và có phép: ", countAbsent);
+
+
+    function getDateOfWeek(year, week, dayOfWeek) {
+        const firstDayOfYear = new Date(year, 0, 1);
+        const daysOffset = (week - 1) * 7;
+        const firstDayOfWeek = new Date(firstDayOfYear);
+        firstDayOfWeek.setDate(firstDayOfYear.getDate() + daysOffset);
+
+        const daysOfWeek = ['Chủ nhật', 'Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy'];
+        const dayIndex = daysOfWeek.indexOf(dayOfWeek);
+        if (dayIndex === -1) {
+            throw new Error("Ngày không hợp lệ");
+        }
+
+        const resultDate = new Date(firstDayOfWeek);
+        resultDate.setDate(firstDayOfWeek.getDate() + dayIndex);
+
+        const yearResult = resultDate.getFullYear();
+        const monthResult = (resultDate.getMonth() + 1).toString().padStart(2, '0');
+        const dayResult = resultDate.getDate().toString().padStart(2, '0');
+
+        return `${yearResult}-${monthResult}-${dayResult}`;
+    }
+
+    // Chuyển đổi dữ liệu
+    function processTimeTable(data) {
+        const result = {};
+
+        data.timeTables.forEach(timeTable => {
+            timeTable.scheduleIds.forEach(schedule => {
+                const date = getDateOfWeek(timeTable.year, timeTable.week, schedule.dayOfWeek);
+
+                // Lấy thông tin các slot có học sinh vắng
+                const slotData = {};
+                schedule.slots.forEach(slot => {
+                    // Kiểm tra attendanceStatus trước, nếu học sinh có mặt và không có trong danh sách absent
+                    if (slot.attendanceStatus.status === true && slot.absentStudentId.length === 0) {
+                        slotData[slot.slotNumber] = { status: "present" };
+                    } else {
+                        // Nếu có học sinh vắng, duyệt qua danh sách absentStudentId
+                        slot.absentStudentId.forEach(absent => {
+                            if (absent.isExcused === false) {
+                                slotData[slot.slotNumber] = { status: "absent" };
+                            } else if (absent.isExcused === true) {
+                                slotData[slot.slotNumber] = { status: "excused" };
+                            }
+                        });
+                    }
+                });
+
+                if (Object.keys(slotData).length > 0) {
+                    result[date] = { slots: slotData };
+                }
+            });
+        });
+
+        return result;
+    }
+
+    function countTotalAbsencesAndExcused(timeTablesData) {
+        let totalAbsent = 0;
+        let totalExcused = 0;
+
+        // Lọc qua tất cả các ngày
+        Object.keys(timeTablesData).forEach(date => {
+            const dayData = timeTablesData[date];
+
+            // Lọc qua từng slot trong ngày
+            Object.keys(dayData.slots).forEach(slotNumber => {
+                const slot = dayData.slots[slotNumber];
+
+                // Đếm tổng số vắng mặt và có phép
+                if (slot.status === "absent") {
+                    totalAbsent++;
+                } else if (slot.status === "excused") {
+                    totalExcused++;
+                }
+            });
+        });
+
+        return { totalAbsent, totalExcused };
+    }
 
     useEffect(() => {
         setStudentId(user?.id);
@@ -81,7 +186,6 @@ const ScoreTableStudent = () => {
         const fetchClasses = async () => {
             try {
                 const allClasses = await ClassService.getAllClass();
-                console.log('All Classes:', allClasses);
 
                 setClasses(allClasses?.data || []);
 
@@ -92,8 +196,6 @@ const ScoreTableStudent = () => {
 
                     return years.length > 0 ? years : null;
                 }).filter(year => year !== null).flat();
-
-                console.log('Calculated School Years:', calculatedSchoolYears);
                 setYears([...new Set(calculatedSchoolYears)]);
 
                 // Set giá trị mặc định cho selectedYear nếu có "2024-2025"
@@ -143,8 +245,6 @@ const ScoreTableStudent = () => {
         setSubjectEvaluate(filterSubjectEvaluationsByUserId());
     }, [classSubjectPhu, user.id]);
 
-    // console.log(subjectEvaluate)
-
     const filterBySemester = () => {
         if (!subjectEvaluate || !Array.isArray(subjectEvaluate)) {
             console.warn('subjectEvaluate is not an array or is undefined');
@@ -176,9 +276,6 @@ const ScoreTableStudent = () => {
         });
     };
 
-
-    // console.log(classSubjectPhu)
-
     // Hàm gọi API và định dạng lại dữ liệu
     const fetchScores = async (semester, year) => {
         if (!classSubject || !Array.isArray(classSubject)) {
@@ -193,7 +290,6 @@ const ScoreTableStudent = () => {
         try {
             // Lấy dữ liệu điểm từ API
             const rawData = await ScoreSbujectService.getAllScoreByStudentIdSemesterAndClass(studentId, semester, year);
-            console.log("Raw Data:", rawData);
 
             // Kiểm tra nếu rawData không có dữ liệu
             if (!rawData || rawData.data.length === 0) {
@@ -236,8 +332,6 @@ const ScoreTableStudent = () => {
                     };
                 }
             });
-
-            console.log("Formatted Data:", formattedData);
 
             setGrades(prev => ({
                 ...prev,
@@ -333,9 +427,6 @@ const ScoreTableStudent = () => {
 
 
     const averages = getAllSubjectAverages();
-    // console.log("Tất cả trung bình môn học:", averages);
-
-    // console.log(grades)
 
     const getAllEvaluate = () => {
         if (!subjectEvaluate || !Array.isArray(subjectEvaluate)) {
@@ -365,10 +456,6 @@ const ScoreTableStudent = () => {
 
     const evaluates = getAllEvaluate()
 
-    // console.log(evaluates)
-
-
-
     return (
         <div className="flex flex-col items-center justify-center min-h-screen p-6">
             <Breadcrumb
@@ -382,7 +469,7 @@ const ScoreTableStudent = () => {
             <div className='w-4/5'>
                 <SummaryStudent studentId={studentId} selectedSemester={selectedSemester} evaluates={evaluates} averages={averages} />
 
-                <SummaryAttendanceAndAward />
+                <SummaryAttendanceAndAward countAbsent={countAbsent} />
             </div>
 
             <div className="flex gap-2 mb-6">

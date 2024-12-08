@@ -2,7 +2,8 @@ import React from 'react';
 import { FaCalendarAlt, FaTrophy } from 'react-icons/fa';
 import { BsAward } from 'react-icons/bs';
 
-const SummaryAttendanceAndAward = () => {
+const SummaryAttendanceAndAward = ({ countAbsent }) => {
+    console.log("ben nay:", countAbsent)
     return (
         <div className="w-full">
             <div className="flex flex-col md:flex-row gap-6">
@@ -15,12 +16,12 @@ const SummaryAttendanceAndAward = () => {
                     <div className="flex flex-col md:flex-row gap-4 flex-1 h-full">
                         <div className="bg-blue-100 rounded-lg p-4 flex flex-col items-center w-full md:w-1/2 min-h-[120px] h-full">
                             <span className="text-gray-700 font-semibold">Nghỉ có phép</span>
-                            <div className="text-teal-600 text-3xl font-bold">1</div>
+                            <div className="text-purple-600 text-3xl font-bold">{countAbsent.totalExcused}</div>
                             <span className="text-gray-500">buổi</span>
                         </div>
                         <div className="bg-purple-100 rounded-lg p-4 flex flex-col items-center w-full md:w-1/2 min-h-[120px] h-full">
                             <span className="text-gray-700 font-semibold">Nghỉ không phép</span>
-                            <div className="text-purple-600 text-3xl font-bold">0</div>
+                            <div className="text-teal-600 text-3xl font-bold">{countAbsent.totalAbsent}</div>
                             <span className="text-gray-500">buổi</span>
                         </div>
                     </div>
