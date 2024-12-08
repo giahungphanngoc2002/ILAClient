@@ -106,16 +106,19 @@ const CreateCalender = () => {
                 const sheetName = workbook.SheetNames[0]; // Lấy sheet đầu tiên
                 const sheet = workbook.Sheets[sheetName];
                 const jsonData = XLSX.utils.sheet_to_json(sheet); // Chuyển đổi sheet thành mảng JSON
-
+    
                 console.log(classDetail?.subjectGroup);
+                
                 const updatedData = jsonData.map(item => {
                     const updatedItem = { ...item };
-
+    
+                    // Duyệt qua các ngày trong lịch học và cập nhật thông tin môn học
                     Object.keys(updatedItem).forEach(day => {
                         const teacher = updatedItem[day];
                         const subject = [
                             ...classDetail?.subjectGroup?.SubjectsId,
-                            ...classDetail?.subjectGroup?.SubjectsChuyendeId
+                            ...classDetail?.subjectGroup?.SubjectsChuyendeId,
+                            ...classDetail?.subjectGroup?.SubjectsPhuId
                         ].find(subject =>
                             teacher === `${subject.nameSubject} - ${subject.teacherId?.username}`
                         );
@@ -123,49 +126,44 @@ const CreateCalender = () => {
                             updatedItem[day] = subject;
                         }
                     });
-
+    
                     return updatedItem;
                 });
-
-                console.log(updatedData)
-
+    
+                console.log(updatedData);
+    
                 const transformedData = transformData(updatedData);
-
-
+    
                 setData(transformedData);
-
-                // console.log(data)
-
-
+    
+                // Cập nhật schedule với dữ liệu đã chuyển đổi từ Excel
                 transformedData.forEach((dayData) => {
                     timeSlots.forEach((slot) => {
                         const currentSchedule = dayData.slots.find(
                             s => s.slotNumber === slot.slot.replace('Tiết ', '')
                         );
-                        console.log(currentSchedule)
+                        console.log(currentSchedule);
                         if (currentSchedule) {
                             handleSelectSlot(
                                 idClass,
                                 dayData.dayOfWeek,
                                 slot.slot,
                                 JSON.stringify({
-                                    subjectId: currentSchedule.subjectId._id,
-                                    subjectChuyendeId: currentSchedule.subjectId.subjectChuyendeId?._id,
+                                    subjectId: currentSchedule.subjectId?._id,
+                                    subjectChuyendeId: currentSchedule.subjectChuyendeId?._id,
+                                    subjectPhuId: currentSchedule.subjectPhuId?._id || null,
                                 })
                             );
                         }
                     });
-                    ;
                 });
-
             };
             reader.readAsBinaryString(file);
         }
     };
-
-
-    console.log("data", data)
-    console.log("schedule", schedule)
+    
+    console.log("data", data);
+    console.log("schedule", schedule);
 
 
     const getYearAndWeekFromValue = (weekValue) => {
@@ -187,7 +185,7 @@ const CreateCalender = () => {
 
     // console.log(schedule)
     const handleSelectSlot = (classId, day, slot, subjectData) => {
-        const { subjectId, subjectChuyendeId } = JSON.parse(subjectData);
+        const { subjectId, subjectChuyendeId ,subjectPhuId} = JSON.parse(subjectData);
         // console.log(subjectData)
         // console.log("Before update:", schedule);
         setSchedule((prev) => ({
@@ -199,6 +197,7 @@ const CreateCalender = () => {
                     [slot]: {
                         subjectId,
                         subjectChuyendeId,
+                        subjectPhuId
                     },
                 },
             },
@@ -251,29 +250,28 @@ const CreateCalender = () => {
                                         absentStudentId: [],
                                     };
                                 });
-
+                
                             if (newSlots.length > 0) {
-                                // Hợp nhất slots mới và slots cũ, ghi đè dựa trên `slotNumber`
                                 let updatedSlots = [];
                                 const existingDay = data?.find(
                                     (daySchedule) => daySchedule.dayOfWeek === day
                                 );
-
+                
                                 if (existingDay) {
                                     updatedSlots = existingDay.slots.filter(
                                         (existingSlot) =>
                                             !newSlots.some((newSlot) => newSlot.slotNumber === existingSlot.slotNumber)
                                     );
                                 }
-
+                
                                 updatedSlots = [...updatedSlots, ...newSlots];
-
+                
                                 return { dayOfWeek: day, slots: updatedSlots };
                             }
-
+                
                             return null;
                         })
-                        .filter((day) => day !== null), // Bỏ qua các ngày không có slots
+                        .filter((day) => day !== null),
                 };
 
                 console.log(scheduleData)
@@ -293,7 +291,6 @@ const CreateCalender = () => {
                 } else {
                     try {
                         const response = await ScheduleService.createScheduleByClassId(idClass, scheduleData);
-
                         if (response?.data?.newTimeTable) {
                             timetableId = response.data.newTimeTable._id;
                             setClassDetail((prev) => ({
@@ -303,8 +300,9 @@ const CreateCalender = () => {
                         }
                         toast.success(`Created schedule for week ${currentWeek}`);
                     } catch (createError) {
-                         toast.error(`Error creating schedule for week ${currentWeek}: ${createError.response?.data?.message || createError.message}`);
-                         toast.error(`${createError.response?.data?.error || createError.error}`);
+                        console.error(createError);
+                        toast.error(`Error creating schedule for week ${currentWeek}`);
+                        toast.error(`${createError.response?.data?.error || createError.message}`);
                     }
                 }
             }
@@ -404,17 +402,17 @@ const CreateCalender = () => {
                                                         id="currentScheduleSelect"
                                                         className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                                         value={
-                                                            schedule[idClass]?.[day]?.[slot.slot]
-                                                                ? JSON.stringify(schedule[idClass][day][slot.slot])
+                                                            schedule[selectedClass]?.[day]?.[slot.slot]
+                                                                ? JSON.stringify(schedule[selectedClass][day][slot.slot])
                                                                 : currentSchedule?.subjectId
                                                                     ? JSON.stringify({
                                                                         subjectId: currentSchedule.subjectId._id,
-                                                                        subjectChuyendeId: currentSchedule.subjectId.subjectChuyendeId?._id,
+                                                                        
                                                                     })
                                                                     : ""
                                                         }
                                                         onChange={(e) =>
-                                                            handleSelectSlot(idClass, day, slot.slot, e.target.value)
+                                                            handleSelectSlot(selectedClass, day, slot.slot, e.target.value)
                                                         }
                                                     >
                                                         {classDetail?.subjectGroup?.SubjectsId.map((subject, index) => (
@@ -422,7 +420,7 @@ const CreateCalender = () => {
                                                                 key={index}
                                                                 value={JSON.stringify({
                                                                     subjectId: subject._id,
-                                                                    subjectChuyendeId: subject?.subjectChuyendeId?._id,
+                                                                   
                                                                 })}
                                                             >
                                                                 {subject?.nameSubject} - {subject?.teacherId?.name}
@@ -433,13 +431,26 @@ const CreateCalender = () => {
                                                                 key={index}
                                                                 value={JSON.stringify({
                                                                     subjectId: subject._id,
-                                                                    subjectChuyendeId: subject?.subjectChuyendeId?._id,
+                                                                   
+                                                                })}
+                                                            >
+                                                                {subject?.nameSubject} - {subject?.teacherId?.name}
+                                                            </option>
+                                                        ))}
+                                                        {classDetail?.subjectGroup?.SubjectsPhuId.map((subject, index) => (
+                                                            <option
+                                                                key={index}
+                                                                value={JSON.stringify({
+                                                                    subjectId: subject._id,
+                                                                   
                                                                 })}
                                                             >
                                                                 {subject?.nameSubject} - {subject?.teacherId?.name}
                                                             </option>
                                                         ))}
                                                     </select>
+
+
                                                 </div>
                                             ) : (
                                                 <select
@@ -454,25 +465,10 @@ const CreateCalender = () => {
                                                     }
                                                 >
                                                     <option value="">Chọn môn</option>
-                                                    {/* Filter available subjects based on current day and slot */}
-                                                    {currentDay.slots.map((subjectSlot, index) => (
-                                                        <option
-                                                            key={index}
-                                                            value={JSON.stringify({
-                                                                subjectId: subjectSlot.subjectId._id,
-                                                                subjectChuyendeId: subjectSlot.subjectId.subjectChuyendeId?._id,
-                                                            })}
-                                                        >
-                                                            {subjectSlot.subjectId.nameSubject} - {subjectSlot.subjectId.teacherId?.name}
-                                                        </option>
-                                                    ))}
                                                     {classDetail?.subjectGroup?.SubjectsId.map((subject, index) => (
                                                         <option
                                                             key={index}
-                                                            value={JSON.stringify({
-                                                                subjectId: subject._id,
-                                                                subjectChuyendeId: subject?.subjectChuyendeId?._id,
-                                                            })}
+                                                            value={JSON.stringify({ subjectId: subject._id,  })}
                                                         >
                                                             {subject?.nameSubject} - {subject?.teacherId?.name}
                                                         </option>
@@ -480,14 +476,20 @@ const CreateCalender = () => {
                                                     {classDetail?.subjectGroup?.SubjectsChuyendeId.map((subject, index) => (
                                                         <option
                                                             key={index}
-                                                            value={JSON.stringify({
-                                                                subjectId: subject._id,
-                                                                subjectChuyendeId: subject?.subjectChuyendeId?._id,
-                                                            })}
+                                                            value={JSON.stringify({ subjectId: subject._id,  })}
                                                         >
                                                             {subject?.nameSubject} - {subject?.teacherId?.name}
                                                         </option>
                                                     ))}
+                                                    {classDetail?.subjectGroup?.SubjectsPhuId.map((subject, index) => (
+                                                        <option
+                                                            key={index}
+                                                            value={JSON.stringify({ subjectId: subject._id,  })}
+                                                        >
+                                                            {subject?.nameSubject} - {subject?.teacherId?.name}
+                                                        </option>
+                                                    ))}
+
                                                 </select>
                                             )}
                                         </td>
@@ -499,15 +501,6 @@ const CreateCalender = () => {
                     </tbody>
                 </table>
             </div>
-            {/* <div className="mt-6 text-center">
-                <button
-                    onClick={handleSaveSchedule}
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded shadow-lg transition duration-200"
-                >
-                    Save Schedule
-                </button>
-            </div> */}
-
         </div>
     );
 };
