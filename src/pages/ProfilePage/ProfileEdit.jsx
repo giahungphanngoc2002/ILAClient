@@ -39,7 +39,7 @@ const ProfileEdit = ({
       setCccd(user.cccd || "");
       setGender(user.gender || "")
     }
-  }, [user, setName, setPhone, setAddress, setAge, setEmail, setGender]);
+  }, [user, setName, setPhone, setAddress, setAge, setEmail, setGender,setCccd]);
 
   const handleProvinceChange = (e) => {
     const provinceCode = e.target.value;
@@ -96,6 +96,7 @@ const ProfileEdit = ({
     const addressString = `${provinceName} , ${districtName} , ${wardName}`;
     // console.log('Địa chỉ hiện tại:', addressString);
     setFullAddress(addressString)
+    setAddress(addressString);      // Cập nhật address (nếu cần thiết)
   };
 
   const formattedAge = age ? age.split("T")[0] : "";
@@ -119,6 +120,19 @@ const ProfileEdit = ({
             />
           ) : (
             <p>{name || "No name provided"}</p>
+          )}
+        </div>
+        {/* CCCD */}
+        <div className="text-gray-600 border-b py-2 font-semibold font-mono col-span-1">Căng Cước Công Dân:</div>
+        <div className="border-b py-2 col-span-2">
+          {isEditing ? (
+            <input
+              className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={cccd}
+              onChange={(e) => setCccd(e.target.value)}
+            />
+          ) : (
+            <p>{cccd || "No name provided"}</p>
           )}
         </div>
 
@@ -206,7 +220,7 @@ const ProfileEdit = ({
               )}
             </div>
           ) : (
-            <p>{fullAddress || "No address provided"}</p>
+            <p>{fullAddress ||address}</p>
           )}
         </div>
 
@@ -241,6 +255,7 @@ const ProfileEdit = ({
                 cccd,
                 gender,
               };
+              console.log(updatedUserInfo)
               onSave(updatedUserInfo); // Gọi onSave khi lưu thông tin
             }
           }}

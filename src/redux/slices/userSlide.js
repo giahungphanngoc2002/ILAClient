@@ -12,7 +12,7 @@ const initialState = {
   id: "",
   access_token: "",
   password: "",
-
+  gender: "",
   updatedAt: " ",
   createdAt: " ",
 
@@ -37,6 +37,7 @@ export const userSlice = createSlice({
         access_token = "",
         password = "",
         cccd = "",
+        gender = "",
         createdAt = "",
         updatedAt = "",
         role = " ",
@@ -50,6 +51,7 @@ export const userSlice = createSlice({
       state.age = age;
       state.id = _id;
       state.role = role;
+      state.gender = gender;
       state.avatar = avatar;
       state.password = password;
       state.cccd = cccd;
@@ -64,6 +66,7 @@ export const userSlice = createSlice({
       state.email = "";
       state.phone = "";
       state.address = "";
+      state.gender = "";
       state.age = "";
       state.id = "";
       state.avatar = "";
