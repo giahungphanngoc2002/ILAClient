@@ -28,6 +28,7 @@ const QuestionManager = () => {
     const [textChapter, setTextChapTer] = useState("");
     const [textLession, setTextLession] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+    const [detailSubject, setDetailSubject] = useState("");
 
     const fetchQuestions = async () => {
         setIsLoading(true);
@@ -46,6 +47,22 @@ const QuestionManager = () => {
     useEffect(() => {
         fetchQuestions();
     }, [idClass, idSubject]);
+
+    useEffect(() => {
+        const fetchDetailSubject = async () => {
+            setIsLoading(true);
+            try {
+                const detailSubjectData = await SubjectService.getDetailSubject(idSubject);
+                setDetailSubject(detailSubjectData?.chapters);
+            } catch (error) {
+                console.error("Error fetching time tables:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchDetailSubject();
+    }, [idSubject]);
+     console.log("chapters ", detailSubject);
 
     const updateMutation = useMutation({
         mutationFn: async ({ classId, subjectId, questionId, updatedQuestion }) => {
@@ -188,7 +205,7 @@ const QuestionManager = () => {
 
     const handleUpdateQuestion = () => {
         const updatedQuestion = {
-            question: textQuestion,
+            question: question.question,
             correctAnswer: question.correctAnswer,
             options: question.options,
             level: question.level,
@@ -241,11 +258,13 @@ const QuestionManager = () => {
         setTextLevel(e.target.value);
     };
     const handleChapterChange = (e) => {
-        setTextChapTer(e.target.value);
-    };
-    const handleLessionChange = (e) => {
-        setTextLession(e.target.value);
-    };
+        setTextChapTer(e.target.value); // Cập nhật chương
+        setTextLession(""); // Reset bài học khi chọn chương mới
+      };
+      
+      const handleLessionChange = (e) => {
+        setTextLession(e.target.value); // Cập nhật bài học
+      }
 
 
 
@@ -382,6 +401,7 @@ const QuestionManager = () => {
                     showUpdateModal={showUpdateModal}
                     handleCloseUpdateModal={handleCloseUpdateModal}
                     question={question}
+                    detailSubject={detailSubject}
                     toggleEditQuestion={toggleEditQuestion}
                     textQuestion={textQuestion}
                     handleQuestionChange={handleQuestionChange}

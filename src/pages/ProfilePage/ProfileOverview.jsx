@@ -2,7 +2,7 @@ import React from "react";
 
 const ProfileOverview = ({ user }) => {
   return (
-    <div className="bg-gray-100 p-6 border rounded-lg shadow-lg">
+    <div className=" p-6 rounded-lg ">
       <h5 className="text-xl font-semibold mb-4">About</h5>
       <p className="text-sm italic mb-6 border-b pb-4">
         Passionate about leveraging technology to solve real-world problems, our

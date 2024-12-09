@@ -13,6 +13,8 @@ import ProfileOverview from "./ProfileOverview";
 import ProfileEdit from "./ProfileEdit";
 import ChangePassword from "../ChangePassWord/ChangePassWord";
 import InfoContact from "./InfoContact";
+import { FaHouseUser } from "react-icons/fa";
+import InfoAccount from "../InfoAccount/InfoAccount.jsx";
 
 const ProfilePage = () => {
   const user = useSelector((state) => state.user);
@@ -23,7 +25,8 @@ const ProfilePage = () => {
   const [address, setAddress] = useState("");
   const [age, setAge] = useState("");
   const [avatar, setAvatar] = useState("123456");
-  const [cccd, setCccd] = useState("")
+  const [cccd, setCccd] = useState("");
+  const [gender, setGender] = useState("");
   const [oldPassword, setOldPassword] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -66,7 +69,7 @@ const ProfilePage = () => {
   }, [userId]); // Gọi lại khi userId thay đổi
 
   useEffect(() => {
-    console.log("InfoContact:", infoContact); // Theo dõi sự thay đổi của infoContact
+console.log("InfoContact:", infoContact); // Theo dõi sự thay đổi của infoContact
   }, [infoContact]);
 
   const mutation = useMutationHooks((data) => {
@@ -148,6 +151,7 @@ const ProfilePage = () => {
       setAvatar(user.avatar || "");
       setCccd(user.cccd || "");
       setOldPassword(user.password || "");
+      setGender(user.gender || "");
     }
   }, [user]);
 
@@ -158,8 +162,7 @@ const ProfilePage = () => {
       await handleUpdateAvatar(file);
     }
   };
-
-  const handleUpdateAvatar = async (file) => {
+const handleUpdateAvatar = async (file) => {
     const formData = new FormData();
     formData.append("avatar", file);
 
@@ -185,6 +188,7 @@ const ProfilePage = () => {
     if (address !== user.address) updateData.address = address;
     if (age !== user.age) updateData.age = age;
     if (cccd !== user.cccd) updateData.cccd = cccd;
+    if (gender !== user.gender) updateData.gender = gender;
 
     mutation.mutate({
       id: user?.id,
@@ -269,12 +273,28 @@ const ProfilePage = () => {
             setCccd={setCccd}
             email={email}
             setEmail={setEmail}
+            gender={gender}
+            setGender={setGender}
             isLoading={isLoading}
           />
         );
-      case "change-password":
+      // case "change-password":
+      //   return (
+      //     <ChangePassword
+      //       onChangePassword={handleUpdatePassword}
+      //       isUpdatingPassword={isUpdatingPassword}
+      //       currentPassword={currentPassword}
+      //       setCurrentPassword={setCurrentPassword}
+      //       newPassword={newPassword}
+      //       setNewPassword={setNewPassword}
+      //       confirmNewPassword={confirmNewPassword}
+      //       setConfirmNewPassword={setConfirmNewPassword}
+      //     />
+      //   );
+      case "info-account":
         return (
-          <ChangePassword
+          <InfoAccount
+            user={user}
             onChangePassword={handleUpdatePassword}
             isUpdatingPassword={isUpdatingPassword}
             currentPassword={currentPassword}
@@ -301,12 +321,11 @@ const ProfilePage = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
-      <div className="bg-white shadow-lg rounded-lg overflow-hidden p-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+    <div className="max-w-7xl mx-auto pt-6">
+      <div className="shadow-lg rounded-lg overflow-hidden ">
+        <div className="grid grid-cols-1 md:grid-cols-3">
           <div className="flex flex-col items-center">
-            <div className="relative">
-
+            <div className="relative mt-10">
               <img
                 src={user.avatar === "" ? "/images/sbcf-default-avatar.webp" : user.avatar}
                 alt="avatar"
@@ -324,17 +343,16 @@ const ProfilePage = () => {
                 className="absolute bottom-0 right-0 cursor-pointer bg-blue-500 text-white p-2 rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
               >
                 <BiUpload size={24} />
-              </label>
+</label>
             </div>
-            <div className="flex items-center space-x-2 mt-2">
+            <div className="flex items-center space-x-2 mt-2 mb-4">
               <h2 className=" font-semibold mb-2 font-mono text-xl">{name}</h2>
             </div>
-            <p className="text-gray-600">{user.job}</p>
-          </div>
-          <div className="col-span-2">
-            <ul className="flex justify-start space-x-8 pb-4 border-b">
-              <li>
+
+            <ul className="flex flex-col space-y-4 pl-0 pb-4">
+              <li >
                 <button
+                  style={{ width: "100%" }}
                   className={`flex items-center space-x-2 ${activeTab === "overview"
                     ? "border-b-2 border-blue-500 text-blue-500"
                     : "text-gray-500 hover:text-blue-500"
@@ -347,6 +365,7 @@ const ProfilePage = () => {
               </li>
               <li>
                 <button
+                  style={{ width: "300px" }}
                   className={`flex items-center space-x-2 ${activeTab === "edit-profile"
                     ? "border-b-2 border-blue-500 text-blue-500"
                     : "text-gray-500 hover:text-blue-500"
@@ -357,8 +376,9 @@ const ProfilePage = () => {
                   <span>Chỉnh sửa thông tin</span>
                 </button>
               </li>
-              <li>
+              {/* <li>
                 <button
+                  style={{ width: "300px" }}
                   className={`flex items-center space-x-2 ${activeTab === "change-password"
                     ? "border-b-2 border-blue-500 text-blue-500"
                     : "text-gray-500 hover:text-blue-500"
@@ -368,21 +388,38 @@ const ProfilePage = () => {
                   <TbArrowsExchange size={20} />
                   <span>Thay đổi mật khẩu</span>
                 </button>
-              </li>
+              </li> */}
               <li>
                 <button
-                  className={`flex items-center space-x-2 ${activeTab === "info-contact"
+                  style={{ width: "300px" }}
+                  className={`flex items-center space-x-2 ${activeTab === "info-account"
                     ? "border-b-2 border-blue-500 text-blue-500"
                     : "text-gray-500 hover:text-blue-500"
                     } py-2 px-4 focus:outline-none transition-colors duration-300`}
-                  onClick={() => setActiveTab("info-contact")}
+                  onClick={() => setActiveTab("info-account")}
                 >
                   <TbArrowsExchange size={20} />
+                  <span>Thông tin đăng nhập</span>
+                </button>
+              </li>
+              <li>
+                <button
+                  style={{ width: "300px" }}
+                  className={`flex items-center space-x-2 ${activeTab === "info-contact"
+                    ? "border-b-2 border-blue-500 text-blue-500"
+: "text-gray-500 hover:text-blue-500"
+                    } py-2 px-4 focus:outline-none transition-colors duration-300`}
+                  onClick={() => setActiveTab("info-contact")}
+                >
+                  <FaHouseUser size={20} />
                   <span>Thông tin liên hệ</span>
                 </button>
               </li>
             </ul>
-            <div className="p-6">{renderTabContent()}</div>
+          </div>
+          <div className="col-span-2 bg-white">
+
+            <div className="">{renderTabContent()}</div>
           </div>
         </div>
       </div>

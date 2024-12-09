@@ -27,7 +27,7 @@ const UpdateQuestionModal = ({
   toggleEditLevel,
   handleEditLevel,
   textLession, handleLessionChange, toggleEditLession, handleEditLession, saveLession,
-  textChapter, handleChapterChange, toggleEditChapter, handleEditChapter, saveChapter
+  textChapter, handleChapterChange, toggleEditChapter, handleEditChapter, saveChapter, detailSubject
 }) => {
   return (
     <Modal show={showUpdateModal} onHide={handleCloseUpdateModal}>
@@ -200,21 +200,76 @@ const UpdateQuestionModal = ({
               )}
             </div>
 
+           
+
             <div className="mt-4">
               <label
-                htmlFor="correctAnswer"
+                htmlFor="chapter"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Chương:
+              </label>
+              {toggleEditChapter ? (
+                <div>
+                  <select
+                    value={textChapter}
+                    onChange={handleChapterChange}
+                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                  >
+                    <option value="" disabled>Chọn chương</option>
+                    {detailSubject &&
+                      detailSubject.map((chapter) => (
+                        <option key={chapter._id} value={chapter.nameChapter}>
+                          {chapter.nameChapter}
+                        </option>
+                      ))}
+                  </select>
+                  <button
+                    onClick={saveChapter}
+                    className="bg-green-500 text-white px-4 py-2 rounded mt-2 hover:bg-green-600"
+                  >
+                    Lưu
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between mt-1">
+                  <p className="m-0 block w-full p-2 border border-gray-300 rounded-md">
+                    {question.chapter}
+                  </p>
+                  <button
+                    onClick={() => handleEditChapter(question.chapter)}
+                    className="ml-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                  >
+                    Sửa
+                  </button>
+                </div>
+              )}
+            </div>
+            <div className="mt-4">
+              <label
+                htmlFor="lession"
                 className="block text-sm font-medium text-gray-700"
               >
                 Bài học:
               </label>
               {toggleEditLession ? (
                 <div>
-                  <input
-                    type="text"
+                  <select
                     value={textLession}
                     onChange={handleLessionChange}
                     className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-                  />
+                    disabled={!textChapter} // Vô hiệu hóa nếu chưa chọn chương
+                  >
+                    <option value="" disabled>Chọn bài học</option>
+                    {textChapter &&
+                      detailSubject
+                        .find((chapter) => chapter.nameChapter === textChapter)
+                        ?.lession.map((lesson, index) => (
+                          <option key={index} value={lesson}>
+                            {lesson}
+                          </option>
+                        ))}
+                  </select>
                   <button
                     onClick={saveLession}
                     className="bg-green-500 text-white px-4 py-2 rounded mt-2 hover:bg-green-600"
@@ -237,42 +292,6 @@ const UpdateQuestionModal = ({
               )}
             </div>
 
-            <div className="mt-4">
-              <label
-                htmlFor="correctAnswer"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Chương:
-              </label>
-              {toggleEditChapter ? (
-                <div>
-                  <input
-                    type="text"
-                    value={textChapter}
-                    onChange={handleChapterChange}
-                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-                  />
-                  <button
-                    onClick={saveChapter}
-                    className="bg-green-500 text-white px-4 py-2 rounded mt-2 hover:bg-green-600"
-                  >
-                    Lưu
-                  </button>
-                </div>
-              ) : (
-                <div className="flex items-center justify-between mt-1">
-                  <p className="m-0 block w-full p-2 border border-gray-300 rounded-md">
-                    {question.chapter}
-                  </p>
-                  <button
-                    onClick={() => handleEditChapter(question.chapter)}
-                    className="ml-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-                  >
-                    Sửa
-                  </button>
-                </div>
-              )}
-            </div>
           </>
         )}
       </Modal.Body>

@@ -33,6 +33,7 @@ export default function SearchQuestionByAI() {
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [detailSubject, setDetailSubject] = useState("");
   const [buttonColor, setButtonColor] = useState("gray");
   const [showWarning, setShowWarning] = useState(false);
   const [editingQuestion, setEditingQuestion] = useState(null); // Câu hỏi đang chỉnh sửa
@@ -62,6 +63,23 @@ export default function SearchQuestionByAI() {
   }, [question]);
 
   const { idClass, idSubject } = useParams();
+
+
+  useEffect(() => {
+    const fetchDetailSubject = async () => {
+      setLoading(true);
+        try {
+            const detailSubjectData = await SubjectService.getDetailSubject(idSubject);
+            setDetailSubject(detailSubjectData?.chapters);
+        } catch (error) {
+            console.error("Error fetching time tables:", error);
+        } finally {
+          setLoading(false);
+        }
+    };
+    fetchDetailSubject();
+}, [idSubject]);
+ console.log("chapters ", detailSubject);
 
   const handleUpdate = async () => {
     try {
@@ -264,7 +282,7 @@ export default function SearchQuestionByAI() {
         placeholder="Nhập đoạn văn bạn muốn tạo ra câu hỏi"
       ></textarea>
       {showWarning && (
-        <p className="text-red-500">Đoạn văn cần có ít nhất 150 từ để tạo câu hỏi.</p>
+        <p className="text-red-500"></p>
       )}
       <div className="mb-4">
         <input
@@ -431,28 +449,49 @@ export default function SearchQuestionByAI() {
             </div>
 
             <div className="text-left">
-              <h5>Bài học:</h5>
-              <input
-                type="text"
+              <h5>Chương</h5>
+              <select
                 value={updatedQuestion.chapter}
-                onChange={(e) => setUpdatedQuestion({ ...updatedQuestion, chapter: e.target.value })}
+                onChange={(e) => {
+                  const selectedChapter = e.target.value;
+                  setUpdatedQuestion({
+                    ...updatedQuestion,
+                    chapter: selectedChapter,
+                    lession: "", // Reset bài học khi chọn chương mới
+                  });
+                }}
                 className="w-full p-2 mb-4 border border-gray-300 rounded-lg"
-                placeholder="Chapter"
-              />
+              >
+                <option value="" disabled>Chọn chương</option>
+                {detailSubject &&
+                  detailSubject.map((chapter) => (
+                    <option key={chapter._id} value={chapter.nameChapter}>
+                      {chapter.nameChapter}
+                    </option>
+                  ))}
+              </select>
             </div>
 
             <div className="text-left">
-              <h5>Chương</h5>
-
-
-              <input
-                type="text"
+              <h5>Bài học</h5>
+              <select
                 value={updatedQuestion.lession}
-                onChange={(e) => setUpdatedQuestion({ ...updatedQuestion, lession: e.target.value })}
+                onChange={(e) =>
+                  setUpdatedQuestion({ ...updatedQuestion, lession: e.target.value })
+                }
                 className="w-full p-2 mb-4 border border-gray-300 rounded-lg"
-                placeholder="Lesson"
-              />
-
+                disabled={!updatedQuestion.chapter} // Vô hiệu hóa nếu chưa chọn chương
+              >
+                <option value="" disabled>Chọn bài học</option>
+                {updatedQuestion.chapter &&
+                  detailSubject
+                    .find((chapter) => chapter.nameChapter === updatedQuestion.chapter)
+                    ?.lession.map((lesson, index) => (
+                      <option key={index} value={lesson}>
+                        {lesson}
+                      </option>
+                    ))}
+              </select>
             </div>
             <div className="flex justify-between">
               <button
