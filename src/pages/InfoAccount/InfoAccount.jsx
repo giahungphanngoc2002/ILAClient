@@ -54,7 +54,7 @@ const InfoAccount = ({
                 <div className="text-gray-600 border-b py-2 font-semibold font-mono col-span-1">Số điện thoại:</div>
                 <div className="border-b py-2 col-span-2 flex items-center justify-between">
                     <p className="m-0">{user.phone || "(Chưa có thông tin)"}</p>
-                    <button onClick={() => setShowChangePassword(true)} className="ml-4 text-blue-500 hover:underline">Cập nhật</button>
+                    <button className="ml-4 text-blue-500 hover:underline">Cập nhật</button>
                 </div>
 
                 {/* Mật khẩu */}
@@ -65,7 +65,7 @@ const InfoAccount = ({
                         <div className="border-b py-2 col-span-2 flex items-center justify-between">
                             <p className="m-0">********</p>
                             <button
-className="ml-4 text-blue-500 hover:underline"
+                                className="ml-4 text-blue-500 hover:underline"
                                 onClick={() => setShowChangePassword(true)} // Thêm sự kiện khi nhấn đổi mật khẩu
                             >
                                 Đổi mật khẩu
