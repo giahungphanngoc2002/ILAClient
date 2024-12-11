@@ -1,26 +1,38 @@
+// ActivationPage.js
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import * as UserService from "../../services/UserService"; // Đường dẫn đến file chứa hàm Axios
 import { AiOutlineWarning, AiOutlineCheckCircle } from 'react-icons/ai';
+import { useDispatch } from "react-redux"; // Thêm useDispatch
+import { updateUser } from "../../redux/slices/userSlide"; // Thêm updateUser action
 
 const ActivationPage = () => {
   const { activation_token } = useParams();
+  const [message, setMessage] = useState("");
   const [error, setError] = useState(false);
+  const dispatch = useDispatch(); // Khai báo useDispatch
 
   useEffect(() => {
     if (activation_token) {
       const sendRequest = async () => {
         try {
           const response = await UserService.activateUser(activation_token);
-          console.log(response);
-          // You might want to set a success state or redirect here
+          if (response.status === "OK") {
+            setMessage("Your email has been activated successfully!");
+            // Dispatch action để cập nhật lại email
+            dispatch(updateUser({ email: response.data.email })); // Giả sử response có data.email
+          } else {
+            setError(true);
+            setMessage(response.message);
+          }
         } catch (err) {
           setError(true);
+          setMessage("Your token is expired! Please request a new activation email.");
         }
       };
       sendRequest();
     }
-  }, [activation_token]);
+  }, [activation_token, dispatch]); // Dispatch khi activation_token thay đổi
 
   return (
     <div className="flex justify-center items-center w-full h-screen bg-gray-100">
@@ -30,9 +42,7 @@ const ActivationPage = () => {
         ) : (
           <AiOutlineCheckCircle className="mx-auto mb-4 text-green-500 text-4xl" />
         )}
-        <p className="text-lg font-semibold">
-          {error ? "Your token is expired!" : "Your email has been created successfully"}
-        </p>
+        <p className="text-lg font-semibold">{message}</p>
       </div>
     </div>
   );

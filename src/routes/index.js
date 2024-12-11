@@ -1,3 +1,5 @@
+
+
 import HomePage from "../pages/HomePage/HomePage";
 import NotFoundPage from "../pages/NotFoundPage/NotFoundPage";
 import SignInPage from "../pages/SignInPage/SignInPage";
@@ -62,7 +64,7 @@ export const routes = [
   },
 
   {
-    path: "/activation",
+    path: "/activate-email/:activation_token",
     page: ActivationPage,
     isShowHeader: false,
   },
