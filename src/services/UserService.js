@@ -64,7 +64,7 @@ export const updatePassword = async (id, data, access_token) => {
 };
 
 export const activateUser = async (activation_token) => {
-  const res = await axios.post(`${API_URL}/activation`, {
+  const res = await axios.post(`${API_URL}/activate-email/${activation_token}`, {
     activation_token,
   });
   return res.data;
