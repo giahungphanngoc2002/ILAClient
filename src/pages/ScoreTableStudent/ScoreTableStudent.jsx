@@ -18,12 +18,14 @@ const ScoreTableStudent = () => {
     const [classes, setClasses] = useState([]);
     const [classSubject, setClassSubject] = useState(null);
     const [classSubjectPhu, setClassSubjectPhu] = useState();
-    const [selectedYear, setSelectedYear] = useState("2024-2025");
     const [years, setYears] = useState([]);
     const [subjectEvaluate, setSubjectEvaluate] = useState([]);
     const [timeTables, setTimeTables] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [countAbsent, setCountAbsent] = useState();
+    const [userClasses, setUserClasses] = useState([])
+
+    const [selectedClass, setSelectedClass] = useState();
 
 
     useEffect(() => {
@@ -43,7 +45,6 @@ const ScoreTableStudent = () => {
         };
         fetchTimeTables();
     }, [studentId]);
-     console.log("Tổng số vắng mặt và có phép: ", countAbsent);
 
 
     function getDateOfWeek(year, week, dayOfWeek) {
@@ -62,7 +63,7 @@ const ScoreTableStudent = () => {
         resultDate.setDate(firstDayOfWeek.getDate() + dayIndex);
 
         const yearResult = resultDate.getFullYear();
-        const monthResult = (resultDate.getMonth() + 1).toString().padStart(2, '0');
+const monthResult = (resultDate.getMonth() + 1).toString().padStart(2, '0');
         const dayResult = resultDate.getDate().toString().padStart(2, '0');
 
         return `${yearResult}-${monthResult}-${dayResult}`;
@@ -138,10 +139,10 @@ const ScoreTableStudent = () => {
             return null;
         }
 
-        const foundClass = allClasses.find((classItem) => {
+        const foundClass = allClasses.filter((classItem) => {
             return (
                 Array.isArray(classItem.studentID) &&
-                classItem.studentID.some((student) =>
+classItem.studentID.some((student) =>
                     typeof student === 'string'
                         ? student === userId
                         : student._id === userId
@@ -181,7 +182,6 @@ const ScoreTableStudent = () => {
         return result;
     }
 
-    // Hàm chính để fetch classes và tìm class
     useEffect(() => {
         const fetchClasses = async () => {
             try {
@@ -198,19 +198,21 @@ const ScoreTableStudent = () => {
                 }).filter(year => year !== null).flat();
                 setYears([...new Set(calculatedSchoolYears)]);
 
-                // Set giá trị mặc định cho selectedYear nếu có "2024-2025"
-                if (calculatedSchoolYears.includes("2024-2025") && !selectedYear) {
-                    setSelectedYear("2024-2025");
-                }
-
                 const userClass = findUserClass(allClasses?.data || [], user.id);
-                if (userClass && userClass.subjectGroup?.SubjectsId) {
-                    setClassSubject(userClass.subjectGroup.SubjectsId);
+                setUserClasses(userClass)
+                console.log(userClass)
+                const filterUserClass = userClass.find((classItem) => {
+                    return classItem._id === selectedClass;
+                });
+
+                console.log(filterUserClass)
+
+                if (filterUserClass && filterUserClass.subjectGroup?.SubjectsId) {
+                    setClassSubject(filterUserClass.subjectGroup.SubjectsId);
                 } else {
-                    console.error("Không tìm thấy classSubject phù hợp!");
                 }
-                if (userClass && userClass.subjectGroup?.SubjectsPhuId) {
-                    setClassSubjectPhu(userClass?.subjectGroup?.SubjectsPhuId || []);
+                if (filterUserClass && filterUserClass.subjectGroup?.SubjectsPhuId) {
+                    setClassSubjectPhu(filterUserClass?.subjectGroup?.SubjectsPhuId || []);
                 } else {
                     console.error("Không tìm thấy classSubject phù hợp!");
                 }
@@ -219,10 +221,11 @@ const ScoreTableStudent = () => {
             }
         };
         fetchClasses();
-    }, [user.id]);
+    }, [user.id, selectedClass]);
+
 
     const filterSubjectEvaluationsByUserId = () => {
-        if (!Array.isArray(classSubjectPhu)) {
+if (!Array.isArray(classSubjectPhu)) {
             console.warn('classSubjectPhu is not an array or is undefined');
             return [];  // Trả về mảng rỗng nếu classSubjectPhu không hợp lệ
         }
@@ -276,8 +279,10 @@ const ScoreTableStudent = () => {
         });
     };
 
+    console.log(filterBySemester())
+
     // Hàm gọi API và định dạng lại dữ liệu
-    const fetchScores = async (semester, year) => {
+    const fetchScores = async (semester, classId) => {
         if (!classSubject || !Array.isArray(classSubject)) {
             console.error("classSubject chưa được khởi tạo hoặc không hợp lệ:", classSubject);
             setError('Dữ liệu môn học chưa sẵn sàng. Vui lòng thử lại!');
@@ -289,13 +294,13 @@ const ScoreTableStudent = () => {
 
         try {
             // Lấy dữ liệu điểm từ API
-            const rawData = await ScoreSbujectService.getAllScoreByStudentIdSemesterAndClass(studentId, semester, year);
-
+            const rawData = await ScoreSbujectService.getAllScoreByStudentIdSemesterAndClass(studentId, semester, classId);
+            console.log(rawData)
             // Kiểm tra nếu rawData không có dữ liệu
             if (!rawData || rawData.data.length === 0) {
                 console.warn(`Không có dữ liệu điểm trả về cho kỳ ${semester}`);
                 setGrades(prev => ({
-                    ...prev,
+...prev,
                     [semester]: classSubject.map(subject => ({
                         subject: subject.nameSubject,
                         regular: [],
@@ -355,12 +360,11 @@ const ScoreTableStudent = () => {
 
 
     useEffect(() => {
-        if (classSubject && Array.isArray(classSubject) && selectedYear) {
-            // Lấy dữ liệu cho cả 2 kỳ
-            fetchScores('1', selectedYear); // Kỳ 1
-            fetchScores('2', selectedYear); // Kỳ 2
+        if (classSubject && Array.isArray(classSubject)) {
+            fetchScores('1', selectedClass);
+            fetchScores('2', selectedClass);
         }
-    }, [selectedYear, classSubject]);
+    }, [selectedClass, classSubject]);
 
     const handleSemesterChange = (semester) => {
         setSelectedSemester(semester);
@@ -372,12 +376,13 @@ const ScoreTableStudent = () => {
 
 
     const calculateAverageSubject = (regular = [], midterm = [], final = [], subject) => {
-        // Kiểm tra nếu các mảng có đúng số lượng phần tử
         if ((subject === "Toán" && regular.length !== 4) || (subject !== "Toán" && regular.length !== 3) || midterm.length !== 1 || final.length !== 1) {
-            return 'Chưa có';  // Hoặc bạn có thể trả về null hoặc một giá trị khác.
+            return 'Chưa có';
         }
+        console.log(regular)
+        console.log(midterm)
+console.log(final)
 
-        // Check if all inputs are arrays
         if (!Array.isArray(regular) || !Array.isArray(midterm) || !Array.isArray(final)) {
             throw new Error("All inputs must be arrays.");
         }
@@ -403,7 +408,6 @@ const ScoreTableStudent = () => {
         Object.keys(grades).forEach((semester) => {
             const semesterGrades = grades[semester];
             if (!semesterGrades || semesterGrades.length === 0) {
-                // console.warn(`Không có dữ liệu điểm cho kỳ ${semester}!`);
                 return;
             }
 
@@ -431,22 +435,17 @@ const ScoreTableStudent = () => {
     const getAllEvaluate = () => {
         if (!subjectEvaluate || !Array.isArray(subjectEvaluate)) {
             console.warn('subjectEvaluate is not an array or is undefined');
-            return []; // Trả về mảng rỗng nếu subjectEvaluate không hợp lệ
+            return [];
         }
-
-        // Khởi tạo mảng để lưu trữ các đánh giá
         const evaluations = [];
 
         subjectEvaluate.forEach(subject => {
-            // Lọc các đánh giá theo kỳ học và lưu vào mảng evaluations
             if (subject.evaluate && Array.isArray(subject.evaluate)) {
                 const evaluationsForSubject = subject.evaluate.map(evaluation => ({
                     semester: evaluation.semester,
                     evaluate: evaluation.evaluate,
-                    subject: subject.nameSubject, // Chỉ lưu tên môn học, không phải toàn bộ object subject
+                    subject: subject.nameSubject,
                 }));
-
-                // Thêm các đánh giá của môn học vào mảng evaluations
                 evaluations.push(...evaluationsForSubject);
             }
         });
@@ -455,6 +454,7 @@ const ScoreTableStudent = () => {
     };
 
     const evaluates = getAllEvaluate()
+    console.log(selectedClass)
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen p-6">
@@ -467,7 +467,7 @@ const ScoreTableStudent = () => {
             <div className="pt-8"></div>
 
             <div className='w-4/5'>
-                <SummaryStudent studentId={studentId} selectedSemester={selectedSemester} evaluates={evaluates} averages={averages} />
+<SummaryStudent studentId={studentId} selectedSemester={selectedSemester} evaluates={evaluates} averages={averages} />
 
                 <SummaryAttendanceAndAward countAbsent={countAbsent} />
             </div>
@@ -489,20 +489,16 @@ const ScoreTableStudent = () => {
 
             <div className="mb-6">
                 <select
-                    value={selectedYear}
-                    onChange={(e) => setSelectedYear(e.target.value)}  // Cập nhật state khi người dùng chọn năm học
+                    value={selectedClass} // Đây sẽ là classItem._id
+                    onChange={(e) => setSelectedClass(e.target.value)} // Cập nhật selectedClass với _id
                     className="px-4 py-2 rounded-lg border border-gray-300"
                 >
                     <option value="">Chọn Năm Học</option>
-                    {years.length > 0 ? (
-                        years.map((year, idx) => (
-                            <option key={idx} value={year}>
-                                {year}
-                            </option>
-                        ))
-                    ) : (
-                        <option value="">Không có năm học nào</option>
-                    )}
+                    {userClasses.map((classItem) => (
+                        <option key={classItem._id} value={classItem._id}> {/* value là _id */}
+                            {classItem.year}
+                        </option>
+                    ))}
                 </select>
             </div>
 
@@ -526,7 +522,7 @@ const ScoreTableStudent = () => {
                                 <th className="w-1/4 px-4 py-4 border border-blue-200 text-center">Trung Bình</th>
                             </tr>
                         </thead>
-                        <tbody>
+<tbody>
                             {grades[selectedSemester]?.map((grade, index) => (
                                 <tr key={index} className="hover:bg-blue-50 text-gray-700 text-lg">
                                     <td className="px-4 py-4 border border-gray-200">
@@ -573,7 +569,7 @@ const ScoreTableStudent = () => {
                 <div className="flex items-center mb-6">
                     <HiClipboardList className="text-blue-600 w-6 h-6 mr-2" />
                     <span className="text-xl font-bold text-blue-600">Bảng đánh giá</span>
-                </div>
+</div>
 
                 {loading && <p className="text-blue-500">Đang tải dữ liệu...</p>}
                 {error && <p className="text-red-500">{error}</p>}

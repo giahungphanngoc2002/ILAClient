@@ -12,7 +12,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate, useParams } from 'react-router-dom';
 import { FaArrowLeft } from "react-icons/fa";
 import * as ClassService from "../../services/ClassService"; // Import the API service
-
+import axios from "axios";
 const getFileTypeIcon = (fileName) => {
   const extension = fileName.split('.').pop();
   switch (extension) {
@@ -45,6 +45,7 @@ const TeachingMaterial = () => {
         if (resources && Array.isArray(resources)) {
           // Map qua danh sách tài nguyên và chuẩn hóa dữ liệu cho từng file
           const loadedFiles = resources.map((resource) => ({
+            fileId: resource._id,
             file: { name: resource.linkResource },  // Lấy tên file từ 'linkResource'
             uploadDate: new Date(resource.createdAt),  // Lấy ngày upload từ 'createdAt'
             size: resource.size  // Lấy kích thước file từ 'size'
@@ -59,7 +60,9 @@ const TeachingMaterial = () => {
     };
   
     fetchSubjectData();
-  }, [idClass, idSubject]);  // Chỉ gọi lại khi idClass hoặc idSubject thay đổi
+  }, [idClass, idSubject]); 
+  
+  console.log(files)// Chỉ gọi lại khi idClass hoặc idSubject thay đổi
   
 
   const handleFileChange = (e) => {
@@ -68,42 +71,80 @@ const TeachingMaterial = () => {
 
   const handleUpload = async () => {
     if (selectedFile) {
-      const newFile = {
-        file: selectedFile,
-        uploadDate: new Date(),
-        size: selectedFile.size
-      };
+      const formData = new FormData();
+      formData.append("linkResource", selectedFile);
+      console.log(selectedFile.size)
+      // Kiểm tra nội dung FormData
+      formData.forEach((value, key) => {
+        console.log(`${key}: ${value}`);
+      });
   
       try {
-       
-        const linkResource = selectedFile.name;  // Sử dụng tên file làm linkResource
-        await ClassService.addResourceToSubject(idClass, idSubject, linkResource);  // Gọi mutation để thêm tài nguyên
-  
-        // Cập nhật state sau khi upload thành công
-        setFiles([...files, newFile]);
-        setSelectedFile(null); 
+        const response = await ClassService.addResourceToSubject(idClass,idSubject,selectedFile)
+        console.log(response);  // Log phản hồi từ server
+        setFiles([...files, { file: selectedFile, uploadDate: new Date(), size: selectedFile.size }]);
+        setSelectedFile(null);
         toast.success("Cập nhập file thành công!");
-  
       } catch (error) {
-        console.error("Error uploading file and updating resource:", error);
+        console.error("Error uploading file:", error);
         toast.error("Cập nhập file thất bại.");
       }
     } else {
       toast.error("No file selected. Please choose a file to upload.");
     }
   };
+  
+  
+  
+  
 
-  const handleDownload = (file) => {
-    const url = URL.createObjectURL(file.file);
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", file.file.name);
-    document.body.appendChild(link);
-    link.click();
+  const handleDownload = async (file) => {
+    try {
+      const response = await ClassService.downloadFileFromCloudinary(file.fileId)
+  
+      // Tạo URL blob từ dữ liệu nhận được
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+  
+      // Lấy tên file và thêm phần mở rộng .pdf nếu cần
+      const fileName = file.file.name.endsWith('.pdf') ? file.file.name : `${file.file.name}.pdf`;
+  
+      // Tạo liên kết để tải file
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", fileName); // Đặt tên file tải xuống
+      document.body.appendChild(link);
+      link.click();
+  
+      // Giải phóng URL sau khi tải xong
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error downloading file:", error.message);
+      toast.error("Failed to download file.");
+    }
   };
+  
+  
+  
+  
+  
+  
+  
 
-  const handleDelete = (fileIndex) => {
-    setFiles(files.filter((_, index) => index !== fileIndex));
+  const handleDelete = async (file, fileIndex) => {
+    try {
+      // Gửi yêu cầu xóa đến backend
+      const response = await ClassService.deleteResourceToSubject(idClass, idSubject, file.fileId);
+      if (response.success) {
+        toast.success(response.message);
+        // Xóa file khỏi state sau khi xóa thành công trên backend
+        setFiles(files.filter((_, index) => index !== fileIndex));
+      } else {
+        toast.error("Failed to delete the resource.");
+      }
+    } catch (error) {
+      console.error("Error deleting resource:", error.message);
+      toast.error("Failed to delete the resource.");
+    }
   };
 
   return (
@@ -154,42 +195,42 @@ const TeachingMaterial = () => {
             </tr>
           </thead>
           <tbody>
-  {files.length === 0 ? (
-    <tr>
-      <td colSpan="4" className="px-4 py-6">
-        <div className="flex flex-col items-center justify-center h-[30vh]">
-          <AiOutlineCloudUpload className="text-gray-400 text-6xl" />
-          <p className="text-gray-500 mt-2">Chưa có tệp nào được tải lên. Bắt đầu bằng cách chọn tệp.</p>
-        </div>
-      </td>
-    </tr>
-  ) : (
-    files.map((file, index) => (
-      <tr key={index} className="border-b bg-white hover:bg-gray-100 transition-all">
-        <td className="px-4 py-2 flex items-center">
-          {getFileTypeIcon(file.file.name)}
-          <span className="ml-2 text-gray-800 break-words">{file.file.name}</span>
-        </td>
-        <td className="px-4 py-2">{file.uploadDate.toLocaleDateString()}</td>
-        <td className="px-4 py-2">{(file.size / 1024).toFixed(2)} KB</td>
-        <td className="px-4 py-2">
-          <button
-            onClick={() => handleDownload(file)}
-            className="bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600 transition-all"
-          >
-            <AiOutlineDownload />
-          </button>
-          <button
-            onClick={() => handleDelete(index)}
-            className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600 transition-all ml-2"
-          >
-            <AiOutlineDelete />
-          </button>
-        </td>
-      </tr>
-    ))
-  )}
-</tbody>
+            {files.length === 0 ? (
+              <tr>
+                <td colSpan="4" className="px-4 py-6">
+                  <div className="flex flex-col items-center justify-center h-[30vh]">
+                    <AiOutlineCloudUpload className="text-gray-400 text-6xl" />
+                    <p className="text-gray-500 mt-2">Chưa có tệp nào được tải lên. Bắt đầu bằng cách chọn tệp.</p>
+                  </div>
+                </td>
+              </tr>
+            ) : (
+              files.map((file, index) => (
+                <tr key={index} className="border-t">
+                  <td className="px-4 py-2 flex items-center">
+                    {getFileTypeIcon(file.file.name)}
+                    <span className="ml-2">{file.file.name}</span>
+                  </td>
+                  <td className="px-4 py-2">{file.uploadDate.toLocaleDateString()}</td>
+                  <td className="px-4 py-2">{(file.size / 1024).toFixed(2)} KB</td>
+                  <td className="px-4 py-2 flex space-x-2">
+                    <button
+                      onClick={() => handleDownload(file)}
+                      className="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700"
+                    >
+                      <AiOutlineDownload />
+                    </button>
+                    <button
+                     onClick={() => handleDelete(file, index)}
+                      className="bg-red-600 text-white p-2 rounded-lg hover:bg-red-700"
+                    >
+                      <AiOutlineDelete />
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
         </table>
       </div>
     </div>

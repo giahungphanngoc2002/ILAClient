@@ -135,12 +135,41 @@ export const getResourcesBySubject = async (classId, subjectId) => {
     return res.data;
 };
 
-export const addResourceToSubject = async (classId, subjectId, linkResource) => {
-    const res = await axios.post(`${CLASS_API_URL}/${classId}/subjects/${subjectId}/resources`, {
-        linkResource,
-    });
+export const addResourceToSubject = async (classId, subjectId, file) => {
+    // Tạo FormData để chứa file
+    const formData = new FormData();
+    formData.append("linkResource", file); // 'linkResource' là tên trường trong multer
+
+    try {
+        const res = await axios.post(
+            `${CLASS_API_URL}/${classId}/subjects/${subjectId}/resources`,
+            formData,
+            {
+                headers: {
+                    'Content-Type': 'multipart/form-data', // Quan trọng khi gửi FormData
+                }
+            }
+        );
+        return res.data;
+    } catch (error) {
+        console.error('Error uploading resource:', error);
+        throw error;
+    }
+};
+
+export const deleteResourceToSubject = async (classId, subjectId, fileId) => {
+    const res = await axios.delete(`${CLASS_API_URL}/${classId}/subjects/${subjectId}/resources/${fileId}`);
     return res.data;
 };
+
+export const downloadFileFromCloudinary = async (fileId) => {
+    const res = await axios.get(`${CLASS_API_URL}/download/${fileId}`, {
+      responseType: "blob", // Đảm bảo nhận file nhị phân
+    });
+    return res; // Trả về toàn bộ response
+  };
+  
+  
 
 // API liên quan đến đơn xin vắng mặt
 export const createApplication = async (classId, applicationData) => {

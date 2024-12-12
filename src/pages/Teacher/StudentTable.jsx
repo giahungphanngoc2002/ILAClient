@@ -672,7 +672,8 @@ const StudentTable = () => {
                 const scoreData = {
                   scores: [
                     ...studentScores.scores.diemThuongXuyen.map(score => ({ type: 'thuongXuyen', score, semester: selectedSemester })),
-                    ...studentScores.scores.diemGiuaKi.map(score => ({ type: 'giuaKi', score, semester: selectedSemester })),
+                    
+                    studentScores.scores.diemGiuaKi ? { type: 'giuaKi', score: studentScores.scores.diemGiuaKi, semester: selectedSemester } : null,
                     studentScores.scores.diemCuoiKi ? { type: 'cuoiKi', score: studentScores.scores.diemCuoiKi, semester: selectedSemester } : null,
                   ].filter(scoreItem => scoreItem && scoreItem.score !== ''), // Ensure scores are valid
                   studentId: studentScores.id,

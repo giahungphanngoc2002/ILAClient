@@ -38,7 +38,7 @@ export const getAllScoreByStudentIdAndSemester = async (studentId, semester) => 
     const res = await axios.get(`${SCORE_API_URL}/scores/${studentId}/${semester}`);
     return res.data;
 };
-export const getAllScoreByStudentIdSemesterAndClass = async (studentId, semester,year) => {
-    const res = await axios.get(`${SCORE_API_URL}/${studentId}/${semester}/${year}`);
+export const getAllScoreByStudentIdSemesterAndClass = async (studentId, semester,classId) => {
+    const res = await axios.get(`${SCORE_API_URL}/${classId}/${studentId}/${semester}`);
     return res.data;
 };

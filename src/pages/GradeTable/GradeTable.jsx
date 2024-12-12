@@ -49,7 +49,7 @@ const GradeTable = () => {
         } else {
             console.error('subjectGroup is not an array or is missing.');
         }
-    
+
         // Lấy thêm SubjectsPhuId nếu có
         if (Array.isArray(classDetail?.subjectGroup?.SubjectsPhuId)) {
             const foundPhuSubject = classDetail.subjectGroup?.SubjectsPhuId.find(subject => subject._id === idSubject);
@@ -61,21 +61,21 @@ const GradeTable = () => {
 
     useEffect(() => {
         const fetchEvalutes = async () => {
-          try {
-            setLoading(true);
-            const response = await SubjectService.getAllEvaluateSemester(idClass, idSubject, semesterFilter);
-            setEvaluates(Array.isArray(response.data) ? response.data : []); // Ensure evaluates is an array
-          } catch (error) {
-            console.error("Lỗi khi lấy danh sách đánh giá:", error);
-          } finally {
-            setLoading(false); // Kết thúc tải
-          }
+            try {
+                setLoading(true);
+                const response = await SubjectService.getAllEvaluateSemester(idClass, idSubject, semesterFilter);
+                setEvaluates(Array.isArray(response.data) ? response.data : []); // Ensure evaluates is an array
+            } catch (error) {
+                console.error("Lỗi khi lấy danh sách đánh giá:", error);
+            } finally {
+                setLoading(false); // Kết thúc tải
+            }
         };
-    
+
         if (idClass) {
-          fetchEvalutes();
+            fetchEvalutes();
         }
-      }, [semesterFilter, idClass, idSubject]);
+    }, [semesterFilter, idClass, idSubject]);
     // Lấy điểm của học sinh
 
     console.log(evaluates)
@@ -85,8 +85,8 @@ const GradeTable = () => {
                 const scoresData = await ScoreSubjectService.getAllScoresBySubjectSemester(idSubject, idClass, semesterFilter);
                 console.log("Fetched scores data:", scoresData);  // Debug log để kiểm tra dữ liệu trả về
 
-                // Tạo đối tượng với key là studentId để dễ dàng tìm kiếm
-                const scoresByStudentId = scoresData.reduce((acc, detail) => {
+                // Kiểm tra nếu không có dữ liệu điểm, tạo bảng điểm rỗng
+                const scoresByStudentId = scoresData?.reduce((acc, detail) => {
                     const filteredScores = detail.scores.filter(score => score.semester === parseInt(semesterFilter));
                     const scores = { diemThuongXuyen: [], diemGiuaKi: [], diemCuoiKi: [] };
 
@@ -121,7 +121,7 @@ const GradeTable = () => {
 
                 // Gộp dữ liệu với danh sách sinh viên chưa có điểm
                 const completeStudentList = studentInClass.map((student) => {
-                    const existingStudent = scoresByStudentId[student._id];
+                    const existingStudent = scoresByStudentId ? scoresByStudentId[student._id] : null;
                     if (existingStudent) {
                         return existingStudent;
                     }
@@ -139,11 +139,24 @@ const GradeTable = () => {
                 setStudents(completeStudentList);
             } catch (error) {
                 console.error("Error fetching scores:", error);
+
+                // Nếu xảy ra lỗi, khởi tạo danh sách rỗng
+                const emptyStudentList = studentInClass.map((student) => ({
+                    id: student._id,
+                    name: student.name,
+                    email: student.email,
+                    diemThuongXuyen: [],
+                    diemGiuaKi: [],
+                    diemCuoiKi: []
+                }));
+
+                setStudents(emptyStudentList);
             }
         };
 
         fetchScores();
     }, [idClass, idSubject, semesterFilter, studentInClass]);
+
 
     const calculateAverage = (grades) =>
         grades.length > 0
@@ -419,73 +432,78 @@ const GradeTable = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {filteredStudents.map((student, index) => (
-                            <tr key={index}>
-                                <td className="border px-4 py-3">
-                                    <input
-                                        type="text"
-                                        value={student.name}
-                                        readOnly
-                                        className="w-full border rounded px-2 py-1 bg-gray-100"
-                                    />
-                                </td>
-                                <td className="border px-4 py-2">
-                                    <div className="grid grid-cols-2 gap-2">
-                                        {[...Array(subject.nameSubject === "Toán" ? 4 : 3)].map((_, idx) => (
-                                            <input
-                                                key={`thuongXuyen-${idx}`}
-                                                type="number"
-                                                value={student.diemThuongXuyen[idx] || ''}
-                                                onChange={(e) => handleScoreChange('diemThuongXuyen', idx, e.target.value, student.id)}
-                                                onInput={(e) => {
-                                                    let value = e.target.value;
-                                                    // Chỉ cho phép nhập giá trị từ 0 đến 10
-                                                    if (value < 0) e.target.value = 0;
-                                                    if (value > 10) e.target.value = 10;
-                                                }}
-                                                className="w-full border rounded px-2 py-1"
-                                            />
-                                        ))}
-                                    </div>
-                                </td>
+                        {filteredStudents.length > 0 ? (
+                            filteredStudents.map((student, index) => (
+                                <tr key={index}>
+                                    <td className="border px-4 py-3">
+                                        <input
+                                            type="text"
+                                            value={student.name}
+                                            readOnly
+                                            className="w-full border rounded px-2 py-1 bg-gray-100"
+                                        />
+                                    </td>
+                                    <td className="border px-4 py-2">
+                                        <div className="grid grid-cols-2 gap-2">
+                                            {[...Array(subject.nameSubject === "Toán" ? 4 : 3)].map((_, idx) => (
+                                                <input
+                                                    key={`thuongXuyen-${idx}`}
+                                                    type="number"
+                                                    value={student.diemThuongXuyen[idx] || ''}
+                                                    onChange={(e) => handleScoreChange('diemThuongXuyen', idx, e.target.value, student.id)}
+                                                    onInput={(e) => {
+                                                        let value = e.target.value;
+                                                        // Chỉ cho phép nhập giá trị từ 0 đến 10
+                                                        if (value < 0) e.target.value = 0;
+                                                        if (value > 10) e.target.value = 10;
+                                                    }}
+                                                    className="w-full border rounded px-2 py-1"
+                                                />
+                                            ))}
+                                        </div>
+                                    </td>
 
-                                <td className="border px-4 py-2">
-                                    <input
-                                        type="number"
-                                        value={student.diemGiuaKi || ''}
-                                        onChange={(e) => handleScoreChange('diemGiuaKi', null, e.target.value, student.id)}
-                                        onInput={(e) => {
-                                            let value = e.target.value;
-                                            // Chỉ cho phép nhập giá trị từ 0 đến 10
-                                            if (value < 0) e.target.value = 0;
-                                            if (value > 10) e.target.value = 10;
-                                        }}
-                                        className="w-full border rounded px-2 py-1"
-                                    />
-                                </td>
-                                <td className="border px-4 py-2">
-                                    <input
-                                        type="number"
-                                        value={student.diemCuoiKi || ''}
-                                        onChange={(e) => handleScoreChange('diemCuoiKi', null, e.target.value, student.id)}
-                                        onInput={(e) => {
-                                            let value = e.target.value;
-                                            // Chỉ cho phép nhập giá trị từ 0 đến 10
-                                            if (value < 0) e.target.value = 0;
-                                            if (value > 10) e.target.value = 10;
-                                        }}
-                                        className="w-full border rounded px-2 py-1"
-                                        min="0"
-                                        max="10"
-                                    />
-                                </td>
+                                    <td className="border px-4 py-2">
+                                        <input
+                                            type="number"
+                                            value={student.diemGiuaKi || ''}
+                                            onChange={(e) => handleScoreChange('diemGiuaKi', null, e.target.value, student.id)}
+                                            onInput={(e) => {
+                                                let value = e.target.value;
+                                                // Chỉ cho phép nhập giá trị từ 0 đến 10
+                                                if (value < 0) e.target.value = 0;
+                                                if (value > 10) e.target.value = 10;
+                                            }}
+                                            className="w-full border rounded px-2 py-1"
+                                        />
+                                    </td>
+                                    <td className="border px-4 py-2">
+                                        <input
+                                            type="number"
+                                            value={student.diemCuoiKi || ''}
+                                            onChange={(e) => handleScoreChange('diemCuoiKi', null, e.target.value, student.id)}
+                                            onInput={(e) => {
+                                                let value = e.target.value;
+                                                // Chỉ cho phép nhập giá trị từ 0 đến 10
+                                                if (value < 0) e.target.value = 0;
+                                                if (value > 10) e.target.value = 10;
+                                            }}
+                                            className="w-full border rounded px-2 py-1"
+                                            min="0"
+                                            max="10"
+                                        />
+                                    </td>
 
-                                <td className="border px-4 py-3 font-semibold text-blue-700">
-                                    {calculateAverageSubject(student.diemThuongXuyen, student.diemGiuaKi, student.diemCuoiKi)}
-                                </td>
+                                    <td className="border px-4 py-3 font-semibold text-blue-700">
+                                        {calculateAverageSubject(student.diemThuongXuyen, student.diemGiuaKi, student.diemCuoiKi)}
+                                    </td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr>
+                                <td colSpan="5" className="text-center py-4">Không có điểm để hiển thị.</td>
                             </tr>
-                        ))}
-
+                        )}
                     </tbody>
                 </table>
             </div>

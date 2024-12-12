@@ -1,49 +1,47 @@
 import React, { createContext, useEffect, useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import {
-    setCurrentQuestion,
-    setSelectedAnswer,
-    setScore,
-    setData,
-} from "../../redux/slices/quizSlice";
-import { useNavigate, useLocation, useParams } from "react-router-dom";
-import { useSaveSelected } from "../../redux/QuizState";
-// import { useQuery } from "@tanstack/react-query";
+import { useParams } from "react-router-dom";
 import * as SubjectService from "../../services/SubjectService";
 import Direction from "../../components/Direction/Direction";
 import Breadcrumb from "../../components/Breadcrumb/Breadcrumb";
+import FilterQuestionsModal from "./FilterQuestionsModal.jsx";
 
 export const QuizzContext = createContext();
 
 const Quiz = () => {
-    const navigate = useNavigate();
-    const location = useLocation();
-    const [saveSelected, setSaveSelected] = useSaveSelected();
-    const [progress, setProgress] = useState("0%");
-    const [learning, setLearning] = useState("learning");
-    const [checkedQuestions, setCheckedQuestions] = useState(0);
     const { idSubject } = useParams();
-    const [dataQuestion, setDataQuestion] = useState();
+
+    const [dataQuestion, setDataQuestion] = useState([]);
+    const [selectedAnswer, setSelectedAnswer] = useState(null);
+    const [currentQuestion, setCurrentQuestion] = useState(0);
+    const [score, setScore] = useState(0);
+    const [progress, setProgress] = useState("0%");
+    const [saveSelected, setSaveSelected] = useState([]);
+    const [checkedQuestions, setCheckedQuestions] = useState(0);
     const [errorr, setErrorr] = useState();
+    const [lesson, setLesson] = useState();
+    const [chapter, setChapter] = useState();
+    const [level, setLevel] = useState();
+    const [showModal, setShowModal] = useState(false);
+    const [dataChapter, setDataChapter] = useState();
+    const [initialDataQuestion, setInitialDataQuestion] = useState([]);
 
 
-
-    const dispatch = useDispatch();
-    const { currentQuestion, selectedAnswer, score, showResult, data, error } =
-        useSelector((state) => state.quiz);
+    const handleOpenModal = () => setShowModal(true);
+    const handleCloseModal = () => setShowModal(false);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const subjectData = await SubjectService.getDetailSubject(idSubject);
-                console.log(subjectData)
                 if (subjectData) {
                     setDataQuestion(subjectData.questions);
+                    setDataChapter(subjectData.chapters);
+                    setInitialDataQuestion(subjectData.questions);
                 } else {
                     setErrorr('Class data not found.');
                 }
-            } catch (errorr) {
-                console.error('Error fetching students:', errorr);
+            } catch (error) {
+                console.error('Error fetching students:', error);
                 setErrorr('Error fetching students. Please try again later.');
             }
         };
@@ -51,32 +49,15 @@ const Quiz = () => {
         fetchData();
     }, [idSubject]);
 
-    console.log(dataQuestion)
-
-    useEffect(() => {
-        const savedData = location.state?.saveSelected;
-        if (savedData) {
-            setSaveSelected(savedData);
-        }
-    }, [location.state, setSaveSelected]);
-
-    // Sử dụng dataset cứng thay vì gọi API
-
     useEffect(() => {
         if (dataQuestion) {
-            dispatch(setData(dataQuestion)); // Đổ dữ liệu từ dataQuestion vào Redux store
-        }
-    }, [dataQuestion, dispatch]);
-
-    useEffect(() => {
-        if (data) {
-            const initialSaveSelected = data.map((_, index) => ({
+            const initialSaveSelected = dataQuestion.map((_, index) => ({
                 [`Question${index + 1}`]: null,
                 result: false,
             }));
             setSaveSelected(initialSaveSelected);
         }
-    }, [data]);
+    }, [dataQuestion]);
 
     useEffect(() => {
         let selectedCount = 0;
@@ -90,15 +71,12 @@ const Quiz = () => {
             }
         });
         setCheckedQuestions(selectedCount);
-        const countProgress = (selectedCount / data?.length) * 100 + "%";
+        const countProgress = (selectedCount / dataQuestion?.length) * 100 + "%";
         setProgress(countProgress);
     }, [saveSelected]);
 
-    // Không cần check error nữa vì không lấy dữ liệu từ API
-    // if (isError) return <div className="text-red-500">Error: {error}</div>;
-
     const handleAnswerSelect = (answer) => {
-        dispatch(setSelectedAnswer(answer));
+        setSelectedAnswer(answer);
         const questionKey = `Question${currentQuestion + 1}`;
         const questionExists = saveSelected.some(
             (selected) => Object.keys(selected)[0] === questionKey
@@ -131,168 +109,98 @@ const Quiz = () => {
     };
 
     const handleNextQuestion = () => {
-        const previousSelectedAnswer = selectedAnswer;
+        setCurrentQuestion(currentQuestion + 1);
+    };
 
-        dispatch(setCurrentQuestion(currentQuestion + 1));
+    const handlePrevQuestion = () => {
+        setCurrentQuestion(currentQuestion - 1);
+    };
 
-        if (currentQuestion !== currentQuizQuestion.length - 1) {
-            dispatch(setSelectedAnswer(null));
-            const nextQuestion = saveSelected.find(
-                (item) => Object.keys(item)[0] === `Question${currentQuestion + 2}`
-            );
-            if (nextQuestion) {
-                const nextAnswer = nextQuestion[`Question${currentQuestion + 2}`];
-                dispatch(setSelectedAnswer(nextAnswer));
-            }
-        } else {
-            dispatch(setSelectedAnswer(previousSelectedAnswer));
-        }
+    const handleFirstQuestion = () => {
+        setCurrentQuestion(0);
+    };
+
+    const handleLastQuestion = () => {
+        setCurrentQuestion(dataQuestion.length - 1);
     };
 
     const checkResult = (answer) => {
-        if (answer === currentQuizQuestion.correctAnswer) {
-            dispatch(setScore(score + 1));
+        if (answer === dataQuestion[currentQuestion].correctAnswer) {
             return true;
         } else {
             return false;
         }
     };
 
-    const handlePrevQuestion = () => {
-        const previousSelectedAnswer = selectedAnswer;
-
-        dispatch(setCurrentQuestion(currentQuestion - 1));
-
-        if (currentQuestion > 0) {
-            dispatch(setSelectedAnswer(null));
-            const prevQuestion = saveSelected.find(
-                (item) => Object.keys(item)[0] === `Question${currentQuestion}`
-            );
-            if (prevQuestion) {
-                const prevAnswer = prevQuestion[`Question${currentQuestion}`];
-                dispatch(setSelectedAnswer(prevAnswer));
-            }
-        } else {
-            dispatch(setSelectedAnswer(previousSelectedAnswer));
-        }
-    };
-
-    const handleFirstQuestion = () => {
-        const previousSelectedAnswer = selectedAnswer;
-
-        dispatch(setCurrentQuestion(0));
-        dispatch(setSelectedAnswer(null));
-        const firstQuestion = saveSelected.find(
-            (item) => Object.keys(item)[0] === `Question1`
-        );
-        if (firstQuestion) {
-            const firstAnswer = firstQuestion[`Question1`];
-            dispatch(setSelectedAnswer(firstAnswer));
-        } else {
-            dispatch(setSelectedAnswer(previousSelectedAnswer));
-        }
-    };
-
-    const handleLastQuestion = () => {
-        const previousSelectedAnswer = selectedAnswer;
-
-        dispatch(setCurrentQuestion(data.length - 1));
-        dispatch(setSelectedAnswer(null));
-        const lastQuestion = saveSelected.find(
-            (item) => Object.keys(item)[0] === `Question${data.length}`
-        );
-        if (lastQuestion) {
-            const lastAnswer = lastQuestion[`Question${data.length}`];
-            dispatch(setSelectedAnswer(lastAnswer));
-        } else {
-            dispatch(setSelectedAnswer(previousSelectedAnswer));
-        }
-    };
-
-    const handleSubmit = () => {
-        const questionExists = saveSelected.some(
-            (answer) => Object.keys(answer)[0] === `Question${currentQuestion + 1}`
-        );
-
-        if (questionExists) {
-            const updatedSaveSelected = saveSelected.filter(
-                (answer) =>
-                    Object.keys(answer)[0] !== `Question${currentQuestion + 1}` &&
-                    Object.keys(answer)[0] !== "result"
-            );
-
-            setSaveSelected([
-                ...updatedSaveSelected,
-                {
-                    [`Question${currentQuestion + 1}`]: selectedAnswer,
-                    result: checkResult(),
-                },
-            ]);
-        } else {
-            setSaveSelected((prevSelected) => [
-                ...prevSelected,
-                {
-                    [`Question${currentQuestion + 1}`]: selectedAnswer,
-                    result: checkResult(),
-                },
-            ]);
-        }
-
-        // Navigate to review page
-        const data = saveSelected;
-        // navigate(`/review/${learning}/${id}`, { state: { data } });
-    };
-
-    if (!data) return null;
-
-    if (showResult) {
-        return (
-            <div className="text-center py-8">
-                <h1 className="text-3xl font-bold text-green-500">Quiz Completed!</h1>
-                <p className="text-xl mt-4">
-                    Your score: <span className="font-bold text-blue-500">{score}</span>
-                </p>
-            </div>
-        );
-    }
-
-    const currentQuizQuestion = data[currentQuestion];
-    const selectedAnswerForQuestion = saveSelected.find(
-        (item) => Object.keys(item)[0] === `Question${currentQuestion + 1}`
-    );
-    const selectedAnswerValue = selectedAnswerForQuestion
-        ? selectedAnswerForQuestion[`Question${currentQuestion + 1}`]
-        : selectedAnswer;
-
-
-    console.log("so cau hoi", checkedQuestions)
+    // const handleChapterChange = (event) => {
+    //     setSelectedChapter(event.target.value);
+    // };
 
     const onBack = () => {
         window.history.back();
+    };
+
+    // const filteredDataQuestion = () => {
+    //     return dataQuestion.filter((question) => question.chapter === selectedChapter);
+    // };
+
+    if (!dataQuestion) return null;
+
+    const currentQuizQuestion = dataQuestion[currentQuestion];
+
+    const openSetting = () => {
+        handleOpenModal()
     }
+
+    const handleApplyFilter = () => {
+        console.log(chapter, lesson, level);
+
+        let filteredQuestions = [...initialDataQuestion]; // Sử dụng dữ liệu gốc để filter
+
+        filteredQuestions = filteredQuestions.filter(question => {
+            // Kiểm tra từng điều kiện và chỉ lọc nếu có giá trị tương ứng
+            const chapterMatch = chapter ? question.chapter === chapter : true;
+            const lessonMatch = lesson ? question.lession === lesson : true;
+            const levelMatch = level ? question.level[0] == level : true;
+
+            // Trả về true nếu tất cả các điều kiện đều thỏa mãn
+            return chapterMatch && lessonMatch && levelMatch;
+        });
+
+        // Cập nhật lại danh sách câu hỏi đã lọc
+        setDataQuestion(filteredQuestions);
+        handleCloseModal();
+    };
+
+
+    console.log(dataQuestion)
+
     return (
         <div className="h-screen flex items-center justify-center bg-gray-50">
             <Breadcrumb
                 title="Tự học"
                 onBack={onBack}
-                displayButton={false} />
+                buttonText="Cài đặt"
+                onButtonClick={openSetting}
+
+            />
             <div className="container w-1/2 mx-auto p-4 bg-white rounded-lg shadow-lg">
                 <div>
                     <div className="mt-2">
                         <h5 className="text-2xl text-gray-900 font-bold mb-12">
-                            Q.{currentQuestion + 1} {currentQuizQuestion.question}
+                            Q.{currentQuestion + 1} {currentQuizQuestion?.question}
                         </h5>
                         <div className="text-gray-700 text-lg mb-4">
                             Hãy chọn một đáp án đúng nhất:
                         </div>
                     </div>
                     <div className="flex flex-wrap -mx-2 mb-6">
-                        {currentQuizQuestion.options.map((answer, index) => {
+                        {currentQuizQuestion?.options.map((answer, index) => {
                             const isCorrectAnswer =
                                 saveSelected.some(
                                     (selected) =>
                                         selected[`Question${currentQuestion + 1}`] ===
-                                        data[currentQuestion].correctAnswer
+                                        dataQuestion[currentQuestion].correctAnswer
                                 ) && selectedAnswer === answer;
                             const isSelected = selectedAnswer === answer;
 
@@ -328,12 +236,10 @@ const Quiz = () => {
                         })}
                     </div>
                     <div className="relative mb-6 flex items-center justify-between">
-                        {/* Nút trái hiển thị số 0 */}
                         <div className="flex items-center justify-center w-10 h-10 border border-blue-400 rounded-full">
                             <span className="text-black">{checkedQuestions}</span>
                         </div>
 
-                        {/* Thanh progress */}
                         <div className="flex-1 mx-4">
                             <div className="relative w-full h-2 bg-blue-100 rounded-full overflow-hidden">
                                 <div
@@ -344,7 +250,7 @@ const Quiz = () => {
                         </div>
 
                         <div className="flex items-center justify-center w-10 h-10 border border-blue-400 rounded-full">
-                            <span className="text-black">{data?.length}</span>
+                            <span className="text-black">{dataQuestion?.length}</span>
                         </div>
                     </div>
 
@@ -354,17 +260,27 @@ const Quiz = () => {
                             handlePrevQuestion={handlePrevQuestion}
                             handleLastQuestion={handleLastQuestion}
                             handleNextQuestion={handleNextQuestion}
-                            data={data}
+                            data={dataQuestion}
                             currentQuestion={currentQuestion}
                         />
                     </div>
                 </div>
+
+                <FilterQuestionsModal
+                    show={showModal}
+                    handleClose={handleCloseModal}
+                    dataChapter={dataChapter}
+                    lesson={lesson}
+                    setLesson={setLesson}
+                    chapter={chapter}
+                    setChapter={setChapter}
+                    level={level}
+                    setLevel={setLevel}
+                    handleApplyFilter={handleApplyFilter}
+                />
             </div>
         </div>
     );
-
-
-
 };
 
 export default Quiz;

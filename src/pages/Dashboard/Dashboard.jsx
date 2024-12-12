@@ -141,7 +141,7 @@ const Dashboard = () => {
 
     const findClass = classes.find((cls) => cls._id === selectedClass);
 
-    // console.log(findClass)
+    console.log(findClass)
 
 
     const handleModalClick = (subjectId) => {
