@@ -13,6 +13,8 @@ export const createClass = async (data) => {
     return res.data;
 };
 
+
+
 export const updateClass = async (id, data) => {
     const res = await axios.put(`${CLASS_API_URL}/updateClass/${id}`, data);
     return res.data;
@@ -30,6 +32,11 @@ export const getDetailClass = async (id) => {
 
 export const getAllClass = async () => {
     const res = await axios.get(`${CLASS_API_URL}/getAllClass`);
+    return res.data;
+};
+
+export const getAllClassType = async () => {
+    const res = await axios.get(`${CLASS_API_URL}/getAllClassType`);
     return res.data;
 };
 

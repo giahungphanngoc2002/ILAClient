@@ -45,6 +45,8 @@ import ManageAccount from "../pages/ManageAccount/ManageAccount";
 import ActivationPage from "../pages/ActivationPage/ActivationPage";
 import CreateCalender from "../pages/CreateCalender/CreateCalender";
 import EvaluateManage from "../pages/EvaluateManage/EvaluateManage";
+import CreateClass from "../pages/CreateClass/CreateClass";
+
 export const routes = [
   {
     path: "/",
@@ -111,6 +113,16 @@ export const routes = [
     page: () => (
       <ProtectedRoute>
         <AttendanceTable />
+      </ProtectedRoute>
+    ),
+    isShowHeader: false,
+  },
+
+  {
+    path: "manage/createClass",
+    page: () => (
+      <ProtectedRoute>
+        <CreateClass />
       </ProtectedRoute>
     ),
     isShowHeader: false,
