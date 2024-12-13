@@ -100,22 +100,49 @@ const CreateClass = () => {
 
 
     // console.log(classType)
-    const handleCreateClass = () => {
-        // if (!nameClass || !year || !block || !teacherHR || !subjectGroup) {
-        //     setMessage('Vui lòng nhập đầy đủ thông tin.');
-        //     return;
-        // }
+    // const handleCreateClass = () => {
+       
+    //     console.log({ nameClass, year, block, room, dataSubjectId, teacherHR })
+    // };
 
-        // setMessage('Lớp học mới đã được tạo thành công!');
-        // // Clear form after creation
-        // setNameClass('');
-        // setYear('');
-        // setBlock('');
-        // setTeacherHR('');
-        // setSubjectGroup('');
-        console.log({ nameClass, year, block, room, dataSubjectId, teacherHR })
-    };
+    const handleCreateClass = async () => {
+        
+        const newClassData = {
+          nameClass:nameClass,
+          year:year,
+          blockID: block,
+          teacherHR:teacherHR,
+          room:room,
+          SubjectsId: dataSubjectId.idSubject,
+          SubjectsChuyendeId: dataSubjectId.idSubjectChuyende,  
+          SubjectsPhuId: dataSubjectId.idSubjectPhu
+        };
 
+        try {
+          const response = await ClassService.createClass(newClassData); 
+          console.log(response) // Call the existing createClass API function
+          console.log({ nameClass, year, block, room, dataSubjectId, teacherHR })
+          if (response.status === 'OK') {
+            setMessage('Lớp học mới đã được tạo thành công!');
+            // Clear form after creation
+            setNameClass('');
+            setYear('');
+            setBlock('');
+            setRoom('');
+            setDataSubjectId('');
+            setTeacherHR('');
+          } else {
+            setMessage(response.message || 'Có lỗi xảy ra khi tạo lớp học.');
+          }
+        } catch (error) {
+          setMessage('Có lỗi xảy ra khi tạo lớp học.');
+          console.error(error);
+        }
+      };
+
+
+
+    
     console.log(classType)
 
     function getNameBlockById(id) {
