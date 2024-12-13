@@ -245,7 +245,7 @@ export const routes = [
       </ProtectedRoute>
     ),
     isShowHeader: false,
-    isShowSideBar: true,
+    isShowSideBar: false,
   },
   {
     path: "/manage/report",

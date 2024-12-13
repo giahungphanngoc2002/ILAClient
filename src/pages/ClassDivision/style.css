@@ -1,0 +1,15 @@
+.custom-table .ant-table-pagination {
+    position: sticky;
+    bottom: 0;
+    /* Cố định ở dưới cùng */
+    z-index: 1;
+    /* Đảm bảo nó nằm trên các thành phần khác */
+    background: #fff;
+    /* Đặt nền trắng để nó không bị che bởi nội dung */
+    padding: 10px 0;
+    /* Khoảng cách giữa thanh phân trang và nội dung */
+    text-align: center;
+    /* Canh giữa nút phân trang */
+    box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+    /* Thêm bóng để nổi bật */
+}

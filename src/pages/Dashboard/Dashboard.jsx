@@ -250,6 +250,10 @@ const Dashboard = () => {
         navigate(`/manage/manageAccount`)
     }
 
+    const handleGoToCreateClass = () => {
+        navigate(`/manage/createClass`)
+    }
+
     // console.log(classHR && classHR.teacherHR !== null && classHR.teacherHR === user.id)
 
     return (
@@ -514,6 +518,18 @@ const Dashboard = () => {
                                     <MdAccountCircle size={32} className="text-white" />
                                 </div>
                                 <p className="font-semibold">Quản lý tài khoản</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex flex-col bg-white p-6 rounded-lg shadow-md w-full mt-8">
+                        <h2 className="text-xl font-bold mb-6">Chuẩn bị đầu năm học</h2>
+                        <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
+                            <div onClick={handleGoToCreateClass} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
+                                <div className="bg-teal-400 p-4 rounded-full mb-2">
+                                    <CalendarClock size={32} className="text-white" />
+                                </div>
+                                <p className="font-semibold">Tạo lớp học mới</p>
                             </div>
                         </div>
                     </div>
