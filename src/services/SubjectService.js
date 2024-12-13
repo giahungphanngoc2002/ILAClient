@@ -53,6 +53,11 @@ export const getAllSubjects = async () => {
   return res.data;
 };
 
+export const getAllSubjectbyBlock = async (block) => {
+  const res = await axios.get(`${SUBJECT_API_URL}/getAllSubjects/${block}`);
+  return res.data;
+};
+
 export const createEvaluate = async (classId, subjectId, evaluateData) => {
   const res = await axios.post(`${SUBJECT_API_URL}/createEvaluate/${classId}/${subjectId}`, evaluateData);
   return res.data;

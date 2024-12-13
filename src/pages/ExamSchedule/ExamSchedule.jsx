@@ -21,7 +21,7 @@ const ExamScheduler = () => {
     const [subjects, setSubjects] = useState([]);
     const [showModal, setShowModal] = useState(false); // Trạng thái hiển thị Modal
     const [selectedEvent, setSelectedEvent] = useState(null); // Lưu sự kiện được chọn
-
+    const [nameBlock, setNameBlock] = useState(null); 
 
     useEffect(() => {
         const fetchBlocks = async () => {
@@ -39,15 +39,17 @@ const ExamScheduler = () => {
     useEffect(() => {
         const fetchSubjects = async () => {
             try {
-                const subjectsData = await SubjectService.getAllSubjects();
-                setSubjects(subjectsData?.data);
+                const subjectsData = await SubjectService.getAllSubjectbyBlock(nameBlock);
+                setSubjects(subjectsData);
             } catch (error) {
                 console.error("Error fetching blocks:", error);
             }
         };
         fetchSubjects();
-    }, []);
+    }, [nameBlock]);
     console.log("su", subjects)
+
+    
 
     useEffect(() => {
         const fetchExamSchedules = async () => {
@@ -78,7 +80,12 @@ const ExamScheduler = () => {
         setShowModal(false);
         setSelectedEvent(null); // Reset sự kiện khi đóng Modal
     };
-
+    useEffect(() => {
+        if (selectedBlock) {
+            const blockName = blocks.find(block => block._id === selectedBlock)?.nameBlock || 'Unknown Block';
+            setNameBlock(blockName);
+        }
+    }, [selectedBlock, blocks]);
 
     const addExam = async () => {
         if (selectedBlock && selectedSubject && date && timeStart) {
@@ -86,6 +93,7 @@ const ExamScheduler = () => {
             const end = new Date(start.getTime() + 60 * 60 * 1000); // Giả sử mỗi kỳ thi kéo dài 1 giờ
 
             const blockName = blocks.find(block => block._id === selectedBlock)?.nameBlock || 'Unknown Block';
+            
             const subjectName = subjects.find(subject => subject._id === selectedSubject)?.nameSubject || 'Unknown Subject';
 
             console.log(blockName)
@@ -170,7 +178,7 @@ const ExamScheduler = () => {
             console.log(updatedEvent)
 
             // Gửi yêu cầu cập nhật
-            // await ExamScheduleService.updateExamSchedule(selectedEvent.id, updatedEvent);
+            await ExamScheduleService.updateExamSchedule(selectedEvent.id, updatedEvent);
 
             // Cập nhật danh sách sự kiện trong state
             setEvents((prevEvents) =>

@@ -8,11 +8,12 @@ import {
     Row,
     Col,
     Space,
+    Spin,
 } from "antd";
 import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import * as UserService from "../../services/UserService";
 import Breadcrumb from "../../components/Breadcrumb/Breadcrumb";
-
+import { toast } from "react-toastify";
 const { Search } = Input;
 const { Option } = Select;
 const { Content } = Layout;
@@ -21,6 +22,7 @@ const ManageAccount = () => {
     const [students, setStudents] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [filterRole, setFilterRole] = useState("");
+    const [filteredData, setFilteredData] = useState("");
     const [tableScrollHeight, setTableScrollHeight] = useState(300);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -64,8 +66,8 @@ const ManageAccount = () => {
     };
 
     // Dữ liệu đã được lọc
-    const filteredData = useMemo(() => {
-        return students.filter((student) => {
+    useEffect(() => {
+        const filtered = students.filter((student) => {
             const name = student.name || ""; // Xử lý giá trị undefined
             const matchesSearchTerm = name
                 .toLowerCase()
@@ -75,11 +77,40 @@ const ManageAccount = () => {
                 : true;
             return matchesSearchTerm && matchesRole;
         });
-    }, [students, searchTerm, filterRole]);
 
-    const handleDelete = (record) => {
+        setFilteredData(filtered); // Cập nhật filteredData sau khi lọc
+    }, [students, searchTerm, filterRole]); // Các phụ thuộc
 
-    }
+
+    const handleDelete = async (record) => {
+        try {
+            setIsLoading(true); // Bật trạng thái loading khi bắt đầu xóa
+            
+            // Gọi hàm xóa người dùng
+            await UserService.deleteUser(record._id);
+            
+            // Sau khi xóa thành công, lấy lại danh sách người dùng
+            const data = await UserService.getAllAccount();
+            const sanitizedData = data.data.map(student => ({
+                ...student,
+                name: student.name || "Unknown", // Thêm giá trị mặc định nếu thiếu
+                role: student.role || "User"     // Đảm bảo trường role không bị undefined
+            }));
+            
+            // Cập nhật lại danh sách sinh viên
+            setStudents(sanitizedData);
+    
+            // Thông báo xóa thành công
+            toast.success("Người dùng đã được xóa thành công!");
+        } catch (error) {
+            // Lỗi bất kỳ trong quá trình xóa
+            console.error("Error deleting user:", error);
+            toast.error("Có lỗi xảy ra khi xóa người dùng.");
+        } finally {
+            setIsLoading(false); // Tắt trạng thái loading sau khi hoàn thành xóa
+        }
+    };
+    
 
     const columns = [
         {
@@ -114,11 +145,13 @@ const ManageAccount = () => {
                         Sửa
                     </Button>
                     <Button
-                        type="primary" danger
-                        icon={<DeleteOutlined />}
+                        type="primary"
+                        danger
+                        icon={isLoading ? <Spin /> : <DeleteOutlined />} // Hiển thị spinner khi đang xóa
                         onClick={() => handleDelete(record)}
+                        disabled={isLoading} 
                     >
-                        Xoá
+                        {isLoading ? "Đang xóa..." : "Xoá"}
                     </Button>
                 </Space>
             ),

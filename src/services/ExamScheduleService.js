@@ -18,6 +18,11 @@ export const deleteExamSchedule = async (examScheduleId) => {
     return res.data;
 };
 
+export const updateExamSchedule = async (examScheduleId) => {
+    const res = await axios.put(`${EXAM_API_URL}/updateExamSchedule/${examScheduleId}`);
+    return res.data;
+};
+
 // Lấy tất cả lịch thi
 export const getAllExamSchedules = async () => {
     const res = await axios.get(`${EXAM_API_URL}/getAllExamSchedule`);

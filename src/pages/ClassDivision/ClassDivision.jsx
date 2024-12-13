@@ -85,8 +85,7 @@ const ClassDivision = () => {
     console.log(studentU)
     console.log(dataClass)
     console.log(filteredStudents)
-
-    const handleSelectChange = (studentId, checked) => {
+const handleSelectChange = (studentId, checked) => {
         setSelectedStudents((prevSelected) => {
             if (checked) {
                 return [...prevSelected, studentId]; // Thêm studentId vào danh sách đã chọn
@@ -134,30 +133,30 @@ const ClassDivision = () => {
     };
 
     const handleAddStudentToClass = async () => {
-        console.log(selectedStudents);
-        console.log(filterClass);
+    console.log(selectedStudents);
+    console.log(filterClass);
 
-        try {
-            setIsLoading(true);
-            const response = await ClassService.addStudentIDToClassbyId(filterClass, selectedStudents);
-            console.log(response);
+    try {
+        setIsLoading(true);
+        const response = await ClassService.addStudentIDToClassbyId(filterClass, selectedStudents);
+        console.log(response);
 
-            // Sau khi thêm học sinh vào lớp thành công, cập nhật lại danh sách học sinh chưa có lớp
-            setStudentU((prevStudents) =>
-                prevStudents.filter((student) => !selectedStudents.includes(student._id)) // Loại bỏ học sinh đã chọn
-            );
+        // Sau khi thêm học sinh vào lớp thành công, cập nhật lại danh sách học sinh chưa có lớp
+        setStudentU((prevStudents) =>
+            prevStudents.filter((student) => !selectedStudents.includes(student._id)) // Loại bỏ học sinh đã chọn
+        );
 
-            // Hiển thị thông báo thành công
-            toast.success("Thêm học sinh thành công");
-            // Xóa lựa chọn học sinh
-            setSelectedStudents([]);
-        } catch (error) {
-            console.error('Error adding students to class:', error);
-            toast.error("Có lỗi xảy ra khi thêm học sinh");
-        } finally {
-            setIsLoading(false);
-        }
-    };
+        // Hiển thị thông báo thành công
+        toast.success("Thêm học sinh thành công");
+        // Xóa lựa chọn học sinh
+        setSelectedStudents([]);
+    } catch (error) {
+        console.error('Error adding students to class:', error);
+        toast.error("Có lỗi xảy ra khi thêm học sinh");
+    } finally {
+        setIsLoading(false);
+    }
+};
 
 
 
@@ -168,7 +167,7 @@ const ClassDivision = () => {
                 title="Chia học sinh"
                 onBack={onBack}
                 buttonText={isLoading ? "Đang xử lý..." : "Thêm học sinh vào lớp"}
-                onButtonClick={handleAddStudentToClass}
+onButtonClick={handleAddStudentToClass}
                 disabled={isLoading}
             />
 

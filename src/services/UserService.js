@@ -102,6 +102,11 @@ export const getAllTopUser = async () => {
   return res.data;
 };
 
+export const deleteUser = async (id) => {
+  const res = await axios.delete(`${API_URL}/deleteUser/${id}`);
+  return res.data;
+};
+
 // API liên quan đến thông tin liên lạc
 export const createContact = async (userId, contactData) => {
   const res = await axios.post(`${API_URL}/createContact/${userId}`, contactData);

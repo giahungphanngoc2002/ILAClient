@@ -4,7 +4,7 @@ import * as ClassService from "../../services/ClassService";
 import * as SubjectService from "../../services/SubjectService";
 import * as UserService from "../../services/UserService";
 // import * as UserService from "../../services/UserService";
-
+import { toast } from "react-toastify";
 const CreateClass = () => {
     const [nameClass, setNameClass] = useState('');
     const [year, setYear] = useState('');
@@ -23,7 +23,7 @@ const CreateClass = () => {
     const [selectedClassType, setSelectedClassType] = useState([])
     const [teachers, setTeachers] = useState([]);
     const [dataSubjectId, setDataSubjectId] = useState([])
-
+    const [isLoading, setIsLoading] = useState(false);
 
 
     useEffect(() => {
@@ -101,48 +101,55 @@ const CreateClass = () => {
 
     // console.log(classType)
     // const handleCreateClass = () => {
-       
+
     //     console.log({ nameClass, year, block, room, dataSubjectId, teacherHR })
     // };
 
     const handleCreateClass = async () => {
-        
+        setIsLoading(true); // Bật trạng thái loading
+
         const newClassData = {
-          nameClass:nameClass,
-          year:year,
-          blockID: block,
-          teacherHR:teacherHR,
-          room:room,
-          SubjectsId: dataSubjectId.idSubject,
-          SubjectsChuyendeId: dataSubjectId.idSubjectChuyende,  
-          SubjectsPhuId: dataSubjectId.idSubjectPhu
+            nameClass: nameClass,
+            year: year,
+            blockID: block,
+            teacherHR: teacherHR,
+            room: room,
+            SubjectsId: dataSubjectId.idSubject,
+            SubjectsChuyendeId: dataSubjectId.idSubjectChuyende,
+            SubjectsPhuId: dataSubjectId.idSubjectPhu
         };
 
         try {
-          const response = await ClassService.createClass(newClassData); 
-          console.log(response) // Call the existing createClass API function
-          console.log({ nameClass, year, block, room, dataSubjectId, teacherHR })
-          if (response.status === 'OK') {
-            setMessage('Lớp học mới đã được tạo thành công!');
-            // Clear form after creation
-            setNameClass('');
-            setYear('');
-            setBlock('');
-            setRoom('');
-            setDataSubjectId('');
-            setTeacherHR('');
-          } else {
-            setMessage(response.message || 'Có lỗi xảy ra khi tạo lớp học.');
-          }
+            const response = await ClassService.createClass(newClassData); // Call the existing createClass API function
+            console.log(response);
+            if (response.status === 'OK') {
+                toast.success('Lớp học mới đã được tạo thành công!');
+                // Clear form after creation
+                setNameClass('');
+                setYear('');
+                setBlock('');
+                setRoom('');
+                setDataSubjectId('');
+                setTeacherHR('');
+                // Reload data (blocks, rooms, etc.)
+                const blocksData = await BlockService.getAllBlocks();
+                setBlocks(blocksData);
+                const roomsData = await ClassService.getAllRoomClass();
+                setRooms(roomsData);
+            } else {
+                toast.error(response.message || 'Có lỗi xảy ra khi tạo lớp học.');
+            }
         } catch (error) {
-          setMessage('Có lỗi xảy ra khi tạo lớp học.');
-          console.error(error);
+            toast.error('Có lỗi xảy ra khi tạo lớp học.');
+            console.error(error);
+        } finally {
+            setIsLoading(false); // Tắt trạng thái loading
         }
-      };
+    };
 
 
 
-    
+
     console.log(classType)
 
     function getNameBlockById(id) {
@@ -313,10 +320,12 @@ const CreateClass = () => {
 
                 <div className="mt-6">
                     <button
-                        className="w-full py-2 px-4 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50"
+                        className={`w-full py-2 px-4 font-semibold rounded-md ${isLoading ? "bg-gray-400" : "bg-indigo-600 hover:bg-indigo-700"
+                            } text-white`}
                         onClick={handleCreateClass}
+                        disabled={isLoading} // Vô hiệu hóa khi đang loading
                     >
-                        Tạo Lớp Học Mới
+                        {isLoading ? "Đang xử lý..." : "Tạo Lớp Học Mới"}
                     </button>
                 </div>
             </div>
