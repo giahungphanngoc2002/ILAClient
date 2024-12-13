@@ -9,7 +9,7 @@ import {
     Col,
     Space,
 } from "antd";
-import { EditOutlined } from "@ant-design/icons";
+import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import * as UserService from "../../services/UserService";
 import Breadcrumb from "../../components/Breadcrumb/Breadcrumb";
 
@@ -77,6 +77,10 @@ const ManageAccount = () => {
         });
     }, [students, searchTerm, filterRole]);
 
+    const handleDelete = (record) => {
+
+    }
+
     const columns = [
         {
             title: "Họ và tên",
@@ -108,6 +112,13 @@ const ManageAccount = () => {
                         onClick={() => handleEdit(record)}
                     >
                         Sửa
+                    </Button>
+                    <Button
+                        type="primary" danger
+                        icon={<DeleteOutlined />}
+                        onClick={() => handleDelete(record)}
+                    >
+                        Xoá
                     </Button>
                 </Space>
             ),

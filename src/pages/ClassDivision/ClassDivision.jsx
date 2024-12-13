@@ -75,10 +75,14 @@ const ClassDivision = () => {
     }, []);
 
     const filteredStudents = studentU.filter((student) => {
-        const isInClass = dataClass.some((cls) => cls.studentID.includes(student._id));
+        const isInClass = dataClass.some((cls) =>
+            cls.studentID && cls.studentID.some((std) => std._id === student._id)
+        );
         return !isInClass;
     });
 
+
+    console.log(studentU)
     console.log(dataClass)
     console.log(filteredStudents)
 
@@ -109,15 +113,6 @@ const ClassDivision = () => {
                 />
             ),
         },
-        {
-            title: "Hành Động",
-            key: "actions",
-            render: (text, record) => (
-                <Space>
-                    {/* Chức năng khác nếu cần */}
-                </Space>
-            ),
-        },
     ];
 
     useEffect(() => {
@@ -141,22 +136,30 @@ const ClassDivision = () => {
     const handleAddStudentToClass = async () => {
         console.log(selectedStudents);
         console.log(filterClass);
-    
+
         try {
-            setIsLoading(true); // Bật trạng thái loading
+            setIsLoading(true);
             const response = await ClassService.addStudentIDToClassbyId(filterClass, selectedStudents);
             console.log(response);
-            toast.success("Thêm học sinh thành công"); // Hiển thị thông báo thành công
-            setSelectedStudents([]); // Xóa danh sách học sinh đã chọn
-            const data = await UserService.getAllUser(); // Tải lại danh sách học sinh
-            setStudentU(data.data);
+
+            // Sau khi thêm học sinh vào lớp thành công, cập nhật lại danh sách học sinh chưa có lớp
+            setStudentU((prevStudents) =>
+                prevStudents.filter((student) => !selectedStudents.includes(student._id)) // Loại bỏ học sinh đã chọn
+            );
+
+            // Hiển thị thông báo thành công
+            toast.success("Thêm học sinh thành công");
+            // Xóa lựa chọn học sinh
+            setSelectedStudents([]);
         } catch (error) {
             console.error('Error adding students to class:', error);
-            toast.error("Có lỗi xảy ra khi thêm học sinh"); // Hiển thị thông báo lỗi
+            toast.error("Có lỗi xảy ra khi thêm học sinh");
         } finally {
-            setIsLoading(false); // Tắt trạng thái loading
+            setIsLoading(false);
         }
     };
+
+
 
 
     return (
@@ -166,7 +169,7 @@ const ClassDivision = () => {
                 onBack={onBack}
                 buttonText={isLoading ? "Đang xử lý..." : "Thêm học sinh vào lớp"}
                 onButtonClick={handleAddStudentToClass}
-                disabled={isLoading} // Vô hiệu hóa nút khi đang xử lý
+                disabled={isLoading}
             />
 
             <div className="pt-16"></div>
@@ -214,30 +217,15 @@ const ClassDivision = () => {
                     rowKey="_id"
                     pagination={{
                         pageSize,
-                        position: ["bottomCenter"], // Giữ phân trang ở dưới cùng
+                        position: ["bottomCenter"],
                     }}
                     bordered
                     scroll={{
                         x: "max-content",
-                        y: tableScrollHeight, // Đặt chiều cao cuộn
+                        y: tableScrollHeight,
                     }}
                     style={{ width: "100%", borderRadius: "8px" }}
                 />
-
-                {/* Hiển thị danh sách học sinh đã chọn */}
-                {/* <div style={{ marginTop: "20px" }}>
-                    <h3>Danh sách học sinh đã chọn:</h3>
-                    <ul>
-                        {selectedStudents.map((studentId) => {
-                            const student = studentU.find((student) => student._id === studentId);
-                            return student ? (
-                                <li key={student._id}>
-                                    {student.name} (ID: {student._id})
-                                </li>
-                            ) : null;
-                        })}
-                    </ul>
-                </div> */}
             </Content>
         </Layout>
     );

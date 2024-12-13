@@ -120,14 +120,6 @@ const Dashboard = () => {
 
             setTeacherSubjects(teacherSubjects)
 
-            // console.log(teacherSubjects)
-
-            // const hasScoreableSubject = teacherSubjects.some((subject) => subject.isScore === true);
-            // if (!hasScoreableSubject) {
-            //     alert("Môn học này không ghi điểm!")
-            //     return;
-            // }
-
             setSelectedCard(cardType);    // Lưu loại card đã bấm
             setSubjects(teacherSubjects); // Cập nhật danh sách môn học
             setIsModalOpen(true);         // Mở modal

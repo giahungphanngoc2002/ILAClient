@@ -107,7 +107,7 @@ const CreateCalender = () => {
                 const sheet = workbook.Sheets[sheetName];
                 const jsonData = XLSX.utils.sheet_to_json(sheet); // Chuyển đổi sheet thành mảng JSON
     
-                console.log(classDetail?.subjectGroup);
+                // console.log(classDetail);
                 
                 const updatedData = jsonData.map(item => {
                     const updatedItem = { ...item };
@@ -116,9 +116,9 @@ const CreateCalender = () => {
                     Object.keys(updatedItem).forEach(day => {
                         const teacher = updatedItem[day];
                         const subject = [
-                            ...classDetail?.subjectGroup?.SubjectsId,
-                            ...classDetail?.subjectGroup?.SubjectsChuyendeId,
-                            ...classDetail?.subjectGroup?.SubjectsPhuId
+                            ...classDetail?.SubjectsId,
+                            ...classDetail?.SubjectsChuyendeId,
+                            ...classDetail?.SubjectsPhuId
                         ].find(subject =>
                             teacher === `${subject.nameSubject} - ${subject.teacherId?.username}`
                         );
@@ -415,7 +415,7 @@ const CreateCalender = () => {
                                                             handleSelectSlot(selectedClass, day, slot.slot, e.target.value)
                                                         }
                                                     >
-                                                        {classDetail?.subjectGroup?.SubjectsId.map((subject, index) => (
+                                                        {classDetail?.SubjectsId.map((subject, index) => (
                                                             <option
                                                                 key={index}
                                                                 value={JSON.stringify({
@@ -426,7 +426,7 @@ const CreateCalender = () => {
                                                                 {subject?.nameSubject} - {subject?.teacherId?.name}
                                                             </option>
                                                         ))}
-                                                        {classDetail?.subjectGroup?.SubjectsChuyendeId.map((subject, index) => (
+                                                        {classDetail?.SubjectsChuyendeId.map((subject, index) => (
                                                             <option
                                                                 key={index}
                                                                 value={JSON.stringify({
@@ -437,7 +437,7 @@ const CreateCalender = () => {
                                                                 {subject?.nameSubject} - {subject?.teacherId?.name}
                                                             </option>
                                                         ))}
-                                                        {classDetail?.subjectGroup?.SubjectsPhuId.map((subject, index) => (
+                                                        {classDetail?.SubjectsPhuId.map((subject, index) => (
                                                             <option
                                                                 key={index}
                                                                 value={JSON.stringify({
@@ -465,7 +465,7 @@ const CreateCalender = () => {
                                                     }
                                                 >
                                                     <option value="">Chọn môn</option>
-                                                    {classDetail?.subjectGroup?.SubjectsId.map((subject, index) => (
+                                                    {classDetail?.SubjectsId.map((subject, index) => (
                                                         <option
                                                             key={index}
                                                             value={JSON.stringify({ subjectId: subject._id,  })}
@@ -473,7 +473,7 @@ const CreateCalender = () => {
                                                             {subject?.nameSubject} - {subject?.teacherId?.name}
                                                         </option>
                                                     ))}
-                                                    {classDetail?.subjectGroup?.SubjectsChuyendeId.map((subject, index) => (
+                                                    {classDetail?.SubjectsChuyendeId.map((subject, index) => (
                                                         <option
                                                             key={index}
                                                             value={JSON.stringify({ subjectId: subject._id,  })}
@@ -481,7 +481,7 @@ const CreateCalender = () => {
                                                             {subject?.nameSubject} - {subject?.teacherId?.name}
                                                         </option>
                                                     ))}
-                                                    {classDetail?.subjectGroup?.SubjectsPhuId.map((subject, index) => (
+                                                    {classDetail?.SubjectsPhuId.map((subject, index) => (
                                                         <option
                                                             key={index}
                                                             value={JSON.stringify({ subjectId: subject._id,  })}
