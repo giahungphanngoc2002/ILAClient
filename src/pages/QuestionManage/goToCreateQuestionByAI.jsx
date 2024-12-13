@@ -96,6 +96,7 @@ export default function SearchQuestionByAI() {
 
       if (response.message === "Question created successfully" && response.subject) {
         message.success("Questions added successfully!");
+        navigate("/manage")
         setQuestions([]);
       } else {
         message.error(`Failed to add questions. ${response.message || "Please try again."}`);

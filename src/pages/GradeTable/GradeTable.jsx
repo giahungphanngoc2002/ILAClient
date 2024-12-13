@@ -41,45 +41,17 @@ const GradeTable = () => {
         }
     }, [idClass]);
 
+    console.log(classDetail)
 
     useEffect(() => {
-        // Kiểm tra nếu classDetail và subjectGroup có sẵn và subjectGroup là một mảng
         if (Array.isArray(classDetail?.SubjectsId)) {
             const foundSubject = classDetail?.SubjectsId.find(subject => subject._id === idSubject);
             setSubject(foundSubject);  // Cập nhật subject vào state
         } else {
-            console.error('subjectGroup is not an array or is missing.');
-        }
-
-        // Lấy thêm SubjectsPhuId nếu có
-        if (Array.isArray(classDetail?.SubjectsPhuId)) {
-            const foundPhuSubject = classDetail?.SubjectsPhuId.find(subject => subject._id === idSubject);
-            setSubjectPhu(foundPhuSubject);  // Cập nhật phuSubject vào state
-        } else {
-            console.error('SubjectsPhuId is not an array or is missing.');
+            // console.error('subjectGroup is not an array or is missing.');
         }
     }, [classDetail, idSubject]);
 
-    useEffect(() => {
-        const fetchEvalutes = async () => {
-            try {
-                setLoading(true);
-                const response = await SubjectService.getAllEvaluateSemester(idClass, idSubject, semesterFilter);
-                setEvaluates(Array.isArray(response.data) ? response.data : []); // Ensure evaluates is an array
-            } catch (error) {
-                console.error("Lỗi khi lấy danh sách đánh giá:", error);
-            } finally {
-                setLoading(false); // Kết thúc tải
-            }
-        };
-
-        if (idClass) {
-            fetchEvalutes();
-        }
-    }, [semesterFilter, idClass, idSubject]);
-    // Lấy điểm của học sinh
-
-    console.log(evaluates)
     useEffect(() => {
         const fetchScores = async () => {
             try {
@@ -90,8 +62,7 @@ const GradeTable = () => {
                 const scoresByStudentId = scoresData?.reduce((acc, detail) => {
                     const filteredScores = detail.scores.filter(score => score.semester === parseInt(semesterFilter));
                     const scores = { diemThuongXuyen: [], diemGiuaKi: [], diemCuoiKi: [] };
-
-                    filteredScores.forEach((score) => {
+filteredScores.forEach((score) => {
                         switch (score.type) {
                             case "thuongXuyen":
                                 scores.diemThuongXuyen.push(score.score);
@@ -164,41 +135,42 @@ const GradeTable = () => {
             ? (grades.reduce((sum, grade) => sum + grade, 0) / grades.length).toFixed(1)
             : 0;
 
-            const calculateAverageSubject = (regular = [], midterm = [], final = [], subject) => {
-                // Kiểm tra điều kiện nhập vào
-                if ((subject === "Toán" && regular.length !== 4) || (subject !== "Toán" && regular.length !== 3) || midterm.length !== 1 || final.length !== 1) {
-                    return 'Chưa có';
-                }
-        
-                // Kiểm tra kiểu dữ liệu của input
-                if (!Array.isArray(regular) || !Array.isArray(midterm) || !Array.isArray(final)) {
-                    throw new Error("All inputs must be arrays.");
-                }
-        
-                // Tính tổng trọng số
-                const totalWeight = (regular.length * 1) + (midterm.length * 2) + (final.length * 3);
-        
-                // Tính tổng điểm với trọng số
-                let totalScore = 0;
-        
-                // Tính tổng điểm cho phần regular
-                for (let i = 0; i < regular.length; i++) {
-                    totalScore += regular[i] * 1;
-                }
-        
-                // Tính tổng điểm cho phần midterm
-                for (let i = 0; i < midterm.length; i++) {
-                    totalScore += midterm[i] * 2;
-                }
-        
-                // Tính tổng điểm cho phần final
-                for (let i = 0; i < final.length; i++) {
-                    totalScore += final[i] * 3;
-                }
-        
-                // Tính điểm trung bình
-                return (totalScore / totalWeight).toFixed(2);
-            };
+    const calculateAverageSubject = (regular = [], midterm = [], final = [], subject) => {
+// Kiểm tra điều kiện nhập vào
+        console.log(subject)
+        if ((subject === "Toán" && regular.length !== 4) || (subject !== "Toán" && regular.length !== 3) || midterm.length !== 1 || final.length !== 1) {
+            return 'Chưa có';
+        }
+
+        // Kiểm tra kiểu dữ liệu của input
+        if (!Array.isArray(regular) || !Array.isArray(midterm) || !Array.isArray(final)) {
+            throw new Error("All inputs must be arrays.");
+        }
+
+        // Tính tổng trọng số
+        const totalWeight = (regular.length * 1) + (midterm.length * 2) + (final.length * 3);
+
+        // Tính tổng điểm với trọng số
+        let totalScore = 0;
+
+        // Tính tổng điểm cho phần regular
+        for (let i = 0; i < regular.length; i++) {
+            totalScore += regular[i] * 1;
+        }
+
+        // Tính tổng điểm cho phần midterm
+        for (let i = 0; i < midterm.length; i++) {
+            totalScore += midterm[i] * 2;
+        }
+
+        // Tính tổng điểm cho phần final
+        for (let i = 0; i < final.length; i++) {
+            totalScore += final[i] * 3;
+        }
+
+        // Tính điểm trung bình
+        return (totalScore / totalWeight).toFixed(2);
+    };
 
     const handleDownloadExcel = () => {
         const worksheet = XLSX.utils.json_to_sheet(
@@ -234,7 +206,7 @@ const GradeTable = () => {
                     if (type === "diemThuongXuyen" && index !== undefined) {
                         // Nếu là điểm thường xuyên, cập nhật theo index
                         if (value.trim() === "") {
-                            updatedStudent.diemThuongXuyen[index] = '';
+updatedStudent.diemThuongXuyen[index] = '';
                         } else {
                             updatedStudent.diemThuongXuyen[index] = parseFloat(value) || 0;  // Cập nhật điểm thường xuyên
                         }
@@ -293,16 +265,33 @@ const GradeTable = () => {
         try {
             // Sử dụng studentsRef để đảm bảo lấy giá trị students lúc hiện tại
             const scoresData = studentsRef.current.map(student => {
+                // Kiểm tra và chỉ lấy điểm nếu có điểm
                 const scores = [
-                    ...student.diemThuongXuyen.map(score => ({ type: "thuongXuyen", score, semester: semesterFilter })),
-                    ...student.diemGiuaKi.map(score => ({ type: "giuaKi", score, semester: semesterFilter })),
-                    ...student.diemCuoiKi.map(score => ({ type: "cuoiKi", score, semester: semesterFilter }))
+                    ...student.diemThuongXuyen.length > 0
+                        ? student.diemThuongXuyen.map(score => ({ type: "thuongXuyen", score, semester: semesterFilter }))
+                        : [],
+                    ...student.diemGiuaKi.length > 0
+                        ? student.diemGiuaKi.map(score => ({ type: "giuaKi", score, semester: semesterFilter }))
+                        : [],
+                    ...student.diemCuoiKi.length > 0
+                        ? student.diemCuoiKi.map(score => ({ type: "cuoiKi", score, semester: semesterFilter }))
+: []
                 ];
+
+                // Nếu không có điểm gì thì bỏ qua
+                if (scores.length === 0) {
+                    return null;
+                }
 
                 const scoreId = student.scoreId || null;
 
                 return { studentId: student.id, subjectId: idSubject, classId: idClass, scores, scoreId };
-            });
+            }).filter(scoreData => scoreData !== null); // Loại bỏ các sinh viên không có điểm
+
+            if (scoresData.length === 0) {
+                toast.info("No scores to submit.");
+                return;
+            }
 
             // Tạo một mảng promises để xử lý tất cả các yêu cầu
             const scorePromises = scoresData.map(scoreData => {
@@ -324,6 +313,7 @@ const GradeTable = () => {
             setLoading(false);
         }
     };
+
 
 
     const handleUploadExcel = (e) => {
@@ -364,15 +354,15 @@ const GradeTable = () => {
     }
 
     return (
-        <div className="container mx-auto p-6 min-h-screen">
+<div className="container mx-auto p-6 min-h-screen">
             <Spin spinning={loading} size="large">
-            <Breadcrumb
-                title={`Bảng Điểm Môn ${subjectPhu ? subjectPhu.nameSubject : subject?.nameSubject} Lớp ${classDetail?.nameClass}`}
-                buttonText="Lưu điểm"
-                onButtonClick={handleSubmitScore}
-                onBack={onBack}
-            />
-        </Spin>
+                <Breadcrumb
+                    title={`Bảng Điểm Môn ${subjectPhu ? subjectPhu.nameSubject : subject?.nameSubject} Lớp ${classDetail?.nameClass}`}
+                    buttonText="Lưu điểm"
+                    onButtonClick={handleSubmitScore}
+                    onBack={onBack}
+                />
+            </Spin>
 
             <div className="mt-16"></div>
 
@@ -425,7 +415,7 @@ const GradeTable = () => {
                         style={{ opacity: 0, position: "absolute", zIndex: -1 }}
                     />
                     <button
-                        className="px-4 py-2 bg-green-600 text-white rounded-lg shadow-lg flex items-center hover:bg-green-700 transition duration-300"
+className="px-4 py-2 bg-green-600 text-white rounded-lg shadow-lg flex items-center hover:bg-green-700 transition duration-300"
                         onClick={handleDownloadExcel}
                     >
                         <FaFileExcel className="mr-2" /> Tải xuống Excel
@@ -471,7 +461,7 @@ const GradeTable = () => {
                                                     type="number"
                                                     value={student.diemThuongXuyen[idx] || ''}
                                                     onChange={(e) => handleScoreChange('diemThuongXuyen', idx, e.target.value, student.id)}
-                                                    onInput={(e) => {
+onInput={(e) => {
                                                         let value = e.target.value;
                                                         // Chỉ cho phép nhập giá trị từ 0 đến 10
                                                         if (value < 0) e.target.value = 0;
@@ -515,7 +505,7 @@ const GradeTable = () => {
                                     </td>
 
                                     <td className="border px-4 py-3 font-semibold text-blue-700">
-                                        {calculateAverageSubject(student.diemThuongXuyen, student.diemGiuaKi, student.diemCuoiKi)}
+{calculateAverageSubject(student.diemThuongXuyen, student.diemGiuaKi, student.diemCuoiKi, subject.nameSubject)}
                                     </td>
                                 </tr>
                             ))

@@ -100,9 +100,9 @@ const StudentTable = () => {
     return data.some(subject => subject._id === idSubject);
   };
 
-  // console.log(isSubjectInChuyenDe(idSubject, detailClass?.subjectGroup.SubjectsChuyendeId));
 
-  console.log(isSubjectPhu(idSubject, detailClass?.subjectGroup.SubjectsPhuId))
+
+  
 
   useEffect(() => {
     if (year && week) {
@@ -260,7 +260,7 @@ const StudentTable = () => {
   const openModal = async (student) => {
     try {
       // Kiểm tra xem môn học có phải là Chuyên đề không
-      const subjectToUse = isSubjectInChuyenDe(idSubject, detailClass?.subjectGroup.SubjectsChuyendeId)
+      const subjectToUse = isSubjectInChuyenDe(idSubject, detailClass?.SubjectsChuyendeId)
         ? idSubjectOfSJCD // Nếu là Chuyên đề thì dùng idSubjectOfSJCD
         : idSubject; // Nếu không thì dùng idSubject mặc định
 
@@ -450,7 +450,7 @@ const StudentTable = () => {
                   <th style={{ width: "20%" }} className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-white uppercase tracking-wider">Ngày sinh</th>
                   <th style={{ width: "20%" }} className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-white uppercase tracking-wider">Điểm danh</th>
                   <th style={{ width: "15%" }} className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-white uppercase tracking-wider">Trạng thái</th>
-                  {!isSubjectPhu(idSubject, detailClass?.subjectGroup.SubjectsPhuId) && <th style={{ width: "15%" }} className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-white uppercase tracking-wider">Xem</th>}
+                  {!isSubjectPhu(idSubject, detailClass?.SubjectsPhuId) && <th style={{ width: "15%" }} className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-white uppercase tracking-wider">Xem</th>}
 
                 </tr>
               </thead>
@@ -487,7 +487,7 @@ const StudentTable = () => {
                         </select>
                       )}
                     </td>
-                    {!isSubjectPhu(idSubject, detailClass?.subjectGroup.SubjectsPhuId) &&
+                    {!isSubjectPhu(idSubject, detailClass?.SubjectsPhuId) &&
                       <td className="px-6 py-4 whitespace-nowrap">
                         <GrView
                           className="cursor-pointer"
