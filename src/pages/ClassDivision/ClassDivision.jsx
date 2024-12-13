@@ -79,6 +79,9 @@ const ClassDivision = () => {
         return !isInClass;
     });
 
+    console.log(dataClass)
+    console.log(filteredStudents)
+
     const handleSelectChange = (studentId, checked) => {
         setSelectedStudents((prevSelected) => {
             if (checked) {
@@ -135,10 +138,25 @@ const ClassDivision = () => {
         window.history.back();
     };
 
-    const handleAddStudentToClass = () => {
-        console.log(selectedStudents)
-        console.log(filterClass)
-    }
+    const handleAddStudentToClass = async () => {
+        console.log(selectedStudents);
+        console.log(filterClass);
+    
+        try {
+            setIsLoading(true); // Bật trạng thái loading
+            const response = await ClassService.addStudentIDToClassbyId(filterClass, selectedStudents);
+            console.log(response);
+            toast.success("Thêm học sinh thành công"); // Hiển thị thông báo thành công
+            setSelectedStudents([]); // Xóa danh sách học sinh đã chọn
+            const data = await UserService.getAllUser(); // Tải lại danh sách học sinh
+            setStudentU(data.data);
+        } catch (error) {
+            console.error('Error adding students to class:', error);
+            toast.error("Có lỗi xảy ra khi thêm học sinh"); // Hiển thị thông báo lỗi
+        } finally {
+            setIsLoading(false); // Tắt trạng thái loading
+        }
+    };
 
 
     return (
@@ -146,8 +164,9 @@ const ClassDivision = () => {
             <Breadcrumb
                 title="Chia học sinh"
                 onBack={onBack}
-                buttonText={"Thêm học sinh vào lớp"}
+                buttonText={isLoading ? "Đang xử lý..." : "Thêm học sinh vào lớp"}
                 onButtonClick={handleAddStudentToClass}
+                disabled={isLoading} // Vô hiệu hóa nút khi đang xử lý
             />
 
             <div className="pt-16"></div>

@@ -81,7 +81,7 @@ const App = () => {
 
     const filteredStudents = classes.flatMap((cls) =>
         cls.studentID.map((student) => ({
-name: student.name,
+        name: student.name,
             class: cls.nameClass,
             _id: student._id,
         }))

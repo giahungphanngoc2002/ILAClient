@@ -93,6 +93,11 @@ export const addStudentIDToClass = async (classId, username) => {
     return res.data;
 };
 
+export const addStudentIDToClassbyId = async (classId, studentIds) => {
+    const res = await axios.post(`${CLASS_API_URL}/class/${classId}/studentIDs`, { studentIds });
+    return res.data;
+};
+
 export const deleteStudentIDToClass = async (classId, studentId) => {
     const res = await axios.delete(`${CLASS_API_URL}/class/${classId}/studentID`, {
         data: { studentId },
