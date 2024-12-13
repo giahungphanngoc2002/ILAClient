@@ -3,6 +3,7 @@ import * as BlockService from "../../services/BlockService";
 import * as ClassService from "../../services/ClassService";
 import * as SubjectService from "../../services/SubjectService";
 import * as UserService from "../../services/UserService";
+// import * as UserService from "../../services/UserService";
 
 const CreateClass = () => {
     const [nameClass, setNameClass] = useState('');
@@ -36,6 +37,22 @@ const CreateClass = () => {
         };
         fetchBlocks();
     }, []);
+
+    console.log(blocks)
+
+    useEffect(() => {
+        const fetchRooms = async () => {
+            try {
+                const roomsData = await ClassService.getAllRoomClass();
+                setRooms(roomsData);
+            } catch (error) {
+                console.error("Error fetching blocks:", error);
+            }
+        };
+        fetchRooms();
+    }, []);
+
+    console.log(rooms)
 
     useEffect(() => {
         const fetchBlocks = async () => {
@@ -96,7 +113,7 @@ const CreateClass = () => {
         // setBlock('');
         // setTeacherHR('');
         // setSubjectGroup('');
-        console.log({ nameClass, year, block, dataSubjectId, teacherHR })
+        console.log({ nameClass, year, block, room, dataSubjectId, teacherHR })
     };
 
     console.log(classType)
@@ -198,7 +215,7 @@ const CreateClass = () => {
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-gray-700">Khối lớp</label>
+                    <label className="block text-sm font-medium text-gray-700">Chọn khối</label>
                     <select
                         className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
                         value={block}
@@ -208,6 +225,22 @@ const CreateClass = () => {
                         {blocks?.map((block) => (
                             <option key={block._id} value={block._id}>
                                 {block.nameBlock}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium text-gray-700">Chọn phòng</label>
+                    <select
+                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                        value={room}
+                        onChange={(e) => setRoom(e.target.value)}
+                    >
+                        <option value="">Chọn khối lớp</option>
+                        {rooms.data?.map((room) => (
+                            <option key={room?._id} value={room?._id}>
+                                {room?.nameRoom}
                             </option>
                         ))}
                     </select>

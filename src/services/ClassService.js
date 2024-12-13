@@ -40,6 +40,10 @@ export const getAllClassType = async () => {
     return res.data;
 };
 
+export const getAllRoomClass = async () => {
+    const res = await axios.get(`${CLASS_API_URL}/getAllRoomClass`);
+    return res.data;
+};
 export const getAllTopClass = async () => {
     const res = await axios.get(`${CLASS_API_URL}/top`);
     return res.data;
