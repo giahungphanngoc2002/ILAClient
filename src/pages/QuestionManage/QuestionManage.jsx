@@ -48,6 +48,8 @@ const QuestionManager = () => {
         fetchQuestions();
     }, [idClass, idSubject]);
 
+    console.log(filteredQuestions)
+
     useEffect(() => {
         const fetchDetailSubject = async () => {
             setIsLoading(true);

@@ -42,8 +42,8 @@ const Dashboard = () => {
             setIsLoading(true);
             try {
                 const response = await ClassService.getAllSubjectClassesByTeacherId(teacherId);
-                // console.log('Full API response data:', response);
-                if (response && response.data && response.data.classes) {
+                console.log('Full API response data:', response);
+                if (response.data && response.data.subjects && response.data.classes) {
                     setClasses(response.data.classes);
                 } else {
                     console.error('Unexpected API response structure', response);
@@ -62,6 +62,8 @@ const Dashboard = () => {
             fetchSubject();
         }
     }, [user?.role, teacherId]);
+
+    console.log(classes)
 
     useEffect(() => {
         if (subjects.length === 1) {
@@ -109,17 +111,24 @@ const Dashboard = () => {
 
     const handleCardClick = (cardType) => {
         if (!selectedClass) return;
-
+    
         const selectedClassData = classes.find((classItem) => classItem._id === selectedClass);
-        // console.log(selectedClassData)
-
+    
         if (selectedClassData) {
-            const teacherSubjects = selectedClassData.subjectGroup.filter(
+            // Nối cả 3 loại subject lại thành một mảng duy nhất
+            const allSubjects = [
+                ...selectedClassData.SubjectsId,
+                ...selectedClassData.SubjectsChuyendeId,
+                ...selectedClassData.SubjectsPhuId,
+            ];
+    
+            // Lọc ra các môn học của giáo viên hiện tại và không phải môn chuyên ngành
+            const teacherSubjects = allSubjects.filter(
                 (subject) => subject.teacherId === user.id && subject.isSpecialized === false
             );
-
-            setTeacherSubjects(teacherSubjects)
-
+    
+            // Cập nhật trạng thái
+            setTeacherSubjects(teacherSubjects);
             setSelectedCard(cardType);    // Lưu loại card đã bấm
             setSubjects(teacherSubjects); // Cập nhật danh sách môn học
             setIsModalOpen(true);         // Mở modal
@@ -137,34 +146,44 @@ const Dashboard = () => {
 
 
     const handleModalClick = (subjectId) => {
-        const subject = findClass?.subjectGroup.find(
-            (subject) => subject._id === subjectId
-        );
-
+        // Kết hợp tất cả các subjects từ 3 loại: SubjectsId, SubjectsChuyendeId, SubjectsPhuId
+        const allSubjects = [
+            ...(findClass?.SubjectsId || []),
+            ...(findClass?.SubjectsChuyendeId || []),
+            ...(findClass?.SubjectsPhuId || []),
+        ];
+    
+        // Tìm môn học dựa trên subjectId
+        const subject = allSubjects.find((subject) => subject._id === subjectId);
+    
+        // Kiểm tra môn học có điểm số hay không
         const hasScoreSubject = subject ? subject.isScore === true : false;
-        console.log(hasScoreSubject)
+        console.log(hasScoreSubject);
+    
+        // Logic điều hướng dựa trên selectedCard
         if (selectedCard === "attendance") {
             navigate(`/attendance/${subjectId}`);
         } else if (selectedCard === "grade") {
             if (hasScoreSubject) {
-                navigate(`/manage/gradeTable/${subjectId}/${selectedClass}/1`)
+                navigate(`/manage/gradeTable/${subjectId}/${selectedClass}/1`);
             } else {
-                toast.info("Môn học này không sử dụng điểm số!!")
+                toast.info("Môn học này không sử dụng điểm số!!");
                 closeModal();
             }
         } else if (selectedCard === "homework") {
             navigate(`/manage/teachingMaterial/${selectedClass}/${subjectId}`);
         } else if (selectedCard === "question") {
-            navigate(`/manage/questionManage/${selectedClass}/${subjectId}`)
+            navigate(`/manage/questionManage/${selectedClass}/${subjectId}`);
         } else if (selectedCard === "evaluate") {
             if (!hasScoreSubject) {
-                navigate(`/manage/evaluateManage/${selectedClass}/${subjectId}`)
+                navigate(`/manage/evaluateManage/${selectedClass}/${subjectId}`);
             } else {
-                toast.info("Môn học này không có đánh giá!!")
+                toast.info("Môn học này không có đánh giá!!");
                 closeModal();
             }
         }
     };
+    
 
     const handleGoToManageAbsentRequest = (idClass) => {
         navigate(`/manage/addAbsenceRequest/${idClass}`)

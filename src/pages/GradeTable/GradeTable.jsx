@@ -7,6 +7,7 @@ import * as SubjectService from "../../services/SubjectService";
 import * as ClassService from "../../services/ClassService";
 import Breadcrumb from "../../components/Breadcrumb/Breadcrumb";
 import { toast } from "react-toastify";
+import { Spin } from "antd";
 const GradeTable = () => {
     const [students, setStudents] = useState([]);
     const { idClass, idSubject, semester } = useParams();
@@ -43,16 +44,16 @@ const GradeTable = () => {
 
     useEffect(() => {
         // Kiểm tra nếu classDetail và subjectGroup có sẵn và subjectGroup là một mảng
-        if (Array.isArray(classDetail?.subjectGroup?.SubjectsId)) {
-            const foundSubject = classDetail.subjectGroup?.SubjectsId.find(subject => subject._id === idSubject);
+        if (Array.isArray(classDetail?.SubjectsId)) {
+            const foundSubject = classDetail?.SubjectsId.find(subject => subject._id === idSubject);
             setSubject(foundSubject);  // Cập nhật subject vào state
         } else {
             console.error('subjectGroup is not an array or is missing.');
         }
 
         // Lấy thêm SubjectsPhuId nếu có
-        if (Array.isArray(classDetail?.subjectGroup?.SubjectsPhuId)) {
-            const foundPhuSubject = classDetail.subjectGroup?.SubjectsPhuId.find(subject => subject._id === idSubject);
+        if (Array.isArray(classDetail?.SubjectsPhuId)) {
+            const foundPhuSubject = classDetail?.SubjectsPhuId.find(subject => subject._id === idSubject);
             setSubjectPhu(foundPhuSubject);  // Cập nhật phuSubject vào state
         } else {
             console.error('SubjectsPhuId is not an array or is missing.');
@@ -364,12 +365,14 @@ const GradeTable = () => {
 
     return (
         <div className="container mx-auto p-6 min-h-screen">
+            <Spin spinning={loading} size="large">
             <Breadcrumb
                 title={`Bảng Điểm Môn ${subjectPhu ? subjectPhu.nameSubject : subject?.nameSubject} Lớp ${classDetail?.nameClass}`}
                 buttonText="Lưu điểm"
                 onButtonClick={handleSubmitScore}
                 onBack={onBack}
             />
+        </Spin>
 
             <div className="mt-16"></div>
 
