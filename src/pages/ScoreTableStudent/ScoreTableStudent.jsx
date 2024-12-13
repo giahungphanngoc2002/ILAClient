@@ -63,7 +63,7 @@ const ScoreTableStudent = () => {
         resultDate.setDate(firstDayOfWeek.getDate() + dayIndex);
 
         const yearResult = resultDate.getFullYear();
-const monthResult = (resultDate.getMonth() + 1).toString().padStart(2, '0');
+        const monthResult = (resultDate.getMonth() + 1).toString().padStart(2, '0');
         const dayResult = resultDate.getDate().toString().padStart(2, '0');
 
         return `${yearResult}-${monthResult}-${dayResult}`;
@@ -142,7 +142,7 @@ const monthResult = (resultDate.getMonth() + 1).toString().padStart(2, '0');
         const foundClass = allClasses.filter((classItem) => {
             return (
                 Array.isArray(classItem.studentID) &&
-classItem.studentID.some((student) =>
+                classItem.studentID.some((student) =>
                     typeof student === 'string'
                         ? student === userId
                         : student._id === userId
@@ -225,7 +225,7 @@ classItem.studentID.some((student) =>
 
 
     const filterSubjectEvaluationsByUserId = () => {
-if (!Array.isArray(classSubjectPhu)) {
+        if (!Array.isArray(classSubjectPhu)) {
             console.warn('classSubjectPhu is not an array or is undefined');
             return [];  // Trả về mảng rỗng nếu classSubjectPhu không hợp lệ
         }
@@ -300,7 +300,7 @@ if (!Array.isArray(classSubjectPhu)) {
             if (!rawData || rawData.data.length === 0) {
                 console.warn(`Không có dữ liệu điểm trả về cho kỳ ${semester}`);
                 setGrades(prev => ({
-...prev,
+                    ...prev,
                     [semester]: classSubject.map(subject => ({
                         subject: subject.nameSubject,
                         regular: [],
@@ -376,25 +376,41 @@ if (!Array.isArray(classSubjectPhu)) {
 
 
     const calculateAverageSubject = (regular = [], midterm = [], final = [], subject) => {
+        // Kiểm tra điều kiện nhập vào
         if ((subject === "Toán" && regular.length !== 4) || (subject !== "Toán" && regular.length !== 3) || midterm.length !== 1 || final.length !== 1) {
             return 'Chưa có';
         }
-        console.log(regular)
-        console.log(midterm)
-console.log(final)
 
+        // Kiểm tra kiểu dữ liệu của input
         if (!Array.isArray(regular) || !Array.isArray(midterm) || !Array.isArray(final)) {
             throw new Error("All inputs must be arrays.");
         }
 
+        // Tính tổng trọng số
         const totalWeight = (regular.length * 1) + (midterm.length * 2) + (final.length * 3);
-        const totalScore =
-            regular.reduce((sum, score) => sum + score, 0) * 1 +
-            midterm.reduce((sum, score) => sum + score, 0) * 2 +
-            final.reduce((sum, score) => sum + score, 0) * 3;
 
+        // Tính tổng điểm với trọng số
+        let totalScore = 0;
+
+        // Tính tổng điểm cho phần regular
+        for (let i = 0; i < regular.length; i++) {
+            totalScore += regular[i] * 1;
+        }
+
+        // Tính tổng điểm cho phần midterm
+        for (let i = 0; i < midterm.length; i++) {
+            totalScore += midterm[i] * 2;
+        }
+
+        // Tính tổng điểm cho phần final
+        for (let i = 0; i < final.length; i++) {
+            totalScore += final[i] * 3;
+        }
+
+        // Tính điểm trung bình
         return (totalScore / totalWeight).toFixed(2);
     };
+
 
     const getAllSubjectAverages = () => {
         if (!grades || Object.keys(grades).length === 0) {
@@ -417,7 +433,7 @@ console.log(final)
                 const average = calculateAverageSubject(regular, midterm, final, subject);
 
                 return {
-                    semester, // Thêm thông tin kỳ học
+                    semester,
                     subject,
                     average,
                 };
@@ -467,7 +483,7 @@ console.log(final)
             <div className="pt-8"></div>
 
             <div className='w-4/5'>
-<SummaryStudent studentId={studentId} selectedSemester={selectedSemester} evaluates={evaluates} averages={averages} />
+                <SummaryStudent studentId={studentId} selectedSemester={selectedSemester} evaluates={evaluates} averages={averages} />
 
                 <SummaryAttendanceAndAward countAbsent={countAbsent} />
             </div>
@@ -522,7 +538,7 @@ console.log(final)
                                 <th className="w-1/4 px-4 py-4 border border-blue-200 text-center">Trung Bình</th>
                             </tr>
                         </thead>
-<tbody>
+                        <tbody>
                             {grades[selectedSemester]?.map((grade, index) => (
                                 <tr key={index} className="hover:bg-blue-50 text-gray-700 text-lg">
                                     <td className="px-4 py-4 border border-gray-200">
@@ -569,7 +585,7 @@ console.log(final)
                 <div className="flex items-center mb-6">
                     <HiClipboardList className="text-blue-600 w-6 h-6 mr-2" />
                     <span className="text-xl font-bold text-blue-600">Bảng đánh giá</span>
-</div>
+                </div>
 
                 {loading && <p className="text-blue-500">Đang tải dữ liệu...</p>}
                 {error && <p className="text-red-500">{error}</p>}

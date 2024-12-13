@@ -163,24 +163,41 @@ const GradeTable = () => {
             ? (grades.reduce((sum, grade) => sum + grade, 0) / grades.length).toFixed(1)
             : 0;
 
-    const calculateAverageSubject = (regular = [], midterm = [], final = []) => {
-        // Check if all inputs are arrays
-        if (!Array.isArray(regular) || !Array.isArray(midterm) || !Array.isArray(final)) {
-            throw new Error("All inputs must be arrays.");
-        }
-
-        console.log("regular length", regular.length)
-        console.log("midterm length", midterm.length)
-        console.log("final length", final.length)
-
-        const totalWeight = (regular.length * 1) + (midterm.length * 2) + (final.length * 3);
-        const totalScore =
-            regular.reduce((sum, score) => sum + score, 0) * 1 +
-            midterm.reduce((sum, score) => sum + score, 0) * 2 +
-            final.reduce((sum, score) => sum + score, 0) * 3;
-
-        return (totalScore / totalWeight).toFixed(2);
-    };
+            const calculateAverageSubject = (regular = [], midterm = [], final = [], subject) => {
+                // Kiểm tra điều kiện nhập vào
+                if ((subject === "Toán" && regular.length !== 4) || (subject !== "Toán" && regular.length !== 3) || midterm.length !== 1 || final.length !== 1) {
+                    return 'Chưa có';
+                }
+        
+                // Kiểm tra kiểu dữ liệu của input
+                if (!Array.isArray(regular) || !Array.isArray(midterm) || !Array.isArray(final)) {
+                    throw new Error("All inputs must be arrays.");
+                }
+        
+                // Tính tổng trọng số
+                const totalWeight = (regular.length * 1) + (midterm.length * 2) + (final.length * 3);
+        
+                // Tính tổng điểm với trọng số
+                let totalScore = 0;
+        
+                // Tính tổng điểm cho phần regular
+                for (let i = 0; i < regular.length; i++) {
+                    totalScore += regular[i] * 1;
+                }
+        
+                // Tính tổng điểm cho phần midterm
+                for (let i = 0; i < midterm.length; i++) {
+                    totalScore += midterm[i] * 2;
+                }
+        
+                // Tính tổng điểm cho phần final
+                for (let i = 0; i < final.length; i++) {
+                    totalScore += final[i] * 3;
+                }
+        
+                // Tính điểm trung bình
+                return (totalScore / totalWeight).toFixed(2);
+            };
 
     const handleDownloadExcel = () => {
         const worksheet = XLSX.utils.json_to_sheet(

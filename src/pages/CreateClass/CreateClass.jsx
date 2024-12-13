@@ -1,36 +1,28 @@
 import React, { useEffect, useState } from 'react';
 import * as BlockService from "../../services/BlockService";
-
+import * as ClassService from "../../services/ClassService";
+import * as SubjectService from "../../services/SubjectService";
+import * as UserService from "../../services/UserService";
 
 const CreateClass = () => {
     const [nameClass, setNameClass] = useState('');
     const [year, setYear] = useState('');
     const [blocks, setBlocks] = useState([]);
     const [block, setBlock] = useState('');
-
+    const [room, setRoom] = useState('');
+    const [rooms, setRooms] = useState('')
     const [teacherHR, setTeacherHR] = useState('');
-    const [subjectGroup, setSubjectGroup] = useState('');
+    const [subjectGroup, setSubjectGroup] = useState([]);
     const [message, setMessage] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [classType, setClassType] = useState([]);
     const [selectedSubjects, setSelectedSubjects] = useState([]);
-    const [selectedTeachers, setSelectedTeachers] = useState({});
+    const [selectedSubjectAndTeacher, setSelectedSubjectAndTeacher] = useState({});
+    const [dataSubject, setDataSubject] = useState([]);
+    const [selectedClassType, setSelectedClassType] = useState([])
+    const [teachers, setTeachers] = useState([]);
+    const [dataSubjectId, setDataSubjectId] = useState([])
 
-
-    // Dữ liệu mẫu về các môn học theo nhóm môn học
-    const subjectData = {
-        "Nhóm 1": [
-            { name: "Toán", teachers: ["Nguyễn Văn A", "Trần Thị B", "Lê Minh C"] },
-            { name: "Lý", teachers: ["Nguyễn Văn B", "Phạm Thị D"] }
-        ],
-        "Nhóm 2": [
-            { name: "Hóa", teachers: ["Nguyễn Văn C", "Lê Minh D"] },
-            { name: "Sinh", teachers: ["Nguyễn Văn D", "Trần Thị E"] }
-        ],
-        "Nhóm 3": [
-            { name: "Văn", teachers: ["Nguyễn Văn E", "Lê Minh F"] },
-            { name: "Sử", teachers: ["Nguyễn Văn F", "Phạm Thị G"] }
-        ]
-    };
 
 
     useEffect(() => {
@@ -45,42 +37,140 @@ const CreateClass = () => {
         fetchBlocks();
     }, []);
 
-    const handleCreateClass = () => {
-        if (!nameClass || !year || !block || !teacherHR || !subjectGroup) {
-            setMessage('Vui lòng nhập đầy đủ thông tin.');
-            return;
-        }
+    useEffect(() => {
+        const fetchBlocks = async () => {
+            try {
+                const usersData = await UserService.getAllAccount();
+                if (usersData?.data) {
+                    const teacherUser = usersData.data.filter((user) => user.role === "Teacher");
+                    setTeachers(teacherUser);
+                } else {
+                    console.error("No data found in usersData");
+                }
+            } catch (error) {
+                console.error("Error fetching blocks:", error);
+            }
+        };
+        fetchBlocks();
+    }, []);
 
-        setMessage('Lớp học mới đã được tạo thành công!');
-        // Clear form after creation
-        setNameClass('');
-        setYear('');
-        setBlock('');
-        setTeacherHR('');
-        setSubjectGroup('');
+    console.log(teachers)
+
+
+    useEffect(() => {
+        const fetchBlocks = async () => {
+            try {
+                const subjectsData = await SubjectService.getAllSubjects();
+                setDataSubject(subjectsData?.data);
+            } catch (error) {
+                console.error("Error fetching blocks:", error);
+            }
+        };
+        fetchBlocks();
+    }, []);
+
+    useEffect(() => {
+        const fetchBlocks = async () => {
+            try {
+                const classTypeData = await ClassService.getAllClassType();
+                setClassType(classTypeData?.data);
+            } catch (error) {
+                console.error("Error fetching blocks:", error);
+            }
+        };
+        fetchBlocks();
+    }, []);
+
+
+    // console.log(classType)
+    const handleCreateClass = () => {
+        // if (!nameClass || !year || !block || !teacherHR || !subjectGroup) {
+        //     setMessage('Vui lòng nhập đầy đủ thông tin.');
+        //     return;
+        // }
+
+        // setMessage('Lớp học mới đã được tạo thành công!');
+        // // Clear form after creation
+        // setNameClass('');
+        // setYear('');
+        // setBlock('');
+        // setTeacherHR('');
+        // setSubjectGroup('');
+        console.log({ nameClass, year, block, dataSubjectId, teacherHR })
     };
+
+    console.log(classType)
+
+    function getNameBlockById(id) {
+        const block = blocks.find(block => block._id === id);
+        return block ? block.nameBlock : null; // Trả về nameBlock nếu tìm thấy, ngược lại trả về null
+    }
+
+    // Sử dụng hàm để tìm nameBlock của block có _id là '6717c5eaff6baca57f486e9d'
+
 
     // Mở modal khi chọn nhóm môn
     const handleSubjectGroupChange = (e) => {
         const selectedGroup = e.target.value;
-        setSubjectGroup(selectedGroup);
-        if (selectedGroup) {
-            setSelectedSubjects(subjectData[selectedGroup] || []);
-            setIsModalOpen(true); // Mở modal khi có nhóm môn học được chọn
-        }
+        // Chuyển chuỗi JSON thành đối tượng
+        const parsedGroup = selectedGroup ? JSON.parse(selectedGroup) : {};
+        setSelectedClassType(parsedGroup)
+        const nameBlock = getNameBlockById(block);
+
+        // Lọc môn học từ các mảng nameSubject, nameSubjectChuyende, nameSubjectPhu
+        const filteredSubjects = dataSubject.filter(subject =>
+            // Kiểm tra nếu môn học thuộc bất kỳ mảng nào trong parsedGroup
+            (
+                parsedGroup.nameSubject.includes(subject.nameSubject) ||
+                parsedGroup.nameSubjectChuyende.includes(subject.nameSubject) ||
+                parsedGroup.nameSubjectPhu.includes(subject.nameSubject)
+            ) &&
+            subject.block === nameBlock
+        );
+
+        // Nhóm các môn học theo nameSubject
+        const groupedSubjects = filteredSubjects.reduce((acc, item) => {
+            if (!acc[item.nameSubject]) {
+                acc[item.nameSubject] = [];
+            }
+            acc[item.nameSubject].push(item);
+            return acc;
+        }, {});
+
+
+        setSelectedSubjects(groupedSubjects);
+        setSubjectGroup(parsedGroup);
+        setIsModalOpen(true);
     };
 
+
     // Xử lý khi chọn giáo viên trong modal
-    const handleTeacherChange = (subjectIndex, teacher) => {
-        setSelectedTeachers(prevState => ({
+    const handleTeacherChange = (subjectName, subjectId) => {
+        setSelectedSubjectAndTeacher(prevState => ({
             ...prevState,
-            [subjectIndex]: teacher
+            [subjectName]: subjectId, // Lưu giáo viên cho từng môn học
         }));
     };
 
     // Đóng modal
     const closeModal = () => {
         setIsModalOpen(false);
+    };
+
+    const handleSaveTeachers = () => {
+        function mapSubjectToIds(subjectList, subjectMapping) {
+            return subjectList.map(subject => subjectMapping[subject]);
+        }
+
+        // Combine the data
+        const combinedData = {
+            idSubject: mapSubjectToIds(selectedClassType.nameSubject, selectedSubjectAndTeacher),
+            idSubjectChuyende: mapSubjectToIds(selectedClassType.nameSubjectChuyende, selectedSubjectAndTeacher),
+            idSubjectPhu: mapSubjectToIds(selectedClassType.nameSubjectPhu, selectedSubjectAndTeacher)
+        };
+        console.log(combinedData);
+        // setSelectedSubjectAndTeacher(combinedData)
+        setDataSubjectId(combinedData)
     };
 
     return (
@@ -131,9 +221,15 @@ const CreateClass = () => {
                         onChange={handleSubjectGroupChange}
                     >
                         <option value="">Chọn nhóm môn</option>
-                        <option value="Nhóm 1">Nhóm 1</option>
-                        <option value="Nhóm 2">Nhóm 2</option>
-                        <option value="Nhóm 3">Nhóm 3</option>
+                        {classType?.map((type) => (
+                            <option key={type._id} value={JSON.stringify({
+                                nameSubject: type.nameSubject,
+                                nameSubjectChuyende: type.nameSubjectChuyende,
+                                nameSubjectPhu: type.nameSubjectPhu
+                            })}>
+                                {type.nameGroup}
+                            </option>
+                        ))}
                     </select>
                 </div>
 
@@ -145,9 +241,9 @@ const CreateClass = () => {
                         onChange={(e) => setTeacherHR(e.target.value)}
                     >
                         <option value="">Chọn giáo viên chủ nhiệm</option>
-                        <option value="Nguyễn Văn A">Nguyễn Văn A</option>
-                        <option value="Nguyễn Văn B">Nguyễn Văn B</option>
-                        <option value="Nguyễn Văn C">Nguyễn Văn C</option>
+                        {teachers?.map((teacher) => (
+                            <option key={teacher.id} value={teacher._id}>{teacher.name}</option>
+                        ))}
                     </select>
                 </div>
 
@@ -165,32 +261,43 @@ const CreateClass = () => {
                 </div>
             </div>
 
-            {/* Modal for displaying subjects with select for teachers */}
             {isModalOpen && (
                 <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
-                    <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-                        <h3 className="text-xl font-semibold mb-4">Chọn giáo viên cho các môn học</h3>
-                        <ul>
-                            {selectedSubjects.map((subject, subjectIndex) => (
-                                <li key={subjectIndex} className="mb-4">
-                                    <div className="font-medium">{subject.name}</div>
-                                    <div className="text-sm text-gray-500">
-                                        <label className="block text-sm font-medium text-gray-700">Chọn giáo viên</label>
-                                        <select
-                                            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                                            value={selectedTeachers[subjectIndex] || ''}
-                                            onChange={(e) => handleTeacherChange(subjectIndex, e.target.value)}
-                                        >
-                                            <option value="">Chọn giáo viên</option>
-                                            {subject.teachers.map((teacher, index) => (
-                                                <option key={index} value={teacher}>{teacher}</option>
-                                            ))}
-                                        </select>
+                    <div className="bg-white p-6 rounded-lg shadow-lg w-144 max-h-[80vh] overflow-y-auto">
+                        {/* <h3 className="text-xl font-semibold mb-4">Chọn giáo viên cho các môn học</h3> */}
+                        <ul className="p-0">
+                            {Object.keys(selectedSubjects).map((subjectName, subjectIndex) => (
+                                <li key={subjectIndex} className="mb-4 flex">
+                                    <div className="font-medium flex-1">{subjectName}</div>
+
+                                    {/* Lặp qua các option cho môn học */}
+                                    <div className="flex-1">
+                                        <div className="text-sm text-gray-500">
+                                            <select
+                                                className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 py-1"
+                                                value={selectedSubjectAndTeacher[subjectName] || ''} // Giáo viên đã chọn cho môn học này
+                                                onChange={(e) => handleTeacherChange(subjectName, e.target.value)} // Cập nhật khi chọn giáo viên mới
+                                            >
+                                                <option value="">Chọn giáo viên</option>
+                                                {selectedSubjects[subjectName]?.map((subject, index) => (
+                                                    <option key={index} value={subject._id}>
+                                                        {subject.teacherId.name}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
                                     </div>
                                 </li>
                             ))}
                         </ul>
+
                         <div className="mt-4 text-center">
+                            <button
+                                className="py-2 px-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                                onClick={handleSaveTeachers}
+                            >
+                                Lưu
+                            </button>
                             <button
                                 className="py-2 px-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
                                 onClick={closeModal}
@@ -201,7 +308,10 @@ const CreateClass = () => {
                     </div>
                 </div>
             )}
-        </div>
+
+
+
+        </div >
     );
 };
 
