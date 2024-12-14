@@ -63,7 +63,7 @@ const ScoreTableStudent = () => {
         resultDate.setDate(firstDayOfWeek.getDate() + dayIndex);
 
         const yearResult = resultDate.getFullYear();
-        const monthResult = (resultDate.getMonth() + 1).toString().padStart(2, '0');
+const monthResult = (resultDate.getMonth() + 1).toString().padStart(2, '0');
         const dayResult = resultDate.getDate().toString().padStart(2, '0');
 
         return `${yearResult}-${monthResult}-${dayResult}`;
@@ -142,7 +142,7 @@ const ScoreTableStudent = () => {
         const foundClass = allClasses.filter((classItem) => {
             return (
                 Array.isArray(classItem.studentID) &&
-                classItem.studentID.some((student) =>
+classItem.studentID.some((student) =>
                     typeof student === 'string'
                         ? student === userId
                         : student._id === userId
@@ -186,21 +186,13 @@ const ScoreTableStudent = () => {
         const fetchClasses = async () => {
             try {
                 const allClasses = await ClassService.getAllClass();
-
+                console.log(allClasses)
                 setClasses(allClasses?.data || []);
-
-                const calculatedSchoolYears = allClasses?.data.map(classItem => {
-
-                    const block = parseInt(classItem?.blockID?.nameBlock, 10);
-                    const years = getSchoolYears(classItem?.year, block);
-
-                    return years.length > 0 ? years : null;
-                }).filter(year => year !== null).flat();
-                setYears([...new Set(calculatedSchoolYears)]);
-
                 const userClass = findUserClass(allClasses?.data || [], user.id);
-                setUserClasses(userClass)
                 console.log(userClass)
+                setUserClasses(userClass)
+
+
                 const filterUserClass = userClass.find((classItem) => {
                     return classItem._id === selectedClass;
                 });
@@ -223,6 +215,7 @@ const ScoreTableStudent = () => {
         fetchClasses();
     }, [user.id, selectedClass]);
 
+    console.log(classSubjectPhu)
 
     const filterSubjectEvaluationsByUserId = () => {
         if (!Array.isArray(classSubjectPhu)) {
@@ -230,10 +223,10 @@ const ScoreTableStudent = () => {
             return [];  // Trả về mảng rỗng nếu classSubjectPhu không hợp lệ
         }
 
+
         return classSubjectPhu.map(subject => {
             const userEvaluate = subject.evaluate.filter(evaluation => evaluation.StudentId === user.id);
-
-            // Nếu có đánh giá của học sinh, trả về môn học và các đánh giá
+// Nếu có đánh giá của học sinh, trả về môn học và các đánh giá
             if (userEvaluate.length > 0) {
                 return {
                     nameSubject: subject.nameSubject,
@@ -279,7 +272,7 @@ const ScoreTableStudent = () => {
         });
     };
 
-    console.log(filterBySemester())
+    // console.log(filterBySemester())
 
     // Hàm gọi API và định dạng lại dữ liệu
     const fetchScores = async (semester, classId) => {
@@ -295,7 +288,7 @@ const ScoreTableStudent = () => {
         try {
             // Lấy dữ liệu điểm từ API
             const rawData = await ScoreSbujectService.getAllScoreByStudentIdSemesterAndClass(studentId, semester, classId);
-            console.log(rawData)
+            // console.log(rawData)
             // Kiểm tra nếu rawData không có dữ liệu
             if (!rawData || rawData.data.length === 0) {
                 console.warn(`Không có dữ liệu điểm trả về cho kỳ ${semester}`);
@@ -310,8 +303,7 @@ const ScoreTableStudent = () => {
                 }));
                 return;
             }
-
-            // Gộp dữ liệu từ classSubject và rawData
+// Gộp dữ liệu từ classSubject và rawData
             const formattedData = classSubject.map(subject => {
                 // Tìm điểm của môn học này từ rawData
                 const subjectData = rawData.data.find(item => item.subjectId.nameSubject === subject.nameSubject);
@@ -388,8 +380,7 @@ const ScoreTableStudent = () => {
 
         // Tính tổng trọng số
         const totalWeight = (regular.length * 1) + (midterm.length * 2) + (final.length * 3);
-
-        // Tính tổng điểm với trọng số
+// Tính tổng điểm với trọng số
         let totalScore = 0;
 
         // Tính tổng điểm cho phần regular
@@ -470,7 +461,7 @@ const ScoreTableStudent = () => {
     };
 
     const evaluates = getAllEvaluate()
-    console.log(selectedClass)
+    console.log(evaluates)
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen p-6">
@@ -483,7 +474,7 @@ const ScoreTableStudent = () => {
             <div className="pt-8"></div>
 
             <div className='w-4/5'>
-                <SummaryStudent studentId={studentId} selectedSemester={selectedSemester} evaluates={evaluates} averages={averages} />
+<SummaryStudent studentId={studentId} selectedSemester={selectedSemester} evaluates={evaluates} averages={averages} />
 
                 <SummaryAttendanceAndAward countAbsent={countAbsent} />
             </div>
@@ -538,7 +529,7 @@ const ScoreTableStudent = () => {
                                 <th className="w-1/4 px-4 py-4 border border-blue-200 text-center">Trung Bình</th>
                             </tr>
                         </thead>
-                        <tbody>
+<tbody>
                             {grades[selectedSemester]?.map((grade, index) => (
                                 <tr key={index} className="hover:bg-blue-50 text-gray-700 text-lg">
                                     <td className="px-4 py-4 border border-gray-200">
@@ -585,7 +576,7 @@ const ScoreTableStudent = () => {
                 <div className="flex items-center mb-6">
                     <HiClipboardList className="text-blue-600 w-6 h-6 mr-2" />
                     <span className="text-xl font-bold text-blue-600">Bảng đánh giá</span>
-                </div>
+</div>
 
                 {loading && <p className="text-blue-500">Đang tải dữ liệu...</p>}
                 {error && <p className="text-red-500">{error}</p>}

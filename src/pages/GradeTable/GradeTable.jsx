@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import * as XLSX from "xlsx";
 import { FaFileExcel, FaSearch, FaArrowLeft } from 'react-icons/fa';
 import { useParams } from "react-router-dom";
@@ -41,7 +41,7 @@ const GradeTable = () => {
         }
     }, [idClass]);
 
-    console.log(classDetail)
+
 
     useEffect(() => {
         if (Array.isArray(classDetail?.SubjectsId)) {
@@ -55,14 +55,15 @@ const GradeTable = () => {
     useEffect(() => {
         const fetchScores = async () => {
             try {
+                setLoading(true); // Bắt đầu trạng thái tải
                 const scoresData = await ScoreSubjectService.getAllScoresBySubjectSemester(idSubject, idClass, semesterFilter);
-                console.log("Fetched scores data:", scoresData);  // Debug log để kiểm tra dữ liệu trả về
-
+                console.log("Fetched scores data:", scoresData); // Debug log để kiểm tra dữ liệu trả về
+    
                 // Kiểm tra nếu không có dữ liệu điểm, tạo bảng điểm rỗng
                 const scoresByStudentId = scoresData?.reduce((acc, detail) => {
                     const filteredScores = detail.scores.filter(score => score.semester === parseInt(semesterFilter));
                     const scores = { diemThuongXuyen: [], diemGiuaKi: [], diemCuoiKi: [] };
-filteredScores.forEach((score) => {
+                    filteredScores.forEach((score) => {
                         switch (score.type) {
                             case "thuongXuyen":
                                 scores.diemThuongXuyen.push(score.score);
@@ -77,7 +78,7 @@ filteredScores.forEach((score) => {
                                 break;
                         }
                     });
-
+    
                     acc[detail.studentId._id] = {
                         id: detail.studentId._id,
                         name: detail.studentId.name,
@@ -87,31 +88,32 @@ filteredScores.forEach((score) => {
                         scoreId: detail._id, // hoặc nếu bạn cần lấy từ trường khác
                         ...scores,
                     };
-
+    
                     return acc;
                 }, {});
-
+    
                 // Gộp dữ liệu với danh sách sinh viên chưa có điểm
                 const completeStudentList = studentInClass.map((student) => {
                     const existingStudent = scoresByStudentId ? scoresByStudentId[student._id] : null;
                     if (existingStudent) {
                         return existingStudent;
                     }
-
+    
                     return {
                         id: student._id,
                         name: student.name,
                         email: student.email,
                         diemThuongXuyen: [],
                         diemGiuaKi: [],
-                        diemCuoiKi: []
+                        diemCuoiKi: [],
+                        scoreId: null,
                     };
                 });
-
+    
                 setStudents(completeStudentList);
             } catch (error) {
                 console.error("Error fetching scores:", error);
-
+    
                 // Nếu xảy ra lỗi, khởi tạo danh sách rỗng
                 const emptyStudentList = studentInClass.map((student) => ({
                     id: student._id,
@@ -119,15 +121,19 @@ filteredScores.forEach((score) => {
                     email: student.email,
                     diemThuongXuyen: [],
                     diemGiuaKi: [],
-                    diemCuoiKi: []
+                    diemCuoiKi: [],
+                    scoreId: null,
                 }));
-
+    
                 setStudents(emptyStudentList);
+            } finally {
+                setLoading(false); // Kết thúc trạng thái tải
             }
         };
-
+    
         fetchScores();
     }, [idClass, idSubject, semesterFilter, studentInClass]);
+    
 
 
     const calculateAverage = (grades) =>
@@ -136,7 +142,7 @@ filteredScores.forEach((score) => {
             : 0;
 
     const calculateAverageSubject = (regular = [], midterm = [], final = [], subject) => {
-// Kiểm tra điều kiện nhập vào
+        // Kiểm tra điều kiện nhập vào
         console.log(subject)
         if ((subject === "Toán" && regular.length !== 4) || (subject !== "Toán" && regular.length !== 3) || midterm.length !== 1 || final.length !== 1) {
             return 'Chưa có';
@@ -191,45 +197,34 @@ filteredScores.forEach((score) => {
         XLSX.writeFile(workbook, "BangDiem.xlsx");
     };
 
-    const handleScoreChange = (type, index, value, studentId) => {
+    const handleScoreChange = useCallback((type, index, value, studentId) => {
         setStudents(prevStudents =>
             prevStudents.map(student => {
                 if (student.id === studentId) {
                     const updatedStudent = {
                         ...student,
+                        scoreId: student.scoreId, // Giữ nguyên scoreId
                         diemThuongXuyen: Array.isArray(student.diemThuongXuyen) ? [...student.diemThuongXuyen] : [],
                         diemGiuaKi: Array.isArray(student.diemGiuaKi) ? [...student.diemGiuaKi] : [],
-                        diemCuoiKi: Array.isArray(student.diemCuoiKi) ? [...student.diemCuoiKi] : []
+                        diemCuoiKi: Array.isArray(student.diemCuoiKi) ? [...student.diemCuoiKi] : [],
                     };
-
-                    // Cập nhật điểm tùy theo loại
+    
                     if (type === "diemThuongXuyen" && index !== undefined) {
-                        // Nếu là điểm thường xuyên, cập nhật theo index
-                        if (value.trim() === "") {
-updatedStudent.diemThuongXuyen[index] = '';
-                        } else {
-                            updatedStudent.diemThuongXuyen[index] = parseFloat(value) || 0;  // Cập nhật điểm thường xuyên
-                        }
+                        updatedStudent.diemThuongXuyen[index] = value ? parseFloat(value) : 0;
                     } else if (type === "diemGiuaKi") {
-                        if (value.trim() === "") {
-                            updatedStudent.diemGiuaKi = [];  // Xoá hoàn toàn mảng khi không có giá trị
-                        } else {
-                            updatedStudent.diemGiuaKi = [parseFloat(value) || 0];  // Cập nhật điểm giữa kỳ
-                        }
+                        updatedStudent.diemGiuaKi = value ? [parseFloat(value)] : [];
                     } else if (type === "diemCuoiKi") {
-                        if (value.trim() === "") {
-                            updatedStudent.diemCuoiKi = [];  // Xoá hoàn toàn mảng khi không có giá trị
-                        } else {
-                            updatedStudent.diemCuoiKi = [parseFloat(value) || 0];  // Cập nhật điểm cuối kỳ
-                        }
+                        updatedStudent.diemCuoiKi = value ? [parseFloat(value)] : [];
                     }
-
+    
                     return updatedStudent;
                 }
                 return student;
             })
         );
-    };
+    }, []);
+    
+
 
     const filteredStudents = students.filter((student) => {
         const averageScore = (
@@ -251,20 +246,13 @@ updatedStudent.diemThuongXuyen[index] = '';
         window.history.back();
     }
 
-    const studentsRef = useRef(students);
-
-    useEffect(() => {
-        studentsRef.current = students;  // Cập nhật students vào ref mỗi khi students thay đổi
-    }, [students]);
 
 
     const handleSubmitScore = async () => {
-        if (loading) return;
-
         setLoading(true);
         try {
             // Sử dụng studentsRef để đảm bảo lấy giá trị students lúc hiện tại
-            const scoresData = studentsRef.current.map(student => {
+            const scoresData = students.map(student => {
                 // Kiểm tra và chỉ lấy điểm nếu có điểm
                 const scores = [
                     ...student.diemThuongXuyen.length > 0
@@ -275,7 +263,7 @@ updatedStudent.diemThuongXuyen[index] = '';
                         : [],
                     ...student.diemCuoiKi.length > 0
                         ? student.diemCuoiKi.map(score => ({ type: "cuoiKi", score, semester: semesterFilter }))
-: []
+                        : []
                 ];
 
                 // Nếu không có điểm gì thì bỏ qua
@@ -292,12 +280,15 @@ updatedStudent.diemThuongXuyen[index] = '';
                 toast.info("No scores to submit.");
                 return;
             }
+            console.log(scoresData)
 
             // Tạo một mảng promises để xử lý tất cả các yêu cầu
             const scorePromises = scoresData.map(scoreData => {
                 if (scoreData.scoreId) {
+                    console.log("Updating score for studentId:", scoreData.studentId);
                     return ScoreSubjectService.updateScore(scoreData.scoreId, scoreData);
                 } else {
+                    console.log("Creating new score for studentId:", scoreData.studentId);
                     return ScoreSubjectService.createScore(scoreData);
                 }
             });
@@ -313,6 +304,7 @@ updatedStudent.diemThuongXuyen[index] = '';
             setLoading(false);
         }
     };
+
 
 
 
@@ -354,7 +346,7 @@ updatedStudent.diemThuongXuyen[index] = '';
     }
 
     return (
-<div className="container mx-auto p-6 min-h-screen">
+        <div className="container mx-auto p-6 min-h-screen">
             <Spin spinning={loading} size="large">
                 <Breadcrumb
                     title={`Bảng Điểm Môn ${subjectPhu ? subjectPhu.nameSubject : subject?.nameSubject} Lớp ${classDetail?.nameClass}`}
@@ -362,7 +354,7 @@ updatedStudent.diemThuongXuyen[index] = '';
                     onButtonClick={handleSubmitScore}
                     onBack={onBack}
                 />
-            </Spin>
+            {/* </Spin> */}
 
             <div className="mt-16"></div>
 
@@ -415,7 +407,7 @@ updatedStudent.diemThuongXuyen[index] = '';
                         style={{ opacity: 0, position: "absolute", zIndex: -1 }}
                     />
                     <button
-className="px-4 py-2 bg-green-600 text-white rounded-lg shadow-lg flex items-center hover:bg-green-700 transition duration-300"
+                        className="px-4 py-2 bg-green-600 text-white rounded-lg shadow-lg flex items-center hover:bg-green-700 transition duration-300"
                         onClick={handleDownloadExcel}
                     >
                         <FaFileExcel className="mr-2" /> Tải xuống Excel
@@ -430,6 +422,7 @@ className="px-4 py-2 bg-green-600 text-white rounded-lg shadow-lg flex items-cen
             </div>
 
             {/* Bảng điểm */}
+            {/* <Spin spinning={loading} size="large"> */}
             <div className="overflow-x-auto shadow-lg rounded-lg bg-white">
                 <table className="table-auto w-full border-collapse">
                     <thead>
@@ -461,7 +454,7 @@ className="px-4 py-2 bg-green-600 text-white rounded-lg shadow-lg flex items-cen
                                                     type="number"
                                                     value={student.diemThuongXuyen[idx] || ''}
                                                     onChange={(e) => handleScoreChange('diemThuongXuyen', idx, e.target.value, student.id)}
-onInput={(e) => {
+                                                    onInput={(e) => {
                                                         let value = e.target.value;
                                                         // Chỉ cho phép nhập giá trị từ 0 đến 10
                                                         if (value < 0) e.target.value = 0;
@@ -505,7 +498,7 @@ onInput={(e) => {
                                     </td>
 
                                     <td className="border px-4 py-3 font-semibold text-blue-700">
-{calculateAverageSubject(student.diemThuongXuyen, student.diemGiuaKi, student.diemCuoiKi, subject.nameSubject)}
+                                        {calculateAverageSubject(student.diemThuongXuyen, student.diemGiuaKi, student.diemCuoiKi, subject.nameSubject)}
                                     </td>
                                 </tr>
                             ))
@@ -517,6 +510,7 @@ onInput={(e) => {
                     </tbody>
                 </table>
             </div>
+            </Spin>
         </div>
     );
 };

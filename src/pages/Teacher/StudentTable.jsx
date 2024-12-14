@@ -672,15 +672,15 @@ const StudentTable = () => {
                 const scoreData = {
                   scores: [
                     ...studentScores.scores.diemThuongXuyen.map(score => ({ type: 'thuongXuyen', score, semester: selectedSemester })),
-                    
-                    studentScores.scores.diemGiuaKi ? { type: 'giuaKi', score: studentScores.scores.diemGiuaKi, semester: selectedSemester } : null,
-                    studentScores.scores.diemCuoiKi ? { type: 'cuoiKi', score: studentScores.scores.diemCuoiKi, semester: selectedSemester } : null,
+                    studentScores.scores.diemGiuaKi ? { type: 'giuaKi', score: Array.isArray(studentScores.scores.diemGiuaKi) ? studentScores.scores.diemGiuaKi.flat() : [studentScores.scores.diemGiuaKi], semester: selectedSemester } : null,
+                    studentScores.scores.diemCuoiKi ? { type: 'cuoiKi', score: Array.isArray(studentScores.scores.diemCuoiKi) ? studentScores.scores.diemCuoiKi.flat() : [studentScores.scores.diemCuoiKi], semester: selectedSemester } : null,
                   ].filter(scoreItem => scoreItem && scoreItem.score !== ''), // Ensure scores are valid
                   studentId: studentScores.id,
                   subjectId: idSubject,
                   classId: idClass,
                 };
-                console.log(scoreData)
+                
+                console.log("scoreData", scoreData);
                 const currentScoreId = studentScores.scoreIds[selectedSemester];
 
                 try {
