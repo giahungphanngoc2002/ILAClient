@@ -96,6 +96,7 @@ const DocumentList = () => {
                         file: { name: resource.linkResource },
                         uploadDate: new Date(resource.createdAt),
                         size: resource.size,
+                        content:resource.content
                     }));
 
                     setDocuments(loadedFiles); // Update state with documents for the selected subject
@@ -115,6 +116,8 @@ const DocumentList = () => {
             fetchSubjectData();
         }
     }, [selectedClass, selectedSubject]);
+
+    console.log(documents)
 
 
     const renderIcon = (type) => {
@@ -222,7 +225,7 @@ const DocumentList = () => {
                             <tbody>
                                 {documents.map((doc) => (
                                     <tr key={doc.fileId} className="border-b">
-                                        <td className="p-3">{doc.file.name}</td>
+                                        <td className="p-3">{doc.content}</td>
                                         <td className="p-3">{renderIcon('pdf')}</td>
                                         <td className="p-3">{new Date(doc.uploadDate).toLocaleString()}</td>
                                         <td className="p-3">

@@ -65,8 +65,8 @@ const StudentViewExamSchedule = () => {
         } else {
           console.error("Không tìm thấy blockClassUser phù hợp!");
         }
-        if (userClass && userClass.subjectGroup?.SubjectsId) {
-          setClassSubject(userClass.subjectGroup.SubjectsId || []);
+        if (userClass && userClass?.SubjectsId) {
+          setClassSubject(userClass?.SubjectsId || []);
         } else {
           console.error("Không tìm thấy classSubject phù hợp!");
         }

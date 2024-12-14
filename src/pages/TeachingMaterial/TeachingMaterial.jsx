@@ -10,9 +10,7 @@ import {
 import { ToastContainer, toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate, useParams } from 'react-router-dom';
-import { FaArrowLeft } from "react-icons/fa";
-import * as ClassService from "../../services/ClassService"; // Import the API service
-import axios from "axios";
+import * as ClassService from "../../services/ClassService";
 import Breadcrumb from "../../components/Breadcrumb/Breadcrumb";
 const getFileTypeIcon = (fileName) => {
   const extension = fileName.split('.').pop();
@@ -32,6 +30,8 @@ const TeachingMaterial = () => {
   const [files, setFiles] = useState([]);  // Store the files (resources)
   const [selectedFile, setSelectedFile] = useState(null);
   const { idClass, idSubject } = useParams();  // Get the classId and subjectId from URL parameters
+  const [fileContent, setFileContent] = useState(""); // State to store content
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -68,12 +68,14 @@ const TeachingMaterial = () => {
 
   const handleFileChange = (e) => {
     setSelectedFile(e.target.files[0]);
+    setIsModalOpen(true);
   };
 
   const handleUpload = async () => {
     if (selectedFile) {
       const formData = new FormData();
       formData.append("linkResource", selectedFile);
+      formData.append("content", fileContent);
       console.log(selectedFile.size)
       // Kiểm tra nội dung FormData
       formData.forEach((value, key) => {
@@ -81,10 +83,12 @@ const TeachingMaterial = () => {
       });
 
       try {
-        const response = await ClassService.addResourceToSubject(idClass, idSubject, selectedFile)
+        const response = await ClassService.addResourceToSubject(idClass, idSubject, selectedFile,fileContent)
         console.log(response);  // Log phản hồi từ server
-        setFiles([...files, { file: selectedFile, uploadDate: new Date(), size: selectedFile.size }]);
+        setFiles([...files, { file: selectedFile, uploadDate: new Date(), size: selectedFile.size ,content:fileContent }]);
         setSelectedFile(null);
+        setFileContent("");
+        setIsModalOpen(false);
         toast.success("Cập nhập file thành công!");
       } catch (error) {
         console.error("Error uploading file:", error);
@@ -123,13 +127,6 @@ const TeachingMaterial = () => {
       toast.error("Failed to download file.");
     }
   };
-
-
-
-
-
-
-
 
   const handleDelete = async (file, fileIndex) => {
     try {
@@ -185,6 +182,36 @@ const TeachingMaterial = () => {
         )}
         <p className="text-xs mt-1 text-gray-500">Supported formats: .pdf, .docx, .xlsx. Max size: 5MB.</p>
       </div>
+
+      {isModalOpen && (
+        <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
+            <h2 className="text-xl font-semibold mb-4">Enter Content</h2>
+            <textarea
+              className="w-full p-2 border border-gray-300 rounded-lg"
+              placeholder="Enter content for the file"
+              value={fileContent}
+              onChange={(e) => setFileContent(e.target.value)}
+              rows="4"
+            />
+            <div className="mt-4 flex justify-end space-x-4">
+              <button
+                onClick={() => setIsModalOpen(false)} // Close modal without uploading
+                className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleUpload}
+                className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
+              >
+                Upload
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
 
       {/* File Table Section */}
       <div className="overflow-x-auto bg-white rounded-lg shadow-md">

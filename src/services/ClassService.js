@@ -151,10 +151,11 @@ export const getResourcesBySubject = async (classId, subjectId) => {
     return res.data;
 };
 
-export const addResourceToSubject = async (classId, subjectId, file) => {
+export const addResourceToSubject = async (classId, subjectId, file,content) => {
     // Tạo FormData để chứa file
     const formData = new FormData();
-    formData.append("linkResource", file); // 'linkResource' là tên trường trong multer
+    formData.append("linkResource", file);
+    formData.append("content", content); // 'linkResource' là tên trường trong multer
 
     try {
         const res = await axios.post(

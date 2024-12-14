@@ -48,11 +48,11 @@ const NotificationToStudent = () => {
     console.log(classData)
 
     const teachingClasses = classData.filter((classItem) => {
-        const subjectsChuyendeMatch = classItem.subjectGroup?.SubjectsChuyendeId?.some(
+        const subjectsChuyendeMatch = classItem?.SubjectsPhuId?.some(
             (subject) => subject.teacherId === user.id
         );
 
-        const subjectsMatch = classItem.subjectGroup?.SubjectsId?.some(
+        const subjectsMatch = classItem?.SubjectsId?.some(
             (subject) => subject.teacherId === user.id
         );
 
@@ -80,6 +80,8 @@ const NotificationToStudent = () => {
         phone: classItem?.teacherHR?.phone || 'N/A', // Default phone if not available
         class: classItem?.nameClass
     }));
+
+    console.log(recipientsTab1)
 
     // Extract classes
     const classes = teachingClasses.map((classItem) => classItem.nameClass);
@@ -153,7 +155,6 @@ const NotificationToStudent = () => {
     const onBack = () => {
         navigate('/manage/historySendNotification')
     }
-
     console.log(content)
 
     return (
