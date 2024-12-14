@@ -100,7 +100,8 @@ const THRSendNoti = () => {
   ).length;
 
   const onBack = () => {
-    navigate('/manage');
+    window.history.back();
+
   };
 
   return (

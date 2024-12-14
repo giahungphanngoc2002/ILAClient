@@ -13,6 +13,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { FaArrowLeft } from "react-icons/fa";
 import * as ClassService from "../../services/ClassService"; // Import the API service
 import axios from "axios";
+import Breadcrumb from "../../components/Breadcrumb/Breadcrumb";
 const getFileTypeIcon = (fileName) => {
   const extension = fileName.split('.').pop();
   switch (extension) {
@@ -38,10 +39,10 @@ const TeachingMaterial = () => {
       try {
         // Gọi API để lấy danh sách tài nguyên
         const response = await ClassService.getResourcesBySubject(idClass, idSubject);
-  
+
         // Nhận danh sách tài nguyên từ response
         const resources = response.data;
-  
+
         if (resources && Array.isArray(resources)) {
           // Map qua danh sách tài nguyên và chuẩn hóa dữ liệu cho từng file
           const loadedFiles = resources.map((resource) => ({
@@ -50,7 +51,7 @@ const TeachingMaterial = () => {
             uploadDate: new Date(resource.createdAt),  // Lấy ngày upload từ 'createdAt'
             size: resource.size  // Lấy kích thước file từ 'size'
           }));
-  
+
           setFiles(loadedFiles);  // Cập nhật state với danh sách tài nguyên đã tải
         }
       } catch (error) {
@@ -58,12 +59,12 @@ const TeachingMaterial = () => {
         toast.error("Failed to load subject data.");
       }
     };
-  
+
     fetchSubjectData();
-  }, [idClass, idSubject]); 
-  
+  }, [idClass, idSubject]);
+
   console.log(files)// Chỉ gọi lại khi idClass hoặc idSubject thay đổi
-  
+
 
   const handleFileChange = (e) => {
     setSelectedFile(e.target.files[0]);
@@ -78,9 +79,9 @@ const TeachingMaterial = () => {
       formData.forEach((value, key) => {
         console.log(`${key}: ${value}`);
       });
-  
+
       try {
-        const response = await ClassService.addResourceToSubject(idClass,idSubject,selectedFile)
+        const response = await ClassService.addResourceToSubject(idClass, idSubject, selectedFile)
         console.log(response);  // Log phản hồi từ server
         setFiles([...files, { file: selectedFile, uploadDate: new Date(), size: selectedFile.size }]);
         setSelectedFile(null);
@@ -93,28 +94,28 @@ const TeachingMaterial = () => {
       toast.error("No file selected. Please choose a file to upload.");
     }
   };
-  
-  
-  
-  
+
+
+
+
 
   const handleDownload = async (file) => {
     try {
       const response = await ClassService.downloadFileFromCloudinary(file.fileId)
-  
+
       // Tạo URL blob từ dữ liệu nhận được
       const url = window.URL.createObjectURL(new Blob([response.data]));
-  
+
       // Lấy tên file và thêm phần mở rộng .pdf nếu cần
       const fileName = file.file.name.endsWith('.pdf') ? file.file.name : `${file.file.name}.pdf`;
-  
+
       // Tạo liên kết để tải file
       const link = document.createElement("a");
       link.href = url;
       link.setAttribute("download", fileName); // Đặt tên file tải xuống
       document.body.appendChild(link);
       link.click();
-  
+
       // Giải phóng URL sau khi tải xong
       window.URL.revokeObjectURL(url);
     } catch (error) {
@@ -122,13 +123,13 @@ const TeachingMaterial = () => {
       toast.error("Failed to download file.");
     }
   };
-  
-  
-  
-  
-  
-  
-  
+
+
+
+
+
+
+
 
   const handleDelete = async (file, fileIndex) => {
     try {
@@ -147,18 +148,20 @@ const TeachingMaterial = () => {
     }
   };
 
+  const onBack = () => {
+    window.history.back();
+  }
+
   return (
     <div className="w-full h-screen p-8 bg-gray-50 shadow-lg font-openSans overflow-auto">
       <ToastContainer />
-      <h1 className="text-3xl font-bold mb-6 text-center text-gray-800">Tài liệu giảng dạy</h1>
-      <div className="mb-4">
-        <button
-          onClick={() => navigate('/manage/myclass')}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-all flex items-center space-x-2"
-        >
-          <FaArrowLeft className="mr-2" /> Trở về
-        </button>
-      </div>
+      <Breadcrumb
+        title="Tài liệu giảng dạy"
+        displayButton={false}
+        onBack={onBack}
+      />
+
+      <div className="mt-12"></div>
 
       {/* File Upload Section */}
       <div className="mb-6">
@@ -221,7 +224,7 @@ const TeachingMaterial = () => {
                       <AiOutlineDownload />
                     </button>
                     <button
-                     onClick={() => handleDelete(file, index)}
+                      onClick={() => handleDelete(file, index)}
                       className="bg-red-600 text-white p-2 rounded-lg hover:bg-red-700"
                     >
                       <AiOutlineDelete />

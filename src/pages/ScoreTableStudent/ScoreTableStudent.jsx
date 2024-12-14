@@ -207,12 +207,12 @@ const ScoreTableStudent = () => {
 
                 console.log(filterUserClass)
 
-                if (filterUserClass && filterUserClass.subjectGroup?.SubjectsId) {
-                    setClassSubject(filterUserClass.subjectGroup.SubjectsId);
+                if (filterUserClass && filterUserClass?.SubjectsId) {
+                    setClassSubject(filterUserClass?.SubjectsId);
                 } else {
                 }
-                if (filterUserClass && filterUserClass.subjectGroup?.SubjectsPhuId) {
-                    setClassSubjectPhu(filterUserClass?.subjectGroup?.SubjectsPhuId || []);
+                if (filterUserClass && filterUserClass?.SubjectsPhuId) {
+                    setClassSubjectPhu(filterUserClass?.SubjectsPhuId || []);
                 } else {
                     console.error("Không tìm thấy classSubject phù hợp!");
                 }

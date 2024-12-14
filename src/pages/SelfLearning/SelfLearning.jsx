@@ -30,14 +30,20 @@ const SelfLearning = () => {
         fetchSchedule();
     }, [user.id]);
 
-    const subjects = userClass?.subjectGroup.SubjectsId || [];
+    const subjects = userClass?.SubjectsId || [];
 
     const subjectImages = {
         "Toán": "/images/ToanHoc.jpg",
         "Ngữ Văn": "/images/VanHoc.jpg",
-        "Vật Lý": "/images/VatLi.jpg",
-        "Hóa": "/images/chemistry.jpg",
-        "Âm Nhạc": "/images/AmNhac.jpg",
+        "Ngoại Ngữ 1": "/images/NgoaiNgu.jpg",
+        "Lịch Sử": "/images/LichSu.jpg",
+        "Giáo Dục QP&AN": "/images/GDQPVAN.jpg",
+        "Nội Dung Giáo Dục của Địa Phương": "/images/NDGDDP.jpg",
+        "Hoá": "/images/VanHoc.jpg",
+        "Sinh Học": "/images/SinhHoc.jpg",
+        "Tin Học": "/images/TinHoc.jpg",
+        "Lý": "/images/VatLi.jpg",
+        "Hoá": "/images/chemistry.jpg",
         // Add more subjects if needed
     };
 

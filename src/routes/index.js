@@ -46,6 +46,7 @@ import ActivationPage from "../pages/ActivationPage/ActivationPage";
 import CreateCalender from "../pages/CreateCalender/CreateCalender";
 import EvaluateManage from "../pages/EvaluateManage/EvaluateManage";
 import CreateClass from "../pages/CreateClass/CreateClass";
+import DocumentList from "../pages/DocumentList/DocumentList";
 
 export const routes = [
   {
@@ -463,6 +464,16 @@ export const routes = [
     page: () => (
       <ProtectedRoute>
         <AttendanceStudent />
+      </ProtectedRoute>
+    ),
+    isShowHeader: false,
+    isShowSideBar: false,
+  },
+  {
+    path: "/student/documentList",
+    page: () => (
+      <ProtectedRoute>
+        <DocumentList />
       </ProtectedRoute>
     ),
     isShowHeader: false,
