@@ -107,6 +107,12 @@ export const deleteUser = async (id) => {
   return res.data;
 };
 
+
+export const getAllUserbyPhoneParent = async (phoneParent) => {
+  const res = await axios.get(`${API_URL}/getAllUserbyPhoneParent/${phoneParent}`);
+  return res.data;
+};
+
 // API liên quan đến thông tin liên lạc
 export const createContact = async (userId, contactData) => {
   const res = await axios.post(`${API_URL}/createContact/${userId}`, contactData);

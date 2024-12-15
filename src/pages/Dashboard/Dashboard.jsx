@@ -4,6 +4,7 @@ import { FaBook } from "react-icons/fa";
 import { FaClipboardQuestion } from "react-icons/fa6";
 import { useSelector } from 'react-redux';
 import * as ClassService from "../../services/ClassService";
+import * as UserService from "../../services/UserService";
 import { useNavigate } from 'react-router-dom';
 import { BiMailSend } from "react-icons/bi";
 import { CalendarClock } from 'lucide-react';
@@ -30,12 +31,45 @@ const Dashboard = () => {
     const [selectedCard, setSelectedCard] = useState(null);
     const [classHR, setClassHR] = useState(null);
     const [teacherSubjects, setTeacherSubjects] = useState();
-
+    const [allChildren, setAllChildren] = useState([]);
+    const [selectedChildren, setSelectedChildren] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
         setTeacherId(user?.id);
     }, [user]);
+
+   
+    console.log("12",allChildren)
+    console.log("12",user.username)
+    useEffect(() => {
+        const fetchChildren = async () => {
+            setIsLoading(true);
+            try {
+                const response = await UserService.getAllUserbyPhoneParent(user.username);
+                
+                console.log('Full API response data:', response);
+                if (response.data) {
+                    setAllChildren(response?.data)
+                } else {
+                    console.error('Unexpected API response structure', response);
+                    setAllChildren([]);
+                }
+                setIsError(false);
+            } catch (error) {
+                setIsError(true);
+                console.error('Error fetching schedule data:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        if (user?.role === "Parent" && user.username) {
+            fetchChildren();
+        }
+    }, [user?.role, user.username]);
+
+    console.log(classes)
 
     useEffect(() => {
         const fetchSubject = async () => {
@@ -79,6 +113,12 @@ const Dashboard = () => {
     }, [classes]);
 
     useEffect(() => {
+        if (allChildren.length > 0) {
+            setSelectedChildren(allChildren[0]._id);
+        }
+    }, [allChildren]);
+
+    useEffect(() => {
         if (!teacherId) return;
         const fetchDetailClassByTeacherHR = async () => {
             setIsLoading(true);
@@ -109,11 +149,15 @@ const Dashboard = () => {
         setSelectedClass(classId); // Cập nhật lớp được chọn
     };
 
+    const handleChildrenClick = (childrenId) => {
+        setSelectedChildren(childrenId); // Cập nhật lớp được chọn
+    };
+
     const handleCardClick = (cardType) => {
         if (!selectedClass) return;
-    
+
         const selectedClassData = classes.find((classItem) => classItem._id === selectedClass);
-    
+
         if (selectedClassData) {
             // Nối cả 3 loại subject lại thành một mảng duy nhất
             const allSubjects = [
@@ -121,12 +165,12 @@ const Dashboard = () => {
                 ...selectedClassData.SubjectsChuyendeId,
                 ...selectedClassData.SubjectsPhuId,
             ];
-    
+
             // Lọc ra các môn học của giáo viên hiện tại và không phải môn chuyên ngành
             const teacherSubjects = allSubjects.filter(
                 (subject) => subject.teacherId === user.id && subject.isSpecialized === false
             );
-    
+
             // Cập nhật trạng thái
             setTeacherSubjects(teacherSubjects);
             setSelectedCard(cardType);    // Lưu loại card đã bấm
@@ -152,14 +196,13 @@ const Dashboard = () => {
             ...(findClass?.SubjectsChuyendeId || []),
             ...(findClass?.SubjectsPhuId || []),
         ];
-    
+
         // Tìm môn học dựa trên subjectId
         const subject = allSubjects.find((subject) => subject._id === subjectId);
-    
+
         // Kiểm tra môn học có điểm số hay không
         const hasScoreSubject = subject ? subject.isScore === true : false;
         console.log(hasScoreSubject);
-    
         // Logic điều hướng dựa trên selectedCard
         if (selectedCard === "attendance") {
             navigate(`/attendance/${subjectId}`);
@@ -183,7 +226,7 @@ const Dashboard = () => {
             }
         }
     };
-    
+
 
     const handleGoToManageAbsentRequest = (idClass) => {
         navigate(`/manage/addAbsenceRequest/${idClass}`)
@@ -264,13 +307,12 @@ const Dashboard = () => {
     const handleGoToCreateClass = () => {
         navigate(`/manage/createClass`)
     }
-
     const handleGoToDocumentList = () => {
         navigate(`/student/documentList`)
     }
 
     // console.log(classHR && classHR.teacherHR !== null && classHR.teacherHR === user.id)
-
+        console.log(selectedChildren)
     return (
         <div className="flex flex-col p-6 bg-gray-100 min-h-screen">
             {/* Tabs for Class Selection */}
@@ -283,6 +325,16 @@ const Dashboard = () => {
                         ${selectedClass === classItem._id ? 'bg-blue-500 text-white ' : ''}`}
                     >
                         {classItem.nameClass}
+                    </button>
+                ))}
+                {allChildren.map((childrenItem) => (
+                    <button
+                        key={childrenItem._id}
+                        onClick={() => handleChildrenClick(childrenItem._id)}
+                        className={`px-4 py-2 text-gray-700 rounded-lg focus:outline-none 
+                        ${selectedChildren === childrenItem._id ? 'bg-blue-500 text-white ' : ''}`}
+                    >
+                        {childrenItem.name}
                     </button>
                 ))}
             </div>
@@ -478,7 +530,6 @@ const Dashboard = () => {
                                 </div>
                                 <p className="font-semibold">Tài liệu học tập</p>
                             </div>
-
                             <div onClick={handleGoToSelfLearning} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
                                 <div className="bg-orange-400 p-4 rounded-full mb-2">
                                     <BiMailSend size={32} className="text-white" />
@@ -560,6 +611,21 @@ const Dashboard = () => {
                     </div>
                 </div>
             )}
+            {user.role === "Parent" && (
+                <div>
+                    <div className="flex flex-col bg-white p-6 rounded-lg shadow-md w-full mt-8">
+                        <h2 className="text-xl font-bold mb-6">Tác vụ</h2>
+                        <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
+                            <div onClick={handleGoToSendNoti} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
+                                <div className="bg-emerald-400 p-4 rounded-full mb-2">
+                                    <BiMailSend size={32} className="text-white" />
+                                </div>
+                                <p className="font-semibold">Gửi thông báo</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
             {/* Modal */}
             {isModalOpen && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
@@ -600,4 +666,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-

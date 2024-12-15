@@ -86,6 +86,9 @@ const AutoCreateAccount = () => {
     const generatedAccounts = data.map((row) => {
       const fullName = row["Họ và tên"];
       const birthDate = row["Ngày Sinh"];
+const parentPhone = row["SĐT Phụ Huynh"];
+      const parentName = row["Tên Phụ Huynh"];
+      const parentCccd = row["CCCD Phụ Huynh"];
       const nameParts = fullName.split(" ");
       const lastName = removeVietnameseTones(nameParts[nameParts.length - 1]).toLowerCase();
       const initials = nameParts
@@ -109,11 +112,16 @@ const AutoCreateAccount = () => {
         fullName,
         username,
         password,
+        parentPhone,
+        parentName,
+        parentCccd,
       };
     });
 
     setAccounts(generatedAccounts);
   };
+
+  console.log(accounts)
 
   const mutation1 = useMutationHooks(
     (data) => UserService.createUserbyRole(data)
@@ -157,6 +165,11 @@ const AutoCreateAccount = () => {
       dataIndex: "password",
       key: "password",
     },
+    {
+      title: "SĐT Phụ huynh",
+      dataIndex: "parentPhone",
+      key: "parentPhone",
+    },
   ];
 
   const onBack = () => {
@@ -167,24 +180,42 @@ const AutoCreateAccount = () => {
     (data) => UserService.signupUser(data)
   );
 
+ 
+
 
 
   const handleAutoCreateAccount = async () => {
     console.log(accounts);
-
+  
     try {
       // Sử dụng Promise.all để thực hiện tất cả các mutation song song
       await Promise.all(
-        accounts.map((account) =>
-          mutation.mutateAsync({
+        accounts.map((account) => {
+          // Thực hiện mutation cho người dùng
+          const userMutation = mutation.mutateAsync({
             username: account.username,
             password: account.password,
             confirmPassword: account.password,
             name: account.fullName,
-          })
-        )
+            cccd: account.parentCccd,
+            phoneParent: account.parentPhone,
+            nameParent: account.parentName,
+          });
+  
+          // Thực hiện mutation cho phụ huynh
+          const parentMutation = mutation1.mutateAsync({
+            name: account.parentName,
+            username: account.parentPhone,
+            password: "123456",
+            confirmPassword: "123456",
+            role: "Parent",
+          });
+  
+          // Trả về một array của Promise để Promise.all thực thi
+          return Promise.all([userMutation, parentMutation]);
+        })
       );
-
+  
       // Khi tất cả các tài khoản được tạo xong, hiển thị toast thành công
       toast.success('Tất cả tài khoản đã được tạo thành công!');
       console.log('Tất cả tài khoản đã được tạo thành công!');
@@ -194,6 +225,7 @@ const AutoCreateAccount = () => {
       console.error('Đã xảy ra lỗi:', error.message);
     }
   };
+  
 
 
   console.log(allAccount)
@@ -285,7 +317,7 @@ const AutoCreateAccount = () => {
                     return Promise.resolve();
                   }
                   return Promise.reject(
-                    new Error("Tài khoản đã tồn tại, vui lòng nhập tài khoản khác!")
+          new Error("Tài khoản đã tồn tại, vui lòng nhập tài khoản khác!")
                   );
                 },
               }),
