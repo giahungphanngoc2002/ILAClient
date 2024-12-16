@@ -42,6 +42,23 @@ const GradeTable = () => {
             fetchClassDetails();
         }
     }, [idClass]);
+    useEffect(() => {
+        const fetchYear = async () => {
+            try {
+                setLoading(true); // Bắt đầu tải
+                const response = await SubjectService.getAllSemesterByYear(year);
+                console.log(response)
+            } catch (error) {
+                console.error("Lỗi khi lấy chi tiết lớp:", error);
+            } finally {
+                setLoading(false); // Kết thúc tải
+            }
+        };
+        if (year) {
+            fetchYear();
+        }
+      
+    }, [year]);
 
 console.log("yearrrr", year)
 
