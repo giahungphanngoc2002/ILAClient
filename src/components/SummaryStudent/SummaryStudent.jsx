@@ -24,7 +24,8 @@ const SummaryStudent = ({ studentId, selectedSemester, evaluates, averages }) =>
             setLoading(true);
             setError(null);
             try {
-                const data = await ClassService.getConductByStudentIdAndSemester(studentId, 1);
+                const data = await ClassService.getConductByStudentIdAndSemester(studentId, selectedSemester);
+                console.log()
                 setConduct1(data);
             } catch (err) {
                 // setError('Không thể tải dữ liệu hạnh kiểm');
@@ -35,7 +36,11 @@ const SummaryStudent = ({ studentId, selectedSemester, evaluates, averages }) =>
         };
 
         fetchConduct();
-    }, [studentId]);
+    }, [studentId,selectedSemester]);
+
+    console.log(conduct1)
+    console.log(conduct2)
+    console.log("123",selectedSemester)
 
     useEffect(() => {
         const fetchConduct = async () => {
@@ -44,7 +49,7 @@ const SummaryStudent = ({ studentId, selectedSemester, evaluates, averages }) =>
             setLoading(true);
             setError(null);
             try {
-                const data = await ClassService.getConductByStudentIdAndSemester(studentId, 2);
+                const data = await ClassService.getConductByStudentIdAndSemester(studentId, selectedSemester);
                 setConduct2(data);
             } catch (err) {
                 // setError('Không thể tải dữ liệu hạnh kiểm');
@@ -54,7 +59,7 @@ const SummaryStudent = ({ studentId, selectedSemester, evaluates, averages }) =>
         };
 
         fetchConduct();
-    }, [studentId]);
+    }, [studentId,selectedSemester]);
 
 
     const calculateTotalAverage = (semester) => {
@@ -117,8 +122,8 @@ const SummaryStudent = ({ studentId, selectedSemester, evaluates, averages }) =>
 
 
     useEffect(() => {
-        const semester1 = averages.filter(item => item.semester === "1");
-        const semester2 = averages.filter(item => item.semester === "2");
+        const semester1 = averages.filter(item => item.semester === selectedSemester);
+        const semester2 = averages.filter(item => item.semester === selectedSemester);
         const calculateAverage = (semester1, semester2) => {
             return (parseFloat(semester1) + 2 * parseFloat(semester2)) / 3;
         };

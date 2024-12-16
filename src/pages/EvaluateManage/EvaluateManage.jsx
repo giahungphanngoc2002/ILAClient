@@ -11,16 +11,18 @@ function EvaluateManage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [evaluates, setEvaluates] = useState(null);
   const { idClass, idSubject } = useParams();
-  const [selectedSemester, setSelectedSemester] = useState("1"); // Mặc định Kỳ 1
+  const [selectedSemester, setSelectedSemester] = useState(""); // Mặc định Kỳ 1
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true); // Trạng thái loading
-
+  const [year, setYear] = useState("");
+  const [semesters, setSemesters] = useState([]);
 
   useEffect(() => {
     const fetchClassDetails = async () => {
       try {
         setLoading(true); // Bắt đầu tải
         const response = await ClassService.getDetailClass(idClass);
+        setYear(response?.data?.year)
         setStudents(response?.data?.studentID);
       } catch (error) {
         console.error("Lỗi khi lấy chi tiết lớp:", error);
@@ -33,6 +35,24 @@ function EvaluateManage() {
       fetchClassDetails();
     }
   }, [idClass]);
+
+  useEffect(() => {
+    const fetchYear = async () => {
+      try {
+        setLoading(true); // Bắt đầu tải
+        const response = await SubjectService.getAllSemesterByYear(year);
+        setSemesters(response?.semesters)
+      } catch (error) {
+        console.error("Lỗi khi lấy chi tiết lớp:", error);
+      } finally {
+        setLoading(false); // Kết thúc tải
+      }
+    };
+    if (year) {
+      fetchYear();
+    }
+
+  }, [year]);
 
   console.log(students)
 
@@ -60,7 +80,7 @@ function EvaluateManage() {
   const mergedData = students.map((student) => {
     const evaluate = Array.isArray(evaluates) ? evaluates.find(
       (cond) =>
-        cond.StudentId?._id === student?._id && cond?.semester === Number(selectedSemester)
+        cond.StudentId?._id === student?._id && cond?.semester === selectedSemester
     ) : null;
     console.log("Evaluate for student:", student.name, "Evaluate found:", evaluate);
     return {
@@ -68,7 +88,7 @@ function EvaluateManage() {
       evaluate: evaluate ? evaluate.evaluate : "Chưa đánh giá", // Default value if no evaluation
     };
   });
-  
+
 
 
   useEffect(() => {
@@ -101,48 +121,54 @@ function EvaluateManage() {
   const handleSubmitEvaluateEvaluation = async () => {
     try {
       // Lọc các đánh giá cho kỳ học đã chọn
-      const evaluationsForSelectedSemester = evaluates && evaluates.length
-  ? evaluates.filter((evaluate) => evaluate.semester === Number(selectedSemester))
-  : [];
-  
-      console.log("Evaluations for Selected Semester:", evaluationsForSelectedSemester);
-  
-      if (!evaluationsForSelectedSemester || evaluationsForSelectedSemester.length === 0) {
-        // Nếu chưa có đánh giá cho kỳ học, khởi tạo mới các đánh giá
-        const evaluateData = students.map((student) => {
-          const evaluateSelect = document.querySelector(`#evaluate-${student._id}`);
-         
-          
+      
+
+        const evaluationsForSelectedSemester = evaluates?.data.filter(
+          (evaluate) => evaluate.semester === selectedSemester
+        )
+      console.log("Evaluations for Selected Semester:", !evaluationsForSelectedSemester || evaluationsForSelectedSemester.length === 0);
+
+      // if (!evaluationsForSelectedSemester || evaluationsForSelectedSemester.length === 0) {
+      
+      //   const evaluateData = students.map((student) => {
+      //     const evaluateSelect = document.querySelector(`#evaluate-${student._id}`);
+
+          if (!evaluationsForSelectedSemester || evaluationsForSelectedSemester.length === 0) {
+           
+            const evaluateData = students.map((student) => {
+              const evaluateSelect = document.querySelector(`#evaluate-${student._id}`);
+
+
           console.log("Student ID:", student._id);
           console.log("Subject ID:", idSubject);
           console.log("Class ID:", idClass);
-          console.log("Semester ID:", Number(selectedSemester));
-         
-  
+          console.log("Semester ID:", selectedSemester);
+
+
           // Kiểm tra nếu thiếu trường dữ liệu
           if (!student._id || !idSubject || !idClass) {
             console.error(`Thiếu ID học sinh, môn học hoặc lớp học cho học sinh: ${student.name}`);
             toast.error("Các trường bắt buộc không hợp lệ!");
             return null; // Tránh gửi dữ liệu không hợp lệ
           }
-        
+
           return {
-            evaluate: evaluateSelect ? evaluateSelect.value :"Đạt",
-            semester: Number(selectedSemester), // Kỳ học
+            evaluate: evaluateSelect ? evaluateSelect.value : "Đạt",
+            semester: selectedSemester, // Kỳ học
             StudentId: student._id, // ID học sinh
             subjectId: idSubject,   // ID môn học
             classId: idClass,       // ID lớp học
           };
         }).filter(Boolean); // Loại bỏ các giá trị null
-  
+
         console.log("Evaluate Data to Submit:", evaluateData);
-  
+
         if (evaluateData.length > 0) {
           const response = await Promise.all(
-            evaluateData.map(data => 
+            evaluateData.map(data =>
               SubjectService.createEvaluate(idClass, idSubject, data)));
           console.log("Response from API:", response);
-  
+
           if (response) {
             toast.success("Khởi tạo đánh giá thành công!");
             // Refresh lại danh sách đánh giá sau khi khởi tạo
@@ -155,18 +181,18 @@ function EvaluateManage() {
         const updatePromises = evaluationsForSelectedSemester.map(async (evaluate) => {
           const evaluateSelect = document.querySelector(`#evaluate-${evaluate.StudentId._id}`);
           const updatedEvaluate = evaluateSelect ? evaluateSelect.value : evaluate.evaluate;
-  
+
           const updateData = { evaluate: updatedEvaluate };
-  
+
           console.log("Updating evaluation for student:", evaluate.StudentId.name, "Updated Value:", updatedEvaluate);
-  
+
           // Kiểm tra các giá trị bắt buộc
           if (!evaluate.StudentId._id || !idSubject || !idClass) {
             console.error(`Thiếu ID học sinh, môn học hoặc lớp học cho đánh giá của học sinh: ${evaluate.StudentId.name}`);
             toast.error("Các trường bắt buộc không hợp lệ!");
             return;
           }
-  
+
           return await SubjectService.updateEvaluate(
             idClass,
             idSubject,
@@ -175,7 +201,7 @@ function EvaluateManage() {
             updateData
           );
         });
-  
+
         await Promise.all(updatePromises);
         toast.success("Cập nhật đánh giá thành công!");
       }
@@ -218,20 +244,24 @@ function EvaluateManage() {
           </div>
           {/* Semester Selection Buttons */}
           <div className="flex gap-2">
-            <button
-              className={`px-4 py-2 rounded-lg font-semibold ${selectedSemester === "1" ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700"
-                }`}
-              onClick={() => handleSemesterChange("1")}
-            >
-              Kỳ 1
-            </button>
-            <button
+            {semesters.map((semester) => (
+              <button
+                className={`px-4 py-2 rounded-lg font-semibold ${selectedSemester === semester._id
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-200 text-gray-700"
+                  }`}
+                onClick={() => handleSemesterChange(semester._id)}
+              >
+                Kỳ {semester.nameSemester}
+              </button>
+            ))}
+            {/* <button
               className={`px-4 py-2 rounded-lg font-semibold ${selectedSemester === "2" ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700"
                 }`}
               onClick={() => handleSemesterChange("2")}
             >
               Kỳ 2
-            </button>
+            </button> */}
           </div>
         </div>
 

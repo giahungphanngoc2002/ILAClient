@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import Breadcrumb from "../../components/Breadcrumb/Breadcrumb";
 import { FaSearch } from "react-icons/fa";
 import * as ClassService from "../../services/ClassService";
+import * as SubjectService from "../../services/SubjectService";
 import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 
@@ -10,16 +11,18 @@ function ConductEvaluation() {
   const [searchTerm, setSearchTerm] = useState("");
   const [conducts, setConducts] = useState(null);
   const { idClass } = useParams();
-  const [selectedSemester, setSelectedSemester] = useState("1"); // Mặc định Kỳ 1
+  const [selectedSemester, setSelectedSemester] = useState(""); // Mặc định Kỳ 1
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true); // Trạng thái loading
-
+const [year, setYear] = useState("");
+  const [semesters, setSemesters] = useState([]);
 
   useEffect(() => {
     const fetchClassDetails = async () => {
       try {
         setLoading(true); // Bắt đầu tải
         const response = await ClassService.getDetailClass(idClass);
+        setYear(response?.data?.year)
         setStudents(response?.data?.studentID);
       } catch (error) {
         console.error("Lỗi khi lấy chi tiết lớp:", error);
@@ -33,6 +36,26 @@ function ConductEvaluation() {
     }
   }, [idClass]);
   console.log(students)
+
+  useEffect(() => {
+      const fetchYear = async () => {
+        try {
+          setLoading(true); // Bắt đầu tải
+          const response = await SubjectService.getAllSemesterByYear(year);
+          setSemesters(response?.semesters)
+        } catch (error) {
+          console.error("Lỗi khi lấy chi tiết lớp:", error);
+        } finally {
+          setLoading(false); // Kết thúc tải
+        }
+      };
+      if (year) {
+        fetchYear();
+      }
+  
+    }, [year]);
+
+    console.log(semesters)
 
   useEffect(() => {
     // Định nghĩa hàm bên trong useEffect để sử dụng
@@ -53,12 +76,14 @@ function ConductEvaluation() {
     } // Gọi hàm fetchConducts để lấy dữ liệu mới
   }, [selectedSemester, idClass]);
 
+  console.log(conducts)
+  console.log(students)
 
 
   const mergedData = students.map((student) => {
-    const conduct = conducts?.find(
+    const conduct = conducts?.data.find(
       (cond) =>
-        cond.studentId?._id === student?._id && cond?.semester === Number(selectedSemester) // Kiểm tra kỳ học
+        cond.studentId?._id === student?._id && cond?.semester === selectedSemester // Kiểm tra kỳ học
     );
     return {
       ...student,
@@ -97,17 +122,17 @@ function ConductEvaluation() {
 
   const handleSubmitConductEvaluation = async () => {
     try {
-      const conductsForSelectedSemester = conducts?.filter(
-        (conduct) => conduct.semester === Number(selectedSemester)
+      const conductsForSelectedSemester = conducts?.data.filter(
+        (conduct) => conduct.semester === selectedSemester
       );
-
+        console.log(!conductsForSelectedSemester || conductsForSelectedSemester.length === 0)
       if (!conductsForSelectedSemester || conductsForSelectedSemester.length === 0) {
         // Nếu chưa có đánh giá cho kỳ hiện tại, khởi tạo mới
         const conductData = students.map((student) => {
           const conductSelect = document.querySelector(`#conduct-${student._id}`);
           return {
             typeConduct: conductSelect ? conductSelect.value : "tốt", // Giá trị mặc định là "tốt"
-            semester: Number(selectedSemester), // Kỳ học (1 hoặc 2)
+            semester: selectedSemester, // Kỳ học (1 hoặc 2)
             studentId: student._id, // ID học sinh
           };
         });
@@ -135,7 +160,7 @@ function ConductEvaluation() {
             : conduct.typeConduct;
 
           const updateData = { typeConduct: updatedTypeConduct };
-          return await ClassService.updateConduct(
+          return await ClassService.updateConductBySemester(
             idClass,
             conduct._id,
             selectedSemester,
@@ -184,20 +209,17 @@ function ConductEvaluation() {
           </div>
           {/* Semester Selection Buttons */}
           <div className="flex gap-2">
-            <button
-              className={`px-4 py-2 rounded-lg font-semibold ${selectedSemester === "1" ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700"
-                }`}
-              onClick={() => handleSemesterChange("1")}
-            >
-              Kỳ 1
-            </button>
-            <button
-              className={`px-4 py-2 rounded-lg font-semibold ${selectedSemester === "2" ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700"
-                }`}
-              onClick={() => handleSemesterChange("2")}
-            >
-              Kỳ 2
-            </button>
+          {semesters.map((semester) => (
+              <button
+                className={`px-4 py-2 rounded-lg font-semibold ${selectedSemester === semester._id
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-200 text-gray-700"
+                  }`}
+                onClick={() => handleSemesterChange(semester._id)}
+              >
+                Kỳ {semester.nameSemester}
+              </button>
+            ))}
           </div>
         </div>
 

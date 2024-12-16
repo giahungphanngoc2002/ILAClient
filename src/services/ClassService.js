@@ -234,7 +234,7 @@ export const getAllConductSemester = async (classId, semester) => {
     return res.data;
 };
 
-export const updateConduct = async (classId, conductId, semester, updateData) => {
+export const updateConductBySemester = async (classId, conductId, semester, updateData) => {
     const res = await axios.put(`${CLASS_API_URL}/updateConduct/${classId}/${conductId}/${semester}`, updateData);
     return res.data;
 };

@@ -12,7 +12,7 @@ import { useSelector } from 'react-redux';
 const ScoreTableStudent = () => {
     const user = useSelector((state) => state.user);
     const [grades, setGrades] = useState([]);
-    const [selectedSemester, setSelectedSemester] = useState("1");
+    const [selectedSemester, setSelectedSemester] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [studentId, setStudentId] = useState(user?.id);
@@ -28,6 +28,8 @@ const ScoreTableStudent = () => {
     const [year, setYear] = useState("")
     const [semesters, setSemesters] = useState([])
     const [selectedClass, setSelectedClass] = useState();
+    const [semester1, setSemester1] = useState();
+    const [semester2, setSemester2] = useState();
 
 
     useEffect(() => {
@@ -371,11 +373,15 @@ const ScoreTableStudent = () => {
 
 
     useEffect(() => {
-        if (classSubject && Array.isArray(classSubject)) {
-            fetchScores(selectedSemester, selectedClass);
+        if (classSubject && Array.isArray(classSubject) && semesters.length > 0) {
+          for (const semester of semesters) {
            
+              fetchScores(semester._id, selectedClass);
+               // Thoát vòng lặp khi tìm thấy kỳ học phù hợp
+            
+          }
         }
-    }, [selectedClass, classSubject]);
+      }, [selectedClass, classSubject, selectedSemester, semesters]);
 
     const handleSemesterChange = (semester) => {
         setSelectedSemester(semester);
@@ -483,7 +489,7 @@ const ScoreTableStudent = () => {
 
     const evaluates = getAllEvaluate()
     console.log(evaluates)
-
+    console.log(averages)
     return (
         <div className="flex flex-col items-center justify-center min-h-screen p-6">
             <Breadcrumb
