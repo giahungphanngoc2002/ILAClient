@@ -317,7 +317,7 @@ const Dashboard = () => {
         <div className="flex flex-col p-6 bg-gray-100 min-h-screen">
             {/* Tabs for Class Selection */}
             <div className="flex space-x-4 mb-8">
-                {classes.map((classItem) => (
+                { user.role === "Teacher" && classes.map((classItem) => (
                     <button
                         key={classItem._id}
                         onClick={() => handleClassClick(classItem._id)}
@@ -327,7 +327,7 @@ const Dashboard = () => {
                         {classItem.nameClass}
                     </button>
                 ))}
-                {allChildren.map((childrenItem) => (
+                {user.role === "Parent" && allChildren.map((childrenItem) => (
                     <button
                         key={childrenItem._id}
                         onClick={() => handleChildrenClick(childrenItem._id)}
