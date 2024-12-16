@@ -47,6 +47,7 @@ import CreateCalender from "../pages/CreateCalender/CreateCalender";
 import EvaluateManage from "../pages/EvaluateManage/EvaluateManage";
 import CreateClass from "../pages/CreateClass/CreateClass";
 import DocumentList from "../pages/DocumentList/DocumentList";
+import RequestAbsentAplication from "../pages/RequestAbsentAplication/RequestAbsentAplication";
 
 export const routes = [
   {
@@ -333,6 +334,16 @@ export const routes = [
     page: () => (
       <ProtectedRoute>
         <AddAbsenceRequest />
+      </ProtectedRoute>
+    ),
+    isShowHeader: false,
+    isShowSideBar: false,
+  },
+  {
+    path: "/manage/requestAbsentAplication/:idClass/:idStudent",
+    page: () => (
+      <ProtectedRoute>
+        <RequestAbsentAplication />
       </ProtectedRoute>
     ),
     isShowHeader: false,

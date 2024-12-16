@@ -33,22 +33,23 @@ const Dashboard = () => {
     const [teacherSubjects, setTeacherSubjects] = useState();
     const [allChildren, setAllChildren] = useState([]);
     const [selectedChildren, setSelectedChildren] = useState(null);
+    const [userClass, setUserClass] = useState();
     const navigate = useNavigate();
 
     useEffect(() => {
         setTeacherId(user?.id);
     }, [user]);
 
-   
-    console.log("12",allChildren)
-    console.log("12",user.username)
+
+    console.log("12", allChildren)
+    console.log("12", user.username)
     useEffect(() => {
         const fetchChildren = async () => {
             setIsLoading(true);
             try {
                 const response = await UserService.getAllUserbyPhoneParent(user.username);
-                
-                console.log('Full API response data:', response);
+
+                // console.log('Full API response data:', response);
                 if (response.data) {
                     setAllChildren(response?.data)
                 } else {
@@ -69,7 +70,50 @@ const Dashboard = () => {
         }
     }, [user?.role, user.username]);
 
-    console.log(classes)
+    const currentYearr = new Date().getFullYear();
+    const result = `${currentYearr}-${currentYearr + 1}`;
+
+    const findUserClasses = (allClasses, userId) => {
+        if (!Array.isArray(allClasses)) {
+            console.error("All classes is not a valid array:", allClasses);
+            return [];
+        }
+
+        const foundClasses = allClasses.filter((classItem) => {
+            return (
+                Array.isArray(classItem.studentID) &&
+                classItem.studentID.some((student) =>
+                    typeof student === "string"
+                        ? student === userId
+                        : student._id === userId
+                ) &&
+                classItem.year === result  // Kiểm tra năm của lớp
+            );
+        });
+
+        if (foundClasses.length === 0) {
+            console.warn("No class found for user:", userId);
+        }
+
+        return foundClasses;
+    };
+
+    useEffect(() => {
+        const fetchClasses = async () => {
+            try {
+                const allClasses = await ClassService.getAllClass();
+                const userClass = findUserClasses(allClasses?.data || [], selectedChildren);
+                console.log(userClass)
+                setUserClass(userClass[0]._id)
+            } catch (error) {
+                console.error("Error fetching classes:", error);
+            }
+        };
+
+        fetchClasses();
+    }, [selectedChildren]);
+
+
 
     useEffect(() => {
         const fetchSubject = async () => {
@@ -227,6 +271,10 @@ const Dashboard = () => {
         }
     };
 
+    const handleGoToRequestAbsentAplication = () => {
+        navigate(`/manage/requestAbsentAplication/${userClass}/${selectedChildren}`)
+    } 
+
 
     const handleGoToManageAbsentRequest = (idClass) => {
         navigate(`/manage/addAbsenceRequest/${idClass}`)
@@ -311,13 +359,11 @@ const Dashboard = () => {
         navigate(`/student/documentList`)
     }
 
-    // console.log(classHR && classHR.teacherHR !== null && classHR.teacherHR === user.id)
-        console.log(selectedChildren)
     return (
         <div className="flex flex-col p-6 bg-gray-100 min-h-screen">
             {/* Tabs for Class Selection */}
             <div className="flex space-x-4 mb-8">
-                { user.role === "Teacher" && classes.map((classItem) => (
+                {user.role === "Teacher" && classes.map((classItem) => (
                     <button
                         key={classItem._id}
                         onClick={() => handleClassClick(classItem._id)}
@@ -616,11 +662,11 @@ const Dashboard = () => {
                     <div className="flex flex-col bg-white p-6 rounded-lg shadow-md w-full mt-8">
                         <h2 className="text-xl font-bold mb-6">Tác vụ</h2>
                         <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
-                            <div onClick={handleGoToSendNoti} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
+                            <div onClick={handleGoToRequestAbsentAplication} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
                                 <div className="bg-emerald-400 p-4 rounded-full mb-2">
                                     <BiMailSend size={32} className="text-white" />
                                 </div>
-                                <p className="font-semibold">Gửi thông báo</p>
+                                <p className="font-semibold">Gửi đơn nghỉ học</p>
                             </div>
                         </div>
                     </div>
