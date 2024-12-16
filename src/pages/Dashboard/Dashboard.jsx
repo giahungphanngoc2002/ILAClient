@@ -273,11 +273,11 @@ const Dashboard = () => {
 
     const handleGoToRequestAbsentAplication = () => {
         navigate(`/manage/requestAbsentAplication/${userClass}/${selectedChildren}`)
-    } 
-
+    }
 
     const handleGoToManageAbsentRequest = (idClass) => {
-        navigate(`/manage/addAbsenceRequest/${idClass}`)
+        navigate(`/manage/manageAbsentAplication/${idClass}`)
+
     }
 
     const handleGoToProfileStudentInClass = (idClass) => {

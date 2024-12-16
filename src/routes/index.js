@@ -48,6 +48,7 @@ import EvaluateManage from "../pages/EvaluateManage/EvaluateManage";
 import CreateClass from "../pages/CreateClass/CreateClass";
 import DocumentList from "../pages/DocumentList/DocumentList";
 import RequestAbsentAplication from "../pages/RequestAbsentAplication/RequestAbsentAplication";
+import ManageAbsentAplication from "../pages/ManageAbsentAplication/ManageAbsentAplication";
 
 export const routes = [
   {
@@ -274,6 +275,16 @@ export const routes = [
     page: () => (
       <ProtectedRoute>
         <FormReport />
+      </ProtectedRoute>
+    ),
+    isShowHeader: false,
+    isShowSideBar: true,
+  },
+  {
+    path: "/manage/manageAbsentAplication/:idClass",
+    page: () => (
+      <ProtectedRoute>
+        <ManageAbsentAplication />
       </ProtectedRoute>
     ),
     isShowHeader: false,
