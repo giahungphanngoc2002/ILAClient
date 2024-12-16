@@ -23,7 +23,7 @@ function RequestAbsentAplication() {
     const [startDate, endDate] = dateRange;
     const [selectedPeriods, setSelectedPeriods] = useState([]); // State để lưu các tiết được chọn
     const [students, setStudents] = useState("");
-    const { idClass } = useParams();
+    const { idClass,idStudent } = useParams();
     const user = useSelector((state) => state.user);
     const [isLoading, setIsLoading] = useState(true);
     const [isError, setIsError] = useState(false);
@@ -98,31 +98,41 @@ function RequestAbsentAplication() {
 
     const handleSubmit = async () => {
         try {
-            // Lấy thông tin tuần, năm và ngày nghỉ từ `dateRange`
-            const formattedDates = dateRange.map(date => ({
-                week: getISOWeek(date),
-                year: format(date, 'yyyy'),
-                dateOff: format(date, 'yyyy-MM-dd'),
+            // Chia từng ngày trong phạm vi
+            const resultDates = getDatesBetween(startDate, endDate);
+    
+            // Lấy thông tin chi tiết về ngày, tuần và năm
+            const dateInfo = resultDates.map(date => ({
+                week: getISOWeek(date), // Tuần trong năm
+                year: format(date, 'yyyy'), // Năm
+                dateOff: format(date, 'yyyy-MM-dd') // Định dạng ngày nghỉ
             }));
-
-            // Chuẩn bị dữ liệu theo đúng model
+    
+            console.log("Processed Dates:", dateInfo); // Debug log
+    
+            // Tạo mảng dateOff chuẩn để gửi lên server
+            const dateOffArray = dateInfo.map(info => info.dateOff);
+    
+            // Chuẩn bị dữ liệu application
             const applicationData = {
-                week: formattedDates[0]?.week.toString(), // Lấy tuần từ ngày bắt đầu
-                year: formattedDates[0]?.year.toString(), // Lấy năm từ ngày bắt đầu
-                dateOff: formattedDates.map(date => date.dateOff).join(', '), // Ghép ngày nghỉ thành chuỗi
+                week: dateInfo[0]?.week.toString(), // Lấy tuần từ ngày đầu tiên
+                year: dateInfo[0]?.year.toString(), // Lấy năm từ ngày đầu tiên
+                dateOff: dateOffArray.join(', '), // Ghép từng ngày lại thành chuỗi
                 content: reason, // Nội dung lý do nghỉ học
-                slot: selectedPeriods, // Danh sách tiết nghỉ
-                studentId: selectedStudent, // ID học sinh
+                slot: selectedPeriods, // Tiết học nghỉ
             };
-
-            // const response = await ClassService.createApplication(idClass, applicationData);
+    
+            console.log("Final Data Sent:", applicationData); // Debug log
+    
+            // Gửi dữ liệu đến server
+            const response = await ClassService.createApplicationByParent(idClass, idStudent, applicationData);
             toast.success("Gửi Đơn Thành Công");
-            // Thông báo cho người dùng khi thành công hoặc điều hướng
         } catch (error) {
             console.error("Failed to create application:", error);
-            // Xử lý lỗi nếu cần
+            toast.error("Gửi đơn thất bại!");
         }
     };
+    
 
     const onBack = () => {
         window.history.back();
@@ -130,19 +140,19 @@ function RequestAbsentAplication() {
 
 
     function getDatesBetween(startDate, endDate) {
-        let dates = [];
+        const dates = [];
+        if (!startDate || !endDate) return dates;
+    
         let currentDate = new Date(startDate);
-
         while (currentDate <= endDate) {
-            dates.push(new Date(currentDate));
+            dates.push(new Date(currentDate)); // Push mỗi ngày vào mảng
             currentDate.setDate(currentDate.getDate() + 1);
         }
-
         return dates;
     }
 
     let result = getDatesBetween(dateRange[0], dateRange[1]);
-
+        console.log(result)
 
     function getDateInfo(dateRange) {
         return dateRange.map(date => {

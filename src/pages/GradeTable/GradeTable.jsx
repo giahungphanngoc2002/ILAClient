@@ -72,7 +72,7 @@ const GradeTable = () => {
         // Kiểm tra và cập nhật trạng thái cho kỳ 1 (semester1)
         if (semester1) {
             // Nếu có semester1, kiểm tra ngày kết thúc và cập nhật isSemesterEndTodaySemester1
-            setIsSemesterEndTodaySemester1(semester1.dateEnd === currentDate);
+            setIsSemesterEndTodaySemester1(semester1.dateEnd >= currentDate);
         } else {
             // Nếu không có semester1, đảm bảo là false
             setIsSemesterEndTodaySemester1(false);
@@ -81,7 +81,7 @@ const GradeTable = () => {
         // Kiểm tra và cập nhật trạng thái cho kỳ 2 (semester2)
         if (semester2) {
             // Nếu có semester2, kiểm tra ngày kết thúc và cập nhật isSemesterEndTodaySemester2
-            setIsSemesterEndTodaySemester2(semester2.dateEnd === currentDate);
+            setIsSemesterEndTodaySemester2(semester2.dateEnd >= currentDate);
         } else {
             // Nếu không có semester2, đảm bảo là false
             setIsSemesterEndTodaySemester2(false);

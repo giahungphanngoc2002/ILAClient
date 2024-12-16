@@ -194,8 +194,32 @@ export const createApplication = async (classId, applicationData) => {
     return res.data;
 };
 
+export const createApplicationByParent = async (classId,studentId, applicationData) => {
+    const res = await axios.post(`${CLASS_API_URL}/classes/${classId}/${studentId}/applicationabsent`, applicationData);
+    return res.data;
+};
+
 export const getDetailApplicationAbsentByIdClass = async (classId) => {
     const res = await axios.get(`${CLASS_API_URL}/classes/${classId}/applicationabsent`);
+    return res.data;
+};
+
+export const getAllApplicationByStatus = async () => {
+    const res = await axios.get(`${CLASS_API_URL}/applications/status`);
+    return res.data;
+};
+export const getDetailApplicationAbsent = async (id) => {
+    const res = await axios.get(`${CLASS_API_URL}/applications/${id}`);
+    return res.data;
+};
+
+export const deleteApplication = async (id) => {
+    const res = await axios.delete(`${CLASS_API_URL}/deleteapplications/${id}`);
+    return res.data;
+};
+
+export const updateApplication = async (id) => {
+    const res = await axios.put(`${CLASS_API_URL}/updateapplications/${id}`);
     return res.data;
 };
 

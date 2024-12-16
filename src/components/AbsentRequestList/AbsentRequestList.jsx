@@ -16,6 +16,7 @@ const AbsenceRequestList = ({ idClass, year, week, dayOfWeek, targetSlot }) => {
             setIsError(false);
             try {
                 const response = await ClassService.getDetailApplicationAbsentByIdClass(idClass);
+                console.log(response)
                 if (response && Array.isArray(response.applications)) {
                     setAbsenceRequests(response.applications);
                 } else {

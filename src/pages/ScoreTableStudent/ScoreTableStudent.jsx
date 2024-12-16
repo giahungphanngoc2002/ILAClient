@@ -5,6 +5,7 @@ import SummaryAttendanceAndAward from '../../components/SummaryAttendaceAndAward
 import { HiClipboardList } from 'react-icons/hi';
 import * as ScoreSbujectService from "../../services/ScoreSbujectService";
 import * as ClassService from "../../services/ClassService";
+import * as SubjectService from "../../services/SubjectService";
 import * as ScheduleService from "../../services/ScheduleService";
 import { useSelector } from 'react-redux';
 
@@ -24,7 +25,8 @@ const ScoreTableStudent = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [countAbsent, setCountAbsent] = useState();
     const [userClasses, setUserClasses] = useState([])
-
+    const [year, setYear] = useState("")
+    const [semesters, setSemesters] = useState([])
     const [selectedClass, setSelectedClass] = useState();
 
 
@@ -63,13 +65,12 @@ const ScoreTableStudent = () => {
         resultDate.setDate(firstDayOfWeek.getDate() + dayIndex);
 
         const yearResult = resultDate.getFullYear();
-const monthResult = (resultDate.getMonth() + 1).toString().padStart(2, '0');
+        const monthResult = (resultDate.getMonth() + 1).toString().padStart(2, '0');
         const dayResult = resultDate.getDate().toString().padStart(2, '0');
 
         return `${yearResult}-${monthResult}-${dayResult}`;
     }
-
-    // Chuyển đổi dữ liệu
+    
     function processTimeTable(data) {
         const result = {};
 
@@ -142,7 +143,7 @@ const monthResult = (resultDate.getMonth() + 1).toString().padStart(2, '0');
         const foundClass = allClasses.filter((classItem) => {
             return (
                 Array.isArray(classItem.studentID) &&
-classItem.studentID.some((student) =>
+                classItem.studentID.some((student) =>
                     typeof student === 'string'
                         ? student === userId
                         : student._id === userId
@@ -191,7 +192,8 @@ classItem.studentID.some((student) =>
                 const userClass = findUserClass(allClasses?.data || [], user.id);
                 console.log(userClass)
                 setUserClasses(userClass)
-
+                setYear(userClass[0].year)
+                    
 
                 const filterUserClass = userClass.find((classItem) => {
                     return classItem._id === selectedClass;
@@ -215,7 +217,24 @@ classItem.studentID.some((student) =>
         fetchClasses();
     }, [user.id, selectedClass]);
 
-    console.log(classSubjectPhu)
+    console.log(year)
+    useEffect(() => {
+            const fetchYear = async () => {
+                try {
+                    setLoading(true); // Bắt đầu tải
+                    const response = await SubjectService.getAllSemesterByYear(year);
+                    setSemesters(response?.semesters)
+                } catch (error) {
+                    console.error("Lỗi khi lấy chi tiết lớp:", error);
+                } finally {
+                    setLoading(false); // Kết thúc tải
+                }
+            };
+            if (year) {
+                fetchYear();
+            }
+    
+        }, [year]);
 
     const filterSubjectEvaluationsByUserId = () => {
         if (!Array.isArray(classSubjectPhu)) {
@@ -226,7 +245,7 @@ classItem.studentID.some((student) =>
 
         return classSubjectPhu.map(subject => {
             const userEvaluate = subject.evaluate.filter(evaluation => evaluation.StudentId === user.id);
-// Nếu có đánh giá của học sinh, trả về môn học và các đánh giá
+            // Nếu có đánh giá của học sinh, trả về môn học và các đánh giá
             if (userEvaluate.length > 0) {
                 return {
                     nameSubject: subject.nameSubject,
@@ -288,7 +307,7 @@ classItem.studentID.some((student) =>
         try {
             // Lấy dữ liệu điểm từ API
             const rawData = await ScoreSbujectService.getAllScoreByStudentIdSemesterAndClass(studentId, semester, classId);
-            // console.log(rawData)
+            console.log(rawData)
             // Kiểm tra nếu rawData không có dữ liệu
             if (!rawData || rawData.data.length === 0) {
                 console.warn(`Không có dữ liệu điểm trả về cho kỳ ${semester}`);
@@ -303,7 +322,7 @@ classItem.studentID.some((student) =>
                 }));
                 return;
             }
-// Gộp dữ liệu từ classSubject và rawData
+            // Gộp dữ liệu từ classSubject và rawData
             const formattedData = classSubject.map(subject => {
                 // Tìm điểm của môn học này từ rawData
                 const subjectData = rawData.data.find(item => item.subjectId.nameSubject === subject.nameSubject);
@@ -353,14 +372,16 @@ classItem.studentID.some((student) =>
 
     useEffect(() => {
         if (classSubject && Array.isArray(classSubject)) {
-            fetchScores('1', selectedClass);
-            fetchScores('2', selectedClass);
+            fetchScores(selectedSemester, selectedClass);
+           
         }
     }, [selectedClass, classSubject]);
 
     const handleSemesterChange = (semester) => {
         setSelectedSemester(semester);
     };
+
+    console.log(selectedSemester)
 
     const onBack = () => {
         window.history.back();
@@ -380,7 +401,7 @@ classItem.studentID.some((student) =>
 
         // Tính tổng trọng số
         const totalWeight = (regular.length * 1) + (midterm.length * 2) + (final.length * 3);
-// Tính tổng điểm với trọng số
+        // Tính tổng điểm với trọng số
         let totalScore = 0;
 
         // Tính tổng điểm cho phần regular
@@ -474,24 +495,31 @@ classItem.studentID.some((student) =>
             <div className="pt-8"></div>
 
             <div className='w-4/5'>
-<SummaryStudent studentId={studentId} selectedSemester={selectedSemester} evaluates={evaluates} averages={averages} />
+                <SummaryStudent studentId={studentId} selectedSemester={selectedSemester} evaluates={evaluates} averages={averages} />
 
                 <SummaryAttendanceAndAward countAbsent={countAbsent} />
             </div>
 
             <div className="flex gap-2 mb-6">
-                <button
-                    className={`px-4 py-2 rounded-lg font-semibold ${selectedSemester === "1" ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700"}`}
-                    onClick={() => handleSemesterChange("1")}
-                >
-                    Kỳ 1
-                </button>
-                <button
+                {semesters.map((semester)=>(
+                    <button
+                    className={`px-4 py-2 rounded-lg font-semibold ${
+                      selectedSemester === semester._id
+                        ? "bg-blue-500 text-white"
+                        : "bg-gray-200 text-gray-700"
+                    }`}
+                    onClick={() => handleSemesterChange(semester._id)}
+                  >
+                    Kỳ {semester.nameSemester}
+                  </button>
+                ))}
+                
+                {/* <button
                     className={`px-4 py-2 rounded-lg font-semibold ${selectedSemester === "2" ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700"}`}
                     onClick={() => handleSemesterChange("2")}
                 >
                     Kỳ 2
-                </button>
+                </button> */}
             </div>
 
             <div className="mb-6">
@@ -529,7 +557,7 @@ classItem.studentID.some((student) =>
                                 <th className="w-1/4 px-4 py-4 border border-blue-200 text-center">Trung Bình</th>
                             </tr>
                         </thead>
-<tbody>
+                        <tbody>
                             {grades[selectedSemester]?.map((grade, index) => (
                                 <tr key={index} className="hover:bg-blue-50 text-gray-700 text-lg">
                                     <td className="px-4 py-4 border border-gray-200">
@@ -576,7 +604,7 @@ classItem.studentID.some((student) =>
                 <div className="flex items-center mb-6">
                     <HiClipboardList className="text-blue-600 w-6 h-6 mr-2" />
                     <span className="text-xl font-bold text-blue-600">Bảng đánh giá</span>
-</div>
+                </div>
 
                 {loading && <p className="text-blue-500">Đang tải dữ liệu...</p>}
                 {error && <p className="text-red-500">{error}</p>}
