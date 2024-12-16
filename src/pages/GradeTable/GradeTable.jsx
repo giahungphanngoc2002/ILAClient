@@ -13,7 +13,7 @@ const GradeTable = () => {
     const { idClass, idSubject, semester } = useParams();
     const [searchTerm, setSearchTerm] = useState("");
     const [filterScore, setFilterScore] = useState("");
-    const [semesterFilter, setSemesterFilter] = useState(1); // Bộ lọc kỳ
+    const [semesterFilter, setSemesterFilter] = useState(""); // Bộ lọc kỳ
     const [studentInClass, setStudentInClass] = useState([]);
     const [classDetail, setClassDetail] = useState();
     const [subject, setSubject] = useState()
@@ -21,8 +21,15 @@ const GradeTable = () => {
     const [loading, setLoading] = useState(false);
     const [evaluates, setEvaluates] = useState(null);
     const [year, setYear] = useState("");
+    const [semesters, setSemesters] = useState([])
+    const [semester1, setSemester1] = useState([])
+    const [semester2, setSemester2] = useState([])
+    const [isSemesterEndToday, setIsSemesterEndToday] = useState(false);
+    const [isSemesterEndTodaySemester1, setIsSemesterEndTodaySemester1] = useState(false);
+    const [isSemesterEndTodaySemester2, setIsSemesterEndTodaySemester2] = useState(false);
 
-    // Lấy danh sách học sinh trong lớp
+
+
     useEffect(() => {
         const fetchClassDetails = async () => {
             try {
@@ -42,12 +49,74 @@ const GradeTable = () => {
             fetchClassDetails();
         }
     }, [idClass]);
+
+    useEffect(() => {
+        const filterSemester = semesters.find((semester) => semester._id === semesterFilter);
+        if (filterSemester) {
+            // Cập nhật semester1 và semester2
+            if (filterSemester.nameSemester == "1") {
+                
+                setSemester1(filterSemester);
+                setSemester2([]);
+            }
+            if (filterSemester.nameSemester == "2") {
+                setSemester2(filterSemester);
+                setSemester1([]);
+            }
+        }
+    }, [semesterFilter, semesters]); // Chỉ phụ thuộc vào semesterFilter và semesters
+
+    useEffect(() => {
+        const currentDate = new Date().toLocaleDateString("en-GB"); // Lấy ngày hiện tại
+
+        // Kiểm tra và cập nhật trạng thái cho kỳ 1 (semester1)
+        if (semester1) {
+            // Nếu có semester1, kiểm tra ngày kết thúc và cập nhật isSemesterEndTodaySemester1
+            setIsSemesterEndTodaySemester1(semester1.dateEnd <>currentDate);
+        } else {
+            // Nếu không có semester1, đảm bảo là false
+            setIsSemesterEndTodaySemester1(false);
+        }
+
+        // Kiểm tra và cập nhật trạng thái cho kỳ 2 (semester2)
+        if (semester2) {
+            // Nếu có semester2, kiểm tra ngày kết thúc và cập nhật isSemesterEndTodaySemester2
+            setIsSemesterEndTodaySemester2(semester2.dateEnd === currentDate);
+        } else {
+            // Nếu không có semester2, đảm bảo là false
+            setIsSemesterEndTodaySemester2(false);
+        }
+    }, [semester1, semester2]);
+    // Phụ thuộc vào semester1 và semester2
+
+
+
+    console.log(isSemesterEndToday)
+    console.log(semester1)
+    console.log(semester2)
+
+    useEffect(() => {
+        if (semester2) {
+            const currentDate = new Date().toLocaleDateString("en-GB");
+            setIsSemesterEndToday(semester2.dateEnd === currentDate);
+        }
+    }, [semester2]); // Phụ thuộc vào semester2
+
+
+
+
+    useEffect(() => {
+        if (semesters.length > 0) {
+            setSemesterFilter(semesters[0]._id);
+        }
+    }, [semesters]);
+
     useEffect(() => {
         const fetchYear = async () => {
             try {
                 setLoading(true); // Bắt đầu tải
                 const response = await SubjectService.getAllSemesterByYear(year);
-                console.log(response)
+                setSemesters(response?.semesters)
             } catch (error) {
                 console.error("Lỗi khi lấy chi tiết lớp:", error);
             } finally {
@@ -57,12 +126,8 @@ const GradeTable = () => {
         if (year) {
             fetchYear();
         }
-      
+
     }, [year]);
-
-console.log("yearrrr", year)
-
-
 
     useEffect(() => {
         if (Array.isArray(classDetail?.SubjectsId)) {
@@ -73,16 +138,21 @@ console.log("yearrrr", year)
         }
     }, [classDetail, idSubject]);
 
+
+
     useEffect(() => {
         const fetchScores = async () => {
             try {
                 setLoading(true); // Bắt đầu trạng thái tải
                 const scoresData = await ScoreSubjectService.getAllScoresBySubjectSemester(idSubject, idClass, semesterFilter);
-                console.log("Fetched scores data:", scoresData); // Debug log để kiểm tra dữ liệu trả về
-    
+
+                // const filterSemester = semesters.find((semester) => semester._id === semesterFilter);
+
+                // console.log(filterSemester.nameSemester);
+
                 // Kiểm tra nếu không có dữ liệu điểm, tạo bảng điểm rỗng
                 const scoresByStudentId = scoresData?.reduce((acc, detail) => {
-                    const filteredScores = detail.scores.filter(score => score.semester === parseInt(semesterFilter));
+                    const filteredScores = detail.scores.filter(score => score.semester === semesterFilter);
                     const scores = { diemThuongXuyen: [], diemGiuaKi: [], diemCuoiKi: [] };
                     filteredScores.forEach((score) => {
                         switch (score.type) {
@@ -99,7 +169,7 @@ console.log("yearrrr", year)
                                 break;
                         }
                     });
-    
+
                     acc[detail.studentId._id] = {
                         id: detail.studentId._id,
                         name: detail.studentId.name,
@@ -109,17 +179,16 @@ console.log("yearrrr", year)
                         scoreId: detail._id, // hoặc nếu bạn cần lấy từ trường khác
                         ...scores,
                     };
-    
+
                     return acc;
                 }, {});
-    
                 // Gộp dữ liệu với danh sách sinh viên chưa có điểm
                 const completeStudentList = studentInClass.map((student) => {
                     const existingStudent = scoresByStudentId ? scoresByStudentId[student._id] : null;
                     if (existingStudent) {
                         return existingStudent;
                     }
-    
+
                     return {
                         id: student._id,
                         name: student.name,
@@ -130,11 +199,11 @@ console.log("yearrrr", year)
                         scoreId: null,
                     };
                 });
-    
+
                 setStudents(completeStudentList);
             } catch (error) {
                 console.error("Error fetching scores:", error);
-    
+
                 // Nếu xảy ra lỗi, khởi tạo danh sách rỗng
                 const emptyStudentList = studentInClass.map((student) => ({
                     id: student._id,
@@ -145,17 +214,15 @@ console.log("yearrrr", year)
                     diemCuoiKi: [],
                     scoreId: null,
                 }));
-    
+
                 setStudents(emptyStudentList);
             } finally {
                 setLoading(false); // Kết thúc trạng thái tải
             }
         };
-    
+
         fetchScores();
     }, [idClass, idSubject, semesterFilter, studentInClass]);
-    
-
 
     const calculateAverage = (grades) =>
         grades.length > 0
@@ -163,8 +230,6 @@ console.log("yearrrr", year)
             : 0;
 
     const calculateAverageSubject = (regular = [], midterm = [], final = [], subject) => {
-        // Kiểm tra điều kiện nhập vào
-        console.log(subject)
         if ((subject === "Toán" && regular.length !== 4) || (subject !== "Toán" && regular.length !== 3) || midterm.length !== 1 || final.length !== 1) {
             return 'Chưa có';
         }
@@ -229,7 +294,7 @@ console.log("yearrrr", year)
                         diemGiuaKi: Array.isArray(student.diemGiuaKi) ? [...student.diemGiuaKi] : [],
                         diemCuoiKi: Array.isArray(student.diemCuoiKi) ? [...student.diemCuoiKi] : [],
                     };
-    
+
                     if (type === "diemThuongXuyen" && index !== undefined) {
                         updatedStudent.diemThuongXuyen[index] = value ? parseFloat(value) : 0;
                     } else if (type === "diemGiuaKi") {
@@ -237,14 +302,14 @@ console.log("yearrrr", year)
                     } else if (type === "diemCuoiKi") {
                         updatedStudent.diemCuoiKi = value ? [parseFloat(value)] : [];
                     }
-    
+
                     return updatedStudent;
                 }
                 return student;
             })
         );
     }, []);
-    
+
 
 
     const filteredStudents = students.filter((student) => {
@@ -326,9 +391,6 @@ console.log("yearrrr", year)
         }
     };
 
-
-
-
     const handleUploadExcel = (e) => {
         const file = e.target.files[0];
         const reader = new FileReader();
@@ -366,6 +428,9 @@ console.log("yearrrr", year)
         reader.readAsBinaryString(file);
     }
 
+    console.log(semesterFilter)
+    console.log(semester1 && semester1.nameSemester == "1" && isSemesterEndTodaySemester1)
+
     return (
         <div className="container mx-auto p-6 min-h-screen">
             <Spin spinning={loading} size="large">
@@ -375,162 +440,165 @@ console.log("yearrrr", year)
                     onButtonClick={handleSubmitScore}
                     onBack={onBack}
                 />
-            {/* </Spin> */}
 
-            <div className="mt-16"></div>
+                <div className="mt-16"></div>
 
+                <div className="flex justify-between items-center mb-4">
+                    <div className="flex items-center">
+                        <FaSearch className="text-gray-500 mr-2" />
+                        <input
+                            type="text"
+                            placeholder="Tìm kiếm học sinh..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none"
+                        />
 
-            {/* Tìm kiếm, lọc và chọn kỳ */}
-            <div className="flex justify-between items-center mb-4">
-                <div className="flex items-center">
-                    <FaSearch className="text-gray-500 mr-2" />
-                    <input
-                        type="text"
-                        placeholder="Tìm kiếm học sinh..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none"
-                    />
+                        {/* Bộ lọc kỳ */}
+                        <select
+                            value={semesterFilter}
+                            onChange={(e) => setSemesterFilter(e.target.value)}
+                            className="px-4 py-2 mx-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none"
+                        >
+                            {semesters.map((semester) => (
+                                <option key={semester.id} value={semester._id}>
+                                    {semester.nameSemester}
+                                </option>
+                            ))}
+                        </select>
 
-                    {/* Bộ lọc kỳ */}
-                    <select
-                        value={semesterFilter}
-                        onChange={(e) => setSemesterFilter(e.target.value)}
-                        className="px-4 py-2 mx-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none"
-                    >
-                        <option value="1">Kỳ 1</option>
-                        <option value="2">Kỳ 2</option>
-                    </select>
+                        <select
+                            value={filterScore}
+                            onChange={(e) => setFilterScore(e.target.value)}
+                            className="px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none"
+                        >
+                            <option value="">Lọc theo loại điểm</option>
+                            <option value="high">Điểm cao ({"\u2265"}8)</option>
+                            <option value="low">Điểm thấp (&lt;8)</option>
+                        </select>
+                    </div>
 
-                    <select
-                        value={filterScore}
-                        onChange={(e) => setFilterScore(e.target.value)}
-                        className="px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none"
-                    >
-                        <option value="">Lọc theo loại điểm</option>
-                        <option value="high">Điểm cao ({"\u2265"}8)</option>
-                        <option value="low">Điểm thấp (&lt;8)</option>
-                    </select>
+                    <div className="flex items-center space-x-2">
+                        <button
+                            className="px-4 py-2 bg-green-600 text-white rounded-lg shadow-lg flex items-center hover:bg-green-700 transition duration-300"
+                            onClick={() => document.getElementById("fileInput").click()}
+                        >
+                            <FaFileExcel className="mr-2" /> Tải lên Excel
+                        </button>
+                        <input
+                            type="file"
+                            id="fileInput"
+                            accept=".xlsx, .xls"
+                            onChange={handleUploadExcel}
+                            style={{ opacity: 0, position: "absolute", zIndex: -1 }}
+                        />
+                        <button
+                            className="px-4 py-2 bg-green-600 text-white rounded-lg shadow-lg flex items-center hover:bg-green-700 transition duration-300"
+                            onClick={handleDownloadExcel}
+                        >
+                            <FaFileExcel className="mr-2" /> Tải xuống Excel
+                        </button>
+                        {/* <button
+                            className="px-4 py-2 bg-blue-500 text-white rounded-lg shadow-lg flex items-center hover:bg-blue-600 transition duration-300"
+                            onClick={() => window.history.back()}
+                        >
+                            <FaArrowLeft className="mr-2" /> Trở về
+                        </button> */}
+                    </div>
                 </div>
 
-                <div className="flex items-center space-x-2">
-                    <button
-                        className="px-4 py-2 bg-green-600 text-white rounded-lg shadow-lg flex items-center hover:bg-green-700 transition duration-300"
-                        onClick={() => document.getElementById("fileInput").click()}
-                    >
-                        <FaFileExcel className="mr-2" /> Tải lên Excel
-                    </button>
-                    <input
-                        type="file"
-                        id="fileInput"
-                        accept=".xlsx, .xls"
-                        onChange={handleUploadExcel}
-                        style={{ opacity: 0, position: "absolute", zIndex: -1 }}
-                    />
-                    <button
-                        className="px-4 py-2 bg-green-600 text-white rounded-lg shadow-lg flex items-center hover:bg-green-700 transition duration-300"
-                        onClick={handleDownloadExcel}
-                    >
-                        <FaFileExcel className="mr-2" /> Tải xuống Excel
-                    </button>
-                    <button
-                        className="px-4 py-2 bg-blue-500 text-white rounded-lg shadow-lg flex items-center hover:bg-blue-600 transition duration-300"
-                        onClick={() => window.history.back()}
-                    >
-                        <FaArrowLeft className="mr-2" /> Trở về
-                    </button>
-                </div>
-            </div>
-
-            {/* Bảng điểm */}
-            {/* <Spin spinning={loading} size="large"> */}
-            <div className="overflow-x-auto shadow-lg rounded-lg bg-white">
-                <table className="table-auto w-full border-collapse">
-                    <thead>
-                        <tr className="text-left uppercase tracking-wider">
-                            <th style={{ width: "25%" }} className="border px-4 py-2">Họ Tên</th>
-                            <th className="border px-4 py-2">Điểm Thường Xuyên</th>
-                            <th style={{ width: "15%" }} className="border px-4 py-2">Điểm Giữa Kỳ</th>
-                            <th style={{ width: "15%" }} className="border px-4 py-2">Điểm Cuối Kỳ</th>
-                            <th style={{ width: "15%" }} className="border px-4 py-2">Trung Bình</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {filteredStudents.length > 0 ? (
-                            filteredStudents.map((student, index) => (
-                                <tr key={index}>
-                                    <td className="border px-4 py-3">
-                                        <input
-                                            type="text"
-                                            value={student.name}
-                                            readOnly
-                                            className="w-full border rounded px-2 py-1 bg-gray-100"
-                                        />
-                                    </td>
-                                    <td className="border px-4 py-2">
-                                        <div className="grid grid-cols-2 gap-2">
-                                            {[...Array(subject.nameSubject === "Toán" ? 4 : 3)].map((_, idx) => (
-                                                <input
-                                                    key={`thuongXuyen-${idx}`}
-                                                    type="number"
-                                                    value={student.diemThuongXuyen[idx] || ''}
-                                                    onChange={(e) => handleScoreChange('diemThuongXuyen', idx, e.target.value, student.id)}
-                                                    onInput={(e) => {
-                                                        let value = e.target.value;
-                                                        // Chỉ cho phép nhập giá trị từ 0 đến 10
-                                                        if (value < 0) e.target.value = 0;
-                                                        if (value > 10) e.target.value = 10;
-                                                    }}
-                                                    className="w-full border rounded px-2 py-1"
-                                                />
-                                            ))}
-                                        </div>
-                                    </td>
-
-                                    <td className="border px-4 py-2">
-                                        <input
-                                            type="number"
-                                            value={student.diemGiuaKi || ''}
-                                            onChange={(e) => handleScoreChange('diemGiuaKi', null, e.target.value, student.id)}
-                                            onInput={(e) => {
-                                                let value = e.target.value;
-                                                // Chỉ cho phép nhập giá trị từ 0 đến 10
-                                                if (value < 0) e.target.value = 0;
-                                                if (value > 10) e.target.value = 10;
-                                            }}
-                                            className="w-full border rounded px-2 py-1"
-                                        />
-                                    </td>
-                                    <td className="border px-4 py-2">
-                                        <input
-                                            type="number"
-                                            value={student.diemCuoiKi || ''}
-                                            onChange={(e) => handleScoreChange('diemCuoiKi', null, e.target.value, student.id)}
-                                            onInput={(e) => {
-                                                let value = e.target.value;
-                                                // Chỉ cho phép nhập giá trị từ 0 đến 10
-                                                if (value < 0) e.target.value = 0;
-                                                if (value > 10) e.target.value = 10;
-                                            }}
-                                            className="w-full border rounded px-2 py-1"
-                                            min="0"
-                                            max="10"
-                                        />
-                                    </td>
-
-                                    <td className="border px-4 py-3 font-semibold text-blue-700">
-                                        {calculateAverageSubject(student.diemThuongXuyen, student.diemGiuaKi, student.diemCuoiKi, subject.nameSubject)}
-                                    </td>
-                                </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td colSpan="5" className="text-center py-4">Không có điểm để hiển thị.</td>
+                {/* Bảng điểm */}
+                {/* <Spin spinning={loading} size="large"> */}
+                <div className="overflow-x-auto shadow-lg rounded-lg bg-white">
+                    <table className="table-auto w-full border-collapse">
+                        <thead>
+                            <tr className="text-left uppercase tracking-wider">
+                                <th style={{ width: "25%" }} className="border px-4 py-2">Họ Tên</th>
+                                <th className="border px-4 py-2">Điểm Thường Xuyên</th>
+                                <th style={{ width: "15%" }} className="border px-4 py-2">Điểm Giữa Kỳ</th>
+                                <th style={{ width: "15%" }} className="border px-4 py-2">Điểm Cuối Kỳ</th>
+                                <th style={{ width: "15%" }} className="border px-4 py-2">Trung Bình</th>
                             </tr>
-                        )}
-                    </tbody>
-                </table>
-            </div>
+                        </thead>
+                        <tbody>
+                            {filteredStudents.length > 0 ? (
+                                filteredStudents.map((student, index) => (
+                                    <tr key={index}>
+                                        <td className="border px-4 py-3">
+                                            <input
+                                                type="text"
+                                                value={student.name}
+                                                readOnly
+                                                className="w-full border rounded px-2 py-1 bg-gray-100"
+                                            />
+                                        </td>
+                                        <td className="border px-4 py-2">
+                                            <div className="grid grid-cols-2 gap-2">
+                                                {[...Array(subject.nameSubject === "Toán" ? 4 : 3)].map((_, idx) => (
+                                                    <input
+                                                        key={`thuongXuyen-${idx}`}
+                                                        type="number"
+                                                        disabled={semester1 && semester1.nameSemester == "1" && isSemesterEndTodaySemester1 || semester2 && semester2.nameSemester == "2" && isSemesterEndTodaySemester2}
+                                                        value={student.diemThuongXuyen[idx] || ''}
+                                                        onChange={(e) => handleScoreChange('diemThuongXuyen', idx, e.target.value, student.id)}
+                                                        onInput={(e) => {
+                                                            let value = e.target.value;
+                                                            // Chỉ cho phép nhập giá trị từ 0 đến 10
+                                                            if (value < 0) e.target.value = 0;
+                                                            if (value > 10) e.target.value = 10;
+                                                        }}
+                                                        className="w-full border rounded px-2 py-1"
+                                                    />
+                                                ))}
+                                            </div>
+                                        </td>
+
+                                        <td className="border px-4 py-2">
+                                            <input
+                                                type="number"
+                                                value={student.diemGiuaKi || ''}
+                                                disabled={semester1 && semester1.nameSemester == "1" && isSemesterEndTodaySemester1 || semester2 && semester2.nameSemester == "2" && isSemesterEndTodaySemester2}
+                                                onChange={(e) => handleScoreChange('diemGiuaKi', null, e.target.value, student.id)}
+                                                onInput={(e) => {
+                                                    let value = e.target.value;
+                                                    // Chỉ cho phép nhập giá trị từ 0 đến 10
+                                                    if (value < 0) e.target.value = 0;
+                                                    if (value > 10) e.target.value = 10;
+                                                }}
+                                                className="w-full border rounded px-2 py-1"
+                                            />
+                                        </td>
+                                        <td className="border px-4 py-2">
+                                            <input
+                                                type="number"
+                                                value={student.diemCuoiKi || ''}
+                                                disabled={semester1 && semester1.nameSemester == "1" && isSemesterEndTodaySemester1 || semester2 && semester2.nameSemester == "2" && isSemesterEndTodaySemester2}
+                                                onChange={(e) => handleScoreChange('diemCuoiKi', null, e.target.value, student.id)}
+                                                onInput={(e) => {
+                                                    let value = e.target.value;
+                                                    // Chỉ cho phép nhập giá trị từ 0 đến 10
+                                                    if (value < 0) e.target.value = 0;
+                                                    if (value > 10) e.target.value = 10;
+                                                }}
+                                                className="w-full border rounded px-2 py-1"
+                                                min="0"
+                                                max="10"
+                                            />
+                                        </td>
+
+                                        <td className="border px-4 py-3 font-semibold text-blue-700">
+                                            {calculateAverageSubject(student.diemThuongXuyen, student.diemGiuaKi, student.diemCuoiKi, subject.nameSubject)}
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan="5" className="text-center py-4">Không có điểm để hiển thị.</td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
             </Spin>
         </div>
     );
