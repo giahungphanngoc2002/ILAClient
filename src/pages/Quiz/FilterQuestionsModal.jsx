@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
 
-const FilterQuestionsModal = ({ 
+const FilterQuestionsModal = ({
     show,
     handleClose,
     dataChapter,
@@ -61,7 +61,7 @@ const FilterQuestionsModal = ({
                         <Form.Control
                             as="select"
                             value={level}
-onChange={(e) => setLevel(e.target.value)}
+                            onChange={(e) => setLevel(e.target.value)}
                             className="mt-2 p-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         >
                             <option value="">Tất cả</option>

@@ -2,11 +2,9 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import * as message from "../../components/MessageComponent/Message";
 import * as SubjectService from "../../services/SubjectService";
-import { useSelector } from "react-redux";
 import ButtonComponent from "../../components/ButtonComponent/ButtonComponent";
-import { useNavigate, useParams } from "react-router-dom";
-import mammoth from "mammoth";
-import { toast } from "react-toastify";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+
 
 const Loading = () => {
   return (
@@ -26,16 +24,12 @@ const Loading = () => {
 };
 
 export default function SearchQuestionByAI() {
-  const classTeacher = useSelector((state) => state.class);
-  const [classTeacherName, setClassTeacherName] = useState("");
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [detailSubject, setDetailSubject] = useState("");
-  const [buttonColor, setButtonColor] = useState("gray");
-  const [showWarning, setShowWarning] = useState(false);
   const [editingQuestion, setEditingQuestion] = useState(null); // Câu hỏi đang chỉnh sửa
   const [updatedQuestion, setUpdatedQuestion] = useState({
     question: "",
@@ -45,41 +39,58 @@ export default function SearchQuestionByAI() {
     chapter: "",
     lession: ""
   });
-  const navigate = useNavigate();
 
-  const countWords = (text) => {
-    return text.split(/\s+/).filter((word) => word.length > 0).length;
-  };
+  const [nameSubject, setNameSubject] = useState("");
+  const [lesson, setLesson] = useState("");
+  const [chapter, setChapter] = useState("");
+  const [block, setBlock] = useState("");
+
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+
+  const lessonFromQuery = queryParams.get("lesson");
+  const chapterFromQuery = queryParams.get("chapter");
+  const nameSubjectFromQuery = queryParams.get("nameSubject");
+  const blockFromQuery = queryParams.get("block");
+
+
+  const navigate = useNavigate();
+  const { idClass, idSubject } = useParams();
 
   useEffect(() => {
-    const wordCount = countWords(question);
-    if (wordCount < 1) {
-      setButtonColor("gray");
-      setShowWarning(true); // Nếu ít hơn 400 từ, hiển thị cảnh báo
-    } else {
-      setButtonColor("green");
-      setShowWarning(false); // Nếu đủ 400 từ, ẩn cảnh báo
-    }
-  }, [question]);
-
-  const { idClass, idSubject } = useParams();
+    if (lessonFromQuery) setLesson(lessonFromQuery);
+    if (chapterFromQuery) setChapter(chapterFromQuery);
+    if (nameSubjectFromQuery) setNameSubject(nameSubjectFromQuery);
+    if (blockFromQuery) setNameSubject(blockFromQuery);
+  }, [lessonFromQuery, chapterFromQuery, nameSubjectFromQuery, blockFromQuery]);
 
 
   useEffect(() => {
     const fetchDetailSubject = async () => {
       setLoading(true);
-        try {
-            const detailSubjectData = await SubjectService.getDetailSubject(idSubject);
-            setDetailSubject(detailSubjectData?.chapters);
-        } catch (error) {
-            console.error("Error fetching time tables:", error);
-        } finally {
-          setLoading(false);
-        }
+      try {
+        const detailSubjectData = await SubjectService.getDetailSubject(idSubject);
+        setDetailSubject(detailSubjectData?.chapters);
+      } catch (error) {
+        console.error("Error fetching time tables:", error);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchDetailSubject();
-}, [idSubject]);
- console.log("chapters ", detailSubject);
+  }, [idSubject]);
+
+  // console.log(lesson, chapter, nameSubject)
+
+  useEffect(() => {
+    if (lesson && chapter && nameSubject && block) {
+      console.log('lesson:', lesson);
+      console.log('chapter:', chapter);
+      console.log('nameSubject:', nameSubject);
+      console.log('block:', block);
+      generateAnswer();
+    }
+  }, [lesson, chapter, nameSubject, block]);
 
   const handleUpdate = async () => {
     try {
@@ -115,8 +126,7 @@ export default function SearchQuestionByAI() {
   async function generateAnswer() {
     setLoading(true);
     setError("");
-    const addText = `
-      theo format dưới đây
+    const addText = `10 câu hỏi môn ${nameSubject} lớp ${block}  chương trình mới tại Việt Nam chương ${chapter} bài ${lesson}  theo format dưới đây
       [
   {
     "question": "Điền câu hỏi vào đây",
@@ -127,9 +137,9 @@ export default function SearchQuestionByAI() {
       "Điền các kết quả để chọn vào đây"
     ],
     "correctAnswer": "Điền đáp án vào đây",
-    "level": [1,2,3],
-    "chapter": "Tên chương học",
-    "lession": "Tên bài học"
+    "level": [1 hoặc 2 hoặc 3],
+    "chapter": ${chapter},
+    "lession": ${lesson}
   },
   {
     "question": "Điền câu hỏi vào đây",
@@ -140,9 +150,9 @@ export default function SearchQuestionByAI() {
       "Điền các kết quả để chọn vào đây"
     ],
     "correctAnswer": "Điền đáp án vào đây",
-    "level": [1,2,3],
-    "chapter": "Tên chương học",
-    "lession": "Tên bài học"
+    "level": [1 hoặc 2 hoặc 3],
+    "chapter": ${chapter},
+    "lession": ${lesson}
   },
   {
     "question": "Điền câu hỏi vào đây",
@@ -153,9 +163,9 @@ export default function SearchQuestionByAI() {
       "Điền các kết quả để chọn vào đây"
     ],
     "correctAnswer": "Điền đáp án vào đây",
-    "level": [1,2,3],
-    "chapter": "Tên chương học",
-    "lession": "Tên bài học"
+    "level": [1 hoặc 2 hoặc 3],
+    "chapter": ${chapter},
+    "lession": ${lesson}
   }
 ]
       `;
@@ -216,40 +226,6 @@ export default function SearchQuestionByAI() {
     console.log(questions);
   }
 
-  function readWordFile() {
-    const fileInput = document.getElementById("file-input");
-    const textQuestion = document.getElementById("textQuestion");
-
-    if (fileInput.files && fileInput.files.length > 0) {
-      const file = fileInput.files[0];
-      const reader = new FileReader();
-
-      reader.onload = function (e) {
-        const arrayBuffer = e.target.result;
-
-        mammoth
-          .extractRawText({ arrayBuffer: arrayBuffer })
-          .then(function (result) {
-            const content = result.value;
-            textQuestion.value = content;
-            console.log(content);
-            setQuestion(content);
-          })
-          .catch(function (error) {
-            console.error("Error reading Word file:", error);
-          });
-      };
-
-      reader.onerror = function (error) {
-        console.error("Error reading Word file:", error);
-      };
-
-      reader.readAsArrayBuffer(file);
-    } else {
-      console.error("No file selected.");
-    }
-  }
-
   const handleUpdateQuestion = (index) => {
     const questionToEdit = questions[index];
     setEditingQuestion(index); // Lưu chỉ số câu hỏi đang chỉnh sửa
@@ -274,35 +250,17 @@ export default function SearchQuestionByAI() {
 
   return (
     <div className="p-6 text-center h-screen bg-white">
-      <h1 className="text-3xl font-bold mb-6 text-gray-800">Chat AI</h1>
       <textarea
         className="question-input w-full h-40 p-3 mb-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:border-blue-500"
         id="textQuestion"
         value={question}
         onChange={(e) => setQuestion(e.target.value)}
         placeholder="Nhập đoạn văn bạn muốn tạo ra câu hỏi"
+        style={{ display: 'none' }}
       ></textarea>
-      {showWarning && (
-        <p className="text-red-500"></p>
-      )}
-      <div className="mb-4">
-        <input
-          type="file"
-          id="file-input"
-          accept=".xlsx,.xls,image/*,.doc, .docx,.ppt, .pptx,.txt,.pdf"
-          className="file-input w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:border-blue-500"
-        />
-      </div>
       <button
-        className="generate-button bg-blue-500 text-white font-bold py-2 px-6 rounded-lg shadow-md hover:bg-blue-600 transition duration-200"
-        onClick={readWordFile}
-      >
-        Read Word File
-      </button>
-      <button
-        className={`generate-button bg-${buttonColor}-500 text-white font-bold py-2 px-6 rounded-lg shadow-md hover:bg-green-600 transition duration-200 ml-4`}
+        className={`generate-button bg-blue-500 text-white font-bold py-2 px-6 rounded-lg shadow-md hover:bg-blue-600 transition duration-200 ml-4`}
         onClick={generateAnswer}
-        disabled={buttonColor === "gray"}
       >
         Generate Answer
       </button>
@@ -391,7 +349,6 @@ export default function SearchQuestionByAI() {
       {editingQuestion !== null && (
         <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded-lg w-1/3">
-            {/* <h3 className="text-xl font-semibold mb-4">Chỉnh sửa câu hỏi</h3> */}
             <div className="text-left">
               <h5>Câu hỏi:</h5>
               <textarea

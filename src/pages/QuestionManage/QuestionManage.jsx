@@ -1,10 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, createContext } from 'react';
 import { FaArrowLeft, FaPlus } from 'react-icons/fa';
 import UpdateQuestionModal from '../Modal/UpdateQuestionModal';
 import * as SubjectService from "../../services/SubjectService";
 import { useNavigate, useParams } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { toast } from "react-toastify";
+import { Modal, Button, Form } from 'react-bootstrap';
+
+
 const QuestionManager = () => {
     const [selectedChapter, setSelectedChapter] = useState('All');
     const [selectedLesson, setSelectedLesson] = useState('All');
@@ -29,6 +32,11 @@ const QuestionManager = () => {
     const [textLession, setTextLession] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [detailSubject, setDetailSubject] = useState("");
+    const [showModalChooseChapter, setShowModalChooseChapter] = useState(false);
+    const [chapter, setChapter] = useState();
+    const [lesson, setLesson] = useState();
+    const [nameSubject , setNameSubject] = useState();
+    const [block , setBlock] = useState()
 
     const fetchQuestions = async () => {
         setIsLoading(true);
@@ -55,6 +63,8 @@ const QuestionManager = () => {
             setIsLoading(true);
             try {
                 const detailSubjectData = await SubjectService.getDetailSubject(idSubject);
+                setBlock(detailSubjectData?.block)
+                setNameSubject(detailSubjectData?.nameSubject)
                 setDetailSubject(detailSubjectData?.chapters);
             } catch (error) {
                 console.error("Error fetching time tables:", error);
@@ -64,7 +74,7 @@ const QuestionManager = () => {
         };
         fetchDetailSubject();
     }, [idSubject]);
-     console.log("chapters ", detailSubject);
+    console.log("chapters ", detailSubject);
 
     const updateMutation = useMutation({
         mutationFn: async ({ classId, subjectId, questionId, updatedQuestion }) => {
@@ -132,9 +142,12 @@ const QuestionManager = () => {
     };
 
     const goToCreateQuestionByAI = () => {
-        navigate(`/questionAI/${idClass}/${idSubject}`);
+        setShowModalChooseChapter(!showModalChooseChapter)
     };
 
+    const handleClose = () => {
+        setShowModalChooseChapter(false)
+    }
 
 
     const handleOpenUpdateModal = (id) => {
@@ -262,11 +275,11 @@ const QuestionManager = () => {
     const handleChapterChange = (e) => {
         setTextChapTer(e.target.value); // Cập nhật chương
         setTextLession(""); // Reset bài học khi chọn chương mới
-      };
-      
-      const handleLessionChange = (e) => {
+    };
+
+    const handleLessionChange = (e) => {
         setTextLession(e.target.value); // Cập nhật bài học
-      }
+    }
 
 
 
@@ -279,6 +292,10 @@ const QuestionManager = () => {
     };
     const uniqueChapters = [...new Set(filteredQuestions.map((q) => q.chapter))];
     const uniqueLessions = [...new Set(filteredQuestions.map((q) => q.lession))];
+
+    const handleGoToAI = () => {
+        navigate(`/questionAI/${idClass}/${idSubject}?lesson=${lesson}&chapter=${chapter}&nameSubject=${nameSubject}&block=${block}`);
+    }
 
     return (
         <div className="p-6 bg-gray-100 min-h-screen">
@@ -437,6 +454,65 @@ const QuestionManager = () => {
                     saveChapter={saveChapter}
                 />
             )}
+            {showModalChooseChapter && (
+                <Modal show={showModalChooseChapter} onHide={handleClose} className="rounded-lg shadow-xl">
+                    <Modal.Header closeButton className="">
+                        <Modal.Title>Lọc Câu Hỏi</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body className="bg-gray-50 p-6">
+                        <Form>
+                            <Form.Group controlId="chapter" className="mb-4">
+                                <Form.Label className="block text-gray-700 font-medium">Chương</Form.Label>
+                                <Form.Control
+                                    as="select"
+                                    value={chapter}
+                                    onChange={(e) => setChapter(e.target.value)}
+                                    className="mt-2 p-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                                    <option value="">Tất cả</option>
+                                    {detailSubject?.map((chapterItem) => (
+                                        <option key={chapterItem._id} value={chapterItem.nameChapter}>
+                                            {chapterItem.nameChapter}
+                                        </option>
+                                    ))}
+                                </Form.Control>
+                            </Form.Group>
+
+                            <Form.Group controlId="lesson" className="mb-4">
+                                <Form.Label className="block text-gray-700 font-medium">Bài</Form.Label>
+                                <Form.Control
+                                    as="select"
+                                    value={lesson}
+                                    onChange={(e) => setLesson(e.target.value)}
+                                    className="mt-2 p-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                                    <option value="">Tất cả</option>
+                                    {detailSubject?.filter(chapterItem => chapterItem.nameChapter === chapter).map((chapterItem) =>
+                                        chapterItem.lession.map((lessonName, index) => (
+                                            <option key={index} value={lessonName}>
+                                                {lessonName}
+                                            </option>
+                                        ))
+                                    )}
+                                </Form.Control>
+                            </Form.Group>
+                        </Form>
+                    </Modal.Body>
+                    <Modal.Footer className="bg-gray-100">
+                        <Button variant="secondary" onClick={handleClose} className="px-6 py-2 text-gray-600 hover:bg-gray-200">
+                            Đóng
+                        </Button>
+                        <Button
+                            variant="primary"
+                            onClick={handleGoToAI}
+                            className="px-6 py-2 bg-blue-600 text-white hover:bg-blue-700 focus:outline-none"
+                        >
+                            Áp Dụng Lọc
+                        </Button>
+                    </Modal.Footer>
+                </Modal>
+            )}
+
         </div>
     );
 
