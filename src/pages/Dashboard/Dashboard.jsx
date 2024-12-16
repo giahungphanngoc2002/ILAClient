@@ -64,7 +64,7 @@ const Dashboard = () => {
             }
         };
 
-        if (user?.role === "Parent" && user.username) {
+        if (user?.role === "Parent") {
             fetchChildren();
         }
     }, [user?.role, user.username]);
