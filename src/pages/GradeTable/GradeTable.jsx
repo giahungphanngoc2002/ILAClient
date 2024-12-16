@@ -20,6 +20,7 @@ const GradeTable = () => {
     const [subjectPhu, setSubjectPhu] = useState()
     const [loading, setLoading] = useState(false);
     const [evaluates, setEvaluates] = useState(null);
+    const [year, setYear] = useState("");
 
     // Lấy danh sách học sinh trong lớp
     useEffect(() => {
@@ -29,6 +30,7 @@ const GradeTable = () => {
                 const response = await ClassService.getDetailClass(idClass);
                 setClassDetail(response?.data)
                 setStudentInClass(response?.data?.studentID);
+                setYear(response?.data.year)
             } catch (error) {
                 console.error("Lỗi khi lấy chi tiết lớp:", error);
             } finally {
@@ -40,6 +42,8 @@ const GradeTable = () => {
             fetchClassDetails();
         }
     }, [idClass]);
+
+console.log("yearrrr", year)
 
 
 
