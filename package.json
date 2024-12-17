@@ -47,7 +47,6 @@
     "react-router-dom": "^6.24.1",
     "react-scripts": "5.0.1",
     "react-toastify": "^10.0.5",
-    "socket.io-client": "^4.8.1",
     "styled-components": "^6.1.10",
     "util": "^0.12.5",
     "vietnam-provinces": "^0.0.4",
