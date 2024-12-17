@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from "react";
 import * as ClassService from "../../services/ClassService";
 
-const AbsenceRequestList = ({ idClass, year, week, dayOfWeek, targetSlot }) => {
+const AbsenceRequestList = ({ idClass, year, week, dayOfWeek, targetSlot, slot, date }) => {
     const [absenceRequests, setAbsenceRequests] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isError, setIsError] = useState(false);
 
+    console.log(slot, date)
+
     useEffect(() => {
         console.log("Year:", year, "Week:", week, "Day of Week:", dayOfWeek, "Target Slot:", targetSlot);
     }, [year, week, dayOfWeek, targetSlot]);
-    
 
     useEffect(() => {
         const fetchAbsenceRequests = async () => {
@@ -17,9 +18,10 @@ const AbsenceRequestList = ({ idClass, year, week, dayOfWeek, targetSlot }) => {
             setIsError(false);
             try {
                 const response = await ClassService.getDetailApplicationAbsentByIdClass(idClass);
-                console.log(response)
+                console.log(response.applications)
+                console.log(filterRecords(response.applications, date, slot))
                 if (response && Array.isArray(response.applications)) {
-                    setAbsenceRequests(response.applications);
+                    setAbsenceRequests(filterRecords(response.applications, date, slot));
                 } else {
                     console.error("Unexpected response format:", response);
                     setAbsenceRequests([]);
@@ -38,40 +40,60 @@ const AbsenceRequestList = ({ idClass, year, week, dayOfWeek, targetSlot }) => {
     }, [idClass]);
     console.log(absenceRequests)
 
-    // Hàm để tính số tuần của một ngày nhất định
-    const targetSlotNumber = targetSlot?.slotNumber;
-    console.log("Target Slot Number is not defined or invalid",targetSlotNumber);
-    if (!targetSlotNumber) {
-      
-      return [];
+    function filterRecords(records, dateInput, slotInput) {
+        // Hàm giúp cắt chuỗi ngày từ dateOff thành mảng
+        const parseDateOff = (dateOffStr) => {
+            const dateArray = dateOffStr.split(',').map(date => new Date(date.trim()));
+            console.log("Parsed dateOffArray:", dateArray); // Log mảng ngày đã được cắt
+            return dateArray;
+        };
+
+        // Hàm kiểm tra xem ngày truyền vào có nằm trong dateOff hay không
+        const isDateValid = (dateOff, dateInput) => {
+            console.log("Checking if the dateInput exists in dateOffArray:", dateOff, dateInput);
+            return dateOff.some(date => {
+                const isValid = date.toISOString().split('T')[0] === dateInput; // so sánh ngày (YYYY-MM-DD)
+                console.log(`Comparing ${date.toISOString().split('T')[0]} with ${dateInput}:`, isValid);
+                return isValid;
+            });
+        };
+
+        // Lọc mảng dựa trên điều kiện
+        return records.filter(record => {
+            console.log("Processing record:", record); // Log mỗi bản ghi trước khi lọc
+
+            // Cắt ngày từ dateOff và kiểm tra
+            const dateOffArray = parseDateOff(record.dateOff);
+
+            // Kiểm tra ngày có hợp lệ và slot có trong slotInput
+            const dateIsValid = isDateValid(dateOffArray, dateInput);
+            console.log(`Is the date valid for this record?`, dateIsValid);
+
+            console.log(record.slot)
+            const isSlotValid = record.slot.some(slot => slot == slotInput);
+            console.log(`Is the slot valid for this record?`, isSlotValid, slotInput);
+
+            return dateIsValid && isSlotValid; // Lọc theo cả 2 điều kiện
+        });
     }
-// Lọc các yêu cầu nghỉ học khớp với các điều kiện về ngày, tuần, và tiết
-// Lọc các yêu cầu nghỉ học khớp với các điều kiện về năm, tuần, và tiết
-const filteredAbsenceRequests = absenceRequests.filter(request => {
-    const requestWeek = parseInt(request?.week); // Lấy tuần từ request
-    const requestYear = parseInt(request?.year); // Lấy năm từ request
-    const requestSlot = request?.slot;
-    const requestNameStudent = request?.studentId?.name;
 
-    // console.log("Request Year:", requestYear);
-    // console.log("Request Week:", requestWeek);
-    // console.log("Expected Year:", year);
-    // console.log("Expected Week:", week);
-    console.log("Expected DayOfWeek:", requestSlot);
-    console.log("Expected Slot Number:", targetSlot?.slotNumber);
-        
-    // So sánh năm, tuần, và slot để xác nhận yêu cầu nghỉ học
-    return (
-        requestYear === parseInt(year) && // So sánh năm
-        requestWeek === parseInt(week) && // So sánh tuần
-         requestSlot?.includes(targetSlot?.slotNumber)&&
-        requestNameStudent 
-    );
-});
 
-console.log(filteredAbsenceRequests)
 
-    
+    // Lọc các yêu cầu nghỉ học khớp với các điều kiện về năm, tuần, và tiết
+    const filteredAbsenceRequests = absenceRequests.filter(request => {
+        const requestWeek = parseInt(request?.week); // Lấy tuần từ request
+        const requestYear = parseInt(request?.year); // Lấy năm từ request
+        const requestSlot = request?.slot;
+
+        // So sánh năm, tuần, và slot để xác nhận yêu cầu nghỉ học
+        return (
+            requestYear === parseInt(year) && // So sánh năm
+            requestWeek === parseInt(week) && // So sánh tuần
+            requestSlot.includes(targetSlot?.slotNumber) // So sánh slot
+        );
+    });
+
+
 
     if (isLoading) {
         return <div>Loading...</div>;
@@ -101,7 +123,7 @@ console.log(filteredAbsenceRequests)
                         <div key={request._id || index} className="p-4 mb-2 bg-white">
                             <div className="grid grid-cols-12 mb-2">
                                 <div className="col-span-6 font-medium">
-                                    {index + 1}. {request?.studentId?.name || "Unknown"}
+                                    {index + 1}. {request.studentId?.name || "Unknown"}
                                 </div>
                             </div>
                             <div className="text-gray-700 mb-1">

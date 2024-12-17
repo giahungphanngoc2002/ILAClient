@@ -37,10 +37,20 @@ const StudentTable = () => {
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [content, setContent] = useState();
   const [isLoading, setIsLoading] = useState(false);
+  const queryParams = new URLSearchParams(location.search);
 
-  console.log(detailSubject)
+  const slot = queryParams.get("slot");
+  const date = queryParams.get("date");
 
-  console.log("idSubject", detailSubject)
+  function convertDate(dateString) {
+    // Tách ngày, tháng, năm từ chuỗi nhập vào
+    const [day, month, year] = dateString.split('/');
+
+    // Tạo ngày mới với định dạng YYYY-MM-DD
+    return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+  }
+
+  console.log(slot, convertDate(date))
 
   useEffect(() => {
     const fetchData = async () => {
@@ -412,8 +422,15 @@ const StudentTable = () => {
           </div>
         </div>
         <div className="w-1/4 h-full flex flex-col overflow-auto mr-4">
-          <AbsenceRequestList idClass={idClass} year={year} week={week} dayOfWeek={dayOfWeek}
-            targetSlot={targetSlot} />
+          <AbsenceRequestList
+            idClass={idClass}
+            year={year}
+            week={week}
+            dayOfWeek={dayOfWeek}
+            targetSlot={targetSlot}
+            slot={slot}
+            date={convertDate(date)}
+          />
         </div>
         <Modal show={isOpenModal} onHide={handleClose}>
           <Modal.Header closeButton>

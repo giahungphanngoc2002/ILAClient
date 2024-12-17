@@ -50,19 +50,19 @@ export const createAbsentstudentId = async (scheduleId, classId, slotId) => {
 };
 
 export const createNoteBookByClassAndScheduleId = async (classId, scheduleId, slotId, content, scoreClass) => {
-    
-      const res = await axios.post(
+
+    const res = await axios.post(
         `${SCHEDULE_API_URL}/createNoteBook/${classId}/${scheduleId}/${slotId}`,
         {
-          content,
-          scoreClass,
+            content,
+            scoreClass,
         }
-      );
-      return res.data; // Trả về kết quả từ server
-     
-  };
+    );
+    return res.data; // Trả về kết quả từ server
 
-  export const getAllScheduleByClassId = async (classId) => {
+};
+
+export const getAllScheduleByClassId = async (classId) => {
     const res = await axios.get(`${SCHEDULE_API_URL}/getAllSchedule/${classId}`);
     return res.data;
 };
@@ -83,16 +83,21 @@ export const createScheduleByClassId = async (classId, scheduleData) => {
 };
 
 export const updateScheduleByClassId = async (classId, timeTableId, scheduleData) => {
-    
-        const res = await axios.put(
-            `${SCHEDULE_API_URL}/${classId}/timetable/${timeTableId}`,
-            scheduleData
-        );
-        return res.data;
-    
+
+    const res = await axios.put(
+        `${SCHEDULE_API_URL}/${classId}/timetable/${timeTableId}`,
+        scheduleData
+    );
+    return res.data;
+
 };
 
 export const getClassAndTimeTableByStudentId = async (studentId) => {
     const res = await axios.get(`${SCHEDULE_API_URL}/getAllTimeTable/${studentId}`);
+    return res.data;
+};
+
+export const getDetailNoteBook = async (scheduleId, slotId) => {
+    const res = await axios.get(`${SCHEDULE_API_URL}/${scheduleId}/slots/${slotId}/noteBook`);
     return res.data;
 };

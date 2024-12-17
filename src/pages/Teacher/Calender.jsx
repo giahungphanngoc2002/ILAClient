@@ -129,11 +129,15 @@ const Calendar = ({ onClassClick }) => {
     }
   };
 
-  const goToClass = (idClass, idSchedule, idSlot, idSubject) => {
-    navigate(`/manage/calender/${idClass}/${idSchedule}/${idSlot}/${idSubject}`, {
+  const goToClass = (idClass, idSchedule, idSlot, idSubject, slotNumber, time) => {
+    console.log(time)
+    navigate(`/manage/calender/${idClass}/${idSchedule}/${idSlot}/${idSubject}?slot=${slotNumber}&date=${time}`, {
       state: { year: selectedYear, week: currentWeekNumber }
     });
   };
+
+
+
 
   return (
     <div className="container mx-auto p-4">
@@ -183,7 +187,7 @@ const Calendar = ({ onClassClick }) => {
                 </div>
                 {slotTimes.map((slot, i) => {
                   const classData = getScheduleForDay(day, i);
-                      console.log("123123",classData)
+                  console.log("123123", classData)
                   return (
                     <div
                       key={i}
@@ -193,7 +197,7 @@ const Calendar = ({ onClassClick }) => {
                         <button
                           onClick={() => goToClass(classData.classId._id,
                             classData.scheduleId, classData._id, classData.subjectId?._id ||
-                          classData.subjectChuyendeId?._id, // Truyền `day` vào goToClass
+                          classData.subjectChuyendeId?._id, classData.slotNumber, weekDates[index] // Truyền `day` vào goToClass
                           )}
                         >
                           <div className="text-xs text-gray-700 w-full h-full flex flex-col items-center justify-center">

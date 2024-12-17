@@ -4,7 +4,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import * as ScheduleService from "../../services/ScheduleService";
 import { useSelector } from 'react-redux';
 import moment from 'moment';
-import InfoSlot from '../InfoSlot/InfoSlot';
+
+import InfoNoteBook from '../InfoNoteBook/InfoNoteBook';
 
 const ManageNoteBook = ({ }) => {
   const [currentWeekOffset, setCurrentWeekOffset] = useState(0);
@@ -13,8 +14,9 @@ const ManageNoteBook = ({ }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
   const { idClass } = useParams();
-
+  const [modalData, setModalData] = useState({ show: false, idSchedule: null, idSlot: null }); // Modal state
   console.log(idClass)
+  console.log(modalData)
   useEffect(() => {
     const fetchSchedule = async () => {
       setIsLoading(true);
@@ -80,39 +82,48 @@ const ManageNoteBook = ({ }) => {
 
 
   const getScheduleForDay = (day, slotIndex) => {
-    const filteredScheduleData = scheduleData.find(schedule => {
-      return schedule.year === String(selectedYear) && schedule.week === String(currentWeekNumber);
+    // Lọc dữ liệu dựa trên year, week và dayOfWeek
+    const filteredScheduleData = scheduleData.filter(schedule => {
+      return (
+        schedule.year === String(selectedYear) &&
+        schedule.week === String(currentWeekNumber) &&
+        schedule.dayOfWeek === day
+      );
     });
 
+    // console.log("Filtered Schedule Data:", filteredScheduleData);
 
-    if (filteredScheduleData) {
-      const classData = filteredScheduleData.schedules.find((cls) => cls.dayOfWeek === day);
+    // Lọc tiếp theo slotNumber
+    const classData = filteredScheduleData.find(cls => cls.slots.slotNumber === slotIndex + 1);
 
-      if (classData) {
-        const slotData = classData.slots.find((slot) => slot.slotNumber === slotIndex + 1);
-        if (slotData) {
-          const scheduleId = classData._id;
-          const formattedDate = weekDates[days.indexOf(day)];
-          const currentDateTime = new Date();
-          const [startHour, startMinute] = slotTimes[slotIndex].start.split(':').map(Number);
-          const slotDate = new Date(formattedDate.split('/').reverse().join('-'));
-          slotDate.setHours(startHour, startMinute);
+    if (classData) {
+      const slotData = classData.slots;
+      const scheduleId = classData.scheduleId._id;
+      const formattedDate = weekDates[days.indexOf(day)];
+      const currentDateTime = new Date();
+      const [startHour, startMinute] = slotTimes[slotIndex].start.split(':').map(Number);
+      const slotDate = new Date(formattedDate.split('/').reverse().join('-'));
+      slotDate.setHours(startHour, startMinute);
 
-          const isCompleted = slotData.attendanceStatus?.status === true;
+      const isCompleted = slotData.attendanceStatus?.status === true;
 
-          if (slotDate < currentDateTime && !isCompleted) {
-            return { ...slotData, scheduleId, isMissed: true };
-          }
-          if (slotDate >= currentDateTime && !isCompleted) {
-            return { ...slotData, scheduleId, isMissed: false };
-          }
-
-          return { ...slotData, scheduleId, isCompleted };
-        }
+      // Xác định trạng thái của slot
+      if (slotDate < currentDateTime && !isCompleted) {
+        return { ...slotData, scheduleId, isMissed: true };
       }
+      if (slotDate >= currentDateTime && !isCompleted) {
+        return { ...slotData, scheduleId, isMissed: false };
+      }
+
+      return { ...slotData, scheduleId, isCompleted };
     }
+
     return null;
   };
+
+
+
+
 
   const handlePreviousWeek = () => {
     if (currentWeekOffset > 0) {
@@ -131,9 +142,12 @@ const ManageNoteBook = ({ }) => {
 
 
 
-  const goToInfoSlot = (idSchedule, idSlot, slotTime) => {
-    // setModalData({ show: true, idSchedule, idSlot, slotTime });
+  const goToInfoNoteBook = (idSchedule, idSlot) => {
+    setModalData({ show: true, idSchedule, idSlot });
   };
+
+  const closeModal = () => setModalData({ ...modalData, show: false });
+
 
 
   return (
@@ -184,7 +198,8 @@ const ManageNoteBook = ({ }) => {
                 </div>
                 {slotTimes.map((slot, i) => {
                   const classData = getScheduleForDay(day, i);
-                  console.log(classData)
+
+
                   return (
                     <div
                       key={i}
@@ -192,11 +207,18 @@ const ManageNoteBook = ({ }) => {
                     >
                       {classData ? (
                         <button
-                          onClick={() => goToInfoSlot(classData.scheduleId, classData._id, slotTimes[i])}
+                          onClick={() => {
+                            if (classData?.scheduleId && classData?._id) {
+                              goToInfoNoteBook(classData.scheduleId, classData._id);
+                            } else {
+                              console.error("Missing data:", { scheduleId: classData?.scheduleId, slotId: classData?._id });
+                            }
+                          }}
+
                         >
                           <div className="text-xs text-gray-700 w-full h-full flex flex-col items-center justify-center">
-                            <div className="font-bold text-blue-800">{classData?.subjectId?.nameSubject || classData?.subjectChuyendeId?.nameSubject}</div>
-                            <div>{classData.classDetails[0].nameClass}</div>
+                            <div className="font-bold text-blue-800">{classData?.subjectDetails?.nameSubject}</div>
+                            {/* <div>{classData.classDetails[0].nameClass}</div> */}
                             <div className={`text-${classData.isCompleted ? 'green' : (classData.isMissed ? 'red' : 'yellow')}-600`}>
                               {classData.isCompleted ? 'Hoàn thành' : (classData.isMissed ? 'Bỏ lỡ' : 'Sắp đến')}
                             </div>
@@ -213,6 +235,13 @@ const ManageNoteBook = ({ }) => {
           </div>
         </div>
       )}
+      <InfoNoteBook
+        show={modalData.show}
+        handleClose={closeModal}
+        idSchedule={modalData.idSchedule}
+        idSlot={modalData.idSlot}
+
+      />
     </div>
   );
 };

@@ -28,6 +28,8 @@ function RequestAbsentAplication() {
         setTeacherId(user?.id);
     }, [user]);
 
+    console.log(idStudent)
+
     useEffect(() => {
         const fetchStudentsinClass = async () => {
             setIsLoading(true);
@@ -37,14 +39,13 @@ function RequestAbsentAplication() {
                 if (response && response.data) {
                     const { nameClass, studentID } = response.data;
 
-                    // Giả sử `studentID` là mảng chứa id của học sinh. Bạn có thể tạo mẫu dữ liệu như sau:
                     const formattedStudents = studentID.map((studentId, index) => ({
-                        id: studentId, // Sử dụng id từ studentID
-                        name: studentId.name, // Bạn cần thay thế tên này nếu có API khác để lấy tên thực
-                        class: nameClass // Đặt `class` bằng `nameClass`
+                        id: studentId,
+                        name: studentId.name,
+                        class: nameClass 
                     }));
 
-                    setStudents(formattedStudents); // Đổ dữ liệu học sinh đã format
+                    setStudents(formattedStudents);
                     setIsError(false);
                 } else {
                     console.error('Unexpected API response structure', response);
@@ -95,6 +96,7 @@ function RequestAbsentAplication() {
                 dateOff: dateOffArray.join(', '), // Ghép từng ngày lại thành chuỗi
                 content: reason.replace(/^<p>|<\/p>$/g, ''), // Nội dung lý do nghỉ học
                 slot: selectedPeriods, // Tiết học nghỉ
+
             };
 
             console.log("Final Data Sent:", applicationData); // Debug log
@@ -148,7 +150,7 @@ function RequestAbsentAplication() {
                     onButtonClick={handleSubmit}
                     onBack={onBack}
                 />
-                
+
                 <div className="bg-gray-100 ">
                     <div className="flex gap-4 h-[calc(100vh-150px)]">
                         <div className="w-full bg-white p-4 rounded-lg shadow overflow-y-auto">
