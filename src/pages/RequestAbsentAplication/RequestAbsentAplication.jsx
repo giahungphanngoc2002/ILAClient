@@ -13,17 +13,12 @@ import { toast } from "react-toastify";
 // Các dữ liệu mẫu cho học sinh
 
 function RequestAbsentAplication() {
-    const [title, setTitle] = useState("");
     const [reason, setReason] = useState("");
-    const [nameFilter, setNameFilter] = useState("");
-    const [classFilter, setClassFilter] = useState("");
-    const [selectedStudent, setSelectedStudent] = useState(null);
-    const [selectAll, setSelectAll] = useState(false);
     const [dateRange, setDateRange] = useState([null, null]);
     const [startDate, endDate] = dateRange;
     const [selectedPeriods, setSelectedPeriods] = useState([]); // State để lưu các tiết được chọn
     const [students, setStudents] = useState("");
-    const { idClass,idStudent } = useParams();
+    const { idClass, idStudent } = useParams();
     const user = useSelector((state) => state.user);
     const [isLoading, setIsLoading] = useState(true);
     const [isError, setIsError] = useState(false);
@@ -69,26 +64,6 @@ function RequestAbsentAplication() {
         }
     }, [idClass]);
 
-    const handleFileChange = (e) => {
-        // Handle file upload logic here
-    };
-
-    const handleSelectAllToggle = () => {
-        // Handle select all logic here
-    };
-
-    const handleStudentToggle = (id) => {
-        setSelectedStudent((prev) =>
-            prev === id ? null : id
-        );
-    };
-
-    const filteredStudents = Array.isArray(students)
-        ? students.filter((student) =>
-            student.name.toLowerCase().includes(nameFilter.toLowerCase()) &&
-            (classFilter ? student.class === classFilter : true)
-        )
-        : [];
 
     const handlePeriodToggle = (period) => {
         setSelectedPeriods((prev) =>
@@ -100,30 +75,30 @@ function RequestAbsentAplication() {
         try {
             // Chia từng ngày trong phạm vi
             const resultDates = getDatesBetween(startDate, endDate);
-    
+
             // Lấy thông tin chi tiết về ngày, tuần và năm
             const dateInfo = resultDates.map(date => ({
                 week: getISOWeek(date), // Tuần trong năm
                 year: format(date, 'yyyy'), // Năm
                 dateOff: format(date, 'yyyy-MM-dd') // Định dạng ngày nghỉ
             }));
-    
+
             console.log("Processed Dates:", dateInfo); // Debug log
-    
+
             // Tạo mảng dateOff chuẩn để gửi lên server
             const dateOffArray = dateInfo.map(info => info.dateOff);
-    
+
             // Chuẩn bị dữ liệu application
             const applicationData = {
                 week: dateInfo[0]?.week.toString(), // Lấy tuần từ ngày đầu tiên
                 year: dateInfo[0]?.year.toString(), // Lấy năm từ ngày đầu tiên
                 dateOff: dateOffArray.join(', '), // Ghép từng ngày lại thành chuỗi
-                content: reason, // Nội dung lý do nghỉ học
+                content: reason.replace(/^<p>|<\/p>$/g, ''), // Nội dung lý do nghỉ học
                 slot: selectedPeriods, // Tiết học nghỉ
             };
-    
+
             console.log("Final Data Sent:", applicationData); // Debug log
-    
+
             // Gửi dữ liệu đến server
             const response = await ClassService.createApplicationByParent(idClass, idStudent, applicationData);
             toast.success("Gửi Đơn Thành Công");
@@ -132,7 +107,7 @@ function RequestAbsentAplication() {
             toast.error("Gửi đơn thất bại!");
         }
     };
-    
+
 
     const onBack = () => {
         window.history.back();
@@ -142,7 +117,7 @@ function RequestAbsentAplication() {
     function getDatesBetween(startDate, endDate) {
         const dates = [];
         if (!startDate || !endDate) return dates;
-    
+
         let currentDate = new Date(startDate);
         while (currentDate <= endDate) {
             dates.push(new Date(currentDate)); // Push mỗi ngày vào mảng
@@ -152,7 +127,7 @@ function RequestAbsentAplication() {
     }
 
     let result = getDatesBetween(dateRange[0], dateRange[1]);
-        console.log(result)
+    console.log(result)
 
     function getDateInfo(dateRange) {
         return dateRange.map(date => {
@@ -173,9 +148,7 @@ function RequestAbsentAplication() {
                     onButtonClick={handleSubmit}
                     onBack={onBack}
                 />
-
                 
-
                 <div className="bg-gray-100 ">
                     <div className="flex gap-4 h-[calc(100vh-150px)]">
                         <div className="w-full bg-white p-4 rounded-lg shadow overflow-y-auto">

@@ -28,8 +28,8 @@ const ScoreTableStudent = () => {
     const [year, setYear] = useState("")
     const [semesters, setSemesters] = useState([])
     const [selectedClass, setSelectedClass] = useState();
-    const [semester1, setSemester1] = useState();
-    const [semester2, setSemester2] = useState();
+    const [selectedNameSemester, setSelectedNameSemester] = useState();
+    const [achivement, setAchivement] = useState();
 
 
     useEffect(() => {
@@ -72,7 +72,7 @@ const ScoreTableStudent = () => {
 
         return `${yearResult}-${monthResult}-${dayResult}`;
     }
-    
+
     function processTimeTable(data) {
         const result = {};
 
@@ -189,19 +189,14 @@ const ScoreTableStudent = () => {
         const fetchClasses = async () => {
             try {
                 const allClasses = await ClassService.getAllClass();
-                console.log(allClasses)
                 setClasses(allClasses?.data || []);
                 const userClass = findUserClass(allClasses?.data || [], user.id);
-                console.log(userClass)
                 setUserClasses(userClass)
                 setYear(userClass[0].year)
-                    
-
                 const filterUserClass = userClass.find((classItem) => {
                     return classItem._id === selectedClass;
                 });
 
-                console.log(filterUserClass)
 
                 if (filterUserClass && filterUserClass?.SubjectsId) {
                     setClassSubject(filterUserClass?.SubjectsId);
@@ -219,31 +214,29 @@ const ScoreTableStudent = () => {
         fetchClasses();
     }, [user.id, selectedClass]);
 
-    console.log(year)
     useEffect(() => {
-            const fetchYear = async () => {
-                try {
-                    setLoading(true); // Bắt đầu tải
-                    const response = await SubjectService.getAllSemesterByYear(year);
-                    setSemesters(response?.semesters)
-                } catch (error) {
-                    console.error("Lỗi khi lấy chi tiết lớp:", error);
-                } finally {
-                    setLoading(false); // Kết thúc tải
-                }
-            };
-            if (year) {
-                fetchYear();
+        const fetchYear = async () => {
+            try {
+                setLoading(true); // Bắt đầu tải
+                const response = await SubjectService.getAllSemesterByYear(year);
+                setSemesters(response?.semesters)
+            } catch (error) {
+                console.error("Lỗi khi lấy chi tiết lớp:", error);
+            } finally {
+                setLoading(false); // Kết thúc tải
             }
-    
-        }, [year]);
+        };
+        if (year) {
+            fetchYear();
+        }
+
+    }, [year]);
 
     const filterSubjectEvaluationsByUserId = () => {
         if (!Array.isArray(classSubjectPhu)) {
             console.warn('classSubjectPhu is not an array or is undefined');
             return [];  // Trả về mảng rỗng nếu classSubjectPhu không hợp lệ
         }
-
 
         return classSubjectPhu.map(subject => {
             const userEvaluate = subject.evaluate.filter(evaluation => evaluation.StudentId === user.id);
@@ -261,6 +254,20 @@ const ScoreTableStudent = () => {
     useEffect(() => {
         setSubjectEvaluate(filterSubjectEvaluationsByUserId());
     }, [classSubjectPhu, user.id]);
+
+    useEffect(() => {
+        if (userClasses.length > 0) {
+            setSelectedClass(userClasses[0]._id);
+        }
+    }, [userClasses]);
+
+    useEffect(() => {
+        if (semesters.length > 0) {
+            // Tự động chọn kỳ 1 (giả sử kỳ 1 là phần tử đầu tiên trong mảng)
+            setSelectedSemester(semesters[0]._id);
+            setSelectedNameSemester(semesters[0].nameSemester)
+        }
+    }, [semesters]);
 
     const filterBySemester = () => {
         if (!subjectEvaluate || !Array.isArray(subjectEvaluate)) {
@@ -293,8 +300,6 @@ const ScoreTableStudent = () => {
         });
     };
 
-    // console.log(filterBySemester())
-
     // Hàm gọi API và định dạng lại dữ liệu
     const fetchScores = async (semester, classId) => {
         if (!classSubject || !Array.isArray(classSubject)) {
@@ -306,16 +311,17 @@ const ScoreTableStudent = () => {
         setLoading(true);
         setError(null);
 
+        const findSemester = semesters.find((smt) => {
+            return smt._id === semester
+        })
+
         try {
             // Lấy dữ liệu điểm từ API
             const rawData = await ScoreSbujectService.getAllScoreByStudentIdSemesterAndClass(studentId, semester, classId);
-            console.log(rawData)
-            // Kiểm tra nếu rawData không có dữ liệu
             if (!rawData || rawData.data.length === 0) {
-                console.warn(`Không có dữ liệu điểm trả về cho kỳ ${semester}`);
                 setGrades(prev => ({
                     ...prev,
-                    [semester]: classSubject.map(subject => ({
+                    [findSemester.nameSemester]: classSubject.map(subject => ({
                         subject: subject.nameSubject,
                         regular: [],
                         midterm: [],
@@ -353,13 +359,13 @@ const ScoreTableStudent = () => {
 
             setGrades(prev => ({
                 ...prev,
-                [semester]: formattedData,
+                [findSemester.nameSemester]: formattedData,
             }));
         } catch (err) {
             // console.error("Error fetching scores:", err.message || err);
             setGrades(prev => ({
                 ...prev,
-                [semester]: classSubject.map(subject => ({
+                [findSemester.nameSemester]: classSubject.map(subject => ({
                     subject: subject.nameSubject,
                     regular: [],
                     midterm: [],
@@ -371,23 +377,20 @@ const ScoreTableStudent = () => {
         }
     };
 
-
     useEffect(() => {
-        if (classSubject && Array.isArray(classSubject) && semesters.length > 0) {
-          for (const semester of semesters) {
-           
-              fetchScores(semester._id, selectedClass);
-               // Thoát vòng lặp khi tìm thấy kỳ học phù hợp
-            
-          }
+        for (const semester of semesters) {
+            fetchScores(semester._id, selectedClass);
         }
-      }, [selectedClass, classSubject, selectedSemester, semesters]);
+    }, [selectedClass, classSubject, selectedSemester, semesters]);
 
-    const handleSemesterChange = (semester) => {
-        setSelectedSemester(semester);
+    const handleSemesterChange = (semesterId) => {
+        const findSemester = semesters.find((semester) => {
+            return semester._id === semesterId
+        })
+        setSelectedSemester(semesterId);
+        setSelectedNameSemester(findSemester.nameSemester);
     };
 
-    console.log(selectedSemester)
 
     const onBack = () => {
         window.history.back();
@@ -466,6 +469,7 @@ const ScoreTableStudent = () => {
 
     const averages = getAllSubjectAverages();
 
+
     const getAllEvaluate = () => {
         if (!subjectEvaluate || !Array.isArray(subjectEvaluate)) {
             console.warn('subjectEvaluate is not an array or is undefined');
@@ -488,8 +492,9 @@ const ScoreTableStudent = () => {
     };
 
     const evaluates = getAllEvaluate()
-    console.log(evaluates)
-    console.log(averages)
+
+    console.log(achivement)
+
     return (
         <div className="flex flex-col items-center justify-center min-h-screen p-6">
             <Breadcrumb
@@ -501,31 +506,33 @@ const ScoreTableStudent = () => {
             <div className="pt-8"></div>
 
             <div className='w-4/5'>
-                <SummaryStudent studentId={studentId} selectedSemester={selectedSemester} evaluates={evaluates} averages={averages} />
+                <SummaryStudent
+                    studentId={studentId}
+                    selectedSemester={selectedSemester}
+                    evaluates={evaluates}
+                    averages={averages}
+                    semesters={semesters}
+                    setAchivement={setAchivement}
+                />
 
-                <SummaryAttendanceAndAward countAbsent={countAbsent} />
+                <SummaryAttendanceAndAward
+                    countAbsent={countAbsent}
+                    achivement={achivement}
+                />
             </div>
 
             <div className="flex gap-2 mb-6">
-                {semesters.map((semester)=>(
+                {semesters.map((semester) => (
                     <button
-                    className={`px-4 py-2 rounded-lg font-semibold ${
-                      selectedSemester === semester._id
-                        ? "bg-blue-500 text-white"
-                        : "bg-gray-200 text-gray-700"
-                    }`}
-                    onClick={() => handleSemesterChange(semester._id)}
-                  >
-                    Kỳ {semester.nameSemester}
-                  </button>
+                        className={`px-4 py-2 rounded-lg font-semibold ${selectedSemester === semester._id
+                            ? "bg-blue-500 text-white"
+                            : "bg-gray-200 text-gray-700"
+                            }`}
+                        onClick={() => handleSemesterChange(semester._id)}
+                    >
+                        Kỳ {semester.nameSemester}
+                    </button>
                 ))}
-                
-                {/* <button
-                    className={`px-4 py-2 rounded-lg font-semibold ${selectedSemester === "2" ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700"}`}
-                    onClick={() => handleSemesterChange("2")}
-                >
-                    Kỳ 2
-                </button> */}
             </div>
 
             <div className="mb-6">
@@ -552,7 +559,7 @@ const ScoreTableStudent = () => {
                 {loading && <p className="text-blue-500">Đang tải dữ liệu...</p>}
                 {error && <p className="text-red-500">{error}</p>}
 
-                {!loading && !error && grades[selectedSemester] && (
+                {!loading && !error && grades[selectedNameSemester] && (
                     <table className="w-full border-collapse text-left table-fixed bg-white">
                         <thead>
                             <tr className="bg-blue-100 text-blue-700 text-lg font-semibold">
@@ -564,7 +571,7 @@ const ScoreTableStudent = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {grades[selectedSemester]?.map((grade, index) => (
+                            {grades[selectedNameSemester]?.map((grade, index) => (
                                 <tr key={index} className="hover:bg-blue-50 text-gray-700 text-lg">
                                     <td className="px-4 py-4 border border-gray-200">
                                         {grade.subject}

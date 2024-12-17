@@ -2,7 +2,7 @@ import React from 'react';
 import { FaCalendarAlt, FaTrophy } from 'react-icons/fa';
 import { BsAward } from 'react-icons/bs';
 
-const SummaryAttendanceAndAward = ({ countAbsent }) => {
+const SummaryAttendanceAndAward = ({ countAbsent, achivement }) => {
     console.log("ben nay:", countAbsent)
     return (
         <div className="w-full">
@@ -38,7 +38,7 @@ const SummaryAttendanceAndAward = ({ countAbsent }) => {
                             <BsAward className="text-yellow-500 w-8 h-8 mr-4" />
                             <div>
                                 <span className="text-gray-700 font-semibold">Danh hiệu</span>
-                                <p className="text-gray-600 m-0">Học sinh giỏi</p>
+                                <p className="text-gray-600 m-0">{achivement}</p>
                             </div>
                         </div>
                         <div className="bg-orange-100 rounded-r-lg p-4 flex items-center w-1/2 min-h-[120px] h-full">

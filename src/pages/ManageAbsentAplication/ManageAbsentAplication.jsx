@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { FaChevronDown } from "react-icons/fa";
 import { GoPlus } from "react-icons/go";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import * as NotificationService from "../../services/NotificationService";
 import * as ClassService from "../../services/ClassService";
 import { useSelector } from "react-redux";
@@ -13,10 +13,11 @@ function ManageAbsentAplication() {
     const [selectedApplication, setSelectedApplication] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
     const navigate = useNavigate();
-    const [emails, setEmails] = useState([]);
     const [application, setApplication] = useState([]);
     const user = useSelector((state) => state.user);
     const [isLoading, setIsLoading] = useState(false);
+    const { idClass } = useParams();
+
 
     useEffect(() => {
         // Hàm gọi API và cập nhật state
@@ -27,7 +28,7 @@ function ManageAbsentAplication() {
                 setApplication(data.applications); // Giả sử API trả về dữ liệu trong `data`
             } catch (error) {
                 console.error("Failed to fetch notifications:", error);
-            }finally {
+            } finally {
                 setIsLoading(false); // Kết thúc loading
             }
         };
@@ -43,13 +44,13 @@ function ManageAbsentAplication() {
             if (selectedApplicationId) {
                 setIsLoading(true);
                 try {
-                    
+
                     const data = await ClassService.getDetailApplicationAbsent(selectedApplicationId);
 
                     setSelectedApplication(data.application); // Giả sử API trả về dữ liệu trong `data`
                 } catch (error) {
                     console.error("Failed to fetch notification details:", error);
-                }finally {
+                } finally {
                     setIsLoading(false);
                 }
             }
@@ -75,11 +76,7 @@ function ManageAbsentAplication() {
     );
 
     const goToCreateNotification = () => {
-        if (user.role === "Teacher") {
-            navigate('/manage/notificationToStudent');
-        } else if (user.role === "Admin") {
-            navigate('/manage/notificationToSchool');
-        }
+        navigate(`/manage/addAbsenceRequest/${idClass}`)
     };
 
     const handleDelete = async (id) => {
@@ -99,7 +96,7 @@ function ManageAbsentAplication() {
         } catch (error) {
             console.error("Failed to delete application:", error);
             toast.error("Xóa đơn nghỉ học thất bại.");
-        }finally {
+        } finally {
             setIsLoading(false); // Kết thúc loading
         }
     };
@@ -121,10 +118,12 @@ function ManageAbsentAplication() {
         } catch (error) {
             console.error("Failed to delete application:", error);
             toast.error("Xóa đơn nghỉ học thất bại.");
-        }finally {
+        } finally {
             setIsLoading(false); // Kết thúc loading
         }
     };
+
+
 
 
     return (
@@ -196,7 +195,7 @@ function ManageAbsentAplication() {
                     </div>
                 )}
             </div>
-    
+
             {/* Chi tiết email */}
             <div className="bg-white w-2/3 p-4 overflow-y-auto h-full"
                 style={{ borderTopRightRadius: "16px", borderBottomRightRadius: "16px" }}
@@ -216,8 +215,11 @@ function ManageAbsentAplication() {
                             <h3 className="font-medium text-lg my-3">Nội dung</h3>
                             <p className="mb-4">{selectedApplication.content}</p>
                         </div>
-                        <h3 className="font-medium text-lg mb-2">Slot</h3>
-                        <p className="mb-4">{selectedApplication.slot}</p>
+                        <h3 className="font-medium text-lg mb-2">Tiết học</h3>
+                        {selectedApplication.slot.map((sl) => (
+
+                            <p className="mb-4">Tiết {sl}</p>
+                        ))}
                         <h3 className="font-medium text-lg mb-2">Trạng thái</h3>
                         <button
                             className="px-4 py-2 bg-green-600 text-white rounded-lg shadow-lg hover:bg-green-700"
@@ -233,7 +235,7 @@ function ManageAbsentAplication() {
                         >
                             {isLoading ? "Đang xử lý..." : "Từ chối"}
                         </button>
-                    
+
                     </div>
                 ) : (
                     <p className="text-gray-500">Chưa chọn thông báo</p>
@@ -241,7 +243,7 @@ function ManageAbsentAplication() {
             </div>
         </div>
     );
-    
+
 }
 
 export default ManageAbsentAplication;

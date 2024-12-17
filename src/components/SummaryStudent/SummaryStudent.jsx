@@ -4,7 +4,7 @@ import { RiStarFill } from "react-icons/ri";
 import { HiClipboardList } from 'react-icons/hi';
 import * as ClassService from "../../services/ClassService";
 
-const SummaryStudent = ({ studentId, selectedSemester, evaluates, averages }) => {
+const SummaryStudent = ({ studentId, selectedSemester, evaluates, averages, semesters , setAchivement }) => {
     const [conduct, setConduct] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -15,7 +15,31 @@ const SummaryStudent = ({ studentId, selectedSemester, evaluates, averages }) =>
     const [dtb1, setDtb1] = useState();
     const [dtb2, setDtb2] = useState();
     const [finalHocLuc, setFinalHocLuc] = useState();
-    const [finalDtb, setFinalDtb] = useState();
+    // const [achievement, setAchivement] = useState()
+
+
+
+    const semesterMapping = semesters.reduce((acc, { _id, nameSemester }) => {
+        acc[_id] = nameSemester;
+        return acc;
+    }, {});
+
+    const updatedEvaluates = evaluates.map(evaluate => {
+        const nameSemester = semesterMapping[evaluate.semester];
+        return { ...evaluate, semester: nameSemester };
+    });
+
+    function countNotAchievedSemester1(evalutes) {
+        return evalutes.filter(evaluate => evaluate.semester === 1 && evaluate.evaluate !== "Đạt").length;
+    }
+
+    function countNotAchievedSemester2(evalutes) {
+        return evalutes.filter(evaluate => evaluate.semester === 2 && evaluate.evaluate !== "Đạt").length;
+    }
+
+    const notAchievedCountSemester1 = countNotAchievedSemester1(updatedEvaluates);
+    const notAchievedCountSemester2 = countNotAchievedSemester2(updatedEvaluates);
+
 
     useEffect(() => {
         const fetchConduct = async () => {
@@ -25,7 +49,6 @@ const SummaryStudent = ({ studentId, selectedSemester, evaluates, averages }) =>
             setError(null);
             try {
                 const data = await ClassService.getConductByStudentIdAndSemester(studentId, selectedSemester);
-                console.log()
                 setConduct1(data);
             } catch (err) {
                 // setError('Không thể tải dữ liệu hạnh kiểm');
@@ -36,11 +59,7 @@ const SummaryStudent = ({ studentId, selectedSemester, evaluates, averages }) =>
         };
 
         fetchConduct();
-    }, [studentId,selectedSemester]);
-
-    console.log(conduct1)
-    console.log(conduct2)
-    console.log("123",selectedSemester)
+    }, [studentId, selectedSemester]);
 
     useEffect(() => {
         const fetchConduct = async () => {
@@ -52,14 +71,14 @@ const SummaryStudent = ({ studentId, selectedSemester, evaluates, averages }) =>
                 const data = await ClassService.getConductByStudentIdAndSemester(studentId, selectedSemester);
                 setConduct2(data);
             } catch (err) {
-                // setError('Không thể tải dữ liệu hạnh kiểm');
+
             } finally {
                 setLoading(false);
             }
         };
 
         fetchConduct();
-    }, [studentId,selectedSemester]);
+    }, [studentId, selectedSemester]);
 
 
     const calculateTotalAverage = (semester) => {
@@ -72,26 +91,25 @@ const SummaryStudent = ({ studentId, selectedSemester, evaluates, averages }) =>
         return average.toFixed(2);
     };
 
-    const classify = (semester) => {
-        // Kiểm tra nếu có phần average là "Chưa có"
+    const classify = (semester, count) => {
         if (semester.some(item => item.average === "Chưa có")) {
             return "Chưa có";
         }
 
-        const above8 = semester.filter(item => item.average > 8);
-        const above6_5 = semester.filter(item => item.average > 6.5);
-        const above5 = semester.filter(item => item.average > 5);
-        const above3_5 = semester.filter(item => item.average > 3.5);
+        const above8 = semester.filter(item => item.average >= 8);
+        const above6_5 = semester.filter(item => item.average >= 6.5);
+        const above5 = semester.filter(item => item.average >= 5);
+        const above3_5 = semester.filter(item => item.average >= 3.5);
 
-        if (above8.length >= 6 && above6_5.length >= 10) {
+        if (above8.length >= 6 && above6_5.length >= 10 && count == 0) {
             return "Tốt";
         }
 
-        if (above6_5.length >= 6 && above5.length >= 10) {
+        if (above6_5.length >= 6 && above5.length >= 10 && count == 0) {
             return "Khá";
         }
 
-        if (above5.length >= 6 && above3_5.length >= 3.5) {
+        if (above5.length >= 6 && above3_5.length >= 3.5 && count == 1) {
             return "Đạt";
         }
 
@@ -102,8 +120,8 @@ const SummaryStudent = ({ studentId, selectedSemester, evaluates, averages }) =>
         const semester1 = averages.filter(item => item.semester === "1");
         const semester2 = averages.filter(item => item.semester === "2");
 
-        const resultSemester1 = classify(semester1);
-        const resultSemester2 = classify(semester2);
+        const resultSemester1 = classify(semester1, notAchievedCountSemester1);
+        const resultSemester2 = classify(semester2, notAchievedCountSemester2);
 
         setHocLuc1(resultSemester1);
         setHocLuc2(resultSemester2);
@@ -122,8 +140,9 @@ const SummaryStudent = ({ studentId, selectedSemester, evaluates, averages }) =>
 
 
     useEffect(() => {
-        const semester1 = averages.filter(item => item.semester === selectedSemester);
-        const semester2 = averages.filter(item => item.semester === selectedSemester);
+        const semester1 = averages.filter(item => item.semester == "1");
+        const semester2 = averages.filter(item => item.semester == "2");
+
         const calculateAverage = (semester1, semester2) => {
             return (parseFloat(semester1) + 2 * parseFloat(semester2)) / 3;
         };
@@ -139,11 +158,51 @@ const SummaryStudent = ({ studentId, selectedSemester, evaluates, averages }) =>
             }
             return null;
         }).filter(item => item !== null);
-
-        const resultFinal = classify(result)
+        const resultFinal = classify(result, notAchievedCountSemester2)
         setFinalHocLuc(resultFinal)
-
     }, [averages]);
+
+    const checkAchivement = (semester) => {
+        if (semester.some(item => item.average === "Chưa có")) {
+            return "Chưa có";
+        }
+
+        const above9 = semester.filter(item => item.average >= 9.00);
+        const above8 = semester.filter(item => item.average >= 8.00);
+
+        if (above9.length >= 6 && above8.length >= 10) {
+            return "Học Sinh Xuất sắc";
+        }
+
+        return "Học Sinh Giỏi";
+    };
+
+    useEffect(() => {
+        if (finalHocLuc === "Tốt") {
+            const semester1 = averages.filter(item => item.semester == "1");
+            const semester2 = averages.filter(item => item.semester == "2");
+
+            const calculateAverage = (semester1, semester2) => {
+                return (parseFloat(semester1) + 2 * parseFloat(semester2)) / 3;
+            };
+
+            const result = semester1.map((item1) => {
+                const item2 = semester2.find(item => item.subject === item1.subject);
+                if (item2) {
+                    const average = item2.average === "Chưa có" ? "Chưa có" : calculateAverage(item1.average, item2.average).toFixed(2);
+                    return {
+                        subject: item1.subject,
+                        average: average
+                    };
+                }
+                return null;
+            }).filter(item => item !== null);
+            const achivement = checkAchivement(result)
+            setAchivement(achivement)
+        }
+    }, [finalHocLuc]);
+
+    // console.log(achievement)
 
 
     function tinhHanhKiem(hk1, hk2) {
@@ -171,8 +230,6 @@ const SummaryStudent = ({ studentId, selectedSemester, evaluates, averages }) =>
             return mucHanhKiem[indexHK1 + 1];
         }
     }
-
-
 
     const data = [
         {
