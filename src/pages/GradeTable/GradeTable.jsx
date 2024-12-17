@@ -118,7 +118,7 @@ const GradeTable = () => {
                 const response = await SubjectService.getAllSemesterByYear(year);
                 setSemesters(response?.semesters)
             } catch (error) {
-                console.error("Lỗi khi lấy chi tiết lớp:", error);
+                console.error("Lỗi khi lấy chi tiết lớp: ", error);
             } finally {
                 setLoading(false); // Kết thúc tải
             }
