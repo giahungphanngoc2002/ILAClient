@@ -135,11 +135,6 @@ const TimeTable = ({  }) => {
 
 
 
-    // const goToInfoSlot = (idSchedule, idSlot) => {
-    //     // navigate(`/student/timeTable/infoSlot/${idSchedule}/${idSlot}`);
-    // };
-
-
     const goToInfoSlot = (idSchedule, idSlot , slotTime) => {
         setModalData({ show: true, idSchedule, idSlot , slotTime });
     };

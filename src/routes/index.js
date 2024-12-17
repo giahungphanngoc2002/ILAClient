@@ -49,6 +49,7 @@ import DocumentList from "../pages/DocumentList/DocumentList";
 import RequestAbsentAplication from "../pages/RequestAbsentAplication/RequestAbsentAplication";
 import ManageAbsentAplication from "../pages/ManageAbsentAplication/ManageAbsentAplication";
 import ScoreTableForParent from "../pages/ScoreTableForParent/ScoreTableForParent";
+import ManageNoteBook from "../pages/ManageNoteBook/ManageNoteBook";
 
 export const routes = [
   {
@@ -420,6 +421,16 @@ export const routes = [
     ),
     isShowHeader: false,
     isShowSideBar: false,
+  },
+  {
+    path: "/manage/manageNoteBook/:idClass",
+    page: () => (
+      <ProtectedRoute>
+        <ManageNoteBook />
+      </ProtectedRoute>
+    ),
+    isShowHeader: false,
+    isShowSideBar: true,
   },
   {
     path: "/manage/autoCreateAccount",
