@@ -264,7 +264,7 @@ const CreateCalender = () => {
                                     );
                                 }
 
-                                updatedSlots = [...updatedSlots, ...newSlots];
+                                updatedSlots = [...updatedSlots];
 
                                 return { dayOfWeek: day, slots: updatedSlots };
                             }

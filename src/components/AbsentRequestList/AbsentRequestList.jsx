@@ -9,6 +9,7 @@ const AbsenceRequestList = ({ idClass, year, week, dayOfWeek, targetSlot }) => {
     useEffect(() => {
         console.log("Year:", year, "Week:", week, "Day of Week:", dayOfWeek, "Target Slot:", targetSlot);
     }, [year, week, dayOfWeek, targetSlot]);
+    
 
     useEffect(() => {
         const fetchAbsenceRequests = async () => {
@@ -38,28 +39,37 @@ const AbsenceRequestList = ({ idClass, year, week, dayOfWeek, targetSlot }) => {
     console.log(absenceRequests)
 
     // Hàm để tính số tuần của một ngày nhất định
-
+    const targetSlotNumber = targetSlot?.slotNumber;
+    console.log("Target Slot Number is not defined or invalid",targetSlotNumber);
+    if (!targetSlotNumber) {
+      
+      return [];
+    }
 // Lọc các yêu cầu nghỉ học khớp với các điều kiện về ngày, tuần, và tiết
 // Lọc các yêu cầu nghỉ học khớp với các điều kiện về năm, tuần, và tiết
 const filteredAbsenceRequests = absenceRequests.filter(request => {
     const requestWeek = parseInt(request?.week); // Lấy tuần từ request
     const requestYear = parseInt(request?.year); // Lấy năm từ request
     const requestSlot = request?.slot;
+    const requestNameStudent = request?.studentId?.name;
 
     // console.log("Request Year:", requestYear);
     // console.log("Request Week:", requestWeek);
     // console.log("Expected Year:", year);
     // console.log("Expected Week:", week);
-    // console.log("Expected DayOfWeek:", dayOfWeek);
-    // console.log("Expected Slot Number:", targetSlot?.slotNumber);
-
+    console.log("Expected DayOfWeek:", requestSlot);
+    console.log("Expected Slot Number:", targetSlot?.slotNumber);
+        
     // So sánh năm, tuần, và slot để xác nhận yêu cầu nghỉ học
     return (
         requestYear === parseInt(year) && // So sánh năm
         requestWeek === parseInt(week) && // So sánh tuần
-        requestSlot.includes(targetSlot?.slotNumber) // So sánh slot
+         requestSlot?.includes(targetSlot?.slotNumber)&&
+        requestNameStudent 
     );
 });
+
+console.log(filteredAbsenceRequests)
 
     
 
@@ -91,7 +101,7 @@ const filteredAbsenceRequests = absenceRequests.filter(request => {
                         <div key={request._id || index} className="p-4 mb-2 bg-white">
                             <div className="grid grid-cols-12 mb-2">
                                 <div className="col-span-6 font-medium">
-                                    {index + 1}. {request.studentId?.name || "Unknown"}
+                                    {index + 1}. {request?.studentId?.name || "Unknown"}
                                 </div>
                             </div>
                             <div className="text-gray-700 mb-1">

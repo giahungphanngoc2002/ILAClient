@@ -72,8 +72,7 @@ const Dashboard = () => {
 
     const currentYearr = new Date().getFullYear();
     const result = `${currentYearr}-${currentYearr + 1}`;
-
-    const findUserClasses = (allClasses, userId) => {
+const findUserClasses = (allClasses, userId) => {
         if (!Array.isArray(allClasses)) {
             console.error("All classes is not a valid array:", allClasses);
             return [];
@@ -166,7 +165,7 @@ const Dashboard = () => {
         if (!teacherId) return;
         const fetchDetailClassByTeacherHR = async () => {
             setIsLoading(true);
-            try {
+try {
                 const response = await ClassService.getDetailClassByTeacherHR(teacherId);
                 if (response && response.data) {
                     setClassHR(response.data);
@@ -249,7 +248,7 @@ const Dashboard = () => {
         console.log(hasScoreSubject);
         // Logic điều hướng dựa trên selectedCard
         if (selectedCard === "attendance") {
-            navigate(`/attendance/${subjectId}`);
+navigate(`/attendance/${subjectId}`);
         } else if (selectedCard === "grade") {
             if (hasScoreSubject) {
                 navigate(`/manage/gradeTable/${subjectId}/${selectedClass}/1`);
@@ -351,8 +350,7 @@ const Dashboard = () => {
     const handleGoToAutoCreateAccount = () => {
         navigate(`/manage/autoCreateAccount`)
     }
-
-    const handleGoToManageAccount = () => {
+const handleGoToManageAccount = () => {
         navigate(`/manage/manageAccount`)
     }
 
@@ -410,7 +408,7 @@ const Dashboard = () => {
                     </div>
                     <div className="bg-white rounded-lg shadow p-4 text-center">
                         <h3 className="text-lg font-semibold">Đi muộn buổi chiều</h3>
-                        <span className="text-2xl font-bold text-orange-500">0</span>
+<span className="text-2xl font-bold text-orange-500">0</span>
                     </div>
                     <div className="bg-white rounded-lg shadow p-4 text-center">
                         <h3 className="text-lg font-semibold">Nghỉ CP buổi chiều</h3>
@@ -453,7 +451,7 @@ const Dashboard = () => {
                             </div>
 
                             <div onClick={() => handleCardClick("question")} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
-                                <div className="bg-red-400 p-4 rounded-full mb-2">
+<div className="bg-red-400 p-4 rounded-full mb-2">
                                     <FaClipboardQuestion size={32} className="text-white" />
                                 </div>
                                 <p className="font-semibold">Quản lí câu hỏi</p>
@@ -479,12 +477,19 @@ const Dashboard = () => {
                                         <p className="font-semibold">Quản lí đơn nghỉ học</p>
                                     </div>
 
+                                    <div onClick={() => handleGoToManageAbsentRequest(classHR._id)} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
+                                        <div className="bg-yellow-500 p-4 rounded-full mb-2">
+                                            <TbSquareLetterA size={32} className="text-white" />
+                                        </div>
+                                        <p className="font-semibold">Sổ đầu bài</p>
+                                    </div>
+
                                     {/* Other Cards */}
                                     <div onClick={handleGoToViewScoreInClassTHR} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
                                         <div className="bg-green-400 p-4 rounded-full mb-2">
                                             <GrScorecard size={32} className="text-white" />
                                         </div>
-                                        <p className="font-semibold">Điểm số</p>
+<p className="font-semibold">Điểm số</p>
                                     </div>
 
                                     <div onClick={() => handleGoToProfileStudentInClass(classHR._id)} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
@@ -522,7 +527,7 @@ const Dashboard = () => {
 
                             <div onClick={handleGoToSendNoti} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
                                 <div className="bg-lime-500 p-4 rounded-full mb-2">
-                                    <BiMailSend size={32} className="text-white" />
+<BiMailSend size={32} className="text-white" />
                                 </div>
                                 <p className="font-semibold">Gửi thông báo</p>
                             </div>
@@ -563,7 +568,7 @@ const Dashboard = () => {
                                 <p className="font-semibold">Xem điểm</p>
                             </div>
                             <div onClick={handleGoToViewExamSchedule} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
-                                <div className="bg-green-400 p-4 rounded-full mb-2">
+<div className="bg-green-400 p-4 rounded-full mb-2">
                                     <AiOutlineTrophy size={32} className="text-white" />
                                 </div>
                                 <p className="font-semibold">Xem lịch thi</p>
@@ -605,7 +610,7 @@ const Dashboard = () => {
                             <div onClick={handleGoToCreateExamSchedule} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
                                 <div className="bg-orange-400 p-4 rounded-full mb-2">
                                     <AiOutlineSchedule size={32} className="text-white" />
-                                </div>
+</div>
                                 <p className="font-semibold">Tạo lịch thi</p>
                             </div>
 
@@ -643,7 +648,7 @@ const Dashboard = () => {
                                 <div className="bg-yellow-500 p-4 rounded-full mb-2">
                                     <MdAccountCircle size={32} className="text-white" />
                                 </div>
-                                <p className="font-semibold">Quản lý tài khoản</p>
+<p className="font-semibold">Quản lý tài khoản</p>
                             </div>
                         </div>
                     </div>
@@ -693,7 +698,7 @@ const Dashboard = () => {
                         <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">Chọn môn học</h2>
 
                         {/* Tìm kiếm */}
-                        <div className="mb-4">
+<div className="mb-4">
                         </div>
 
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">

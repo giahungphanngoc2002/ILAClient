@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Toggle from '../../components/Toggle/Toggle';
-import { Modal, Button, Dropdown } from 'react-bootstrap';
+import { Modal, Button, Dropdown, Form } from 'react-bootstrap';
 import { FaArrowLeft } from 'react-icons/fa';
 import * as ClassService from "../../services/ClassService";
 import * as SubjectService from "../../services/SubjectService";
@@ -25,10 +25,7 @@ const StudentTable = () => {
   const [isInitialLoadComplete, setIsInitialLoadComplete] = useState(false);
   const [absenceTypes, setAbsenceTypes] = useState({});
   const [selectedSemester, setSelectedSemester] = useState(1);
-  const [semesterScores, setSemesterScores] = useState({
-    1: { diemThuongXuyen: [], diemGiuaKi: [], diemCuoiKi: '' },
-    2: { diemThuongXuyen: [], diemGiuaKi: [], diemCuoiKi: '' }
-  });
+  const [score, setScore] = useState();
   const [filteredStudents, setFilteredStudents] = useState(students);
   const location = useLocation();
   const { year, week } = location.state || {};
@@ -37,6 +34,9 @@ const StudentTable = () => {
   const [detailClass, setDetailClass] = useState();
   const [idSubjectOfSJCD, setIdSubjectOfSJCD] = useState();
   const [detailSubject, setDetailSubject] = useState();
+  const [isOpenModal, setIsOpenModal] = useState(false);
+  const [content, setContent] = useState();
+  const [isLoading, setIsLoading] = useState(false);
 
   console.log(detailSubject)
 
@@ -102,7 +102,7 @@ const StudentTable = () => {
 
 
 
-  
+
 
   useEffect(() => {
     if (year && week) {
@@ -110,14 +110,6 @@ const StudentTable = () => {
     }
   }, [year, week]);
 
-  useEffect(() => {
-    if (semesterScores[selectedSemester]) {
-      setStudentScores((prev) => ({
-        ...prev,
-        scores: semesterScores[selectedSemester],
-      }));
-    }
-  }, [selectedSemester, semesterScores]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -172,7 +164,6 @@ const StudentTable = () => {
                 isExcused: absentInfo ? absentInfo.isExcused : false // Đặt `isExcused` dựa trên `absentInfo`
               };
             });
-
             // Cập nhật danh sách sinh viên
             setStudents(updatedStudents);
             setIsInitialLoadComplete(true); // Đánh dấu đã tải xong dữ liệu
@@ -234,126 +225,6 @@ const StudentTable = () => {
       [id]: type
     }));
   };
-  const processScores = (scoresData, semester) => {
-    const allScoresData = scoresData || [];  // Nếu không có dữ liệu, sử dụng mảng rỗng
-    const scoreId = allScoresData.length > 0 ? allScoresData[0]._id : null;
-
-    // Phân loại điểm theo loại và học kỳ
-    const categorizedScores = {
-      diemThuongXuyen: allScoresData
-        .flatMap(data => data.scores)
-        .filter(score => score.type === 'thuongXuyen' && score.semester === semester)
-        .map(score => score.score),
-      diemGiuaKi: allScoresData
-        .flatMap(data => data.scores)
-        .filter(score => score.type === 'giuaKi' && score.semester === semester)
-        .map(score => score.score),
-      diemCuoiKi: allScoresData
-        .flatMap(data => data.scores)
-        .filter(score => score.type === 'cuoiKi' && score.semester === semester)
-        .map(score => score.score)[0] || '',  // Nếu không có điểm cuối kỳ, mặc định là chuỗi rỗng
-    };
-
-    return { categorizedScores, scoreId };
-  };
-
-  const openModal = async (student) => {
-    try {
-      // Kiểm tra xem môn học có phải là Chuyên đề không
-      const subjectToUse = isSubjectInChuyenDe(idSubject, detailClass?.SubjectsChuyendeId)
-        ? idSubjectOfSJCD // Nếu là Chuyên đề thì dùng idSubjectOfSJCD
-        : idSubject; // Nếu không thì dùng idSubject mặc định
-
-      // Fetch scores for semester 1
-      const scoresDataSemester1 = await ScoreSbujectService.getAllScoresBySubject(subjectToUse, idClass, 1, student._id);
-      const semester1 = processScores(scoresDataSemester1, 1);
-
-      // Try to fetch scores for semester 2, but handle any potential errors for semester 2 independently
-      let semester2 = { categorizedScores: { diemThuongXuyen: [], diemGiuaKi: [], diemCuoiKi: '' }, scoreId: null };
-      try {
-        const scoresDataSemester2 = await ScoreSbujectService.getAllScoresBySubject(subjectToUse, idClass, 2, student._id);
-        semester2 = processScores(scoresDataSemester2, 2);
-      } catch (error) {
-        console.warn('Error fetching scores for semester 2:', error);
-      }
-
-      // Initialize semesterScores with the data that was successfully fetched
-      setSemesterScores({
-        1: semester1.categorizedScores,
-        2: semester2.categorizedScores,
-      });
-
-      // Store scoreId per semester and set student scores
-      setStudentScores({
-        name: student.name,
-        id: student._id,
-        scoreIds: { 1: semester1.scoreId, 2: semester2.scoreId },
-        scores: {
-          1: semester1.categorizedScores,
-          2: semester2.categorizedScores,
-        },
-      });
-
-      setShowModal(true);
-    } catch (error) {
-      console.error('Error fetching scores:', error);
-      setError(error.message || 'Error fetching scores. Please try again later.');
-
-      // Initialize with empty data if there's an error
-      setSemesterScores({
-        1: { diemThuongXuyen: [], diemGiuaKi: [], diemCuoiKi: '' },
-        2: { diemThuongXuyen: [], diemGiuaKi: [], diemCuoiKi: '' },
-      });
-
-      setStudentScores({
-        name: student.name,
-        id: student._id,
-        scoreIds: { 1: null, 2: null },
-        scores: {
-          1: { diemThuongXuyen: [], diemGiuaKi: [], diemCuoiKi: '' },
-          2: { diemThuongXuyen: [], diemGiuaKi: [], diemCuoiKi: '' },
-        },
-      });
-
-      setShowModal(true);
-    }
-  };
-
-
-  const closeModal = () => {
-    setShowModal(false);
-    setStudentScores(null);
-  };
-
-  const handleScoreChange = (type, index, value) => {
-    setSemesterScores((prevSemesterScores) => {
-      const updatedScores = { ...prevSemesterScores[selectedSemester] };
-      if (type === 'diemCuoiKi') {
-        updatedScores.diemCuoiKi = value;
-      } else if (type === 'diemGiuaKi') {
-        updatedScores.diemGiuaKi = value;
-      } else {
-        updatedScores[type][index] = value;
-      }
-      return {
-        ...prevSemesterScores,
-        [selectedSemester]: updatedScores,
-      };
-    });
-  };
-
-  const handleAddNewInput = (type) => {
-    setSemesterScores((prevSemesterScores) => {
-      const updatedScores = { ...prevSemesterScores[selectedSemester] };
-      if (type !== 'diemCuoiKi') {
-        updatedScores[type].push('');
-      }
-      return {
-        ...prevSemesterScores,
-        [selectedSemester]: updatedScores,
-      };
-    });
-  };
 
   const mutation = useMutation({
     mutationFn: async (newAbsentStudents) => {
@@ -363,6 +234,7 @@ const StudentTable = () => {
     onSuccess: (data) => {
       // Display success toast và log dữ liệu đã cập nhật
       toast.success("Absent students updated successfully!");
+      // navigate("/manage/calender")
       console.log("Absent students updated:", data);
     },
     onError: (error) => {
@@ -373,23 +245,25 @@ const StudentTable = () => {
   });
 
   const saveStudents = () => {
-    const newAbsentStudents = students
-      .filter(student => student.status === false) // Lọc học sinh vắng mặt
-      .map(student => ({
-        studentId: student._id, // Sử dụng studentId thay vì id
-        isExcused: absenceTypes[student._id] === 'Excused' // Đặt isExcused dựa trên absenceTypes
-      }));
+    // const newAbsentStudents = students
+    //   .filter(student => student.status === false) // Lọc học sinh vắng mặt
+    //   .map(student => ({
+    //     studentId: student._id, // Sử dụng studentId thay vì id
+    //     isExcused: absenceTypes[student._id] === 'Excused' // Đặt isExcused dựa trên absenceTypes
+    //   }));
 
-    console.log("Inactive Student IDs with Absence Type:", newAbsentStudents);
+    // console.log("Inactive Student IDs with Absence Type:", newAbsentStudents);
 
-    // Đảm bảo inactiveStudentIds là mảng
-    if (!Array.isArray(newAbsentStudents)) {
-      console.error("newAbsentStudents is not an array:", newAbsentStudents);
-      return;
-    }
+    // // Đảm bảo inactiveStudentIds là mảng
+    // if (!Array.isArray(newAbsentStudents)) {
+    //   console.error("newAbsentStudents is not an array:", newAbsentStudents);
+    //   return;
+    // }
 
-    // Gọi mutation để cập nhật danh sách học sinh vắng
-    mutation.mutate(newAbsentStudents);
+    // // Gọi mutation để cập nhật danh sách học sinh vắng
+    // mutation.mutate(newAbsentStudents);
+
+    setIsOpenModal(true)
   };
 
 
@@ -415,9 +289,54 @@ const StudentTable = () => {
     unexcused: unexcusedCount,
   };
 
+  const handleClose = () => setIsOpenModal(false);
+
+  const handleSaveSlot = async (classId, scheduleId, slotId, content, score) => {
+    const newAbsentStudents = students
+      .filter(student => student.status === false) // Lọc học sinh vắng mặt
+      .map(student => ({
+        studentId: student._id,
+        isExcused: absenceTypes[student._id] === 'Excused', // Đặt isExcused dựa trên absenceTypes
+      }));
+
+    console.log("Inactive Student IDs with Absence Type:", newAbsentStudents);
+
+    setIsLoading(true); // Bắt đầu trạng thái tải
+
+    try {
+      // Gửi danh sách học sinh vắng mặt và nội dung notebook
+      await ScheduleService.createNoteBookByClassAndScheduleId(classId, scheduleId, slotId, content, score);
+
+      console.log('Notebook and absence list saved successfully!');
+      toast.success('Notebook and absence list saved successfully!');
+
+      // Gọi mutation nếu cần (giả định mutation có sẵn)
+      mutation.mutate(newAbsentStudents);
+    } catch (error) {
+      console.error('Failed to save notebook or absent students:', error.message);
+      toast.error('Failed to save notebook or absent students.');
+    } finally {
+      setIsLoading(false); // Kết thúc trạng thái tải
+    }
+  };
+
+
+  console.log(content)
+
   return (
     <div className="flex flex-col w-full h-screen bg-white w-[95%] mx-auto pb-4">
+      {isLoading && (
+        <div
+          className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-gray-500 bg-opacity-50 z-50"
+        >
+          <div className="spinner-border text-white" role="status">
+            <span className="sr-only">Loading...</span>
+          </div>
+          <p className="text-white text-xl ml-4">Đang tải...</p>
+        </div>
+      )}
       <div className="bg-white pt-2 pr-4 flex justify-end">
+
         <button
           onClick={saveStudents}
           className="bg-blue-500 text-white font-bold text-sm px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-300 transform hover:scale-105"
@@ -450,7 +369,6 @@ const StudentTable = () => {
                   <th style={{ width: "20%" }} className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-white uppercase tracking-wider">Ngày sinh</th>
                   <th style={{ width: "20%" }} className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-white uppercase tracking-wider">Điểm danh</th>
                   <th style={{ width: "15%" }} className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-white uppercase tracking-wider">Trạng thái</th>
-                  {!isSubjectPhu(idSubject, detailClass?.SubjectsPhuId) && <th style={{ width: "15%" }} className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-white uppercase tracking-wider">Xem</th>}
 
                 </tr>
               </thead>
@@ -487,15 +405,6 @@ const StudentTable = () => {
                         </select>
                       )}
                     </td>
-                    {!isSubjectPhu(idSubject, detailClass?.SubjectsPhuId) &&
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <GrView
-                          className="cursor-pointer"
-                          onClick={() => openModal(student)}
-                          title="Xem chi tiết"
-                        />
-                      </td>
-                    }
                   </tr>
                 ))}
               </tbody>
@@ -506,220 +415,53 @@ const StudentTable = () => {
           <AbsenceRequestList idClass={idClass} year={year} week={week} dayOfWeek={dayOfWeek}
             targetSlot={targetSlot} />
         </div>
-      </div>
-      {showModal && studentScores && (
-        <Modal show={showModal} onHide={closeModal} size="xl">
+        <Modal show={isOpenModal} onHide={handleClose}>
+          <Modal.Header closeButton>
+            <Modal.Title>Đánh giá tiết học</Modal.Title>
+          </Modal.Header>
           <Modal.Body>
-            <div className="bg-gray-100 flex justify-center">
-              <div className="bg-white p-8 rounded-lg shadow-lg w-full">
-                <h2 className="text-2xl font-bold mb-4 text-center">Bảng Điểm Học Sinh</h2>
-                <div className="flex justify-center mb-4">
-                  <button
-                    className={`px-4 py-2 font-semibold ${selectedSemester === 1 ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-                    onClick={() => setSelectedSemester(1)}
-                  >
-                    Kỳ 1
-                  </button>
-                  <button
-                    className={`px-4 py-2 font-semibold ${selectedSemester === 2 ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-                    onClick={() => setSelectedSemester(2)}
-                  >
-                    Kỳ 2
-                  </button>
-                </div>
-                <table className="table-auto w-full border-collapse">
-                  <thead>
-                    <tr>
-                      <th className="border px-4 py-2" style={{ width: '25%' }}>Tên học sinh</th>
-                      <th className="border px-4 py-2 cursor-pointer" style={{ width: '30%' }} onClick={() => handleAddNewInput('diemThuongXuyen')}>
-                        Điểm thường xuyên
-                      </th>
-                      <th className="border px-4 py-2" style={{ width: '15%' }}>
-                        Điểm giữa kì
-                      </th>
-                      <th className="border px-4 py-2" style={{ width: '15%' }}>Điểm cuối kì</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {selectedSemester === 1 ? (
-                      <tr>
-                        <td className="border px-4 py-2">
-                          <input
-                            type="text"
-                            name="name"
-                            value={studentScores.name}
-                            readOnly
-                            className="w-full border rounded px-2 py-1 bg-gray-100"
-                          />
-                        </td>
-                        <td className="border px-4 py-2">
-                          <div className="grid grid-cols-2 gap-2">
-                            {[...Array(detailSubject?.nameSubject === "Toán" ? 4 : 3)].map((_, index) => (
-                              <input
-                                key={index}
-                                type="number"
-                                value={studentScores.scores.diemThuongXuyen?.[index] || ""}
-                                onChange={(e) => {
-                                  let value = e.target.value;
-                                  if (value < 0) value = 0;
-                                  if (value > 10) value = 10;
-                                  handleScoreChange('diemThuongXuyen', index, value);
-                                }}
-                                className="w-full border rounded px-2 py-1"
-                                min="0"
-                                max="10"
-                              />
-                            ))}
-                          </div>
-                        </td>
-                        <td className="border px-4 py-2">
-                          <input
-                            type="number"
-                            value={studentScores.scores.diemGiuaKi || ''}
-                            onChange={(e) => {
-                              let value = e.target.value;
-                              if (value < 0) value = 0;
-                              if (value > 10) value = 10;
-                              handleScoreChange('diemGiuaKi', null, value);
-                            }}
-                            className="w-full border rounded px-2 py-1"
-                          />
-                        </td>
-                        <td className="border px-4 py-2">
-                          <input
-                            type="number"
-                            value={studentScores.scores.diemCuoiKi || ''}
-                            onChange={(e) => {
-                              let value = e.target.value;
-                              if (value < 0) value = 0;
-                              if (value > 10) value = 10;
-                              handleScoreChange('diemCuoiKi', null, value);
-                            }}
-                            className="w-full border rounded px-2 py-1"
-                          />
-                        </td>
-                      </tr>
-                    ) : (
-                      <tr>
-                        <td className="border px-4 py-2">
-                          <input
-                            type="text"
-                            name="name"
-                            value={studentScores.name}
-                            readOnly
-                            className="w-full border rounded px-2 py-1 bg-gray-100"
-                          />
-                        </td>
-                        <td className="border px-4 py-2">
-                          <div className="grid grid-cols-2 gap-2">
-                            {studentScores.scores.diemThuongXuyen?.map((score, index) => (
-                              <input
-                                key={index}
-                                type="number"
-                                value={score}
-                                onChange={(e) => {
-                                  let value = e.target.value;
-                                  if (value < 0) value = 0;
-                                  if (value > 10) value = 10;
-                                  handleScoreChange('diemThuongXuyen', index, value);
-                                }}
-                                className="w-full border rounded px-2 py-1"
-                              />
-                            ))}
-                          </div>
-                        </td>
-                        <td className="border px-4 py-2">
-                          <input
-                            type="number"
-                            value={studentScores.scores.diemGiuaKi || ''}
-                            onChange={(e) => {
-                              let value = e.target.value;
-                              if (value < 0) value = 0;
-                              if (value > 10) value = 10;
-                              handleScoreChange('diemGiuaKi', null, value);
-                            }}
-                            className="w-full border rounded px-2 py-1"
-                          />
-                        </td>
-                        <td className="border px-4 py-2">
-                          <input
-                            type="number"
-                            value={studentScores.scores.diemCuoiKi || ''}
-                            onChange={(e) => {
-                              let value = e.target.value;
-                              if (value < 0) value = 0;
-                              if (value > 10) value = 10;
-                              handleScoreChange('diemCuoiKi', null, value);
-                            }}
-                            className="w-full border rounded px-2 py-1"
-                          />
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+            <Form>
+              <Form.Control
+                as="textarea"
+                rows={4}
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                placeholder="Enter content for the file"
+              />
+              <Form.Group className="mt-3">
+                <Form.Label>Điểm tiết học</Form.Label>
+                <Form.Control
+                  type="number"
+                  value={score}
+                  onChange={(e) => setScore(e.target.value)}
+                  placeholder="Nhập điểm tiết học"
+                />
+              </Form.Group>
+            </Form>
           </Modal.Body>
           <Modal.Footer>
-            <Button variant="secondary" onClick={closeModal}>
-              Tắt
+            <Button variant="secondary" onClick={handleClose} disabled={isLoading}>
+              Cancel
             </Button>
-
             <Button
-              variant="primary"
-              onClick={async () => {
-                const scoreData = {
-                  scores: [
-                    ...studentScores.scores.diemThuongXuyen.map(score => ({ type: 'thuongXuyen', score, semester: selectedSemester })),
-                    studentScores.scores.diemGiuaKi ? { type: 'giuaKi', score: Array.isArray(studentScores.scores.diemGiuaKi) ? studentScores.scores.diemGiuaKi.flat() : [studentScores.scores.diemGiuaKi], semester: selectedSemester } : null,
-                    studentScores.scores.diemCuoiKi ? { type: 'cuoiKi', score: Array.isArray(studentScores.scores.diemCuoiKi) ? studentScores.scores.diemCuoiKi.flat() : [studentScores.scores.diemCuoiKi], semester: selectedSemester } : null,
-                  ].filter(scoreItem => scoreItem && scoreItem.score !== ''), // Ensure scores are valid
-                  studentId: studentScores.id,
-                  subjectId: idSubject,
-                  classId: idClass,
-                };
-                
-                console.log("scoreData", scoreData);
-                const currentScoreId = studentScores.scoreIds[selectedSemester];
-
-                try {
-                  let response;
-                  if (currentScoreId) {
-                    response = await ScoreSbujectService.updateScore(currentScoreId, scoreData);
-                    toast.success("Đã cập nhật điểm thành công!");
-                  } else {
-                    response = await ScoreSbujectService.createScore(scoreData);
-                    toast.success("Đã khởi tạo điểm thành công!");
-                  }
-
-                  // Update scoreId for the semester
-                  setStudentScores((prev) => ({
-                    ...prev,
-                    scoreIds: {
-                      ...prev.scoreIds,
-                      [selectedSemester]: response._id, // Assuming response contains the new scoreId
-                    },
-                  }));
-
-                  // Update semesterScores with saved data
-                  setSemesterScores((prevSemesterScores) => ({
-                    ...prevSemesterScores,
-                    [selectedSemester]: studentScores.scores,
-                  }));
-
-                  closeModal();
-                } catch (error) {
-                  console.error("Error handling score:", error);
-                }
-              }}
+              variant="success"
+              onClick={() =>
+                handleSaveSlot(
+                  idClass,          // classId
+                  idSchedule,       // scheduleId
+                  idSlot,           // slotId
+                  content,          // Nội dung từ state content
+                  score             // Điểm từ state score
+                )
+              }
+              disabled={isLoading} // Disable button khi đang tải
             >
-              Lưu
+              {isLoading ? 'Uploading...' : 'Upload'}
             </Button>
-
           </Modal.Footer>
         </Modal>
-      )}
+
+      </div>
     </div>
   );
 };

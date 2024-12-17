@@ -49,6 +49,24 @@ export const createAbsentstudentId = async (scheduleId, classId, slotId) => {
     return res.data;
 };
 
+export const createNoteBookByClassAndScheduleId = async (classId, scheduleId, slotId, content, scoreClass) => {
+    
+      const res = await axios.post(
+        `${SCHEDULE_API_URL}/createNoteBook/${classId}/${scheduleId}/${slotId}`,
+        {
+          content,
+          scoreClass,
+        }
+      );
+      return res.data; // Trả về kết quả từ server
+     
+  };
+
+  export const getAllScheduleByClassId = async (classId) => {
+    const res = await axios.get(`${SCHEDULE_API_URL}/getAllSchedule/${classId}`);
+    return res.data;
+};
+
 // Cập nhật danh sách sinh viên vắng mặt
 export const updateAbsentstudentId = async (scheduleId, classId, slotId, newAbsentStudents) => {
     const res = await axios.put(
