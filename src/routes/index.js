@@ -31,7 +31,6 @@ import NotificationToStudent from "../pages/NotificationToStudent/NotificationTo
 import NotificationToSchool from "../pages/NotificationToSchool/NotificationToSchool";
 import HistorySendNotification from "../pages/HistorySendNotification/HistorySendNotification";
 import ExamSchedule from "../pages/ExamSchedule/ExamSchedule";
-import Message from "../pages/Message/Message";
 import QuestionAI from "../pages/QuestionManage/goToCreateQuestionByAI";
 import AddAbsenceRequest from "../pages/AddAbsenceRequest/AddAbsenceRequest";
 import ProfileStudentInClass from "../pages/ProfileStudentInClass/ProfileStudentInClass";
@@ -49,6 +48,7 @@ import CreateClass from "../pages/CreateClass/CreateClass";
 import DocumentList from "../pages/DocumentList/DocumentList";
 import RequestAbsentAplication from "../pages/RequestAbsentAplication/RequestAbsentAplication";
 import ManageAbsentAplication from "../pages/ManageAbsentAplication/ManageAbsentAplication";
+import ScoreTableForParent from "../pages/ScoreTableForParent/ScoreTableForParent";
 
 export const routes = [
   {
@@ -205,16 +205,6 @@ export const routes = [
     page: () => (
       <ProtectedRoute>
         <MyClasses />
-      </ProtectedRoute>
-    ),
-    isShowHeader: false,
-    isShowSideBar: true,
-  },
-  {
-    path: "/manage/message",
-    page: () => (
-      <ProtectedRoute>
-        <Message />
       </ProtectedRoute>
     ),
     isShowHeader: false,
@@ -382,6 +372,16 @@ export const routes = [
     isShowSideBar: false,
   },
   {
+    path: "/manage/scoreTableForParent/:studentId",
+    page: () => (
+      <ProtectedRoute>
+        <ScoreTableForParent />
+      </ProtectedRoute>
+    ),
+    isShowHeader: false,
+    isShowSideBar: false,
+  },
+  {
     path: "/manage/notificationToSchool",
     page: () => (
       <ProtectedRoute>
@@ -450,16 +450,6 @@ export const routes = [
     ),
     isShowHeader: false,
     isShowSideBar: false,
-  },
-  {
-    path: "/student/message",
-    page: () => (
-      <ProtectedRoute>
-        <Message />
-      </ProtectedRoute>
-    ),
-    isShowHeader: false,
-    isShowSideBar: true,
   },
   {
     path: "/student/selfLearning",

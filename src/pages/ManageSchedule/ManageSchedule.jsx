@@ -259,23 +259,6 @@ const ManageSchedule = () => {
                         >
                             Tuần trước
                         </button>
-                        {/* <select
-                            className="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                            value={startWeek || ""}
-                            onChange={handleStartWeekChange}
-                        >
-                            <option value="">-- Chọn tuần --</option>
-                            {Array.from({ length: 52 }).map((_, idx) => {
-                                const year = new Date().getFullYear();
-                                const week = idx + 1;
-                                return (
-                                    <option key={week} value={`${year}-W${week}`}>
-                                        Tuần {week} - Năm {year}
-                                    </option>
-                                );
-                            })}
-                        </select> */}
-
                         <div className="mb-4 text-center">
                             <label className="block text-lg font-semibold">-- Chọn tuần --</label>
                             <input
@@ -344,7 +327,7 @@ const ManageSchedule = () => {
 
                                                                     })}
                                                                 >
-                                                                    {subject?.nameSubject} - {subject?.teacherId?.name}
+                                                                    {subject?.nameSubject}
                                                                 </option>
                                                             ))}
                                                             {classDetail?.SubjectsChuyendeId.map((subject, index) => (
@@ -355,7 +338,7 @@ const ManageSchedule = () => {
 
                                                                     })}
                                                                 >
-                                                                    {subject?.nameSubject} - {subject?.teacherId?.name}
+                                                                    {subject?.nameSubject}
                                                                 </option>
                                                             ))}
                                                             {classDetail?.SubjectsPhuId.map((subject, index) => (
@@ -366,7 +349,7 @@ const ManageSchedule = () => {
 
                                                                     })}
                                                                 >
-                                                                    {subject?.nameSubject} - {subject?.teacherId?.name}
+                                                                    {subject?.nameSubject}
                                                                 </option>
                                                             ))}
                                                         </select>
@@ -391,7 +374,7 @@ const ManageSchedule = () => {
                                                                 key={index}
                                                                 value={JSON.stringify({ subjectId: subject._id, subjectChuyendeId: subject?.subjectChuyendeId?._id })}
                                                             >
-                                                                {subject?.nameSubject} - {subject?.teacherId?.name}
+                                                                {subject?.nameSubject}
                                                             </option>
                                                         ))}
                                                         {classDetail?.SubjectsChuyendeId.map((subject, index) => (
@@ -399,7 +382,7 @@ const ManageSchedule = () => {
                                                                 key={index}
                                                                 value={JSON.stringify({ subjectId: subject._id, subjectChuyendeId: subject?.subjectChuyendeId?._id })}
                                                             >
-                                                                {subject?.nameSubject} - {subject?.teacherId?.name}
+                                                                {subject?.nameSubject}
                                                             </option>
                                                         ))}
                                                         {classDetail?.SubjectsPhuId.map((subject, index) => (
@@ -407,7 +390,7 @@ const ManageSchedule = () => {
                                                                 key={index}
                                                                 value={JSON.stringify({ subjectId: subject._id, subjectChuyendeId: subject?.subjectChuyendeId?._id })}
                                                             >
-                                                                {subject?.nameSubject} - {subject?.teacherId?.name}
+                                                                {subject?.nameSubject}
                                                             </option>
                                                         ))}
 

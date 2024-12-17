@@ -275,6 +275,10 @@ const Dashboard = () => {
         navigate(`/manage/requestAbsentAplication/${userClass}/${selectedChildren}`)
     }
 
+    const handleGoToScoreTableForParent = () => {
+        navigate(`/manage/scoreTableForParent/${selectedChildren}`)
+    }
+
     const handleGoToManageAbsentRequest = (idClass) => {
         navigate(`/manage/manageAbsentAplication/${idClass}`)
 
@@ -426,12 +430,12 @@ const Dashboard = () => {
 
                         {/* Cards Container */}
                         <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
-                            <div onClick={() => handleCardClick("attendance")} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
+                            {/* <div onClick={() => handleCardClick("attendance")} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
                                 <div className="bg-orange-400 p-4 rounded-full mb-2">
                                     <GrScorecard size={32} className="text-white" />
                                 </div>
                                 <p className="font-semibold">Quản lí điểm danh</p>
-                            </div>
+                            </div> */}
 
                             {/* Other Cards */}
                             <div onClick={() => handleCardClick("grade")} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
@@ -657,19 +661,29 @@ const Dashboard = () => {
                     </div>
                 </div>
             )}
+            {/* handleGoToRequestAbsentAplication */}
             {user.role === "Parent" && (
                 <div>
                     <div className="flex flex-col bg-white p-6 rounded-lg shadow-md w-full mt-8">
                         <h2 className="text-xl font-bold mb-6">Tác vụ</h2>
                         <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
                             <div onClick={handleGoToRequestAbsentAplication} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
-                                <div className="bg-emerald-400 p-4 rounded-full mb-2">
-                                    <BiMailSend size={32} className="text-white" />
+                                <div className="bg-teal-400 p-4 rounded-full mb-2">
+                                    <CalendarClock size={32} className="text-white" />
                                 </div>
-                                <p className="font-semibold">Gửi đơn nghỉ học</p>
+                                <p className="font-semibold">Xin phép nghỉ học</p>
+                            </div>
+
+                            <div onClick={handleGoToScoreTableForParent} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
+                                <div className="bg-orange-400 p-4 rounded-full mb-2">
+                                    <AiOutlineSchedule size={32} className="text-white" />
+                                </div>
+                                <p className="font-semibold">Báo cáo học tập</p>
                             </div>
                         </div>
                     </div>
+
+
                 </div>
             )}
             {/* Modal */}

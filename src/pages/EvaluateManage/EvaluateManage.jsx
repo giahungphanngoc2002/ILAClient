@@ -54,7 +54,11 @@ function EvaluateManage() {
 
   }, [year]);
 
-  console.log(students)
+  useEffect(() => {
+    if (semesters.length > 0) {
+      setSelectedSemester(semesters[0]._id); // Chọn kỳ đầu tiên
+    }
+  }, [semesters]);
 
   useEffect(() => {
     const fetchEvalutes = async () => {
@@ -82,7 +86,6 @@ function EvaluateManage() {
       (cond) =>
         cond.StudentId?._id === student?._id && cond?.semester === selectedSemester
     ) : null;
-    console.log("Evaluate for student:", student.name, "Evaluate found:", evaluate);
     return {
       ...student,
       evaluate: evaluate ? evaluate.evaluate : "Chưa đánh giá", // Default value if no evaluation
@@ -92,19 +95,14 @@ function EvaluateManage() {
 
 
   useEffect(() => {
-    console.log("Dữ liệu evaluates:", evaluates);
   }, [evaluates]);
 
 
   useEffect(() => {
-    console.log("Dữ liệu students:", students);
   }, [students]);
 
   useEffect(() => {
-    console.log("Kỳ học hiện tại:", selectedSemester);
   }, [selectedSemester]);
-
-  console.log("Dữ liệu hiển thị:", mergedData);
 
   const filteredRows = mergedData.filter((row) =>
     row.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -120,30 +118,14 @@ function EvaluateManage() {
 
   const handleSubmitEvaluateEvaluation = async () => {
     try {
-      // Lọc các đánh giá cho kỳ học đã chọn
-      
+      const evaluationsForSelectedSemester = evaluates?.data.filter(
+        (evaluate) => evaluate.semester === selectedSemester
+      )
 
-        const evaluationsForSelectedSemester = evaluates?.data.filter(
-          (evaluate) => evaluate.semester === selectedSemester
-        )
-      console.log("Evaluations for Selected Semester:", !evaluationsForSelectedSemester || evaluationsForSelectedSemester.length === 0);
+      if (!evaluationsForSelectedSemester || evaluationsForSelectedSemester.length === 0) {
 
-      // if (!evaluationsForSelectedSemester || evaluationsForSelectedSemester.length === 0) {
-      
-      //   const evaluateData = students.map((student) => {
-      //     const evaluateSelect = document.querySelector(`#evaluate-${student._id}`);
-
-          if (!evaluationsForSelectedSemester || evaluationsForSelectedSemester.length === 0) {
-           
-            const evaluateData = students.map((student) => {
-              const evaluateSelect = document.querySelector(`#evaluate-${student._id}`);
-
-
-          console.log("Student ID:", student._id);
-          console.log("Subject ID:", idSubject);
-          console.log("Class ID:", idClass);
-          console.log("Semester ID:", selectedSemester);
-
+        const evaluateData = students.map((student) => {
+          const evaluateSelect = document.querySelector(`#evaluate-${student._id}`);
 
           // Kiểm tra nếu thiếu trường dữ liệu
           if (!student._id || !idSubject || !idClass) {
@@ -161,13 +143,11 @@ function EvaluateManage() {
           };
         }).filter(Boolean); // Loại bỏ các giá trị null
 
-        console.log("Evaluate Data to Submit:", evaluateData);
 
         if (evaluateData.length > 0) {
           const response = await Promise.all(
             evaluateData.map(data =>
               SubjectService.createEvaluate(idClass, idSubject, data)));
-          console.log("Response from API:", response);
 
           if (response) {
             toast.success("Khởi tạo đánh giá thành công!");
@@ -183,8 +163,6 @@ function EvaluateManage() {
           const updatedEvaluate = evaluateSelect ? evaluateSelect.value : evaluate.evaluate;
 
           const updateData = { evaluate: updatedEvaluate };
-
-          console.log("Updating evaluation for student:", evaluate.StudentId.name, "Updated Value:", updatedEvaluate);
 
           // Kiểm tra các giá trị bắt buộc
           if (!evaluate.StudentId._id || !idSubject || !idClass) {
@@ -247,8 +225,8 @@ function EvaluateManage() {
             {semesters.map((semester) => (
               <button
                 className={`px-4 py-2 rounded-lg font-semibold ${selectedSemester === semester._id
-                    ? "bg-blue-500 text-white"
-                    : "bg-gray-200 text-gray-700"
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-200 text-gray-700"
                   }`}
                 onClick={() => handleSemesterChange(semester._id)}
               >

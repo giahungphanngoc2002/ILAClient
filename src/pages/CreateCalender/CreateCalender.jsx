@@ -106,12 +106,12 @@ const CreateCalender = () => {
                 const sheetName = workbook.SheetNames[0]; // Lấy sheet đầu tiên
                 const sheet = workbook.Sheets[sheetName];
                 const jsonData = XLSX.utils.sheet_to_json(sheet); // Chuyển đổi sheet thành mảng JSON
-    
+
                 // console.log(classDetail);
-                
+
                 const updatedData = jsonData.map(item => {
                     const updatedItem = { ...item };
-    
+
                     // Duyệt qua các ngày trong lịch học và cập nhật thông tin môn học
                     Object.keys(updatedItem).forEach(day => {
                         const teacher = updatedItem[day];
@@ -126,16 +126,16 @@ const CreateCalender = () => {
                             updatedItem[day] = subject;
                         }
                     });
-    
+
                     return updatedItem;
                 });
-    
+
                 console.log(updatedData);
-    
+
                 const transformedData = transformData(updatedData);
-    
+
                 setData(transformedData);
-    
+
                 // Cập nhật schedule với dữ liệu đã chuyển đổi từ Excel
                 transformedData.forEach((dayData) => {
                     timeSlots.forEach((slot) => {
@@ -161,7 +161,7 @@ const CreateCalender = () => {
             reader.readAsBinaryString(file);
         }
     };
-    
+
     console.log("data", data);
     console.log("schedule", schedule);
 
@@ -185,7 +185,7 @@ const CreateCalender = () => {
 
     // console.log(schedule)
     const handleSelectSlot = (classId, day, slot, subjectData) => {
-        const { subjectId, subjectChuyendeId ,subjectPhuId} = JSON.parse(subjectData);
+        const { subjectId, subjectChuyendeId, subjectPhuId } = JSON.parse(subjectData);
         // console.log(subjectData)
         // console.log("Before update:", schedule);
         setSchedule((prev) => ({
@@ -250,25 +250,25 @@ const CreateCalender = () => {
                                         absentStudentId: [],
                                     };
                                 });
-                
+
                             if (newSlots.length > 0) {
                                 let updatedSlots = [];
                                 const existingDay = data?.find(
                                     (daySchedule) => daySchedule.dayOfWeek === day
                                 );
-                
+
                                 if (existingDay) {
                                     updatedSlots = existingDay.slots.filter(
                                         (existingSlot) =>
                                             !newSlots.some((newSlot) => newSlot.slotNumber === existingSlot.slotNumber)
                                     );
                                 }
-                
+
                                 updatedSlots = [...updatedSlots, ...newSlots];
-                
+
                                 return { dayOfWeek: day, slots: updatedSlots };
                             }
-                
+
                             return null;
                         })
                         .filter((day) => day !== null),
@@ -407,7 +407,7 @@ const CreateCalender = () => {
                                                                 : currentSchedule?.subjectId
                                                                     ? JSON.stringify({
                                                                         subjectId: currentSchedule.subjectId._id,
-                                                                        
+
                                                                     })
                                                                     : ""
                                                         }
@@ -420,10 +420,10 @@ const CreateCalender = () => {
                                                                 key={index}
                                                                 value={JSON.stringify({
                                                                     subjectId: subject._id,
-                                                                   
+
                                                                 })}
                                                             >
-                                                                {subject?.nameSubject} - {subject?.teacherId?.name}
+                                                                {subject?.nameSubject}
                                                             </option>
                                                         ))}
                                                         {classDetail?.SubjectsChuyendeId.map((subject, index) => (
@@ -431,10 +431,10 @@ const CreateCalender = () => {
                                                                 key={index}
                                                                 value={JSON.stringify({
                                                                     subjectId: subject._id,
-                                                                   
+
                                                                 })}
                                                             >
-                                                                {subject?.nameSubject} - {subject?.teacherId?.name}
+                                                                {subject?.nameSubject}
                                                             </option>
                                                         ))}
                                                         {classDetail?.SubjectsPhuId.map((subject, index) => (
@@ -442,10 +442,10 @@ const CreateCalender = () => {
                                                                 key={index}
                                                                 value={JSON.stringify({
                                                                     subjectId: subject._id,
-                                                                   
+
                                                                 })}
                                                             >
-                                                                {subject?.nameSubject} - {subject?.teacherId?.name}
+                                                                {subject?.nameSubject}
                                                             </option>
                                                         ))}
                                                     </select>
@@ -468,25 +468,25 @@ const CreateCalender = () => {
                                                     {classDetail?.SubjectsId.map((subject, index) => (
                                                         <option
                                                             key={index}
-                                                            value={JSON.stringify({ subjectId: subject._id,  })}
+                                                            value={JSON.stringify({ subjectId: subject._id, })}
                                                         >
-                                                            {subject?.nameSubject} - {subject?.teacherId?.name}
+                                                            {subject?.nameSubject}
                                                         </option>
                                                     ))}
                                                     {classDetail?.SubjectsChuyendeId.map((subject, index) => (
                                                         <option
                                                             key={index}
-                                                            value={JSON.stringify({ subjectId: subject._id,  })}
+                                                            value={JSON.stringify({ subjectId: subject._id, })}
                                                         >
-                                                            {subject?.nameSubject} - {subject?.teacherId?.name}
+                                                            {subject?.nameSubject}
                                                         </option>
                                                     ))}
                                                     {classDetail?.SubjectsPhuId.map((subject, index) => (
                                                         <option
                                                             key={index}
-                                                            value={JSON.stringify({ subjectId: subject._id,  })}
+                                                            value={JSON.stringify({ subjectId: subject._id, })}
                                                         >
-                                                            {subject?.nameSubject} - {subject?.teacherId?.name}
+                                                            {subject?.nameSubject}
                                                         </option>
                                                     ))}
 

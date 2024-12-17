@@ -14,7 +14,7 @@ function ConductEvaluation() {
   const [selectedSemester, setSelectedSemester] = useState(""); // Mặc định Kỳ 1
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true); // Trạng thái loading
-const [year, setYear] = useState("");
+  const [year, setYear] = useState("");
   const [semesters, setSemesters] = useState([]);
 
   useEffect(() => {
@@ -38,24 +38,24 @@ const [year, setYear] = useState("");
   console.log(students)
 
   useEffect(() => {
-      const fetchYear = async () => {
-        try {
-          setLoading(true); // Bắt đầu tải
-          const response = await SubjectService.getAllSemesterByYear(year);
-          setSemesters(response?.semesters)
-        } catch (error) {
-          console.error("Lỗi khi lấy chi tiết lớp:", error);
-        } finally {
-          setLoading(false); // Kết thúc tải
-        }
-      };
-      if (year) {
-        fetchYear();
+    const fetchYear = async () => {
+      try {
+        setLoading(true); // Bắt đầu tải
+        const response = await SubjectService.getAllSemesterByYear(year);
+        setSemesters(response?.semesters)
+      } catch (error) {
+        console.error("Lỗi khi lấy chi tiết lớp:", error);
+      } finally {
+        setLoading(false); // Kết thúc tải
       }
-  
-    }, [year]);
+    };
+    if (year) {
+      fetchYear();
+    }
 
-    console.log(semesters)
+  }, [year]);
+
+  console.log(semesters)
 
   useEffect(() => {
     // Định nghĩa hàm bên trong useEffect để sử dụng
@@ -75,10 +75,6 @@ const [year, setYear] = useState("");
       fetchConducts();
     } // Gọi hàm fetchConducts để lấy dữ liệu mới
   }, [selectedSemester, idClass]);
-
-  console.log(conducts)
-  console.log(students)
-
 
   const mergedData = students.map((student) => {
     const conduct = conducts?.data.find(
@@ -103,11 +99,6 @@ const [year, setYear] = useState("");
     console.log("Kỳ học hiện tại:", selectedSemester);
   }, [selectedSemester]);
 
-  console.log("Dữ liệu hiển thị:", mergedData);
-
-
-
-
   const filteredRows = mergedData.filter((row) =>
     row.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -125,7 +116,7 @@ const [year, setYear] = useState("");
       const conductsForSelectedSemester = conducts?.data.filter(
         (conduct) => conduct.semester === selectedSemester
       );
-        console.log(!conductsForSelectedSemester || conductsForSelectedSemester.length === 0)
+      console.log(!conductsForSelectedSemester || conductsForSelectedSemester.length === 0)
       if (!conductsForSelectedSemester || conductsForSelectedSemester.length === 0) {
         // Nếu chưa có đánh giá cho kỳ hiện tại, khởi tạo mới
         const conductData = students.map((student) => {
@@ -177,6 +168,11 @@ const [year, setYear] = useState("");
     }
   };
 
+  useEffect(() => {
+    if (semesters.length > 0) {
+      setSelectedSemester(semesters[0]._id); // Chọn kỳ đầu tiên
+    }
+  }, [semesters]);
 
   const handleSemesterChange = (semester) => {
     setSelectedSemester(semester);
@@ -209,11 +205,11 @@ const [year, setYear] = useState("");
           </div>
           {/* Semester Selection Buttons */}
           <div className="flex gap-2">
-          {semesters.map((semester) => (
+            {semesters.map((semester) => (
               <button
                 className={`px-4 py-2 rounded-lg font-semibold ${selectedSemester === semester._id
-                    ? "bg-blue-500 text-white"
-                    : "bg-gray-200 text-gray-700"
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-200 text-gray-700"
                   }`}
                 onClick={() => handleSemesterChange(semester._id)}
               >
