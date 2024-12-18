@@ -155,25 +155,35 @@ const ClassDivision = () => {
     const onBack = () => {
         window.history.back();
     };
-
-    const handleAddStudentToClass = () => {
+        
+    const handleAddStudentToClass = async () => {
         // Lọc ra danh sách học sinh đã có giá trị selectedClass
         const selectedStudentsWithClass = studentU.filter(
             (student) => student.selectedClass
         );
-
-        // In ra danh sách học sinh
-        console.log("Danh sách học sinh đã chọn lớp:", selectedStudentsWithClass);
-
-        // Optional: Hiển thị thông báo nếu không có học sinh nào được chọn lớp
+    
+        // Kiểm tra nếu không có học sinh nào được chọn lớp
         if (selectedStudentsWithClass.length === 0) {
             toast.warn("Không có học sinh nào được chọn lớp!");
-        } else {
-            toast.success("Danh sách học sinh đã chọn lớp được ghi nhận!");
+            return;
         }
-
-        // Có thể xử lý thêm logic lưu thông tin này vào backend nếu cần
+    
+        try {
+            // Lặp qua danh sách học sinh và gọi API cho từng lớp
+            const promises = selectedStudentsWithClass.map((student) => 
+                ClassService.addStudentIDToClassbyId(student.selectedClass, [student._id])
+            );
+    
+            await Promise.all(promises);
+    
+            toast.success("Danh sách học sinh đã được thêm vào lớp thành công!");
+            console.log("Danh sách học sinh đã chọn lớp:", selectedStudentsWithClass);
+        } catch (error) {
+            console.error("Error adding students to class:", error);
+            toast.error("Có lỗi xảy ra khi thêm học sinh vào lớp!");
+        }
     };
+    
 
 
 
