@@ -50,6 +50,7 @@ import RequestAbsentAplication from "../pages/RequestAbsentAplication/RequestAbs
 import ManageAbsentAplication from "../pages/ManageAbsentAplication/ManageAbsentAplication";
 import ScoreTableForParent from "../pages/ScoreTableForParent/ScoreTableForParent";
 import ManageNoteBook from "../pages/ManageNoteBook/ManageNoteBook";
+import ManageTimeScore from "../pages/ManageTimeScore/ManageTimeScore";
 
 export const routes = [
   {
@@ -117,6 +118,16 @@ export const routes = [
     page: () => (
       <ProtectedRoute>
         <AttendanceTable />
+      </ProtectedRoute>
+    ),
+    isShowHeader: false,
+  },
+
+  {
+    path: "manage/manageTimeScore",
+    page: () => (
+      <ProtectedRoute>
+        <ManageTimeScore />
       </ProtectedRoute>
     ),
     isShowHeader: false,

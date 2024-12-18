@@ -365,6 +365,10 @@ const Dashboard = () => {
         navigate(`/manage/manageNoteBook/${idClass}`)
     }
 
+    const handleGoToManageTimeScore = () => {
+        navigate(`/manage/manageTimeScore/`)
+    }
+
     return (
         <div className="flex flex-col p-6 bg-gray-100 min-h-screen">
             {/* Tabs for Class Selection */}
@@ -630,23 +634,18 @@ const Dashboard = () => {
                         <h2 className="text-xl font-bold mb-6">Quản lý</h2>
                         <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
                             {/* Other Cards */}
-                            <div onClick={handleGoToClassDivision} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
-                                <div className="bg-green-400 p-4 rounded-full mb-2">
-                                    <GrScorecard size={32} className="text-white" />
-                                </div>
-                                <p className="font-semibold">Chia lớp</p>
-                            </div>
+
                             <div onClick={handleGoToClassManage} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
                                 <div className="bg-purple-400 p-4 rounded-full mb-2">
                                     <SiGoogleclassroom size={32} className="text-white" />
                                 </div>
                                 <p className="font-semibold">Quản lý lớp học</p>
                             </div>
-                            <div onClick={handleGoToAutoCreateAccount} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
+                            <div onClick={handleGoToManageTimeScore} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
                                 <div className="bg-red-400 p-4 rounded-full mb-2">
                                     <FaUserPlus size={32} className="text-white" />
                                 </div>
-                                <p className="font-semibold">Tạo tài khoản học sinh</p>
+                                <p className="font-semibold">Thời gian học kì</p>
                             </div>
                             <div onClick={handleGoToManageAccount} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
                                 <div className="bg-yellow-500 p-4 rounded-full mb-2">
@@ -665,6 +664,18 @@ const Dashboard = () => {
                                     <CalendarClock size={32} className="text-white" />
                                 </div>
                                 <p className="font-semibold">Tạo lớp học mới</p>
+                            </div>
+                            <div onClick={handleGoToClassDivision} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
+                                <div className="bg-green-400 p-4 rounded-full mb-2">
+                                    <GrScorecard size={32} className="text-white" />
+                                </div>
+                                <p className="font-semibold">Chia lớp</p>
+                            </div>
+                            <div onClick={handleGoToAutoCreateAccount} className="flex flex-col items-center bg-blue-50 p-4 rounded-lg shadow-md w-full md:w-1/5 cursor-pointer">
+                                <div className="bg-red-400 p-4 rounded-full mb-2">
+                                    <FaUserPlus size={32} className="text-white" />
+                                </div>
+                                <p className="font-semibold">Tạo tài khoản học sinh</p>
                             </div>
                         </div>
                     </div>
