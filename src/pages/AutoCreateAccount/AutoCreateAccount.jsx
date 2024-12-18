@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import * as XLSX from "xlsx";
 import * as UserService from "../../services/UserService";
+import * as ClassService from "../../services/ClassService";
 import {
   Table,
   Button,
@@ -34,6 +35,15 @@ const AutoCreateAccount = () => {
   const [tableScrollHeight, setTableScrollHeight] = useState(300);
   const [pageSize, setPageSize] = useState(10);
   const [form] = Form.useForm();
+  const [year, setYear] = useState();
+  const [dataClass, setDataClass] = useState([])
+  useEffect(() => {
+    const currentYear = new Date().getFullYear();
+    const nextYear = currentYear + 1;
+    setYear(`${currentYear}-${nextYear}`);
+  }, []);
+
+  console.log(year)
 
   useEffect(() => {
     const fetchStudent = async () => {
@@ -48,6 +58,30 @@ const AutoCreateAccount = () => {
 
     fetchStudent();
   }, []);
+
+  useEffect(() => {
+    const fetchClass = async () => {
+      try {
+        const data = await ClassService.getAllClassByBlock("6717c5d8ff6baca57f486e9b");
+        const filterClassByYear = data.filter((classItem) => classItem.year === year);
+
+        // Chỉ setDataClass nếu có dữ liệu mới
+        if (filterClassByYear.length > 0) {
+          setDataClass(filterClassByYear);
+          console.log("Data set successfully:", filterClassByYear);
+        } else {
+          console.log("No data available for the specified year.");
+        }
+      } catch (error) {
+        console.error("Error fetching class data:", error);
+      }
+    };
+
+    fetchClass();
+  }, [year]);
+
+
+  console.log(dataClass)
 
   useEffect(() => {
     const calculateTableHeight = () => {
@@ -86,7 +120,7 @@ const AutoCreateAccount = () => {
     const generatedAccounts = data.map((row) => {
       const fullName = row["Họ và tên"];
       const birthDate = row["Ngày Sinh"];
-const parentPhone = row["SĐT Phụ Huynh"];
+      const parentPhone = row["SĐT Phụ Huynh"];
       const parentName = row["Tên Phụ Huynh"];
       const parentCccd = row["CCCD Phụ Huynh"];
       const nameParts = fullName.split(" ");
@@ -122,6 +156,8 @@ const parentPhone = row["SĐT Phụ Huynh"];
   };
 
   console.log(accounts)
+
+
 
   const mutation1 = useMutationHooks(
     (data) => UserService.createUserbyRole(data)
@@ -180,55 +216,79 @@ const parentPhone = row["SĐT Phụ Huynh"];
     (data) => UserService.signupUser(data)
   );
 
- 
 
 
+  const exportToExcel = () => {
+    if (accounts.length === 0) {
+      toast.error("Không có dữ liệu để xuất!");
+      return;
+    }
 
-  const handleAutoCreateAccount = async () => {
-    console.log(accounts);
-  
+    const formattedData = accounts.map((account) => {
+      const baseData = {
+        "Họ và tên": account.fullName,
+        "Tài khoản": account.username,
+      };
+
+      dataClass.forEach((classItem) => {
+        baseData[classItem.nameClass] = null;
+      });
+
+      return baseData;
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(formattedData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Danh sách tài khoản");
+
+    // Ghi file Excel
+    XLSX.writeFile(workbook, "Danh_sach_tai_khoan.xlsx");
+    toast.success("Xuất file Excel thành công!");
+  };
+
+
+  const handleAutoCreateAccount = () => {
     try {
-      // Sử dụng Promise.all để thực hiện tất cả các mutation song song
-      await Promise.all(
-        accounts.map((account) => {
-          // Thực hiện mutation cho người dùng
-          const userMutation = mutation.mutateAsync({
-            username: account.username,
-            password: account.password,
-            confirmPassword: account.password,
-            name: account.fullName,
-            cccd: account.parentCccd,
-            phoneParent: account.parentPhone,
-            nameParent: account.parentName,
-          });
-  
-          // Thực hiện mutation cho phụ huynh
-          const parentMutation = mutation1.mutateAsync({
-            name: account.parentName,
-            username: account.parentPhone,
-            password: "123456",
-            confirmPassword: "123456",
-            role: "Parent",
-          });
-  
-          // Trả về một array của Promise để Promise.all thực thi
-          return Promise.all([userMutation, parentMutation]);
-        })
-      );
-  
-      // Khi tất cả các tài khoản được tạo xong, hiển thị toast thành công
-      toast.success('Tất cả tài khoản đã được tạo thành công!');
-      console.log('Tất cả tài khoản đã được tạo thành công!');
+      // Lấy danh sách lớp theo khối
+
+
+      exportToExcel();
+
+      // Lặp qua từng account để tạo tài khoản
+      accounts.forEach((account) => {
+        // Mutation cho người dùng
+        mutation.mutate({
+          username: account.username,
+          password: account.password,
+          confirmPassword: account.password,
+          name: account.fullName,
+          cccd: account.parentCccd,
+          phoneParent: account.parentPhone,
+          nameParent: account.parentName,
+        });
+
+        // Mutation cho phụ huynh
+        mutation1.mutate({
+          name: account.parentName,
+          username: account.parentPhone,
+          password: "123456",
+          confirmPassword: "123456",
+          role: "Parent",
+        });
+      });
+
+      // Hiển thị toast khi tất cả các tài khoản đã được xử lý
+      toast.success("Tất cả tài khoản đã được tạo thành công!");
+      console.log("Tất cả tài khoản đã được tạo thành công!");
     } catch (error) {
-      // Xử lý lỗi khi bất kỳ tài khoản nào thất bại
+      // Xử lý lỗi nếu có lỗi xảy ra
       toast.error(`Đã xảy ra lỗi: ${error.message}`);
-      console.error('Đã xảy ra lỗi:', error.message);
+      console.error("Đã xảy ra lỗi:", error.message);
     }
   };
-  
 
 
-  console.log(allAccount)
+
 
   return (
     <Layout style={{ height: "100vh" }}>
@@ -317,7 +377,7 @@ const parentPhone = row["SĐT Phụ Huynh"];
                     return Promise.resolve();
                   }
                   return Promise.reject(
-          new Error("Tài khoản đã tồn tại, vui lòng nhập tài khoản khác!")
+                    new Error("Tài khoản đã tồn tại, vui lòng nhập tài khoản khác!")
                   );
                 },
               }),

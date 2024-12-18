@@ -5,6 +5,7 @@ import * as SubjectService from "../../services/SubjectService";
 import * as UserService from "../../services/UserService";
 // import * as UserService from "../../services/UserService";
 import { toast } from "react-toastify";
+import Breadcrumb from '../../components/Breadcrumb/Breadcrumb';
 const CreateClass = () => {
     const [nameClass, setNameClass] = useState('');
     const [year, setYear] = useState('');
@@ -38,7 +39,12 @@ const CreateClass = () => {
         fetchBlocks();
     }, []);
 
-    console.log(blocks)
+    useEffect(() => {
+        const currentYear = new Date().getFullYear();
+        setYear(`${currentYear} - ${currentYear + 1}`);
+    }, []);
+
+    console.log(year)
 
     useEffect(() => {
         const fetchRooms = async () => {
@@ -221,18 +227,34 @@ const CreateClass = () => {
         };
         console.log(combinedData);
         // setSelectedSubjectAndTeacher(combinedData)
-        setDataSubjectId(combinedData)
+        setDataSubjectId(combinedData);
+        setIsModalOpen(false);
     };
 
+    const onBack = () => {
+        window.history.back()
+    }
+
+    const handleSubmit = () => {
+
+    }
+
     return (
-        <div className="h-screen max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-lg">
-            <h2 className="text-2xl font-bold text-center mb-4">Tạo Lớp Học Mới</h2>
-            <div className="space-y-4">
+        <div className=" h-screen max-w-4xl mx-auto ">
+            <Breadcrumb
+                title="Tạo lớp học đầu năm"
+                buttonText="Lưu đơn"
+                onButtonClick={handleCreateClass}
+                onBack={onBack}
+            />
+
+            <div className="pt-16"></div>
+            <div className=" space-y-6 bg-white p-8  rounded-lg shadow-xl">
                 <div>
                     <label className="block text-sm font-medium text-gray-700">Tên lớp học</label>
                     <input
                         type="text"
-                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                        className="mt-2 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
                         value={nameClass}
                         onChange={(e) => setNameClass(e.target.value)}
                     />
@@ -242,8 +264,9 @@ const CreateClass = () => {
                     <label className="block text-sm font-medium text-gray-700">Năm học</label>
                     <input
                         type="text"
-                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                        className="mt-2 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
                         value={year}
+                        disabled
                         onChange={(e) => setYear(e.target.value)}
                     />
                 </div>
@@ -251,7 +274,7 @@ const CreateClass = () => {
                 <div>
                     <label className="block text-sm font-medium text-gray-700">Chọn khối</label>
                     <select
-                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                        className="mt-2 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
                         value={block}
                         onChange={(e) => setBlock(e.target.value)}
                     >
@@ -267,11 +290,11 @@ const CreateClass = () => {
                 <div>
                     <label className="block text-sm font-medium text-gray-700">Chọn phòng</label>
                     <select
-                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                        className="mt-2 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
                         value={room}
                         onChange={(e) => setRoom(e.target.value)}
                     >
-                        <option value="">Chọn khối lớp</option>
+                        <option value="">Chọn phòng học</option>
                         {rooms.data?.map((room) => (
                             <option key={room?._id} value={room?._id}>
                                 {room?.nameRoom}
@@ -283,17 +306,20 @@ const CreateClass = () => {
                 <div>
                     <label className="block text-sm font-medium text-gray-700">Nhóm môn học</label>
                     <select
-                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                        className="mt-2 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
                         value={subjectGroup}
                         onChange={handleSubjectGroupChange}
                     >
                         <option value="">Chọn nhóm môn</option>
                         {classType?.map((type) => (
-                            <option key={type._id} value={JSON.stringify({
-                                nameSubject: type.nameSubject,
-                                nameSubjectChuyende: type.nameSubjectChuyende,
-                                nameSubjectPhu: type.nameSubjectPhu
-                            })}>
+                            <option
+                                key={type._id}
+                                value={JSON.stringify({
+                                    nameSubject: type.nameSubject,
+                                    nameSubjectChuyende: type.nameSubjectChuyende,
+                                    nameSubjectPhu: type.nameSubjectPhu,
+                                })}
+                            >
                                 {type.nameGroup}
                             </option>
                         ))}
@@ -303,72 +329,60 @@ const CreateClass = () => {
                 <div>
                     <label className="block text-sm font-medium text-gray-700">Giáo viên chủ nhiệm</label>
                     <select
-                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                        className="mt-2 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
                         value={teacherHR}
                         onChange={(e) => setTeacherHR(e.target.value)}
                     >
                         <option value="">Chọn giáo viên chủ nhiệm</option>
                         {teachers?.map((teacher) => (
-                            <option key={teacher.id} value={teacher._id}>{teacher.name}</option>
+                            <option key={teacher.id} value={teacher._id}>
+                                {teacher.name}
+                            </option>
                         ))}
                     </select>
                 </div>
 
                 {message && (
-                    <div className="mt-4 text-center text-sm font-semibold text-green-500">{message}</div>
+                    <div className="mt-6 text-center text-sm font-semibold text-green-500">{message}</div>
                 )}
-
-                <div className="mt-6">
-                    <button
-                        className={`w-full py-2 px-4 font-semibold rounded-md ${isLoading ? "bg-gray-400" : "bg-indigo-600 hover:bg-indigo-700"
-                            } text-white`}
-                        onClick={handleCreateClass}
-                        disabled={isLoading} // Vô hiệu hóa khi đang loading
-                    >
-                        {isLoading ? "Đang xử lý..." : "Tạo Lớp Học Mới"}
-                    </button>
-                </div>
             </div>
 
             {isModalOpen && (
                 <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
-                    <div className="bg-white p-6 rounded-lg shadow-lg w-144 max-h-[80vh] overflow-y-auto">
-                        {/* <h3 className="text-xl font-semibold mb-4">Chọn giáo viên cho các môn học</h3> */}
-                        <ul className="p-0">
+                    <div className="bg-white p-6 rounded-lg shadow-2xl w-full max-w-3xl max-h-[80vh] overflow-y-auto">
+                        <h3 className="text-2xl font-semibold text-gray-700 mb-6 text-center">
+                            Chọn giáo viên cho các môn học
+                        </h3>
+                        <ul className="space-y-4">
                             {Object.keys(selectedSubjects).map((subjectName, subjectIndex) => (
-                                <li key={subjectIndex} className="mb-4 flex">
-                                    <div className="font-medium flex-1">{subjectName}</div>
-
-                                    {/* Lặp qua các option cho môn học */}
-                                    <div className="flex-1">
-                                        <div className="text-sm text-gray-500">
-                                            <select
-                                                className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 py-1"
-                                                value={selectedSubjectAndTeacher[subjectName] || ''} // Giáo viên đã chọn cho môn học này
-                                                onChange={(e) => handleTeacherChange(subjectName, e.target.value)} // Cập nhật khi chọn giáo viên mới
-                                            >
-                                                <option value="">Chọn giáo viên</option>
-                                                {selectedSubjects[subjectName]?.map((subject, index) => (
-                                                    <option key={index} value={subject._id}>
-                                                        {subject.teacherId.name}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        </div>
+                                <li key={subjectIndex} className="flex items-center">
+                                    <div className="font-medium w-1/2">{subjectName}</div>
+                                    <div className="w-1/2">
+                                        <select
+                                            className="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 py-2"
+                                            value={selectedSubjectAndTeacher[subjectName] || ""}
+                                            onChange={(e) => handleTeacherChange(subjectName, e.target.value)}
+                                        >
+                                            <option value="">Chọn giáo viên</option>
+                                            {selectedSubjects[subjectName]?.map((subject, index) => (
+                                                <option key={index} value={subject._id}>
+                                                    {subject.teacherId.name}
+                                                </option>
+                                            ))}
+                                        </select>
                                     </div>
                                 </li>
                             ))}
                         </ul>
-
-                        <div className="mt-4 text-center">
+                        <div className="mt-8 flex justify-end space-x-4">
                             <button
-                                className="py-2 px-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                                className="py-2 px-6 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700"
                                 onClick={handleSaveTeachers}
                             >
                                 Lưu
                             </button>
                             <button
-                                className="py-2 px-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                                className="py-2 px-6 bg-gray-400 text-white font-semibold rounded-lg hover:bg-gray-500"
                                 onClick={closeModal}
                             >
                                 Đóng
@@ -377,10 +391,8 @@ const CreateClass = () => {
                     </div>
                 </div>
             )}
+        </div>
 
-
-
-        </div >
     );
 };
 
