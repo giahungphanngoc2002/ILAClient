@@ -151,7 +151,7 @@ export const getResourcesBySubject = async (classId, subjectId) => {
     return res.data;
 };
 
-export const addResourceToSubject = async (classId, subjectId, file,content) => {
+export const addResourceToSubject = async (classId, subjectId, file, content) => {
     // Tạo FormData để chứa file
     const formData = new FormData();
     formData.append("linkResource", file);
@@ -181,12 +181,12 @@ export const deleteResourceToSubject = async (classId, subjectId, fileId) => {
 
 export const downloadFileFromCloudinary = async (fileId) => {
     const res = await axios.get(`${CLASS_API_URL}/download/${fileId}`, {
-      responseType: "blob", // Đảm bảo nhận file nhị phân
+        responseType: "blob", // Đảm bảo nhận file nhị phân
     });
     return res; // Trả về toàn bộ response
-  };
-  
-  
+};
+
+
 
 // API liên quan đến đơn xin vắng mặt
 export const createApplication = async (classId, applicationData) => {
@@ -194,7 +194,7 @@ export const createApplication = async (classId, applicationData) => {
     return res.data;
 };
 
-export const createApplicationByParent = async (classId,studentId, applicationData) => {
+export const createApplicationByParent = async (classId, studentId, applicationData) => {
     const res = await axios.post(`${CLASS_API_URL}/classes/${classId}/${studentId}/applicationabsent`, applicationData);
     return res.data;
 };
@@ -244,3 +244,7 @@ export const getConductByStudentIdAndSemester = async (studentId, semester) => {
     return res.data;
 };
 
+export const getAllClassByBlock = async (blockId) => {
+    const res = await axios.get(`${CLASS_API_URL}/getAllClassByBlock/${blockId}`);
+    return res.data;
+};

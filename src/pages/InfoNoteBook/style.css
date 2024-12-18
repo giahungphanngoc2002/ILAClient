@@ -1,0 +1,9 @@
+.flex-30 {
+    flex: 0 0 30%;
+    max-width: 30%;
+}
+
+.flex-70 {
+    flex: 0 0 70%;
+    max-width: 70%;
+}
