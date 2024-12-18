@@ -60,12 +60,11 @@ export const getAllSemesterByYear = async (year) => {
   return res.data;
 };
 
-export const updateSemester = async (id) => {
-  const res = await axios.put(
-    `${SUBJECT_API_URL}/updateSemester/${id}`,
-    
-  );
-  return res.data;
+export const updateSemester = async (id, updateData) => {
+  
+    const res = await axios.put(`${SUBJECT_API_URL}/updateSemester/${id}`, updateData);
+    return res.data; // Trả về dữ liệu phản hồi từ API
+  
 };
 
 

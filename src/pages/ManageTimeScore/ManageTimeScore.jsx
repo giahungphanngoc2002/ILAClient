@@ -80,24 +80,37 @@ const ManageTimeScore = () => {
 
     const handleUpdate = async () => {
         try {
-            const values = await form.validateFields();
-            // Call API to update the record
+            setIsLoading(true); // Bắt đầu hiệu ứng tải
+            const values = await form.validateFields(); // Lấy dữ liệu từ form
+            const updateData = {
+                dateStart: values.dateStart.format("DD/MM/YYYY").toString(),
+                dateEnd: values.dateEnd.format("DD/MM/YYYY").toString(),
 
-            console.log(values.dateStart.format("DD/MM/YYYY").toString())
-            console.log(values.dateEnd.format("DD/MM/YYYY").toString())
-            console.log(editingRecord._id)
-            // await SubjectService.updateSemester(editingRecord._id, {
-            //     dateStart: values.dateStart.format("DD/MM/YYYY").toString(),
-            //     dateEnd: values.dateEnd.format("DD/MM/YYYY").toString(),
-            // });
-            toast.success("Cập nhật thành công");
+            };
+    
+            console.log("Update Data:", updateData);
+            console.log("Editing Record ID:", editingRecord._id);
+    
+            // Gọi API để cập nhật học kỳ
+            const updatedSemester = await SubjectService.updateSemester(editingRecord._id, updateData);
+    
+            console.log("Updated Semester:", updatedSemester);
+            toast.success("Cập nhật thành công kỳ học!"); // Thông báo thành công
+    
+            // Đóng modal và làm mới form
             setIsModalVisible(false);
             form.resetFields();
+            // Làm mới danh sách học kỳ
+            const refreshedSemesters = await SubjectService.getAllSemesterByYear(yearRange);
+            setSemesters(refreshedSemesters.semesters);
         } catch (error) {
             console.error("Error updating semester:", error);
-            toast.error("Có lỗi xảy ra khi cập nhật");
+            toast.error("Cập nhật thất bại!"); // Thông báo lỗi
+        } finally {
+            setIsLoading(false); // Kết thúc hiệu ứng tải
         }
-    };
+    }; 
+    
 
     const columns = [
         {
