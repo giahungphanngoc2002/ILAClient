@@ -16,7 +16,8 @@ function ConductEvaluation() {
   const [loading, setLoading] = useState(true); // Trạng thái loading
   const [year, setYear] = useState("");
   const [semesters, setSemesters] = useState([]);
-
+  const [semestersBlock, setSemesterBlock] = useState([]);
+  const [blockId, setBlockId] = useState(null);
   useEffect(() => {
     const fetchClassDetails = async () => {
       try {
@@ -24,6 +25,7 @@ function ConductEvaluation() {
         const response = await ClassService.getDetailClass(idClass);
         setYear(response?.data?.year)
         setStudents(response?.data?.studentID);
+        setBlockId(response?.data?.blockID?._id);
       } catch (error) {
         console.error("Lỗi khi lấy chi tiết lớp:", error);
       } finally {
@@ -75,6 +77,31 @@ function ConductEvaluation() {
       fetchConducts();
     } // Gọi hàm fetchConducts để lấy dữ liệu mới
   }, [selectedSemester, idClass]);
+
+
+  useEffect(() => {
+    const fetchSemestersByBlockAndYear = async () => {
+      try {
+        setLoading(true);
+        if (blockId && year) {
+          const response = await SubjectService.getAllSemesterByBlockAndYear(blockId, year);
+        
+          setSemesters(response?.semesters || []);
+        }
+      } catch (error) {
+        console.error("Lỗi khi lấy học kỳ theo khối và năm:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSemestersByBlockAndYear();
+  }, [blockId, year]);
+
+
+console.log(blockId, year);
+
+
 
   const mergedData = students.map((student) => {
     const conduct = conducts?.data.find(
