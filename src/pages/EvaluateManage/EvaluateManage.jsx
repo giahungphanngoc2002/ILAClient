@@ -16,14 +16,17 @@ function EvaluateManage() {
   const [loading, setLoading] = useState(true); // Trạng thái loading
   const [year, setYear] = useState("");
   const [semesters, setSemesters] = useState([]);
+  const [block, setBlock] = useState();
 
   useEffect(() => {
     const fetchClassDetails = async () => {
       try {
         setLoading(true); // Bắt đầu tải
         const response = await ClassService.getDetailClass(idClass);
+        console.log(response)
         setYear(response?.data?.year)
         setStudents(response?.data?.studentID);
+        setBlock(response?.data?.blockID._id)
       } catch (error) {
         console.error("Lỗi khi lấy chi tiết lớp:", error);
       } finally {
@@ -40,19 +43,21 @@ function EvaluateManage() {
     const fetchYear = async () => {
       try {
         setLoading(true); // Bắt đầu tải
-        const response = await SubjectService.getAllSemesterByYear(year);
+        const response = await SubjectService.getAllSemesterByBlockAndYear(block, year);
+        console.log(response)
         setSemesters(response?.semesters)
+
       } catch (error) {
         console.error("Lỗi khi lấy chi tiết lớp:", error);
       } finally {
         setLoading(false); // Kết thúc tải
       }
     };
-    if (year) {
+    if (block && year) {
       fetchYear();
     }
 
-  }, [year]);
+  }, [block, year]);
 
   useEffect(() => {
     if (semesters.length > 0) {

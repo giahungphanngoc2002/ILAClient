@@ -30,6 +30,7 @@ const ScoreTableStudent = () => {
     const [selectedClass, setSelectedClass] = useState();
     const [selectedNameSemester, setSelectedNameSemester] = useState();
     const [achivement, setAchivement] = useState();
+    const [block, setBlock] = useState();
 
 
     useEffect(() => {
@@ -193,6 +194,7 @@ const ScoreTableStudent = () => {
                 const userClass = findUserClass(allClasses?.data || [], user.id);
                 setUserClasses(userClass)
                 setYear(userClass[0].year)
+                setBlock(userClass[0].blockID._id)
                 const filterUserClass = userClass.find((classItem) => {
                     return classItem._id === selectedClass;
                 });
@@ -218,7 +220,7 @@ const ScoreTableStudent = () => {
         const fetchYear = async () => {
             try {
                 setLoading(true); // Bắt đầu tải
-                const response = await SubjectService.getAllSemesterByYear(year);
+                const response = await SubjectService.getAllSemesterByBlockAndYear(block, year);
                 setSemesters(response?.semesters)
             } catch (error) {
                 console.error("Lỗi khi lấy chi tiết lớp:", error);
@@ -226,11 +228,11 @@ const ScoreTableStudent = () => {
                 setLoading(false); // Kết thúc tải
             }
         };
-        if (year) {
+        if (year && block) {
             fetchYear();
         }
 
-    }, [year]);
+    }, [year, block]);
 
     const filterSubjectEvaluationsByUserId = () => {
         if (!Array.isArray(classSubjectPhu)) {

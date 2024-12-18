@@ -29,6 +29,7 @@ const ScoreTableForParent = () => {
     const [selectedClass, setSelectedClass] = useState();
     const [selectedNameSemester, setSelectedNameSemester] = useState();
     const [achivement, setAchivement] = useState();
+    const [block, setBlock] = useState();
 
     const { studentId } = useParams();
 
@@ -190,13 +191,13 @@ const ScoreTableForParent = () => {
                 const allClasses = await ClassService.getAllClass();
                 setClasses(allClasses?.data || []);
                 const userClass = findUserClass(allClasses?.data || [], studentId);
+                console.log(userClass)
                 setUserClasses(userClass)
                 setYear(userClass[0].year)
+                setBlock(userClass[0].blockID._id)
                 const filterUserClass = userClass.find((classItem) => {
                     return classItem._id === selectedClass;
                 });
-
-
                 if (filterUserClass && filterUserClass?.SubjectsId) {
                     setClassSubject(filterUserClass?.SubjectsId);
                 } else {
@@ -213,11 +214,13 @@ const ScoreTableForParent = () => {
         fetchClasses();
     }, [studentId, selectedClass]);
 
+    console.log(block)
+
     useEffect(() => {
         const fetchYear = async () => {
             try {
                 setLoading(true); // Bắt đầu tải
-                const response = await SubjectService.getAllSemesterByYear(year);
+                const response = await SubjectService.getAllSemesterByBlockAndYear(block, year);
                 setSemesters(response?.semesters)
             } catch (error) {
                 console.error("Lỗi khi lấy chi tiết lớp:", error);
@@ -225,11 +228,11 @@ const ScoreTableForParent = () => {
                 setLoading(false); // Kết thúc tải
             }
         };
-        if (year) {
+        if (year && block) {
             fetchYear();
         }
 
-    }, [year]);
+    }, [year , block]);
 
     const filterSubjectEvaluationsByUserId = () => {
         if (!Array.isArray(classSubjectPhu)) {
