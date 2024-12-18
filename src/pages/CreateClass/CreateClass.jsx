@@ -41,7 +41,7 @@ const CreateClass = () => {
 
     useEffect(() => {
         const currentYear = new Date().getFullYear();
-        setYear(`${currentYear} - ${currentYear + 1}`);
+        setYear(`${currentYear}-${currentYear + 1}`);
     }, []);
 
     console.log(year)

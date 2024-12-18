@@ -38,6 +38,7 @@ const GradeTable = () => {
                 setClassDetail(response?.data)
                 setStudentInClass(response?.data?.studentID);
                 setYear(response?.data.year)
+                console.log(response)
             } catch (error) {
                 console.error("Lỗi khi lấy chi tiết lớp:", error);
             } finally {
@@ -193,6 +194,7 @@ const GradeTable = () => {
                         id: student._id,
                         name: student.name,
                         email: student.email,
+                        username: student.username,
                         diemThuongXuyen: [],
                         diemGiuaKi: [],
                         diemCuoiKi: [],
@@ -209,6 +211,7 @@ const GradeTable = () => {
                     id: student._id,
                     name: student.name,
                     email: student.email,
+                    username: student.username,
                     diemThuongXuyen: [],
                     diemGiuaKi: [],
                     diemCuoiKi: [],
@@ -264,9 +267,12 @@ const GradeTable = () => {
         return (totalScore / totalWeight).toFixed(2);
     };
 
+
+
     const handleDownloadExcel = () => {
         const worksheet = XLSX.utils.json_to_sheet(
             filteredStudents.map((student) => ({
+                "Tài Khoản": student.username,
                 "Họ Tên": student.name,
                 "Điểm Thường Xuyên": student.diemThuongXuyen.join(", "),
                 "Điểm Giữa Kỳ": student.diemGiuaKi.join(", "),
@@ -311,6 +317,7 @@ const GradeTable = () => {
     }, []);
 
 
+    console.log(students)
 
     const filteredStudents = students.filter((student) => {
         const averageScore = (
@@ -331,8 +338,6 @@ const GradeTable = () => {
     const onBack = () => {
         window.history.back();
     }
-
-
 
     const handleSubmitScore = async () => {
         setLoading(true);
@@ -384,6 +389,7 @@ const GradeTable = () => {
 
             // Hiển thị toast khi tất cả đã hoàn thành
             toast.success("All scores have been successfully uploaded!");
+            document.getElementById("fileUpload").value = "";
         } catch (error) {
             toast.error("An error occurred while submitting scores.");
         } finally {
@@ -405,7 +411,7 @@ const GradeTable = () => {
 
                 // Đảm bảo rằng các dữ liệu trong Excel có đúng cấu trúc
                 const updatedStudents = students.map(student => {
-                    const studentData = json.find(item => item["Họ Tên"] === student.name);
+                    const studentData = json.find(item => item["Họ Tên"] === student.name && item["Tài Khoản"] === student.username);
 
                     if (studentData) {
                         return {
@@ -428,9 +434,7 @@ const GradeTable = () => {
         reader.readAsBinaryString(file);
     }
 
-    console.log(semesterFilter)
-    console.log(semester1 && semester1.nameSemester == "1" && isSemesterEndTodaySemester1)
-
+    console.log(filteredStudents)
     return (
         <div className="container mx-auto p-6 min-h-screen">
             <Spin spinning={loading} size="large">
@@ -521,81 +525,76 @@ const GradeTable = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {filteredStudents.length > 0 ? (
-                                filteredStudents.map((student, index) => (
-                                    <tr key={index}>
-                                        <td className="border px-4 py-3">
-                                            <input
-                                                type="text"
-                                                value={student.name}
-                                                readOnly
-                                                className="w-full border rounded px-2 py-1 bg-gray-100"
-                                            />
-                                        </td>
-                                        <td className="border px-4 py-2">
-                                            <div className="grid grid-cols-2 gap-2">
-                                                {[...Array(subject.nameSubject === "Toán" ? 4 : 3)].map((_, idx) => (
-                                                    <input
-                                                        key={`thuongXuyen-${idx}`}
-                                                        type="number"
-                                                        disabled={semester1 && semester1.nameSemester == "1" && isSemesterEndTodaySemester1 || semester2 && semester2.nameSemester == "2" && isSemesterEndTodaySemester2}
-                                                        value={student.diemThuongXuyen[idx] || ''}
-                                                        onChange={(e) => handleScoreChange('diemThuongXuyen', idx, e.target.value, student.id)}
-                                                        onInput={(e) => {
-                                                            let value = e.target.value;
-                                                            // Chỉ cho phép nhập giá trị từ 0 đến 10
-                                                            if (value < 0) e.target.value = 0;
-                                                            if (value > 10) e.target.value = 10;
-                                                        }}
-                                                        className="w-full border rounded px-2 py-1"
-                                                    />
-                                                ))}
-                                            </div>
-                                        </td>
+                            {filteredStudents.map((student, index) => (
+                                <tr key={index}>
+                                    <td className="border px-4 py-3">
+                                        <input
+                                            type="text"
+                                            value={student.name}
+                                            readOnly
+                                            className="w-full border rounded px-2 py-1 bg-gray-100"
+                                        />
+                                    </td>
+                                    <td className="border px-4 py-2">
+                                        <div className="grid grid-cols-2 gap-2">
+                                            {[...Array(subject.nameSubject === "Toán" ? 4 : 3)].map((_, idx) => (
+                                                <input
+                                                    key={`thuongXuyen-${idx}`}
+                                                    type="number"
+                                                    disabled={semester1 && semester1.nameSemester == "1" && isSemesterEndTodaySemester1 || semester2 && semester2.nameSemester == "2" && isSemesterEndTodaySemester2}
+                                                    value={student.diemThuongXuyen[idx] || ''}
+                                                    onChange={(e) => handleScoreChange('diemThuongXuyen', idx, e.target.value, student.id)}
+                                                    onInput={(e) => {
+                                                        let value = e.target.value;
+                                                        // Chỉ cho phép nhập giá trị từ 0 đến 10
+                                                        if (value < 0) e.target.value = 0;
+                                                        if (value > 10) e.target.value = 10;
+                                                    }}
+                                                    className="w-full border rounded px-2 py-1"
+                                                />
+                                            ))}
+                                        </div>
+                                    </td>
 
-                                        <td className="border px-4 py-2">
-                                            <input
-                                                type="number"
-                                                value={student.diemGiuaKi || ''}
-                                                disabled={semester1 && semester1.nameSemester == "1" && isSemesterEndTodaySemester1 || semester2 && semester2.nameSemester == "2" && isSemesterEndTodaySemester2}
-                                                onChange={(e) => handleScoreChange('diemGiuaKi', null, e.target.value, student.id)}
-                                                onInput={(e) => {
-                                                    let value = e.target.value;
-                                                    // Chỉ cho phép nhập giá trị từ 0 đến 10
-                                                    if (value < 0) e.target.value = 0;
-                                                    if (value > 10) e.target.value = 10;
-                                                }}
-                                                className="w-full border rounded px-2 py-1"
-                                            />
-                                        </td>
-                                        <td className="border px-4 py-2">
-                                            <input
-                                                type="number"
-                                                value={student.diemCuoiKi || ''}
-                                                disabled={semester1 && semester1.nameSemester == "1" && isSemesterEndTodaySemester1 || semester2 && semester2.nameSemester == "2" && isSemesterEndTodaySemester2}
-                                                onChange={(e) => handleScoreChange('diemCuoiKi', null, e.target.value, student.id)}
-                                                onInput={(e) => {
-                                                    let value = e.target.value;
-                                                    // Chỉ cho phép nhập giá trị từ 0 đến 10
-                                                    if (value < 0) e.target.value = 0;
-                                                    if (value > 10) e.target.value = 10;
-                                                }}
-                                                className="w-full border rounded px-2 py-1"
-                                                min="0"
-                                                max="10"
-                                            />
-                                        </td>
+                                    <td className="border px-4 py-2">
+                                        <input
+                                            type="number"
+                                            value={student.diemGiuaKi || ''}
+                                            disabled={semester1 && semester1.nameSemester == "1" && isSemesterEndTodaySemester1 || semester2 && semester2.nameSemester == "2" && isSemesterEndTodaySemester2}
+                                            onChange={(e) => handleScoreChange('diemGiuaKi', null, e.target.value, student.id)}
+                                            onInput={(e) => {
+                                                let value = e.target.value;
+                                                // Chỉ cho phép nhập giá trị từ 0 đến 10
+                                                if (value < 0) e.target.value = 0;
+                                                if (value > 10) e.target.value = 10;
+                                            }}
+                                            className="w-full border rounded px-2 py-1"
+                                        />
+                                    </td>
+                                    <td className="border px-4 py-2">
+                                        <input
+                                            type="number"
+                                            value={student.diemCuoiKi || ''}
+                                            disabled={semester1 && semester1.nameSemester == "1" && isSemesterEndTodaySemester1 || semester2 && semester2.nameSemester == "2" && isSemesterEndTodaySemester2}
+                                            onChange={(e) => handleScoreChange('diemCuoiKi', null, e.target.value, student.id)}
+                                            onInput={(e) => {
+                                                let value = e.target.value;
+                                                // Chỉ cho phép nhập giá trị từ 0 đến 10
+                                                if (value < 0) e.target.value = 0;
+                                                if (value > 10) e.target.value = 10;
+                                            }}
+                                            className="w-full border rounded px-2 py-1"
+                                            min="0"
+                                            max="10"
+                                        />
+                                    </td>
 
-                                        <td className="border px-4 py-3 font-semibold text-blue-700">
-                                            {calculateAverageSubject(student.diemThuongXuyen, student.diemGiuaKi, student.diemCuoiKi, subject.nameSubject)}
-                                        </td>
-                                    </tr>
-                                ))
-                            ) : (
-                                <tr>
-                                    <td colSpan="5" className="text-center py-4">Không có điểm để hiển thị.</td>
+                                    <td className="border px-4 py-3 font-semibold text-blue-700">
+                                        {calculateAverageSubject(student.diemThuongXuyen, student.diemGiuaKi, student.diemCuoiKi, subject.nameSubject)}
+                                    </td>
                                 </tr>
-                            )}
+                            ))
+                            }
                         </tbody>
                     </table>
                 </div>
