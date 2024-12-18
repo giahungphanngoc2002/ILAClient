@@ -59,6 +59,16 @@ export const getAllSemesterByYear = async (year) => {
   const res = await axios.get(`${SUBJECT_API_URL}/allSemester/${year}`);
   return res.data;
 };
+
+export const updateSemester = async (id) => {
+  const res = await axios.put(
+    `${SUBJECT_API_URL}/updateSemester/${id}`,
+    
+  );
+  return res.data;
+};
+
+
 export const getAllSubjectbyBlock = async (block) => {
   const res = await axios.get(`${SUBJECT_API_URL}/getAllSubjects/${block}`);
   return res.data;
