@@ -165,6 +165,7 @@ const ManageSchedule = () => {
                     toast.success(`Thay đổi thành công tuần ${startWeekNumber}`);
                 } catch (updateError) {
                     toast.error(`Error updating schedule for week ${startWeekNumber}`);
+                      toast.error(`${updateError.response?.data?.error || updateError.message}`);
                 }
             } else {
                 try {

@@ -67,6 +67,11 @@ export const updateSemester = async (id, updateData) => {
   
 };
 
+export const getAllSemesterByBlock = async (blockId) => {
+  const res = await axios.get(`${SUBJECT_API_URL}/semesters/block/${blockId}`);
+  return res.data;
+};
+
 
 export const getAllSubjectbyBlock = async (block) => {
   const res = await axios.get(`${SUBJECT_API_URL}/getAllSubjects/${block}`);
