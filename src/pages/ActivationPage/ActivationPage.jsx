@@ -1,16 +1,12 @@
-// ActivationPage.js
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import * as UserService from "../../services/UserService"; // Đường dẫn đến file chứa hàm Axios
-import { AiOutlineWarning, AiOutlineCheckCircle } from 'react-icons/ai';
-import { useDispatch } from "react-redux"; // Thêm useDispatch
-import { updateUser } from "../../redux/slices/userSlide"; // Thêm updateUser action
+import * as UserService from "../../services/UserService";
+import { AiOutlineWarning, AiOutlineCheckCircle } from "react-icons/ai";
 
 const ActivationPage = () => {
   const { activation_token } = useParams();
   const [message, setMessage] = useState("");
   const [error, setError] = useState(false);
-  const dispatch = useDispatch(); // Khai báo useDispatch
 
   useEffect(() => {
     if (activation_token) {
@@ -18,21 +14,22 @@ const ActivationPage = () => {
         try {
           const response = await UserService.activateUser(activation_token);
           if (response.status === "OK") {
-            setMessage("Your email has been activated successfully!");
-            // Dispatch action để cập nhật lại email
-            dispatch(updateUser({ email: response.data.email })); // Giả sử response có data.email
+            setMessage("Email của bạn đã được kích hoạt thành công!");
+            setTimeout(() => {
+              window.location.href = "http://localhost:3000/manage/profile";
+            }, 2000); // Chuyển hướng sau 2 giây
           } else {
             setError(true);
             setMessage(response.message);
           }
         } catch (err) {
           setError(true);
-          setMessage("Your token is expired! Please request a new activation email.");
+          setMessage("Token đã hết hạn! Vui lòng yêu cầu gửi lại email kích hoạt.");
         }
       };
       sendRequest();
     }
-  }, [activation_token, dispatch]); // Dispatch khi activation_token thay đổi
+  }, [activation_token]);
 
   return (
     <div className="flex justify-center items-center w-full h-screen bg-gray-100">
