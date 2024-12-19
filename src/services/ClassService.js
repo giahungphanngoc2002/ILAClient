@@ -204,8 +204,8 @@ export const getDetailApplicationAbsentByIdClass = async (classId) => {
     return res.data;
 };
 
-export const getAllApplicationByStatus = async () => {
-    const res = await axios.get(`${CLASS_API_URL}/applications/status`);
+export const getAllApplicationByStatus = async (classId) => {
+    const res = await axios.get(`${CLASS_API_URL}/applications/status/${classId}`);
     return res.data;
 };
 export const getDetailApplicationAbsent = async (id) => {

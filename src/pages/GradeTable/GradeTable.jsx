@@ -27,6 +27,7 @@ const GradeTable = () => {
     const [isSemesterEndToday, setIsSemesterEndToday] = useState(false);
     const [isSemesterEndTodaySemester1, setIsSemesterEndTodaySemester1] = useState(false);
     const [isSemesterEndTodaySemester2, setIsSemesterEndTodaySemester2] = useState(false);
+    const [block, setBlock] = useState();
 
 
 
@@ -38,6 +39,7 @@ const GradeTable = () => {
                 setClassDetail(response?.data)
                 setStudentInClass(response?.data?.studentID);
                 setYear(response?.data.year)
+                setBlock(response?.data.blockID._id)
                 console.log(response)
             } catch (error) {
                 console.error("Lỗi khi lấy chi tiết lớp:", error);
@@ -116,7 +118,7 @@ const GradeTable = () => {
         const fetchYear = async () => {
             try {
                 setLoading(true); // Bắt đầu tải
-                const response = await SubjectService.getAllSemesterByYear(year);
+                const response = await SubjectService.getAllSemesterByBlockAndYear(block, year);
                 setSemesters(response?.semesters)
             } catch (error) {
                 console.error("Lỗi khi lấy chi tiết lớp: ", error);
@@ -124,11 +126,11 @@ const GradeTable = () => {
                 setLoading(false); // Kết thúc tải
             }
         };
-        if (year) {
+        if (block && year) {
             fetchYear();
         }
 
-    }, [year]);
+    }, [block, year]);
 
     useEffect(() => {
         if (Array.isArray(classDetail?.SubjectsId)) {
@@ -146,10 +148,6 @@ const GradeTable = () => {
             try {
                 setLoading(true); // Bắt đầu trạng thái tải
                 const scoresData = await ScoreSubjectService.getAllScoresBySubjectSemester(idSubject, idClass, semesterFilter);
-
-                // const filterSemester = semesters.find((semester) => semester._id === semesterFilter);
-
-                // console.log(filterSemester.nameSemester);
 
                 // Kiểm tra nếu không có dữ liệu điểm, tạo bảng điểm rỗng
                 const scoresByStudentId = scoresData?.reduce((acc, detail) => {
@@ -342,7 +340,7 @@ const GradeTable = () => {
     const handleSubmitScore = async () => {
         setLoading(true);
         try {
-            // Sử dụng studentsRef để đảm bảo lấy giá trị students lúc hiện tại
+            
             const scoresData = students.map(student => {
                 // Kiểm tra và chỉ lấy điểm nếu có điểm
                 const scores = [
@@ -363,7 +361,6 @@ const GradeTable = () => {
                 }
 
                 const scoreId = student.scoreId || null;
-
                 return { studentId: student.id, subjectId: idSubject, classId: idClass, scores, scoreId };
             }).filter(scoreData => scoreData !== null); // Loại bỏ các sinh viên không có điểm
 
@@ -391,7 +388,7 @@ const GradeTable = () => {
             toast.success("All scores have been successfully uploaded!");
             document.getElementById("fileUpload").value = "";
         } catch (error) {
-            toast.error("An error occurred while submitting scores.");
+            // toast.error("An error occurred while submitting scores.");
         } finally {
             setLoading(false);
         }
@@ -433,7 +430,6 @@ const GradeTable = () => {
 
         reader.readAsBinaryString(file);
     }
-
     console.log(filteredStudents)
     return (
         <div className="container mx-auto p-6 min-h-screen">

@@ -24,10 +24,8 @@ const timeSlots = [
 const daysOfWeek = ['Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy'];
 
 const CreateCalender = () => {
-    const [selectedClass, setSelectedClass] = useState(null);
     const [schedule, setSchedule] = useState({});
     const [error, setError] = useState("");
-    const [blocks, setBlocks] = useState([]);
     const [classDetail, setClassDetail] = useState(null);
     const [startWeek, setStartWeek] = useState(null);
     const [endWeek, setEndWeek] = useState(null);
@@ -35,19 +33,6 @@ const CreateCalender = () => {
     const [endYearWeek, setEndYearWeek] = useState({ year: "", week: "" });
     const [data, setData] = useState();
     const { idClass } = useParams();
-
-
-    useEffect(() => {
-        const fetchBlocks = async () => {
-            try {
-                const blocksData = await BlockService.getAllBlocks();
-                setBlocks(blocksData);
-            } catch (error) {
-                console.error("Error fetching blocks:", error);
-            }
-        };
-        fetchBlocks();
-    }, []);
 
     useEffect(() => {
         const fetchClassDetail = async () => {
@@ -64,7 +49,6 @@ const CreateCalender = () => {
 
     const transformData = (data) => {
         const result = [];
-
         // Duyệt qua từng ngày trong tuần
         daysOfWeek.forEach(day => {
             // Lọc các dữ liệu cho từng ngày
@@ -93,21 +77,18 @@ const CreateCalender = () => {
         return result.filter(day => day.slots.length > 0);
     };
 
-
-    console.log(classDetail)
-
     const handleFileUpload = (event) => {
         const file = event.target.files[0];
         if (file) {
             const reader = new FileReader();
             reader.onload = (e) => {
-                const data = e.target.result;
+const data = e.target.result;
                 const workbook = XLSX.read(data, { type: 'binary' });
-                const sheetName = workbook.SheetNames[0]; // Lấy sheet đầu tiên
+                const sheetName = workbook.SheetNames[0];
                 const sheet = workbook.Sheets[sheetName];
-                const jsonData = XLSX.utils.sheet_to_json(sheet); // Chuyển đổi sheet thành mảng JSON
+                const jsonData = XLSX.utils.sheet_to_json(sheet);
 
-                // console.log(classDetail);
+                console.log(jsonData)
 
                 const updatedData = jsonData.map(item => {
                     const updatedItem = { ...item };
@@ -130,9 +111,11 @@ const CreateCalender = () => {
                     return updatedItem;
                 });
 
-                console.log(updatedData);
+                console.log(updatedData)
 
                 const transformedData = transformData(updatedData);
+
+                console.log(transformedData)
 
                 setData(transformedData);
 
@@ -142,7 +125,6 @@ const CreateCalender = () => {
                         const currentSchedule = dayData.slots.find(
                             s => s.slotNumber === slot.slot.replace('Tiết ', '')
                         );
-                        console.log(currentSchedule);
                         if (currentSchedule) {
                             handleSelectSlot(
                                 idClass,
@@ -162,9 +144,6 @@ const CreateCalender = () => {
         }
     };
 
-    console.log("data", data);
-    console.log("schedule", schedule);
-
 
     const getYearAndWeekFromValue = (weekValue) => {
         const [year, week] = weekValue.split('-W');
@@ -179,15 +158,12 @@ const CreateCalender = () => {
 
     const handleEndWeekChange = (e) => {
         const endWeekValue = e.target.value;
-        setEndWeek(endWeekValue);
+setEndWeek(endWeekValue);
         setEndYearWeek(getYearAndWeekFromValue(endWeekValue));
     };
 
-    // console.log(schedule)
     const handleSelectSlot = (classId, day, slot, subjectData) => {
-        const { subjectId, subjectChuyendeId, subjectPhuId } = JSON.parse(subjectData);
-        // console.log(subjectData)
-        // console.log("Before update:", schedule);
+        const { subjectId } = JSON.parse(subjectData);
         setSchedule((prev) => ({
             ...prev,
             [classId]: {
@@ -195,9 +171,7 @@ const CreateCalender = () => {
                 [day]: {
                     ...(prev[classId]?.[day] || {}),
                     [slot]: {
-                        subjectId,
-                        subjectChuyendeId,
-                        subjectPhuId
+                        subjectId
                     },
                 },
             },
@@ -211,6 +185,9 @@ const CreateCalender = () => {
         const endWeek = parseInt(endYearWeek.week, 10);
         return endYear > startYear || (endYear === startYear && endWeek >= startWeek);
     };
+
+    useEffect(() => {
+    }, [schedule]);
 
 
     const handleSaveSchedule = async () => {
@@ -229,7 +206,6 @@ const CreateCalender = () => {
 
             for (let currentWeek = startWeekNumber; currentWeek <= endWeekNumber; currentWeek++) {
                 let timetableId = data?.find((schedule) => schedule.week === `${currentWeek}`)?._id || null;
-                // console.log(timetableId)
                 const scheduleData = {
                     yearNumber: startYearWeek.year,
                     weekNumber: currentWeek,
@@ -252,7 +228,7 @@ const CreateCalender = () => {
                                 });
 
                             if (newSlots.length > 0) {
-                                let updatedSlots = [];
+let updatedSlots = [];
                                 const existingDay = data?.find(
                                     (daySchedule) => daySchedule.dayOfWeek === day
                                 );
@@ -264,7 +240,7 @@ const CreateCalender = () => {
                                     );
                                 }
 
-                                updatedSlots = [...updatedSlots];
+                                updatedSlots = [...newSlots];
 
                                 return { dayOfWeek: day, slots: updatedSlots };
                             }
@@ -274,7 +250,6 @@ const CreateCalender = () => {
                         .filter((day) => day !== null),
                 };
 
-                console.log(scheduleData)
                 if (!scheduleData.days || scheduleData.days.length === 0) {
                     setError("Schedule is empty, please select at least one subject per time slot.");
                     toast.error("Schedule is empty, please select at least one subject per time slot.");
@@ -315,8 +290,7 @@ const CreateCalender = () => {
             toast.error("An error occurred while processing the schedule.");
         }
     };
-
-    const onBack = () => {
+const onBack = () => {
         window.history.back();
     }
 
@@ -328,9 +302,6 @@ const CreateCalender = () => {
                 onButtonClick={handleSaveSchedule}
                 onBack={onBack}
             />
-
-
-
             <div className="bg-white p-6 rounded-lg shadow-lg mt-16">
                 <div className="flex">
                     <div className="mb-4 w-1/2 pr-2">
@@ -379,7 +350,7 @@ const CreateCalender = () => {
                     <thead>
                         <tr className="bg-indigo-100">
                             <th className="border px-4 py-2 text-indigo-700">Tiết học</th>
-                            {daysOfWeek.map((day, idx) => (
+{daysOfWeek.map((day, idx) => (
                                 <th key={idx} className="border px-4 py-2 text-indigo-700" style={{ width: "15%" }}>{day}</th>
                             ))}
                         </tr>
@@ -402,25 +373,23 @@ const CreateCalender = () => {
                                                         id="currentScheduleSelect"
                                                         className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                                         value={
-                                                            schedule[selectedClass]?.[day]?.[slot.slot]
-                                                                ? JSON.stringify(schedule[selectedClass][day][slot.slot])
+                                                            schedule[idClass]?.[day]?.[slot.slot]
+                                                                ? JSON.stringify(schedule[idClass][day][slot.slot])
                                                                 : currentSchedule?.subjectId
                                                                     ? JSON.stringify({
                                                                         subjectId: currentSchedule.subjectId._id,
-
                                                                     })
                                                                     : ""
                                                         }
                                                         onChange={(e) =>
-                                                            handleSelectSlot(selectedClass, day, slot.slot, e.target.value)
+                                                            handleSelectSlot(idClass, day, slot.slot, e.target.value)
                                                         }
                                                     >
                                                         {classDetail?.SubjectsId.map((subject, index) => (
                                                             <option
                                                                 key={index}
                                                                 value={JSON.stringify({
-                                                                    subjectId: subject._id,
-
+subjectId: subject._id,
                                                                 })}
                                                             >
                                                                 {subject?.nameSubject}
@@ -456,15 +425,15 @@ const CreateCalender = () => {
                                                 <select
                                                     className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                                     onChange={(e) =>
-                                                        handleSelectSlot(selectedClass, day, slot.slot, e.target.value)
+                                                        handleSelectSlot(idClass, day, slot.slot, e.target.value)
                                                     }
                                                     value={
-                                                        schedule[selectedClass]?.[day]?.[slot.slot]
-                                                            ? JSON.stringify(schedule[selectedClass]?.[day]?.[slot.slot])
+                                                        schedule[idClass]?.[day]?.[slot.slot]
+                                                            ? JSON.stringify(schedule[idClass]?.[day]?.[slot.slot])
                                                             : ""
                                                     }
                                                 >
-                                                    <option value="">Chọn môn</option>
+<option value="">Chọn môn</option>
                                                     {classDetail?.SubjectsId.map((subject, index) => (
                                                         <option
                                                             key={index}
@@ -497,7 +466,6 @@ const CreateCalender = () => {
                                 })}
                             </tr>
                         ))}
-
                     </tbody>
                 </table>
             </div>
@@ -506,5 +474,3 @@ const CreateCalender = () => {
 };
 
 export default CreateCalender;
-
-

@@ -24,7 +24,7 @@ function ManageAbsentAplication() {
         const fetchApplication = async () => {
             setIsLoading(true);
             try {
-                const data = await ClassService.getAllApplicationByStatus();
+                const data = await ClassService.getAllApplicationByStatus(idClass);
                 setApplication(data.applications); // Giả sử API trả về dữ liệu trong `data`
             } catch (error) {
                 console.error("Failed to fetch notifications:", error);
@@ -34,7 +34,7 @@ function ManageAbsentAplication() {
         };
 
         fetchApplication();
-    }, []);
+    }, [idClass]);
 
     console.log("123", application)
 
@@ -168,19 +168,19 @@ function ManageAbsentAplication() {
                                         {groupedApplication[day].map((applicationn) => (
                                             <div
                                                 key={applicationn._id}
-                                                onClick={() => setSelectedApplicationId(applicationn._id)}
+                                                onClick={() => setSelectedApplicationId(applicationn?._id)}
                                                 className={`p-4 cursor-pointer rounded-lg shadow-sm border ${selectedApplicationId === applicationn._id
                                                     ? "bg-blue-100 border-blue-500"
                                                     : "bg-gray-50 border-gray-300"
                                                     } hover:bg-blue-50 transition duration-200`}
                                             >
                                                 <div className="flex justify-between">
-                                                    <p className="font-semibold text-gray-800">Phụ huynh của: {applicationn.studentId.name}</p>
+                                                    <p className="font-semibold text-gray-800">Phụ huynh của: {applicationn?.studentId?.name}</p>
                                                     <p className="text-sm text-gray-500 mt-1">
-                                                        {new Date(applicationn.createdAt).toLocaleTimeString()}
+                                                        {new Date(applicationn?.createdAt).toLocaleTimeString()}
                                                     </p>
                                                 </div>
-                                                <p className="text-sm text-gray-600 mt-1 truncate">{applicationn.content}</p>
+                                                <p className="text-sm text-gray-600 mt-1 truncate">{applicationn?.content}</p>
                                             </div>
                                         ))}
                                     </div>
