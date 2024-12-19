@@ -30,9 +30,7 @@ export const getAllExamSchedules = async () => {
 };
 
 // Lấy lịch thi theo khối
-export const getAllExamScheduleByBlock = async (blockId) => {
-    const res = await axios.get(`${EXAM_API_URL}/getAllExamScheduleByBlock`, {
-        params: { blockId },
-    });
+export const getAllExamScheduleByBlock = async (blockId,semester) => {
+    const res = await axios.get(`${EXAM_API_URL}/getAllExamScheduleByBlock/${blockId}/${semester}`);
     return res.data;
 };

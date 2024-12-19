@@ -16,12 +16,15 @@ const ExamScheduler = () => {
     const [date, setDate] = useState('');
     const [timeStart, setTimeStart] = useState('');
     const [timeEnd, setTimeEnd] = useState('');
+    
     const [events, setEvents] = useState([]);
     const [blocks, setBlocks] = useState([]);
     const [subjects, setSubjects] = useState([]);
     const [showModal, setShowModal] = useState(false); // Trạng thái hiển thị Modal
     const [selectedEvent, setSelectedEvent] = useState(null); // Lưu sự kiện được chọn
-    const [nameBlock, setNameBlock] = useState(null); 
+    const [nameBlock, setNameBlock] = useState(null);
+    const [selectedSemester, setSelectedSemester] = useState();
+
 
     useEffect(() => {
         const fetchBlocks = async () => {
@@ -34,7 +37,6 @@ const ExamScheduler = () => {
         };
         fetchBlocks();
     }, []);
-
 
     useEffect(() => {
         const fetchSubjects = async () => {
@@ -49,7 +51,7 @@ const ExamScheduler = () => {
     }, [nameBlock]);
     console.log("su", subjects)
 
-    
+
 
     useEffect(() => {
         const fetchExamSchedules = async () => {
@@ -93,7 +95,7 @@ const ExamScheduler = () => {
             const end = new Date(start.getTime() + 60 * 60 * 1000); // Giả sử mỗi kỳ thi kéo dài 1 giờ
 
             const blockName = blocks.find(block => block._id === selectedBlock)?.nameBlock || 'Unknown Block';
-            
+
             const subjectName = subjects.find(subject => subject._id === selectedSubject)?.nameSubject || 'Unknown Subject';
 
             console.log(blockName)
@@ -104,6 +106,7 @@ const ExamScheduler = () => {
                 day: date,
                 timeStart: timeStart,
                 timeEnd: timeEnd,
+                semester: selectedSemester
             };
 
             try {
@@ -126,6 +129,7 @@ const ExamScheduler = () => {
                 setDate('');
                 setTimeStart('');
                 setTimeEnd('');
+                setSelectedSemester('');
 
                 toast.success("Lịch thi đã được thêm thành công!");
             } catch (error) {
@@ -157,7 +161,8 @@ const ExamScheduler = () => {
         setSelectedEvent(event);
         setDate(event.start.toISOString().split('T')[0]); // Lấy ngày từ sự kiện
         setTimeStart(event.start.toTimeString().slice(0, 5)); // Lấy giờ bắt đầu
-        setTimeEnd(event.end.toTimeString().slice(0, 5)); // Lấy giờ kết thúc
+        setTimeEnd(event.end.toTimeString().slice(0, 5));
+        setSelectedSemester(event.semester); // Lấy giờ kết thúc
         setShowModal(true);
     };
 
@@ -173,6 +178,7 @@ const ExamScheduler = () => {
                 day: date,
                 timeStart: timeStart,
                 timeEnd: timeEnd,
+                semester:selectedSemester
             };
 
             console.log(updatedEvent)
@@ -240,6 +246,19 @@ const ExamScheduler = () => {
                                     {subject.nameSubject}
                                 </option>
                             ))}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label className="block text-lg font-medium mb-2">Chọn Kì</label>
+                        <select
+                            value={selectedSemester}
+                            onChange={(e) => setSelectedSemester(e.target.value)}
+                            className="w-full p-2 border rounded"
+                        >
+                            <option value="">Chọn kì thi</option>
+                            <option value="1">Kì 1</option>
+                            <option value="2">Kì 2</option>
                         </select>
                     </div>
 
@@ -322,6 +341,15 @@ const ExamScheduler = () => {
                                     type="time"
                                     value={timeEnd} // Giá trị đã được đổ sẵn từ sự kiện
                                     onChange={(e) => setTimeEnd(e.target.value)}
+                                    className="form-control"
+                                />
+                            </div>
+                            <div className="mt-3">
+                                <label>Kì Học:</label>
+                                <input
+                                    type="Text"
+                                    value={selectedSemester}
+                                    onChange={(e) => setSelectedSemester(e.target.value)}
                                     className="form-control"
                                 />
                             </div>

@@ -16,6 +16,7 @@ const StudentViewExamSchedule = () => {
   const [classSubject, setClassSubject] = useState([]);
   const [blockClassUser, setBlockClassUser] = useState();
   const [loading, setLoading] = useState(false);
+  const [selectedSemester, setSelectedSemester] = useState("1");
   const user = useSelector((state) => state.user);
 
   const findUserClass = (allClasses, userId) => {
@@ -86,8 +87,9 @@ const StudentViewExamSchedule = () => {
 
       try {
         const data = await ExamScheduleService.getAllExamScheduleByBlock(
-          blockClassUser._id
+          blockClassUser._id ,selectedSemester
         );
+        console.log(data)
         setExamSchedule(data || []); // Đảm bảo state không undefined
       } catch (err) {
         console.error(err); // Log lỗi nếu có
@@ -97,19 +99,19 @@ const StudentViewExamSchedule = () => {
     };
 
     fetchExamSchedules();
-  }, [blockClassUser?._id]);
+  }, [blockClassUser?._id,selectedSemester]);
   console.log(examSchedule)
 
   // Kết hợp `classSubject` và `examSchedule`
   useEffect(() => {
     if (!classSubject.length) return;
-  
+
     const combinedSchedule = classSubject
       .map((subject) => {
         const exam = examSchedule.find(
           (examItem) => examItem.subjectId?._id === subject._id
         );
-  
+
         // Chỉ thêm vào lịch thi nếu có dữ liệu về thời gian thi
         if (exam && exam.day && exam.timeStart && exam.timeEnd) {
           return {
@@ -120,19 +122,19 @@ const StudentViewExamSchedule = () => {
             duration: calculateDuration(exam.timeStart, exam.timeEnd),
           };
         }
-  
+
         // Không trả về gì nếu không có lịch thi hợp lệ
         return null;
       })
       .filter(Boolean);  // Loại bỏ các giá trị null (những môn không có lịch thi)
-  
+
     // Filter theo `searchTerm`
     const searched = combinedSchedule.filter(
       (exam) =>
         exam.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
         exam.date.includes(searchTerm)
     );
-  
+
     setFilteredSchedule(searched);
   }, [classSubject, examSchedule, searchTerm]);
 
@@ -170,6 +172,12 @@ const StudentViewExamSchedule = () => {
     },
   ];
 
+  const handleSemesterChange = (semester) => {
+    setSelectedSemester(semester);
+  }
+
+  console.log(selectedSemester)
+
   return (
     <Layout style={{ height: "100vh" }}>
       <Breadcrumb title="Lịch Thi" onBack={onBack} displayButton={false} />
@@ -184,13 +192,57 @@ const StudentViewExamSchedule = () => {
           overflow: "auto",
         }}
       >
-        <Row gutter={[16, 16]} style={{ marginBottom: "20px" }}>
+        <Row gutter={[16, 16]} style={{
+          marginBottom: "20px",
+          display: "flex",
+          justifyContent: "space-between",
+        }}>
           <Col xs={24} sm={12} md={8}>
             <Search
               placeholder="Tìm kiếm môn học hoặc ngày thi"
               onChange={(e) => setSearchTerm(e.target.value)}
               style={{ width: "100%" }}
             />
+          </Col>
+          <Col xs={24} sm={12} md={8}
+            style={{
+              display: "flex",
+              justifyContent: "flex-end", // Đẩy các nút sang phải
+              gap: "8px", // Khoảng cách giữa các nút
+            }}
+          >
+            <Row gutter={[8, 8]}>
+              <Col>
+                <button
+                  style={{
+                    padding: "10px 20px",
+                    cursor: "pointer",
+                    backgroundColor: selectedSemester === "1" ? "#3B82F6" : "lightgray",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "8px",
+                  }}
+                  onClick={() => handleSemesterChange("1")}
+                >
+                  Kì 1
+                </button>
+              </Col>
+              <Col>
+                <button
+                  style={{
+                    padding: "10px 20px",
+                    cursor: "pointer",
+                    backgroundColor: selectedSemester === "2" ? "#3B82F6" : "lightgray",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "8px",
+                  }}
+                  onClick={() => handleSemesterChange("2")}
+                >
+                  Kì 2
+                </button>
+              </Col>
+            </Row>
           </Col>
         </Row>
         <Table
