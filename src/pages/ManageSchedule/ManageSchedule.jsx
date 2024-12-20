@@ -164,7 +164,7 @@ const ManageSchedule = () => {
                     setSchedule("") // Clear schedule state if update is successful
                     toast.success(`Thay đổi thành công tuần ${startWeekNumber}`);
                 } catch (updateError) {
-                    toast.error(`Error updating schedule for week ${startWeekNumber}`);
+                    toast.error(`Lỗi bị Trùng lịch ${startWeekNumber}`);
                       toast.error(`${updateError.response?.data?.error || updateError.message}`);
                 }
             } else {
@@ -177,9 +177,9 @@ const ManageSchedule = () => {
                             timeTable: [...(prev?.timeTable || []), response.data.newTimeTable],
                         }));
                     }
-                    toast.success(`Created schedule for week ${startWeekNumber}`);
+                    toast.success(`Khởi tạo thành công lịch cho tuần ${startWeekNumber}`);
                 } catch (createError) {
-                    toast.error(`Error creating schedule for week ${startWeekNumber}`);
+                    toast.error(`Lỗi trùng lịch  ${startWeekNumber}`);
                     toast.error(`${createError.response?.data?.error || createError.error}`);
                 }
             }

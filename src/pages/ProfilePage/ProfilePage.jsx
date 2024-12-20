@@ -103,7 +103,7 @@ console.log("InfoContact:", infoContact); // Theo dõi sự thay đổi của in
     }
 
     if (isPasswordSuccess && passwordData?.status !== "ERROR") {
-      toast.success("Password updated successfully!");
+      toast.success("Thay đổi mật khẩu thành công!");
       setIsUpdatingPassword(false);
       setCurrentPassword("");
       setNewPassword("");
@@ -112,7 +112,7 @@ console.log("InfoContact:", infoContact); // Theo dõi sự thay đổi của in
       isPasswordError ||
       (isPasswordSuccess && passwordData?.status === "ERROR")
     ) {
-      toast.error("Failed to update password");
+      toast.error("lỗi khi thay đổi mật khẩu");
       setIsUpdatingPassword(false);
     }
   }, [isSuccess, isError, isPasswordSuccess, isPasswordError]);

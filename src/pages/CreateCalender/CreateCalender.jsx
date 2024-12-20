@@ -82,7 +82,7 @@ const CreateCalender = () => {
         if (file) {
             const reader = new FileReader();
             reader.onload = (e) => {
-const data = e.target.result;
+                const data = e.target.result;
                 const workbook = XLSX.read(data, { type: 'binary' });
                 const sheetName = workbook.SheetNames[0];
                 const sheet = workbook.Sheets[sheetName];
@@ -158,7 +158,7 @@ const data = e.target.result;
 
     const handleEndWeekChange = (e) => {
         const endWeekValue = e.target.value;
-setEndWeek(endWeekValue);
+        setEndWeek(endWeekValue);
         setEndYearWeek(getYearAndWeekFromValue(endWeekValue));
     };
 
@@ -228,7 +228,7 @@ setEndWeek(endWeekValue);
                                 });
 
                             if (newSlots.length > 0) {
-let updatedSlots = [];
+                                let updatedSlots = [];
                                 const existingDay = data?.find(
                                     (daySchedule) => daySchedule.dayOfWeek === day
                                 );
@@ -259,9 +259,9 @@ let updatedSlots = [];
                 if (timetableId) {
                     try {
                         await ScheduleService.updateScheduleByClassId(idClass, timetableId, scheduleData);
-                        toast.success(`Updated schedule for week ${currentWeek}`);
+                        toast.success(`Cập nhập thành công  ${currentWeek}`);
                     } catch (updateError) {
-                        toast.error(`Error updating schedule for week ${currentWeek}`);
+                        toast.error(`Cập nhập thất bại ${currentWeek}`);
                     }
                 } else {
                     try {
@@ -273,24 +273,24 @@ let updatedSlots = [];
                                 timeTable: [...(prev?.timeTable || []), response.data.newTimeTable],
                             }));
                         }
-                        toast.success(`Created schedule for week ${currentWeek}`);
+                        toast.success(`khởi tạo lịch thành công cho ${currentWeek}`);
                     } catch (createError) {
                         console.error(createError);
-                        toast.error(`Error creating schedule for week ${currentWeek}`);
+                        toast.error(`khởi tạo thất bại ${currentWeek}`);
                         toast.error(`${createError.response?.data?.error || createError.message}`);
                     }
                 }
             }
 
             setError("");
-            toast.success("Schedule processed successfully for all weeks!");
+            toast.success("Khởi tạo thành công!");
         } catch (error) {
             console.error("Error saving/updating schedule:", error);
             setError("An error occurred while processing the schedule.");
-            toast.error("An error occurred while processing the schedule.");
+            toast.error("đã có lỗi xảy ra khi lưu .");
         }
     };
-const onBack = () => {
+    const onBack = () => {
         window.history.back();
     }
 
@@ -350,7 +350,7 @@ const onBack = () => {
                     <thead>
                         <tr className="bg-indigo-100">
                             <th className="border px-4 py-2 text-indigo-700">Tiết học</th>
-{daysOfWeek.map((day, idx) => (
+                            {daysOfWeek.map((day, idx) => (
                                 <th key={idx} className="border px-4 py-2 text-indigo-700" style={{ width: "15%" }}>{day}</th>
                             ))}
                         </tr>
@@ -389,7 +389,7 @@ const onBack = () => {
                                                             <option
                                                                 key={index}
                                                                 value={JSON.stringify({
-subjectId: subject._id,
+                                                                    subjectId: subject._id,
                                                                 })}
                                                             >
                                                                 {subject?.nameSubject}
@@ -433,7 +433,7 @@ subjectId: subject._id,
                                                             : ""
                                                     }
                                                 >
-<option value="">Chọn môn</option>
+                                                    <option value="">Chọn môn</option>
                                                     {classDetail?.SubjectsId.map((subject, index) => (
                                                         <option
                                                             key={index}

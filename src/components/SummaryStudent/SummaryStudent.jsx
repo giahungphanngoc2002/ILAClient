@@ -4,7 +4,7 @@ import { RiStarFill } from "react-icons/ri";
 import { HiClipboardList } from 'react-icons/hi';
 import * as ClassService from "../../services/ClassService";
 
-const SummaryStudent = ({ studentId, selectedSemester, evaluates, averages, semesters , setAchivement }) => {
+const SummaryStudent = ({ studentId, selectedSemester, evaluates, averages, semesters, setAchivement }) => {
     const [conduct, setConduct] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -83,7 +83,7 @@ const SummaryStudent = ({ studentId, selectedSemester, evaluates, averages, seme
 
     const calculateTotalAverage = (semester) => {
         if (semester.some(item => item.average === "Chưa có")) {
-            return "Chưa có";
+return "Chưa có";
         }
 
         const average = semester.reduce((sum, item) => sum + parseFloat(item.average), 0) / semester.length;
@@ -168,17 +168,17 @@ const SummaryStudent = ({ studentId, selectedSemester, evaluates, averages, seme
         }
 
         const above9 = semester.filter(item => item.average >= 9.00);
-        const above8 = semester.filter(item => item.average >= 8.00);
+const above8 = semester.filter(item => item.average >= 8.00);
 
         if (above9.length >= 6 && above8.length >= 10) {
-            return "Học Sinh Xuất sắc";
+            return "Học Sinh Xuất Sắc";
         }
 
         return "Học Sinh Giỏi";
     };
 
     useEffect(() => {
-        if (finalHocLuc === "Tốt") {
+        if (finalHocLuc === "Tốt" && tinhHanhKiem(conduct1?.typeConduct, conduct2?.typeConduct) == "Tốt") {
             const semester1 = averages.filter(item => item.semester == "1");
             const semester2 = averages.filter(item => item.semester == "2");
 
@@ -206,29 +206,35 @@ const SummaryStudent = ({ studentId, selectedSemester, evaluates, averages, seme
 
 
     function tinhHanhKiem(hk1, hk2) {
-        const mucHanhKiem = ["Yếu", "Trung bình", "Khá", "Tốt"];
+        const mucHanhKiem = ["Chưa Đạt", "Đạt", "Khá", "Tốt"];
 
         const indexHK1 = mucHanhKiem.indexOf(hk1);
         const indexHK2 = mucHanhKiem.indexOf(hk2);
 
-        // Kiểm tra nếu có hạnh kiểm Yếu
-        if (hk1 === "Yếu" || hk2 === "Yếu") {
-            return "Yếu"; // Ưu tiên mức thấp nhất nếu có "Yếu"
+        // Điều kiện mức Tốt
+        if (hk2 === "Tốt" && indexHK1 >= mucHanhKiem.indexOf("Khá")) {
+            return "Tốt";
         }
 
-        // Nếu cả hai kỳ giống nhau
-        if (indexHK1 === indexHK2) {
-            return hk1;
+        // Điều kiện mức Khá
+        if (
+            (hk2 === "Khá" && indexHK1 >= mucHanhKiem.indexOf("Đạt")) ||
+            (hk2 === "Đạt" && hk1 === "Tốt") ||
+            (hk2 === "Tốt" && (hk1 === "Đạt" || hk1 === "Chưa Đạt"))
+        ) {
+            return "Khá";
         }
 
-        // Nếu khác nhau, ưu tiên kỳ 2
-        if (indexHK1 > indexHK2) {
-            // Kỳ 1 cao hơn kỳ 2 -> hạ xuống mức của kỳ 2
-            return hk2;
-        } else {
-            // Kỳ 1 thấp hơn kỳ 2 -> nâng lên mức giữa kỳ 1 và kỳ 2
-            return mucHanhKiem[indexHK1 + 1];
+        // Điều kiện mức Đạt
+        if (
+            (hk2 === "Đạt" && indexHK1 >= mucHanhKiem.indexOf("Chưa Đạt")) ||
+            (hk2 === "Khá" && hk1 === "Chưa Đạt")
+        ) {
+            return "Đạt";
         }
+
+        // Mức Chưa Đạt cho các trường hợp còn lại
+        return "Chưa Đạt";
     }
 
     const data = [
@@ -244,17 +250,17 @@ const SummaryStudent = ({ studentId, selectedSemester, evaluates, averages, seme
         },
         {
             icon: <RiStarFill className="w-6 h-6 text-purple-500" />,
-            title: "Học lực",
+            title: "Kết quả học tập",
             score: finalHocLuc, // Giả sử học lực từ API khác
             details: [
-                { label: 'Học kỳ 1', value: hocLuc1 },
+{ label: 'Học kỳ 1', value: hocLuc1 },
                 { label: 'Học kỳ 2', value: hocLuc2 },
             ],
             bgColor: "bg-purple-500"
         },
         {
             icon: <RiStarFill className="w-6 h-6 text-orange-500" />,
-            title: "Hạnh kiểm",
+            title: "Kết quả rèn luyện",
             score: tinhHanhKiem(conduct1?.typeConduct, conduct2?.typeConduct) || "Đang tải...",
             details: [
                 { label: `Học kỳ 1`, value: conduct1?.typeConduct || "Chưa có" },

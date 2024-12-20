@@ -320,8 +320,8 @@ console.log(blockId, year);
                       >
                         <option value="Tốt">Tốt</option>
                         <option value="Khá">Khá</option>
-                        <option value="Trung Bình">Trung bình</option>
-                        <option value="Yếu">Yếu</option>
+                        <option value="Đạt">Đạt</option>
+                        <option value="Chưa Đạt">Chưa Đạt</option>
                       </select>
                     </td>
                   </tr>

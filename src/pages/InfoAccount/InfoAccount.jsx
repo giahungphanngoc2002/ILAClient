@@ -68,14 +68,14 @@ const InfoAccount = ({
     useEffect(() => {
         if (isSuccess) {
             if (data?.status === "OK") {
-                toast.success("Email updated successfully!");
+                toast.success("Email cập nhập thành công!");
                 dispatch(updateUser({ email })); // Cập nhật lại email trong store
             } else {
-                toast.error(data?.message || "Failed to update user information");
+                toast.error(data?.message || "lỗi khi xảy xa cập nhập");
             }
             setIsLoading(false);  // Đặt lại isLoading khi API trả về thành công
         } else if (isError) {
-            toast.error(error?.message || "An unknown error occurred");
+            toast.error(error?.message || "Đã xảy ra lỗi ko xác định");
             setIsLoading(false); // Đặt lại isLoading khi có lỗi
         }
     }, [isSuccess, isError, data, error, email, dispatch]);

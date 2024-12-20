@@ -385,7 +385,7 @@ const GradeTable = () => {
             await Promise.all(scorePromises);
 
             // Hiển thị toast khi tất cả đã hoàn thành
-            toast.success("All scores have been successfully uploaded!");
+            toast.success("Tất cả điểm số đã được tải lên thành công!");
             document.getElementById("fileUpload").value = "";
         } catch (error) {
             // toast.error("An error occurred while submitting scores.");
