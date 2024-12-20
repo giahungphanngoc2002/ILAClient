@@ -4,7 +4,7 @@ import { RiStarFill } from "react-icons/ri";
 import { HiClipboardList } from 'react-icons/hi';
 import * as ClassService from "../../services/ClassService";
 
-const SummaryStudent = ({ studentId, selectedSemester, evaluates, averages, semesters, setAchivement }) => {
+const SummaryStudent = ({ studentId, selectedSemester, evaluates, averages, semesters, setAchivement, resultConduct }) => {
     const [conduct, setConduct] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -16,7 +16,6 @@ const SummaryStudent = ({ studentId, selectedSemester, evaluates, averages, seme
     const [dtb2, setDtb2] = useState();
     const [finalHocLuc, setFinalHocLuc] = useState();
     // const [achievement, setAchivement] = useState()
-
 
 
     const semesterMapping = semesters.reduce((acc, { _id, nameSemester }) => {
@@ -40,50 +39,32 @@ const SummaryStudent = ({ studentId, selectedSemester, evaluates, averages, seme
     const notAchievedCountSemester1 = countNotAchievedSemester1(updatedEvaluates);
     const notAchievedCountSemester2 = countNotAchievedSemester2(updatedEvaluates);
 
+    console.log(resultConduct)
 
     useEffect(() => {
-        const fetchConduct = async () => {
-            if (!studentId) return;
-
-            setLoading(true);
-            setError(null);
-            try {
-                const data = await ClassService.getConductByStudentIdAndSemester(studentId, selectedSemester);
-                setConduct1(data);
-            } catch (err) {
-                // setError('Không thể tải dữ liệu hạnh kiểm');
-
-            } finally {
-                setLoading(false);
+        if (Array.isArray(resultConduct) && resultConduct.length > 0) {
+            // Lấy giá trị cho semester === "1"
+            const semester1 = resultConduct.find((item) => item.semester == "1");
+            if (semester1) {
+                setConduct1(semester1.typeConduct);
             }
-        };
 
-        fetchConduct();
-    }, [studentId, selectedSemester]);
-
-    useEffect(() => {
-        const fetchConduct = async () => {
-            if (!studentId) return;
-
-            setLoading(true);
-            setError(null);
-            try {
-                const data = await ClassService.getConductByStudentIdAndSemester(studentId, selectedSemester);
-                setConduct2(data);
-            } catch (err) {
-
-            } finally {
-                setLoading(false);
+            // Lấy giá trị cho semester === "2"
+            const semester2 = resultConduct.find((item) => item.semester == "2");
+            if (semester2) {
+                setConduct2(semester2.typeConduct);
             }
-        };
+        }
+    }, [resultConduct]);
 
-        fetchConduct();
-    }, [studentId, selectedSemester]);
+
+    console.log(conduct1)
+    console.log(conduct2)
 
 
     const calculateTotalAverage = (semester) => {
         if (semester.some(item => item.average === "Chưa có")) {
-return "Chưa có";
+            return "Chưa có";
         }
 
         const average = semester.reduce((sum, item) => sum + parseFloat(item.average), 0) / semester.length;
@@ -168,7 +149,7 @@ return "Chưa có";
         }
 
         const above9 = semester.filter(item => item.average >= 9.00);
-const above8 = semester.filter(item => item.average >= 8.00);
+        const above8 = semester.filter(item => item.average >= 8.00);
 
         if (above9.length >= 6 && above8.length >= 10) {
             return "Học Sinh Xuất Sắc";
@@ -253,7 +234,7 @@ const above8 = semester.filter(item => item.average >= 8.00);
             title: "Kết quả học tập",
             score: finalHocLuc, // Giả sử học lực từ API khác
             details: [
-{ label: 'Học kỳ 1', value: hocLuc1 },
+                { label: 'Học kỳ 1', value: hocLuc1 },
                 { label: 'Học kỳ 2', value: hocLuc2 },
             ],
             bgColor: "bg-purple-500"
@@ -261,10 +242,10 @@ const above8 = semester.filter(item => item.average >= 8.00);
         {
             icon: <RiStarFill className="w-6 h-6 text-orange-500" />,
             title: "Kết quả rèn luyện",
-            score: tinhHanhKiem(conduct1?.typeConduct, conduct2?.typeConduct) || "Đang tải...",
+            score: tinhHanhKiem(conduct1, conduct2) || "Đang tải...",
             details: [
-                { label: `Học kỳ 1`, value: conduct1?.typeConduct || "Chưa có" },
-                { label: `Học kỳ 2`, value: conduct2?.typeConduct || "Chưa có" }
+                { label: `Học kỳ 1`, value: conduct1 || "Chưa có" },
+                { label: `Học kỳ 2`, value: conduct2 || "Chưa có" }
 
             ],
             bgColor: "bg-orange-500"

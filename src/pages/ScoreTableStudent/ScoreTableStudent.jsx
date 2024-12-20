@@ -31,6 +31,7 @@ const ScoreTableStudent = () => {
     const [selectedNameSemester, setSelectedNameSemester] = useState();
     const [achivement, setAchivement] = useState();
     const [block, setBlock] = useState();
+    const [conducts, setConducts] = useState();
 
 
     useEffect(() => {
@@ -192,6 +193,10 @@ const ScoreTableStudent = () => {
                 const allClasses = await ClassService.getAllClass();
                 setClasses(allClasses?.data || []);
                 const userClass = findUserClass(allClasses?.data || [], user.id);
+                const filterConductStudent = userClass[0]?.conduct.filter((conduct) => {
+                    return conduct.studentId === user.id
+                })
+                setConducts(filterConductStudent)
                 setUserClasses(userClass)
                 setYear(userClass[0].year)
                 setBlock(userClass[0].blockID._id)
@@ -233,6 +238,33 @@ const ScoreTableStudent = () => {
         }
 
     }, [year, block]);
+
+    const [resultConduct, setResultConduct] = useState([]);
+
+    useEffect(() => {
+        if (conducts && semesters) {
+            const processedConducts = conducts
+                .map((conduct) => {
+                    const matchingSemester = semesters.find(
+                        (sem) => sem._id === conduct.semester
+                    );
+                    if (matchingSemester) {
+                        return {
+                            semester: matchingSemester.nameSemester.toString(),
+                            typeConduct: conduct.typeConduct,
+                        };
+                    }
+                    return null;
+                })
+                .filter((item) => item !== null);
+
+            setResultConduct(processedConducts);
+        }
+    }, [conducts, semesters]);
+
+    console.log(resultConduct)
+
+
 
     const filterSubjectEvaluationsByUserId = () => {
         if (!Array.isArray(classSubjectPhu)) {
@@ -495,7 +527,6 @@ const ScoreTableStudent = () => {
 
     const evaluates = getAllEvaluate()
 
-    console.log(achivement)
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen p-6">
@@ -515,6 +546,7 @@ const ScoreTableStudent = () => {
                     averages={averages}
                     semesters={semesters}
                     setAchivement={setAchivement}
+                    resultConduct={resultConduct}
                 />
 
                 <SummaryAttendanceAndAward

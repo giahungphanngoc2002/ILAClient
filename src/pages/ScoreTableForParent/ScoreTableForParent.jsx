@@ -30,7 +30,7 @@ const ScoreTableForParent = () => {
     const [selectedNameSemester, setSelectedNameSemester] = useState();
     const [achivement, setAchivement] = useState();
     const [block, setBlock] = useState();
-
+    const [conducts, setConducts] = useState();
     const { studentId } = useParams();
 
     console.log(studentId)
@@ -191,7 +191,10 @@ const ScoreTableForParent = () => {
                 const allClasses = await ClassService.getAllClass();
                 setClasses(allClasses?.data || []);
                 const userClass = findUserClass(allClasses?.data || [], studentId);
-                console.log(userClass)
+                const filterConductStudent = userClass[0]?.conduct.filter((conduct) => {
+                    return conduct.studentId === studentId
+                })
+                setConducts(filterConductStudent)
                 setUserClasses(userClass)
                 setYear(userClass[0].year)
                 setBlock(userClass[0].blockID._id)
@@ -232,7 +235,7 @@ const ScoreTableForParent = () => {
             fetchYear();
         }
 
-    }, [year , block]);
+    }, [year, block]);
 
     const filterSubjectEvaluationsByUserId = () => {
         if (!Array.isArray(classSubjectPhu)) {
@@ -270,6 +273,29 @@ const ScoreTableForParent = () => {
             setSelectedNameSemester(semesters[0].nameSemester)
         }
     }, [semesters]);
+
+    const [resultConduct, setResultConduct] = useState([]);
+
+    useEffect(() => {
+        if (conducts && semesters) {
+            const processedConducts = conducts
+                .map((conduct) => {
+                    const matchingSemester = semesters.find(
+                        (sem) => sem._id === conduct.semester
+                    );
+                    if (matchingSemester) {
+                        return {
+                            semester: matchingSemester.nameSemester.toString(),
+                            typeConduct: conduct.typeConduct,
+                        };
+                    }
+                    return null;
+                })
+                .filter((item) => item !== null);
+
+            setResultConduct(processedConducts);
+        }
+    }, [conducts, semesters]);
 
     const filterBySemester = () => {
         if (!subjectEvaluate || !Array.isArray(subjectEvaluate)) {
@@ -515,6 +541,7 @@ const ScoreTableForParent = () => {
                     averages={averages}
                     semesters={semesters}
                     setAchivement={setAchivement}
+                    resultConduct={resultConduct}
                 />
 
                 <SummaryAttendanceAndAward
