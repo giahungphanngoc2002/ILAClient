@@ -106,7 +106,7 @@ export default function SearchQuestionByAI() {
       console.log(response); // Kiểm tra nội dung phản hồi
 
       if (response.message === "Question created successfully" && response.subject) {
-        message.success("Questions added successfully!");
+        message.success("Câu Hỏi được thêm thành công!");
         navigate("/manage")
         setQuestions([]);
       } else {
@@ -245,7 +245,7 @@ export default function SearchQuestionByAI() {
 
     setQuestions(updatedQuestions); // Cập nhật danh sách câu hỏi
     setEditingQuestion(null); // Đóng modal
-    message.success("Question updated successfully!");
+    message.success("Thêm câu hỏi thành công");
   }
 
   return (
@@ -262,7 +262,7 @@ export default function SearchQuestionByAI() {
         className={`generate-button bg-blue-500 text-white font-bold py-2 px-6 rounded-lg shadow-md hover:bg-blue-600 transition duration-200 ml-4`}
         onClick={generateAnswer}
       >
-        Generate Answer
+        Tạo câu hỏi
       </button>
       {loading ? (
         <Loading />
@@ -272,7 +272,7 @@ export default function SearchQuestionByAI() {
             <div key={key} className="bg-white shadow-lg rounded-lg p-6 mb-6 hover:shadow-2xl transition-shadow duration-300">
               <div className="mb-4">
                 <h2 className="text-2xl font-semibold text-left text-gray-800 mb-4">
-                  Question: {questionn?.question}
+                  Câu hỏi: {questionn?.question}
                 </h2>
                 <div className="flex flex-wrap -mx-2 mb-4">
                   {questionn?.options.map((answer, index) => (
@@ -294,16 +294,16 @@ export default function SearchQuestionByAI() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                   <p className="border-2 rounded-lg bg-green-200 p-3 text-left border-green-500">
-                    Correct answer: {questionn?.correctAnswer}
+                    Câu trả lời đúng: {questionn?.correctAnswer}
                   </p>
                   <p className="border-2 rounded-lg bg-green-200 p-3 text-left border-green-500">
-                    Level: {questionn?.level}
+                    Độ khó: {questionn?.level}
                   </p>
                   <p className="border-2 rounded-lg bg-green-200 p-3 text-left border-green-500">
-                    Chapter: {questionn?.chapter}
+                    Chương: {questionn?.chapter}
                   </p>
                   <p className="border-2 rounded-lg bg-green-200 p-3 text-left border-green-500">
-                    Lesson: {questionn?.lession}
+                    Bài: {questionn?.lession}
                   </p>
                 </div>
               </div>
@@ -313,14 +313,14 @@ export default function SearchQuestionByAI() {
                   className="btn btn-danger bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition duration-200"
                   onClick={() => handleDeleteQuestion(key)}
                 >
-                  Delete
+                  Xoá
                 </button>
                 <button
                   style={{ backgroundColor: "#2563EB" }}
                   className="btn text-white py-2 px-4 rounded-lg hover:bg-blue-600"
                   onClick={() => handleUpdateQuestion(key)}
                 >
-                  Update
+                  Sửa
                 </button>
               </div>
             </div>
@@ -456,13 +456,13 @@ export default function SearchQuestionByAI() {
                 className="bg-red-500 text-white px-4 py-2 rounded-lg"
                 onClick={() => setEditingQuestion(null)} // Đóng modal
               >
-                Cancel
+                Huỷ
               </button>
               <button
                 className="bg-green-500 text-white px-4 py-2 rounded-lg"
                 onClick={() => handleSaveUpdatedQuestion(editingQuestion)} // Lưu câu hỏi
               >
-                Save
+                Lưu
               </button>
             </div>
           </div>

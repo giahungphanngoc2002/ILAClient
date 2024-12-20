@@ -83,7 +83,7 @@ const QuestionManager = () => {
         onMutate: () => setIsLoading(true), // Set loading state on mutation start
         onSuccess: (data) => {
             setIsLoading(false);
-            toast.success("Question updated successfully");
+            toast.success("Thay câu hỏi thành công");
             fetchQuestions(); // Tải lại danh sách câu hỏi sau khi cập nhật thành công
             // Reset loading state on success
             setShowUpdateModal(false);
@@ -102,7 +102,7 @@ const QuestionManager = () => {
         },
         onMutate: () => setIsLoading(true), // Set loading state on mutation start
         onSuccess: () => {
-            toast.success("Question deleted successfully");
+            toast.success("Xoá câu hỏi thành công");
             setIsLoading(false); // Reset loading state on success
             fetchQuestions(); // T
 
@@ -305,13 +305,13 @@ const QuestionManager = () => {
             {/* Bộ lọc theo Chương, Bài và Tìm kiếm */}
             <div className="mb-4 flex flex-wrap items-center space-x-4">
                 <div className="flex-1">
-                    <label className="block text-lg font-medium mb-1">Filter by Chapter:</label>
+                    <label className="block text-lg font-medium mb-1">Lọc theo Chương:</label>
                     <select
                         className="w-full p-2 border border-gray-300 rounded-md"
                         value={selectedChapter}
                         onChange={(e) => setSelectedChapter(e.target.value)}
                     >
-                        <option value="All">All Chapters</option>
+                        <option value="All">Tất cả các Chương</option>
                         {uniqueChapters.map((chapter) => (
                             <option key={chapter} value={chapter}>
                                 {chapter}
@@ -321,13 +321,13 @@ const QuestionManager = () => {
                 </div>
 
                 <div className="flex-1">
-                    <label className="block text-lg font-medium mb-1">Filter by Lesson:</label>
+                    <label className="block text-lg font-medium mb-1">Lọc theo Bài:</label>
                     <select
                         className="w-full p-2 border border-gray-300 rounded-md"
                         value={selectedLesson}
                         onChange={(e) => setSelectedLesson(e.target.value)}
                     >
-                        <option value="All">All Lessions</option>
+                        <option value="All">Tất cả các Bài</option>
                         {uniqueLessions.map((lession) => (
                             <option key={lession} value={lession}>
                                 Lesson {lession}
@@ -338,7 +338,7 @@ const QuestionManager = () => {
                 </div>
 
                 <div className="flex-2">
-                    <label className="block text-lg font-medium mb-1">Search by Question:</label>
+                    <label className="block text-lg font-medium mb-1">Tìm theo Câu hỏi:</label>
                     <input
                         type="text"
                         className="w-full p-2 border border-gray-300 rounded-md"
@@ -375,7 +375,7 @@ const QuestionManager = () => {
             {/* Danh sách câu hỏi */}
             <div>
                 {filteredQuestions.length === 0 ? (
-                    <p className="text-lg">No questions found.</p>
+                    <p className="text-lg">Không có câu hỏi.</p>
                 ) : (
                     <ul className="p-0">
                         {filteredQuestions.map((question) => (
@@ -389,10 +389,10 @@ const QuestionManager = () => {
                                     ))}
                                 </ul>
                                 <p className="mt-2 text-green-600 font-bold">
-                                    Correct Answer: {question.correctAnswer}
+                                    Đáp án đúng: {question.correctAnswer}
                                 </p>
                                 <p className="mt-1 text-gray-500">
-                                    Chapter: {question.chapter} - Lession: {question.lession}
+                                    Chương: {question.chapter} - Bài: {question.lession}
                                 </p>
 
                                 {/* Nút cập nhật và xóa */}
@@ -401,13 +401,13 @@ const QuestionManager = () => {
                                         className="bg-yellow-500 text-white py-1 px-3 rounded-md hover:bg-yellow-600"
                                         onClick={() => handleOpenUpdateModal(question._id)}
                                     >
-                                        Update
+                                        Sửa
                                     </button>
                                     <button
                                         className="bg-red-500 text-white py-1 px-3 rounded-md hover:bg-red-600"
                                         onClick={() => handleDeleteQuestion(question._id)}
                                     >
-                                        Delete
+                                        Xoá
                                     </button>
                                 </div>
                             </li>

@@ -108,7 +108,7 @@ const NotificationToSchool = () => {
         try {
             const response = await NotificationService.createNotification(notificationData);
             console.log('Notification created successfully:', response);
-            toast.success('Notification created successfully');
+            toast.success('Tạo thông báo thành công');
             navigate('/manage/historySendNotification');
         } catch (error) {
             toast.error('Error creating notification');
