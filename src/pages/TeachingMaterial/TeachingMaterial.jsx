@@ -44,24 +44,26 @@ const TeachingMaterial = () => {
         const resources = response.data;
 
         if (resources && Array.isArray(resources)) {
-          // Map qua danh sách tài nguyên và chuẩn hóa dữ liệu cho từng file
+          // Duyệt qua danh sách tài nguyên và chuẩn hóa dữ liệu cho từng file
           const loadedFiles = resources.map((resource) => ({
-            fileId: resource._id,
+            fileId: resource._id, // Lấy ID của file từ _id
             file: { name: resource.linkResource },  // Lấy tên file từ 'linkResource'
-            uploadDate: new Date(resource.createdAt),  // Lấy ngày upload từ 'createdAt'
+            uploadDate: new Date(resource.createdAt),  // Lấy ngày tải lên từ 'createdAt'
             size: resource.size  // Lấy kích thước file từ 'size'
           }));
 
-          setFiles(loadedFiles);  // Cập nhật state với danh sách tài nguyên đã tải
+          setFiles(loadedFiles);  // Cập nhật state với danh sách tài nguyên đã xử lý
         }
       } catch (error) {
-        console.error("Error fetching subject data:", error);
-        toast.error("Failed to load subject data.");
+        console.error("Lỗi khi lấy dữ liệu môn học:", error);
+        toast.error("Không thể tải dữ liệu môn học.");
       }
     };
 
     fetchSubjectData();
   }, [idClass, idSubject]);
+
+
 
   console.log(files)// Chỉ gọi lại khi idClass hoặc idSubject thay đổi
 
@@ -83,9 +85,9 @@ const TeachingMaterial = () => {
       });
 
       try {
-        const response = await ClassService.addResourceToSubject(idClass, idSubject, selectedFile,fileContent)
+        const response = await ClassService.addResourceToSubject(idClass, idSubject, selectedFile, fileContent)
         console.log(response);  // Log phản hồi từ server
-        setFiles([...files, { file: selectedFile, uploadDate: new Date(), size: selectedFile.size ,content:fileContent }]);
+        setFiles([...files, { file: selectedFile, uploadDate: new Date(), size: selectedFile.size, content: fileContent }]);
         setSelectedFile(null);
         setFileContent("");
         setIsModalOpen(false);
