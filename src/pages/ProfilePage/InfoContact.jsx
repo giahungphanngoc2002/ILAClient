@@ -60,12 +60,12 @@ const InfoContact = ({ userId }) => {
                 // Cập nhật liên hệ
                 const contactId = userContacts[selectedContact]._id;
                 response = await UserService.updateContact(contactId, contactData);
-                toast.success("Update contact success");
+                toast.success("Thay đổi thành công");
                 console.log("Updated contact:", response);
             } else {
                 // Thêm mới liên hệ
                 response = await UserService.createContact(userId, contactData);
-                toast.success("Created new contact success");
+                toast.success("Khởi tạo thành công");
                 console.log("Created new contact:", response);
             }
 

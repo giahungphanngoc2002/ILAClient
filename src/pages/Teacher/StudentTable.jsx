@@ -243,7 +243,7 @@ const StudentTable = () => {
     },
     onSuccess: (data) => {
       // Display success toast và log dữ liệu đã cập nhật
-      toast.success("Absent students updated successfully!");
+      toast.success("Điểm danh học sinh thành công");
       // navigate("/manage/calender")
       console.log("Absent students updated:", data);
     },
@@ -318,7 +318,7 @@ const StudentTable = () => {
       await ScheduleService.createNoteBookByClassAndScheduleId(classId, scheduleId, slotId, content, score);
 
       console.log('Notebook and absence list saved successfully!');
-      toast.success('Notebook and absence list saved successfully!');
+      toast.success('Khởi tạo sổ đầu bài thành công');
 
       // Gọi mutation nếu cần (giả định mutation có sẵn)
       mutation.mutate(newAbsentStudents);

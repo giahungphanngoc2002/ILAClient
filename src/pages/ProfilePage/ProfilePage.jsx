@@ -169,7 +169,7 @@ const handleUpdateAvatar = async (file) => {
     try {
       const response = await UserService.updateUser(user?.id, formData, user?.access_token);
       if (response.status === "OK") {
-        toast.success("Avatar updated successfully!");
+        toast.success("Thay đổi hình nền thành công");
         setAvatar(response.data.avatar);
       }
     } catch (error) {
@@ -195,7 +195,7 @@ const handleUpdateAvatar = async (file) => {
       ...updateData,
       access_token: user?.access_token,
     });
-    toast.success(" updated successfully!");
+    toast.success(" Thay đổi thành công");
     // Xử lý lỗi sau khi mutation thất bại
     if (isError && data?.status === "ERR") {
       toast.error(data?.message || "Update failed");

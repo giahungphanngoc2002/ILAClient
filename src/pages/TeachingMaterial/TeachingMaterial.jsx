@@ -135,7 +135,7 @@ const TeachingMaterial = () => {
       // Gửi yêu cầu xóa đến backend
       const response = await ClassService.deleteResourceToSubject(idClass, idSubject, file.fileId);
       if (response.success) {
-        toast.success(response.message);
+        toast.success("Xoá thành công");
         // Xóa file khỏi state sau khi xóa thành công trên backend
         setFiles(files.filter((_, index) => index !== fileIndex));
       } else {

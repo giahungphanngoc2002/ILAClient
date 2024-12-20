@@ -23,7 +23,7 @@ const ResetPassword = () => {
     }
     try {
       const res = await UserService.resetPassword(resetToken, newPassword);
-      toast.success(res.message);
+      toast.success("reset thành công");
       handleNavigateSignin();
     } catch (err) {
       toast.error(err.response.data.message);

@@ -10,7 +10,7 @@ const RequestPasswordReset = () => {
     e.preventDefault();
     try {
       const res = await UserService.requestPasswordReset(email);
-      toast.success(res.message);
+      toast.success("Thay đổi thành công");
     } catch (err) {
       toast.error(err.response?.data?.message || "Yêu cầu đặt lại mật khẩu thất bại.");
     }
