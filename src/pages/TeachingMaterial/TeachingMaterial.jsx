@@ -44,26 +44,24 @@ const TeachingMaterial = () => {
         const resources = response.data;
 
         if (resources && Array.isArray(resources)) {
-          // Duyệt qua danh sách tài nguyên và chuẩn hóa dữ liệu cho từng file
+          // Map qua danh sách tài nguyên và chuẩn hóa dữ liệu cho từng file
           const loadedFiles = resources.map((resource) => ({
-            fileId: resource._id, // Lấy ID của file từ _id
+            fileId: resource._id,
             file: { name: resource.linkResource },  // Lấy tên file từ 'linkResource'
-            uploadDate: new Date(resource.createdAt),  // Lấy ngày tải lên từ 'createdAt'
+            uploadDate: new Date(resource.createdAt),  // Lấy ngày upload từ 'createdAt'
             size: resource.size  // Lấy kích thước file từ 'size'
           }));
 
-          setFiles(loadedFiles);  // Cập nhật state với danh sách tài nguyên đã xử lý
+          setFiles(loadedFiles);  // Cập nhật state với danh sách tài nguyên đã tải
         }
       } catch (error) {
-        console.error("Lỗi khi lấy dữ liệu môn học:", error);
-        toast.error("Không thể tải dữ liệu môn học.");
+        console.error("Error fetching subject data:", error);
+        toast.error("Failed to load subject data.");
       }
     };
 
     fetchSubjectData();
   }, [idClass, idSubject]);
-
-
 
   console.log(files)// Chỉ gọi lại khi idClass hoặc idSubject thay đổi
 
@@ -135,7 +133,7 @@ const TeachingMaterial = () => {
       // Gửi yêu cầu xóa đến backend
       const response = await ClassService.deleteResourceToSubject(idClass, idSubject, file.fileId);
       if (response.success) {
-        toast.success("Xoá thành công");
+        toast.success(response.message);
         // Xóa file khỏi state sau khi xóa thành công trên backend
         setFiles(files.filter((_, index) => index !== fileIndex));
       } else {
